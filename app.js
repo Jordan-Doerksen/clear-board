@@ -69,7 +69,7 @@ function renderHome(view) {
       <button class="station" data-go="drill"><b>🎯 Drill</b><small>Adaptive practice</small></button>
       <button class="station" data-go="yard"><b>🚂 The Yard</b><small>Work the cuts</small></button>
       <button class="station" data-go="signals"><b>🚦 Signals</b><small>Read the aspect</small></button>
-      <button class="station" disabled><b>📻 Radio walkthrough</b><small>Coming soon</small></button>
+      <button class="station" data-go="radio"><b>📻 Radio walkthrough</b><small>Back to a joint</small></button>
       <button class="station" disabled><b>📝 Exam</b><small>Coming soon</small></button>
     </div>
 
@@ -97,6 +97,16 @@ function route() {
       .catch(err => {
         console.error(err);
         view.innerHTML = '<button class="back" data-go="">← Home</button><p class="muted">The Yard failed to load.</p>';
+        const b = view.querySelector('[data-go]'); if (b) b.addEventListener('click', () => go(''));
+      });
+  }
+  else if (r0 === 'radio') {
+    view.innerHTML = '<p class="muted">Loading…</p>';
+    import('./stations/radio.js')
+      .then(m => m.mount(view, ctx()))
+      .catch(err => {
+        console.error(err);
+        view.innerHTML = '<button class="back" data-go="">← Home</button><p class="muted">Radio failed to load.</p>';
         const b = view.querySelector('[data-go]'); if (b) b.addEventListener('click', () => go(''));
       });
   }

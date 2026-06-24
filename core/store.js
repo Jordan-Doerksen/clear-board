@@ -21,6 +21,7 @@ export function freshProfile(settings) {
     settings, items: {},
     domains: Object.fromEntries(DOMAINS.map(d => [d.id, { mastery: 0, lastDrill: null }])),
     yard: { completed: [] },
+    radio: { done: false },
     path: { stage: 'First-day trainee', unlocked: ['reference', 'drill'], testReady: false },
   };
 }

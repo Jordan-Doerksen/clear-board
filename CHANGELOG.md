@@ -32,7 +32,13 @@
   (CSS namespaced under `.yard-wrap`, no leak), 19 solver-verified puzzles, Watch-optimal,
   reduced-motion aware, started muted unless audio is on. Puzzle wins record to `profile.yard.completed`.
 
+- **Radio station live**: the "Back to a Joint" call walkthrough ported **verbatim** from the CN
+  trainer (14 SME-tuned steps, wording untouched; scoped CSS; completion → `profile.radio.done`).
+  One walkthrough for now — flagged to grow.
+- **Deployed**: GitHub Pages is live at https://jordan-doerksen.github.io/clear-board/ (built).
+
 ### Next
-- The Radio call walkthrough; the Exam station (needs the SME "test-ready" bar first).
+- More radio walkthroughs (only "Back to a Joint" exists — the weakest section).
+- The Exam station (needs the SME "test-ready" bar first).
 - PWA/offline (service worker + manifest); profile export/import.
-- Surface yard progress (jobs worked) on the path/home.
+- Surface yard/radio progress on the path/home.
