@@ -31,10 +31,9 @@ const YARD_CSS = `
     padding: 8px 12px; cursor: pointer; margin-bottom: 10px;
   }
   .yard-wrap button.back:hover { border-color: #3a4554; }
-  /* the yard breaks out wider than the reading column; everything else stays put */
+  /* fit the reading column — no break-out inside Clear Board (it mispositioned + clipped) */
   .yard-wrap .yardframe {
-    width: min(1680px, 95vw); position: relative; left: 50%; transform: translateX(-50%);
-    margin: 12px 0 14px; border: 1px solid var(--line); border-radius: 12px;
+    width: 100%; margin: 12px 0 14px; border: 1px solid var(--line); border-radius: 12px;
     background: #0f1216; overflow: hidden; box-shadow: 0 14px 50px rgba(0,0,0,.45);
   }
   .yard-wrap canvas#yard { display: block; width: 100%; height: auto; aspect-ratio: 1340 / 460; }
