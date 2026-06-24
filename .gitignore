@@ -1,0 +1,12 @@
+# Secrets / local
+.env
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Never republish the source rulebook PDF (the *text* is public + citable; the PDF is not ours to host)
+reference/*.pdf
+
+# Editor
+.vscode/

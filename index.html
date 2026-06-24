@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Clear Board — a free trainer that takes you from first day to ready to sit the CN conductor qualification. Built for the people a rulebook failed.">
+<title>Clear Board — become a conductor, free</title>
+<style>
+  /* ---- Design tokens: calm, high-contrast dark study tool (not the personal Glass Archive) ---- */
+  :root{
+    --bg:#0e1116; --surface:#161b22; --surface-2:#1c232c; --line:#2a3340;
+    --ink:#e6edf3; --muted:#9aa7b4;
+    --clear:#3fb950;     /* clear board / proceed / CROR */
+    --caution:#d29922;   /* GOI / special instruction */
+    --stop:#f85149;      /* needs-review / wrong */
+    --focus:#58a6ff;
+    --r:14px; --maxw:920px;
+    --fs:16px; --space:1.5;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  /* Dyslexia-friendly mode: more legible stack + looser spacing (toggle in settings) */
+  html[data-dys="1"]{ --font:"Atkinson Hyperlegible","Comic Sans MS",Verdana,sans-serif; --space:1.8; letter-spacing:.02em; word-spacing:.08em; }
+  html[data-contrast="1"]{ --ink:#ffffff; --muted:#cdd9e5; --line:#3d4855; }
+
+  *{ box-sizing:border-box }
+  html,body{ margin:0 }
+  body{ background:var(--bg); color:var(--ink); font-family:var(--font); font-size:var(--fs);
+    line-height:var(--space); -webkit-font-smoothing:antialiased; }
+  a{ color:var(--focus) }
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:20px 18px 80px }
+
+  /* focus visibility (accessibility) */
+  :focus-visible{ outline:3px solid var(--focus); outline-offset:2px; border-radius:6px }
+  .skip{ position:absolute; left:-999px; top:0; background:var(--clear); color:#062; padding:8px 12px; border-radius:0 0 8px 0; z-index:50 }
+  .skip:focus{ left:0 }
+
+  header.top{ display:flex; align-items:center; gap:14px; padding:6px 0 18px; border-bottom:1px solid var(--line); margin-bottom:22px }
+  .mark{ width:42px; height:42px; border-radius:10px; background:var(--surface-2); border:1px solid var(--line); display:grid; place-items:center; flex:0 0 auto }
+  .mark span{ width:14px; height:14px; border-radius:50%; background:var(--clear); box-shadow:0 0 12px var(--clear) }
+  .brand h1{ font-size:1.35rem; margin:0; letter-spacing:.2px }
+  .brand p{ margin:2px 0 0; color:var(--muted); font-size:.86rem }
+  .top .grow{ flex:1 }
+  .iconbtn{ background:var(--surface-2); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:9px 13px; font:inherit; font-size:.9rem; cursor:pointer; min-height:44px }
+  .iconbtn:hover{ border-color:var(--muted) }
+
+  .lede{ background:linear-gradient(180deg,var(--surface),var(--surface) 60%,transparent); border:1px solid var(--line); border-radius:var(--r); padding:18px 18px; margin-bottom:24px }
+  .lede b{ color:var(--clear) }
+  .free{ display:inline-block; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--clear); border:1px solid var(--clear); border-radius:999px; padding:3px 10px; margin-bottom:10px }
+
+  h2.section{ font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:28px 2px 12px }
+
+  /* The path — overall progress */
+  .path{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px }
+  .stage{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap }
+  .stage b{ font-size:1.05rem } .stage span{ color:var(--muted); font-size:.85rem }
+  .bar{ height:12px; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; overflow:hidden; margin-top:12px }
+  .bar > i{ display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--clear),#6fd17f); transition:width .6s ease }
+  html[data-reduce="1"] .bar > i{ transition:none }
+
+  /* Domain grid */
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:15px 15px 14px; display:flex; flex-direction:column; gap:8px }
+  .card.locked{ opacity:.55 }
+  .card .h{ display:flex; align-items:center; gap:9px }
+  .dot{ width:9px; height:9px; border-radius:50%; background:var(--clear); flex:0 0 auto }
+  .card h3{ margin:0; font-size:1rem }
+  .card p{ margin:0; color:var(--muted); font-size:.84rem; flex:1 }
+  .mini{ height:7px; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; overflow:hidden }
+  .mini > i{ display:block; height:100%; width:0%; background:var(--clear) }
+  .soon{ font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--caution); border:1px solid var(--caution); border-radius:999px; padding:2px 8px; align-self:flex-start }
+
+  /* Station nav */
+  .stations{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px }
+  .station{ background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:14px; text-align:left; color:var(--ink); font:inherit; cursor:pointer; min-height:64px }
+  .station:hover{ border-color:var(--clear) }
+  .station b{ display:block } .station small{ color:var(--muted) }
+  .station[disabled]{ cursor:default; opacity:.5 } .station[disabled]:hover{ border-color:var(--line) }
+
+  footer{ margin-top:40px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:.82rem }
+  footer .tip{ display:inline-block; border:1px solid var(--caution); color:var(--caution); border-radius:999px; padding:4px 12px; margin-bottom:10px; min-height:auto }
+
+  /* Settings drawer */
+  dialog#settings{ background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:var(--r); max-width:440px; width:92%; padding:0 }
+  dialog#settings::backdrop{ background:rgba(0,0,0,.6) }
+  .set-h{ display:flex; justify-content:space-between; align-items:center; padding:16px 18px; border-bottom:1px solid var(--line) }
+  .set-h h2{ margin:0; font-size:1.05rem }
+  .set-body{ padding:8px 18px 18px }
+  .row{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:13px 0; border-bottom:1px solid var(--line) }
+  .row:last-child{ border-bottom:0 }
+  .row label{ font-size:.95rem } .row small{ display:block; color:var(--muted); font-size:.8rem }
+  /* accessible toggle */
+  .sw{ position:relative; width:50px; height:28px; flex:0 0 auto }
+  .sw input{ position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer }
+  .sw i{ position:absolute; inset:0; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; transition:.2s }
+  .sw i::after{ content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--muted); transition:.2s }
+  .sw input:checked + i{ background:rgba(63,185,80,.25); border-color:var(--clear) }
+  .sw input:checked + i::after{ left:25px; background:var(--clear) }
+  html[data-reduce="1"] .sw i, html[data-reduce="1"] .sw i::after{ transition:none }
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+  <header class="top">
+    <div class="mark" aria-hidden="true"><span></span></div>
+    <div class="brand">
+      <h1>Clear Board</h1>
+      <p>Become a conductor. Free, forever.</p>
+    </div>
+    <div class="grow"></div>
+    <button class="iconbtn" id="openSet" aria-haspopup="dialog">⚙ Settings</button>
+  </header>
+
+  <main id="main">
+    <section class="lede">
+      <span class="free">Free · tip jar only</span>
+      <p>Start on your first day knowing nothing. Leave <b>ready to sit the qualification</b>. Every
+      rule explained in plain words first, the real CROR text one tap deeper — and a safe place to
+      make every mistake until the right move is automatic.</p>
+    </section>
+
+    <h2 class="section">Your path</h2>
+    <div class="path">
+      <div class="stage">
+        <b id="stageName">First-day trainee</b>
+        <span id="overallPct">0% to test-ready</span>
+      </div>
+      <div class="bar" role="progressbar" aria-label="Overall progress to test-ready" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="overallBar"><i id="overallFill"></i></div>
+    </div>
+
+    <h2 class="section">The job, one piece at a time</h2>
+    <div class="grid" id="domains"><!-- rendered --></div>
+
+    <h2 class="section">Ways to learn</h2>
+    <div class="stations">
+      <button class="station" data-station="reference"><b>📖 Reference</b><small>Look anything up — cited</small></button>
+      <button class="station" data-station="drill"><b>🎯 Drill</b><small>Adaptive practice</small></button>
+      <button class="station" disabled><b>🚂 The Yard</b><small>Coming soon</small></button>
+      <button class="station" disabled><b>🚦 Signals</b><small>Coming soon</small></button>
+      <button class="station" disabled><b>📻 Radio</b><small>Coming soon</small></button>
+      <button class="station" disabled><b>📝 Exam</b><small>Coming soon</small></button>
+    </div>
+
+    <footer>
+      <span class="tip">☕ Tip jar — if it helped you get there (link soon)</span>
+      <p>An independent study tool. Cites the <b>Canadian Rail Operating Rules</b> (a public document)
+      and flags CN operating practice (GOI) as not-a-rule. Not affiliated with CN, Transport Canada,
+      or the RAC. Built for the people the book failed.</p>
+    </footer>
+  </main>
+</div>
+
+<dialog id="settings" aria-label="Settings">
+  <div class="set-h"><h2>Settings</h2><button class="iconbtn" id="closeSet">Done</button></div>
+  <div class="set-body">
+    <div class="row"><div><label for="t-dys">Dyslexia-friendly text</label><small>Clearer font + looser spacing</small></div><span class="sw"><input type="checkbox" id="t-dys"><i></i></span></div>
+    <div class="row"><div><label for="t-con">Higher contrast</label><small>Brighter text on dark</small></div><span class="sw"><input type="checkbox" id="t-con"><i></i></span></div>
+    <div class="row"><div><label for="t-red">Reduce motion</label><small>No animations</small></div><span class="sw"><input type="checkbox" id="t-red"><i></i></span></div>
+    <div class="row"><div><label for="t-aud">Read aloud</label><small>Speak rules &amp; questions (where supported)</small></div><span class="sw"><input type="checkbox" id="t-aud"><i></i></span></div>
+    <div class="row"><div><label for="t-big">Bigger text</label><small>Increase the type size</small></div><span class="sw"><input type="checkbox" id="t-big"><i></i></span></div>
+  </div>
+</dialog>
+
+<script type="module">
+/* Clear Board — V1 shell (slice 0).
+   This file stands up the qualification-path home, the accessible theme, and a local profile.
+   SEAMS (next slices, per SPEC): core/store.js + core/sr.js (SM-2-lite), data/*.json content
+   library (migrated, cited, trust-flagged), stations/reference.js + stations/drill.js. */
+
+const DOMAINS = [
+  { id:'definitions', name:'The words', desc:'CROR definitions — the language of the job.', live:true },
+  { id:'signals',     name:'Signals',   desc:'Read the aspect, know the indication.',       live:true },
+  { id:'switching',   name:'Switching', desc:'Work the yard: pull, spot, kick — clean.',     live:false },
+  { id:'securement',  name:'Securement',desc:'Rule 112 — tie it down so it stays put.',      live:false },
+  { id:'radio',       name:'Radio',     desc:'The calls, word for word.',                    live:false },
+  { id:'authority',   name:'Authority', desc:'OCS · ABS · CTC — who owns the track.',         live:false },
+];
+
+const SETTINGS_KEY = 'cb.settings.v1';
+const PROFILE_KEY  = 'cb.profile.v1';
+
+/* ---- settings (accessibility) persist + apply ---- */
+const root = document.documentElement;
+const defaults = { dys:false, contrast:false, reduce:matchMedia('(prefers-reduced-motion: reduce)').matches, audio:false, big:false };
+let settings = load(SETTINGS_KEY, defaults);
+function applySettings(){
+  root.dataset.dys = settings.dys ? '1':'0';
+  root.dataset.contrast = settings.contrast ? '1':'0';
+  root.dataset.reduce = settings.reduce ? '1':'0';
+  root.style.setProperty('--fs', settings.big ? '18.5px' : '16px');
+  q('#t-dys').checked=settings.dys; q('#t-con').checked=settings.contrast;
+  q('#t-red').checked=settings.reduce; q('#t-aud').checked=settings.audio; q('#t-big').checked=settings.big;
+}
+function bindToggle(id,key){ q(id).addEventListener('change',e=>{ settings[key]=e.target.checked; save(SETTINGS_KEY,settings); applySettings(); }); }
+
+/* ---- profile (SPEC schema; SR fields land with core/sr.js) ---- */
+function freshProfile(){ return { schema:1, createdAt:nowISO(), updatedAt:nowISO(),
+  settings, items:{}, domains:Object.fromEntries(DOMAINS.map(d=>[d.id,{mastery:0,lastDrill:null}])),
+  path:{ stage:'First-day trainee', unlocked:['reference','drill'], testReady:false } }; }
+let profile = load(PROFILE_KEY, freshProfile());
+
+/* ---- render the path ---- */
+function renderDomains(){
+  q('#domains').innerHTML = DOMAINS.map(d=>{
+    const m = Math.round((profile.domains[d.id]?.mastery||0)*100);
+    return `<div class="card ${d.live?'':'locked'}">
+      <div class="h"><span class="dot" style="${d.live?'':'background:var(--muted)'}"></span><h3>${d.name}</h3></div>
+      <p>${d.desc}</p>
+      ${d.live
+        ? `<div class="mini" role="progressbar" aria-label="${d.name} mastery" aria-valuenow="${m}" aria-valuemin="0" aria-valuemax="100"><i style="width:${m}%"></i></div>`
+        : `<span class="soon">Coming soon</span>`}
+    </div>`;
+  }).join('');
+}
+function renderOverall(){
+  const live = DOMAINS.filter(d=>d.live);
+  const pct = Math.round(live.reduce((s,d)=>s+(profile.domains[d.id]?.mastery||0),0)/Math.max(1,live.length)*100);
+  q('#overallFill').style.width = pct+'%';
+  q('#overallBar').setAttribute('aria-valuenow', pct);
+  q('#overallPct').textContent = pct+'% to test-ready';
+}
+
+/* ---- station nav (stub until stations land) ---- */
+document.querySelectorAll('.station[data-station]').forEach(b=>{
+  b.addEventListener('click',()=>{ alert(`"${b.textContent.trim()}" station is next on the build — the shell + profile are wired and ready for it.`); });
+});
+
+/* ---- settings dialog ---- */
+const dlg = q('#settings');
+q('#openSet').addEventListener('click',()=>dlg.showModal());
+q('#closeSet').addEventListener('click',()=>dlg.close());
+bindToggle('#t-dys','dys'); bindToggle('#t-con','contrast'); bindToggle('#t-red','reduce'); bindToggle('#t-aud','audio'); bindToggle('#t-big','big');
+
+/* ---- boot ---- */
+applySettings(); renderDomains(); renderOverall();
+
+/* ---- tiny helpers ---- */
+function q(s){ return document.querySelector(s); }
+function nowISO(){ return new Date().toISOString(); }
+function load(k,fb){ try{ return {...fb, ...(JSON.parse(localStorage.getItem(k))||{})}; }catch{ return fb; } }
+function save(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
+</script>
+</body>
+</html>
