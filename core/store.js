@@ -3,7 +3,7 @@ import { decayedFam } from './sr.js';
 
 export const DOMAINS = [
   { id: 'definitions', name: 'The words', desc: 'CROR definitions — the language of the job.', live: true },
-  { id: 'signals',     name: 'Signals',   desc: 'Read the aspect, know the indication.',       live: false },
+  { id: 'signals',     name: 'Signals',   desc: 'Read the aspect, know the indication.',       live: true },
   { id: 'switching',   name: 'Switching', desc: 'Work the yard: pull, spot, kick — clean.',     live: false },
   { id: 'securement',  name: 'Securement',desc: 'Rule 112 — tie it down so it stays put.',      live: false },
   { id: 'radio',       name: 'Radio',     desc: 'The calls, word for word.',                    live: false },
@@ -12,7 +12,7 @@ export const DOMAINS = [
 // V1: only `definitions` has migrated content. Signals + the rest land in later slices.
 
 const PROFILE_KEY = 'cb.profile.v1';
-const CONTENT_FILES = ['data/definitions.json'];   // grows as domains are migrated
+const CONTENT_FILES = ['data/definitions.json', 'data/signals.json'];   // grows as domains are migrated
 
 export function freshProfile(settings) {
   return {

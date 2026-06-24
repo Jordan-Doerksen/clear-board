@@ -67,7 +67,7 @@ function renderHome(view) {
       <button class="station" data-go="reference"><b>📖 Reference</b><small>Look anything up — cited</small></button>
       <button class="station" data-go="drill"><b>🎯 Drill</b><small>Adaptive practice</small></button>
       <button class="station" disabled><b>🚂 The Yard</b><small>Coming soon</small></button>
-      <button class="station" disabled><b>🚦 Signals</b><small>Coming soon</small></button>
+      <button class="station" data-go="signals"><b>🚦 Signals</b><small>Read the aspect</small></button>
       <button class="station" disabled><b>📻 Radio</b><small>Coming soon</small></button>
       <button class="station" disabled><b>📝 Exam</b><small>Coming soon</small></button>
     </div>
@@ -88,6 +88,7 @@ function route() {
   const h = location.hash.replace(/^#\/?/, '');
   if (h === 'reference') reference.mount(view, ctx());
   else if (h === 'drill') drill.mount(view, ctx());
+  else if (h === 'signals') drill.mount(view, ctx(), { domain: 'signals' });
   else renderHome(view);
   view.focus?.();
 }

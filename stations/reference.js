@@ -1,4 +1,6 @@
 // Clear Board — Reference station. Look anything up: plain words first, rule text one tap deeper, always cited.
+import { drawSignal } from './signal-render.js';
+
 const TRUST = {
   'verified':           ['✓ verified',                              'clear'],
   'needs-review':       ['⚠ not yet verified — reference only',     'caution'],
@@ -35,6 +37,8 @@ export function mount(root, ctx) {
       <h3>${esc(i.title)}</h3>
       ${badge(c)}
       <p class="plain">${esc(i.plain)}</p>
+      ${i.type === 'signal' && i.payload && i.payload.aspects && i.payload.aspects.length
+        ? `<div class="aspects">${i.payload.aspects.slice(0, 8).map(a => drawSignal(a)).join('')}</div><p class="muted small">Hardware variants — all the same indication.</p>` : ''}
       ${c.verbatim ? `<details><summary>Show the rule text${c.ref ? ' — ' + esc(c.ref) : ''}</summary><blockquote>${esc(c.verbatim)}</blockquote></details>` : ''}
       <div class="cite">Source: ${esc(c.source)}${c.ref ? ' · ' + esc(c.ref) : ''}${c.relatedRef ? ' · related: ' + esc(c.relatedRef) : ''}</div>
       ${ctx.settings.audio ? `<button class="iconbtn" id="ref-say">🔊 Read aloud</button>` : ''}`;

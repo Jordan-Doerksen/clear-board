@@ -16,9 +16,12 @@
   on every answer, mastery feeds the path. F1 enforced — only verified items are graded.
 - `app.js`: modular shell with hash routing (home / reference / drill) + settings.
 - Verified end-to-end on preview (home, search→detail→verbatim, answer→grade→mastery persist).
+- **Signals domain live**: `stations/signal-render.js` (the verified `drawSignal` SVG renderer,
+  copied verbatim) + `data/signals.json` (42 indications — 38 verified, 4 needs-review/reference-only).
+  Reference renders the aspect variants; Drill is now type-aware (definitions → term↔def, signals →
+  read-the-aspect) over one profile; plus a signals-only "🚦 Signals" station.
+- **Tip jar**: Ko-fi link (ko-fi.com/jordandoerksen) wired into the footer.
 
 ### Next
-- Migrate the **signals** domain (the SVG aspect renderer + ~100 indications, `needs-review` flags
-  on the 4 unencoded ones) so Drill spans a second content type.
-- Then: rules/operating content, the Yard (switch-list engine), Radio, and the Exam station.
-- PWA/offline (service worker + manifest); profile export/import; tip-jar link.
+- Rules / operating content; the Yard (switch-list engine); Radio; the Exam station.
+- PWA/offline (service worker + manifest); profile export/import.
