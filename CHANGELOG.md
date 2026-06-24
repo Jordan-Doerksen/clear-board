@@ -27,6 +27,12 @@
   switching, securement, radio, authority, and a new **Operating** bucket — so all 7 light up.
   Live domain cards are now one-tap drills (`#/drill/<domain>`).
 
+- **The Yard live**: the switch-list switching sim ported in as a station — 7 verified engine
+  modules copied byte-for-byte (SHA-256 identical), `main.js` adapted into a scoped `mount()`
+  (CSS namespaced under `.yard-wrap`, no leak), 19 solver-verified puzzles, Watch-optimal,
+  reduced-motion aware, started muted unless audio is on. Puzzle wins record to `profile.yard.completed`.
+
 ### Next
-- The Yard (port the switch-list engine); the Radio call walkthrough; the Exam station.
+- The Radio call walkthrough; the Exam station (needs the SME "test-ready" bar first).
 - PWA/offline (service worker + manifest); profile export/import.
+- Surface yard progress (jobs worked) on the path/home.

@@ -20,6 +20,7 @@ export function freshProfile(settings) {
     schema: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
     settings, items: {},
     domains: Object.fromEntries(DOMAINS.map(d => [d.id, { mastery: 0, lastDrill: null }])),
+    yard: { completed: [] },
     path: { stage: 'First-day trainee', unlocked: ['reference', 'drill'], testReady: false },
   };
 }

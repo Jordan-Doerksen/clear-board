@@ -67,7 +67,7 @@ function renderHome(view) {
     <div class="stations">
       <button class="station" data-go="reference"><b>📖 Reference</b><small>Look anything up — cited</small></button>
       <button class="station" data-go="drill"><b>🎯 Drill</b><small>Adaptive practice</small></button>
-      <button class="station" disabled><b>🚂 The Yard</b><small>Coming soon</small></button>
+      <button class="station" data-go="yard"><b>🚂 The Yard</b><small>Work the cuts</small></button>
       <button class="station" data-go="signals"><b>🚦 Signals</b><small>Read the aspect</small></button>
       <button class="station" disabled><b>📻 Radio walkthrough</b><small>Coming soon</small></button>
       <button class="station" disabled><b>📝 Exam</b><small>Coming soon</small></button>
@@ -90,6 +90,16 @@ function route() {
   if (r0 === 'reference') reference.mount(view, ctx());
   else if (r0 === 'drill') drill.mount(view, ctx(), arg ? { domain: arg } : {});
   else if (r0 === 'signals') drill.mount(view, ctx(), { domain: 'signals' });
+  else if (r0 === 'yard') {
+    view.innerHTML = '<p class="muted">Loading the yard…</p>';
+    import('./stations/yard.js')
+      .then(m => m.mount(view, ctx()))
+      .catch(err => {
+        console.error(err);
+        view.innerHTML = '<button class="back" data-go="">← Home</button><p class="muted">The Yard failed to load.</p>';
+        const b = view.querySelector('[data-go]'); if (b) b.addEventListener('click', () => go(''));
+      });
+  }
   else renderHome(view);
   view.focus?.();
 }
