@@ -35,14 +35,15 @@ function renderHome(view) {
   const pct = Math.round(live.reduce((s, d) => s + (profile.domains[d.id]?.mastery || 0), 0) / Math.max(1, live.length) * 100);
   const cards = store.DOMAINS.map(d => {
     const m = Math.round((profile.domains[d.id]?.mastery || 0) * 100);
-    const liveCard = d.live && (content.byDomain[d.id] || []).some(i => i.citation?.trust === 'verified');
-    return `<div class="card ${liveCard ? '' : 'locked'}">
-      <div class="h"><span class="dot" style="${liveCard ? '' : 'background:var(--muted)'}"></span><h3>${d.name}</h3></div>
+    const liveCard = d.live && store.drillable(content.byDomain[d.id], content).length > 0;
+    const inner = `<div class="h"><span class="dot" style="${liveCard ? '' : 'background:var(--muted)'}"></span><h3>${d.name}</h3></div>
       <p>${d.desc}</p>
       ${liveCard
         ? `<div class="mini" role="progressbar" aria-label="${d.name} mastery" aria-valuenow="${m}" aria-valuemin="0" aria-valuemax="100"><i style="width:${m}%"></i></div>`
-        : `<span class="soon">Coming soon</span>`}
-    </div>`;
+        : `<span class="soon">Coming soon</span>`}`;
+    return liveCard
+      ? `<button class="card" data-go="drill/${d.id}" aria-label="Drill ${d.name}">${inner}</button>`
+      : `<div class="card locked">${inner}</div>`;
   }).join('');
 
   view.innerHTML = `
@@ -68,7 +69,7 @@ function renderHome(view) {
       <button class="station" data-go="drill"><b>🎯 Drill</b><small>Adaptive practice</small></button>
       <button class="station" disabled><b>🚂 The Yard</b><small>Coming soon</small></button>
       <button class="station" data-go="signals"><b>🚦 Signals</b><small>Read the aspect</small></button>
-      <button class="station" disabled><b>📻 Radio</b><small>Coming soon</small></button>
+      <button class="station" disabled><b>📻 Radio walkthrough</b><small>Coming soon</small></button>
       <button class="station" disabled><b>📝 Exam</b><small>Coming soon</small></button>
     </div>
 
@@ -85,10 +86,10 @@ function renderHome(view) {
 function route() {
   applySettings();
   const view = document.getElementById('view');
-  const h = location.hash.replace(/^#\/?/, '');
-  if (h === 'reference') reference.mount(view, ctx());
-  else if (h === 'drill') drill.mount(view, ctx());
-  else if (h === 'signals') drill.mount(view, ctx(), { domain: 'signals' });
+  const [r0, arg] = location.hash.replace(/^#\/?/, '').split('/');
+  if (r0 === 'reference') reference.mount(view, ctx());
+  else if (r0 === 'drill') drill.mount(view, ctx(), arg ? { domain: arg } : {});
+  else if (r0 === 'signals') drill.mount(view, ctx(), { domain: 'signals' });
   else renderHome(view);
   view.focus?.();
 }

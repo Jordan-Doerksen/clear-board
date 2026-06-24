@@ -21,7 +21,12 @@
   Reference renders the aspect variants; Drill is now type-aware (definitions → term↔def, signals →
   read-the-aspect) over one profile; plus a signals-only "🚦 Signals" station.
 - **Tip jar**: Ko-fi link (ko-fi.com/jordandoerksen) wired into the footer.
+- **Rules / operating content live**: `data/rules.json` (100 cited rule concepts) +
+  `data/rule-questions.json` (226 authored MC, verbatim from the old CROR Quiz BANK; answer∈choices
+  verified on all). A third drill type (authored operating-rule MC). The remaining domains go live —
+  switching, securement, radio, authority, and a new **Operating** bucket — so all 7 light up.
+  Live domain cards are now one-tap drills (`#/drill/<domain>`).
 
 ### Next
-- Rules / operating content; the Yard (switch-list engine); Radio; the Exam station.
+- The Yard (port the switch-list engine); the Radio call walkthrough; the Exam station.
 - PWA/offline (service worker + manifest); profile export/import.

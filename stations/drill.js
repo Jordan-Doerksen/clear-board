@@ -1,7 +1,7 @@
 // Clear Board — Drill station. Adaptive (SM-2-lite) MC across content types; updates mastery → the path.
 // Definitions → term↔definition MC. Signals → read-the-aspect MC. One loop, one profile.
 import { grade, isDue } from '../core/sr.js';
-import { gradable, DOMAINS } from '../core/store.js';
+import { drillable, DOMAINS } from '../core/store.js';
 import { drawSignal } from './signal-render.js';
 
 const shuffle = a => { const x = a.slice(); for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; } return x; };
@@ -10,8 +10,8 @@ const esc = s => (s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 export function mount(root, ctx, opts = {}) {
   // Pool: verified-only (F1) items, filtered to one domain or across all live domains.
   let items = [];
-  if (opts.domain) items = gradable(ctx.content.byDomain[opts.domain]);
-  else for (const d of DOMAINS.filter(d => d.live)) items.push(...gradable(ctx.content.byDomain[d.id]));
+  if (opts.domain) items = drillable(ctx.content.byDomain[opts.domain], ctx.content);
+  else for (const d of DOMAINS.filter(d => d.live)) items.push(...drillable(ctx.content.byDomain[d.id], ctx.content));
   // signals need a renderable aspect to be drillable
   items = items.filter(i => i.type !== 'signal' || (i.payload && i.payload.aspects && i.payload.aspects.length));
 
@@ -39,6 +39,11 @@ export function mount(root, ctx, opts = {}) {
   }
 
   function buildQ(item) {
+    if (item.type === 'rule') {
+      const qs = ctx.content.questionsByRule[item.id] || [];
+      const Q = qs[Math.floor(Math.random() * qs.length)];
+      return { kind: 'rule', heading: 'What does the rule say?', promptText: Q.stem, correct: Q.answer, options: shuffle(Q.choices.slice()), explain: Q.explain };
+    }
     if (item.type === 'signal') {
       const aspects = item.payload.aspects;
       const spec = aspects[Math.floor(Math.random() * aspects.length)];
@@ -65,7 +70,7 @@ export function mount(root, ctx, opts = {}) {
       <div class="prompt ${q.kind === 'signal' ? 'prompt-signal' : ''}">${q.kind === 'signal' ? q.svg : esc(q.promptText)}</div>
       <div class="opts">${q.options.map(o => `<button class="opt" data-val="${esc(o)}">${esc(o)}</button>`).join('')}</div>
       <div class="feedback" hidden aria-live="polite"></div>`;
-    if (ctx.settings.audio && q.kind === 'text') ctx.speak(q.promptText);
+    if (ctx.settings.audio && q.kind !== 'signal') ctx.speak(q.promptText);
 
     const opts = root.querySelector('.opts');
     const fb = root.querySelector('.feedback');
@@ -82,7 +87,7 @@ export function mount(root, ctx, opts = {}) {
       fb.hidden = false;
       const c = item.citation;
       fb.innerHTML = `<b class="${ok ? 'fb-ok' : 'fb-no'}">${ok ? 'Right.' : 'Not quite.'}</b>
-        <span><b>${esc(item.title)}</b> — ${esc(item.plain || c.verbatim)}</span>
+        <span><b>${esc(item.title)}</b> — ${esc(q.explain || item.plain || c.verbatim)}</span>
         <span class="cite">${esc(c.source)}${c.ref ? ' · ' + esc(c.ref) : ''}</span>
         <button class="iconbtn next" id="next">${idx + 1 < chosen.length ? 'Next →' : 'Finish'}</button>`;
       fb.querySelector('#next').addEventListener('click', () => { idx++; render(); });
