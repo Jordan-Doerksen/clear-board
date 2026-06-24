@@ -73,7 +73,7 @@ function renderHome(view) {
     </div>
 
     <footer>
-      <span class="tip">☕ Tip jar — if it helped you get there (link soon)</span>
+      <a class="tip" href="https://ko-fi.com/jordandoerksen" target="_blank" rel="noopener">☕ Tip jar — if it helped you get there</a>
       <p>An independent study tool. Cites the <b>Canadian Rail Operating Rules</b> (a public document)
       and flags CN operating practice (GOI) as not-a-rule. Not affiliated with CN, Transport Canada,
       or the RAC. Built for the people the book failed.</p>
