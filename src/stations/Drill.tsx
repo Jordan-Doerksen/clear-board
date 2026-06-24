@@ -1,0 +1,160 @@
+// Drill — adaptive (SM-2-lite) MC across content types; updates mastery → the path. (vanilla drill.js)
+// Definitions → term↔definition MC. Signals → read-the-aspect MC. Rules → authored MC bank. One loop, one profile.
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useApp } from '../state/AppContext';
+import { Signal } from './Signal';
+import { DOMAINS, drillable } from '../core/store';
+import { isDue } from '../core/sr';
+import type { Content, ContentItem, SignalAspect } from '../core/types';
+
+const shuffle = <T,>(a: T[]): T[] => {
+  const x = a.slice();
+  for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; }
+  return x;
+};
+
+type Q =
+  | { kind: 'rule'; heading: string; promptText: string; correct: string; options: string[]; explain: string }
+  | { kind: 'signal'; heading: string; aspect: SignalAspect; correct: string; options: string[]; explain?: string }
+  | { kind: 'text'; heading: string; promptText: string; correct: string; options: string[]; explain?: string };
+
+interface Built { chosen: ContentItem[]; pool: ContentItem[]; byType: Record<string, ContentItem[]>; drilledDomains: string[]; startMastery: Record<string, number> }
+
+function distractors(item: ContentItem, pool: ContentItem[], byType: Record<string, ContentItem[]>, fieldFn: (o: ContentItem) => string): string[] {
+  const same = (byType[item.type] || pool).filter(o => o.id !== item.id);
+  let opts = shuffle(same).slice(0, 3).map(fieldFn);
+  if (opts.length < 3) opts = opts.concat(shuffle(pool.filter(o => o.id !== item.id)).slice(0, 3 - opts.length).map(fieldFn));
+  return opts;
+}
+
+function buildQ(item: ContentItem, content: Content, b: Built): Q {
+  if (item.type === 'rule') {
+    const qs = content.questionsByRule[item.id] || [];
+    const Q = qs[Math.floor(Math.random() * qs.length)];
+    return { kind: 'rule', heading: 'What does the rule say?', promptText: Q.stem, correct: Q.answer, options: shuffle(Q.choices.slice()), explain: Q.explain };
+  }
+  if (item.type === 'signal') {
+    const aspects = item.payload?.aspects || [];
+    const aspect = aspects[Math.floor(Math.random() * aspects.length)];
+    const correct = item.title;
+    return { kind: 'signal', heading: 'What signal is this?', aspect, correct, options: shuffle([correct, ...distractors(item, b.pool, b.byType, o => o.title)]) };
+  }
+  const dir = Math.random() < 0.5 ? 'term' : 'def';
+  const field = (it: ContentItem) => (dir === 'term' ? (it.plain || it.citation.verbatim || '') : it.title);
+  const promptText = dir === 'term' ? item.title : (item.plain || item.citation.verbatim || '');
+  const correct = field(item);
+  return { kind: 'text', heading: dir === 'term' ? 'What does this mean?' : 'Which term is this?', promptText, correct, options: shuffle([correct, ...distractors(item, b.pool, b.byType, field)]) };
+}
+
+export function Drill({ domain }: { domain?: string }) {
+  const { content, profile, recordAnswer, speak } = useApp();
+  const navigate = useNavigate();
+  const profileRef = useRef(profile);
+  profileRef.current = profile;
+
+  const [sessionKey, setSessionKey] = useState(0);
+  const [built, setBuilt] = useState<Built | null>(null);
+  const [idx, setIdx] = useState(0);
+  const [score, setScore] = useState(0);
+  const [picked, setPicked] = useState<string | null>(null);
+
+  // Build the session pool once per (content, domain, sessionKey). profileRef → pre-session snapshot.
+  useEffect(() => {
+    if (!content) return;
+    let items: ContentItem[] = [];
+    if (domain) items = drillable(content.byDomain[domain], content);
+    else for (const d of DOMAINS.filter(d => d.live)) items.push(...drillable(content.byDomain[d.id], content));
+    items = items.filter(i => i.type !== 'signal' || (i.payload?.aspects?.length ?? 0) > 0);
+
+    const byType: Record<string, ContentItem[]> = {};
+    for (const i of items) (byType[i.type] ||= []).push(i);
+    const due = items.filter(i => isDue(profileRef.current.items[i.id]));
+    const chosen = shuffle(due.length ? due : items).slice(0, 10);
+    const drilledDomains = [...new Set(chosen.map(i => i.domain))];
+    const startMastery = Object.fromEntries(drilledDomains.map(d => [d, profileRef.current.domains[d]?.mastery || 0]));
+
+    setBuilt({ chosen, pool: items, byType, drilledDomains, startMastery });
+    setIdx(0); setScore(0); setPicked(null);
+  }, [content, domain, sessionKey]);
+
+  const item = built && idx < built.chosen.length ? built.chosen[idx] : null;
+  const q = useMemo(() => (item && content && built ? buildQ(item, content, built) : null), [item, content, built]);
+
+  // Read-aloud the prompt (not the signal SVG) when a new question appears.
+  useEffect(() => {
+    if (q && (q.kind === 'rule' || q.kind === 'text')) speak(q.promptText);
+  }, [q, speak]);
+
+  if (!content || !built) return <p className="muted">Loading…</p>;
+
+  if (built.chosen.length < 4) {
+    return (
+      <>
+        <button className="back" onClick={() => navigate('/')}>← Home</button>
+        <p className="muted">Not enough verified content to drill yet.</p>
+      </>
+    );
+  }
+
+  // Finished — show the session summary with mastery deltas.
+  if (!item || !q) {
+    const lines = built.drilledDomains.map(d => {
+      const name = (DOMAINS.find(x => x.id === d) || {}).name || d;
+      const end = profile.domains[d]?.mastery || 0;
+      const delta = Math.round((end - (built.startMastery[d] || 0)) * 100);
+      return `${name}: ${delta >= 0 ? '+' : ''}${delta}% → ${Math.round(end * 100)}%`;
+    }).join(' · ');
+    return (
+      <>
+        <button className="back" onClick={() => navigate('/')}>← Home</button>
+        <h2 className="view-title">Session done</h2>
+        <p className="big-score">{score} / {built.chosen.length}</p>
+        <p className="muted">{lines}. Spaced out over the next days so it sticks.</p>
+        <div className="opts">
+          <button className="opt" onClick={() => setSessionKey(k => k + 1)}>Drill again</button>
+          <button className="opt" onClick={() => navigate('/')}>Back to the path</button>
+        </div>
+      </>
+    );
+  }
+
+  const answered = picked !== null;
+  const ok = picked === q.correct;
+  const c = item.citation;
+
+  function choose(value: string) {
+    if (picked !== null) return;
+    const correct = value === q!.correct;
+    setPicked(value);
+    if (correct) setScore(s => s + 1);
+    recordAnswer(item!, correct);
+  }
+
+  return (
+    <>
+      <button className="back" onClick={() => navigate('/')}>← Home</button>
+      <div className="drill-top"><span className="muted">Question {idx + 1} of {built.chosen.length}</span><span className="muted">{score} correct</span></div>
+      <h2 className="view-title">{q.heading}</h2>
+      <div className={`prompt ${q.kind === 'signal' ? 'prompt-signal' : ''}`}>
+        {q.kind === 'signal' ? <Signal aspect={q.aspect} /> : q.promptText}
+      </div>
+      <div className="opts">
+        {q.options.map((o, i) => {
+          const cls = answered ? (o === q.correct ? 'opt right' : (o === picked ? 'opt wrong' : 'opt')) : 'opt';
+          return <button key={i} className={cls} disabled={answered} onClick={() => choose(o)}>{o}</button>;
+        })}
+      </div>
+      {answered && (
+        <div className="feedback" aria-live="polite">
+          <b className={ok ? 'fb-ok' : 'fb-no'}>{ok ? 'Right.' : 'Not quite.'}</b>
+          <span><b>{item.title}</b> — {q.explain || item.plain || c.verbatim}</span>
+          <span className="cite">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
+          <button className="iconbtn next" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>
+            {idx + 1 < built.chosen.length ? 'Next →' : 'Finish'}
+          </button>
+        </div>
+      )}
+    </>
+  );
+}

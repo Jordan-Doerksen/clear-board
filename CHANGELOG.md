@@ -1,6 +1,23 @@
 # Changelog
 
 ## [Unreleased] — V1 in progress
+
+### Rebuilt on React + TypeScript + Tauri (2026-06-24, D-0016)
+- **Stack moved off vanilla ES modules to Vite + React 19 + TypeScript** (reverses D-0005's
+  "no build"). The offline-PWA + local-first + never-commit-the-PDF constraints still hold.
+- Core ported 1:1 and typed (`src/core/sr.ts`, `store.ts`); the four verified data JSON files
+  migrated **untouched** to `public/data/`; the signal SVG renderer kept **byte-for-byte**
+  (`src/core/signal.ts`, wrapped in `<Signal>`).
+- Stations rebuilt as components: Home/path, Reference, Drill (rules/signals/defs). **The Yard**
+  and **Radio** kept byte-for-byte as imperative islands (engine/station unchanged) behind a shared
+  `useImperativeStation` hook. React's auto-escaping removed the hand-rolled `esc()` from every
+  station — a safety win for verbatim CROR text.
+- **Feature parity** with the vanilla build, verified live (all five stations, settings, profile).
+- **Desktop:** Tauri v2 shell (`src-tauri/`) → self-contained `Clear Board.exe` (~18 MB, OS WebView2)
+  + NSIS installer; verified launching. `npm run tauri build`.
+- **Deploy:** Pages switched from legacy root-serve to a GitHub Actions build (`.github/workflows/deploy.yml`).
+- The vanilla build is retired (recoverable in git history before this commit).
+
 ### Added
 - Design gate (2026-06-23): `SPEC.md`, `DECISIONS.md`, adversarial `GAP-REVIEW.md` — **gate-clean for V1**.
 - Project scaffold: README, MIT LICENSE, .gitignore, this changelog.

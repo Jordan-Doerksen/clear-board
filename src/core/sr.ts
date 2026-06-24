@@ -1,13 +1,16 @@
 // Clear Board — SM-2-lite spaced repetition (SPEC §Retention). Pure functions over an item's SR state.
+// Ported 1:1 from the vanilla core/sr.js — same math, now typed.
+import type { SRState } from './types';
+
 const DAY = 86400000;
 
-export function newState() {
+export function newState(): SRState {
   return { fam: 0, seen: 0, correct: 0, lastSeen: null, due: new Date().toISOString(), ease: 2.5, interval: 0 };
 }
 
-// Update SR state after an answer. quality is a boolean (correct?) for V1 (no easy/hard buttons yet).
-export function grade(prev, correct) {
-  const s = { ...(prev || newState()) };
+// Update SR state after an answer. `correct` is a boolean for V1 (no easy/hard buttons yet).
+export function grade(prev: SRState | undefined, correct: boolean): SRState {
+  const s: SRState = { ...(prev || newState()) };
   s.seen += 1;
   s.lastSeen = new Date().toISOString();
   if (correct) {
@@ -23,12 +26,12 @@ export function grade(prev, correct) {
   return s;
 }
 
-export function isDue(st) {
+export function isDue(st: SRState | undefined): boolean {
   return !st || !st.due || new Date(st.due).getTime() <= Date.now();
 }
 
-// Familiarity decayed by time since last seen (half-life 60d) — drives domain mastery, reflects retention not activity.
-export function decayedFam(st) {
+// Familiarity decayed by time since last seen (half-life 60d) — drives mastery, reflects retention not activity.
+export function decayedFam(st: SRState | undefined): number {
   if (!st || !st.lastSeen) return (st && st.fam) || 0;
   const days = (Date.now() - new Date(st.lastSeen).getTime()) / DAY;
   return (st.fam || 0) * Math.pow(0.5, days / 60);

@@ -103,5 +103,34 @@ nearest CROR rule (e.g. "set and center" → GOI, relatedRef "CROR 109") without
 as the rule.
 **Why:** B3/F1 — the CROR-vs-GOI distinction must be representable, not just promised.
 
+### D-0016 — Adopt Vite + React + TypeScript + Tauri (reverses D-0005's "no build")
+**Chosen:** Clear Board moves to a Vite + React + TypeScript front end, shipped as a static
+offline PWA for GitHub Pages and (later) a Tauri desktop exe. The React pilot lives in
+`../clear-board-react` until it reaches parity, then it replaces this folder (the vanilla build
+becomes reference, then retires).
+**Weighed:** stay vanilla ES modules (D-0005); Electron instead of Tauri.
+**Why:** Jordan is standardizing on React for tools with real UI state, and on a clean-exe stack.
+Vite still ships a static, offline-first PWA (the *spirit* of D-0005 — train-side offline, zero
+hosting cost), and Tauri adds the ~5 MB clean exe Electron can't. React's default escaping also
+removes the hand-rolled `esc()` from every station — a safety win for rendering verbatim CROR text.
+**Consequence:** the SPEC §Hard-constraints "No build step" line is superseded for this project;
+the offline-PWA + local-first + never-commit-the-PDF constraints still hold. The four verified data
+JSON files migrate untouched; the signal renderer stays byte-for-byte (now wrapped in a component).
+**Status (2026-06-24):** spine ported + verified live — shell, core (sr/store), Home/path,
+Reference, Drill incl. signals. SM-2 grading replay-checked in the browser (miss → ease 2.5→2.3,
+interval reset, persisted). **The Yard now ported too** — the 7 SHA-verified engine modules + the
+station kept byte-for-byte, wrapped as a React "imperative island" (`Yard.tsx`) that lazy-loads
+them, bridges `ctx` (navigate/settings/profile/save), and tears down cleanly on unmount; verified
+live (19 puzzles load, canvas paints, engine responds, no leak across remounts, 0 errors). **Radio
+ported too** via the same shared `useImperativeStation` hook — drove the full 14-step walkthrough live,
+`profile.radio.done` persisted. **FEATURE PARITY REACHED** — all five stations (Home/path · Reference ·
+Drill · The Yard · Radio) + settings + profile run on React, 0 console errors. **TAURI EXE BUILT &
+VERIFIED RUNNING (2026-06-24)** — `npm run tauri build` produces a self-contained `Clear Board.exe`
+(~18 MB, OS WebView2) + a `Clear Board_0.1.0_x64-setup.exe` NSIS installer (~4 MB); launched the exe,
+native window "Clear Board" opened, 35 MB resident, no crash. Build needed a complete MinGW-w64 on
+PATH (`C:\projects\.toolchains\mingw64\bin`) — rustup's bundled GNU MinGW lacks `as.exe`. Remaining:
+PWA service worker (vite-plugin-pwa already a dep), custom icon, then consolidate (this React folder
+replaces the vanilla one, which retires) + update map.md/Observatory.
+
 ---
 *V1. Edit as decisions are made or reversed.*

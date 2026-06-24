@@ -1,36 +1,52 @@
 # Clear Board
 
-*A free, unified trainer that takes someone from "first day, knows nothing" to "ready to sit
-the CN conductor qualification" — built for the people a dense rulebook failed.*
+A free CROR conductor-qualification trainer — first day to job-ready, built for the people a rulebook failed.
+Built on **React + TypeScript + Tauri** (the rebuild that replaced the original vanilla build — see `DECISIONS.md` → **D-0016**).
+Design-gate docs live alongside: `SPEC.md`, `DECISIONS.md`, `GAP-REVIEW.md`.
 
-> **Working name.** A clear board = proceed. Free, forever — tip jar only.
+## Stack
+- **Vite + React 19 + TypeScript** — the UI.
+- **react-router-dom** (HashRouter) — routing that works on a GitHub Pages subpath and offline.
+- **Tauri v2** — the self-contained desktop exe (uses the OS WebView2). See *Desktop* below.
 
-One browser app, one profile, one path. It folds together what used to be four separate rail
-apps (CROR trainer, switching sim, signals trainer, study assistant) into a single
-qualification journey: look anything up (cited), drill it (spaced repetition), work the yard,
-read the signals, make the radio calls — and watch your mastery light up the path.
+## What's ported (the spine — verified live)
+- `src/core/` — `sr.ts` (SM-2-lite spacing) and `store.ts` (profile, mastery, the `drillable` safety filter), ported 1:1 from the vanilla core and now typed.
+- `src/core/signal.ts` — the verified SVG signal renderer, **byte-for-byte** (only TS annotations added). Wrapped by `src/stations/Signal.tsx`.
+- `src/state/AppContext.tsx` — one provider: content library + the single profile + accessibility settings (the old `ctx` object).
+- Stations: **Home** (the qualification path), **Reference** (cited lookup), **Drill** (rules + signals + definitions).
+- **The Yard** (switch-list canvas sim) and **Radio** ("Back to a Joint" walkthrough) — both are **imperative islands**. Their engines/stations (`src/stations/yard/*.js`, `yardSim.js`, `radioSim.js`) are kept **byte-for-byte**; the shared `useImperativeStation` hook ([imperativeStation.ts](src/stations/imperativeStation.ts)) lazy-loads each (own code-split chunk), hands it a host `<div>` + a `ctx` bridged to React (navigate / settings / read-aloud / live profile / persist-on-win), and tears it down on unmount.
+- `public/data/*.json` — the four SME-verified content files, **copied untouched**. Never re-derived.
 
-## Why it exists
-To help people who'd have made good railroaders but bounced off a dense rulebook get there.
-Not for profit — a tip jar for "if this helped you get there." Safety knowledge is never withheld.
+**This is now at feature parity with the vanilla build** — all five stations run on React, verified live.
 
-## Principles
-- **Plain language is the front door** — the human explanation first; the verbatim CROR text one tap deeper, always cited.
-- **Trust is sacred** — nothing is taught as fact without a citation + trust flag. Show nothing rather than something false.
-- **Built for the people the book failed** — accessibility is core: dyslexia-friendly type, read-aloud, high contrast, reduced-motion, screen-reader clean.
-- **One brain, not panels** — one content library, one profile, one path.
+## Next
+- PWA service worker (offline on the train) — `vite-plugin-pwa` is already a devDep, just needs wiring.
+- Custom app icon (currently the default Tauri logo).
+- Consolidate — this folder replaces the vanilla `../clear-board`, which retires; update the map + Observatory.
 
-## How it's built
-No build step. Vanilla HTML / CSS / ES modules. Static host (GitHub Pages) + PWA, offline-first.
-Local-first: no accounts, no server, no PII. See **SPEC.md** and **DECISIONS.md** (the design gate),
-and **GAP-REVIEW.md** (the adversarial pre-build review).
+## Run / build
+```sh
+npm install
+npm run dev          # dev server (Vite), http://localhost:4548 via .claude/launch.json
+npm run build        # tsc -b && vite build  →  dist/  (static, deploy to GitHub Pages)
+npm run tauri build  # → standalone Clear Board.exe + NSIS installer (see Desktop below)
+```
 
-## Status
-Design gate passed (2026-06-23). V1 in progress: shell + shared core + Reference + Drill.
+## Desktop (Tauri) — done
+`npm run tauri build` produces a self-contained **`Clear Board.exe`** (~18 MB, frontend baked in,
+uses the OS WebView2) and a **`Clear Board_0.1.0_x64-setup.exe`** NSIS installer (~4 MB), in
+`src-tauri/target/release/` and `.../release/bundle/nsis/`. Config: `src-tauri/tauri.conf.json`
+(dark window, `productName`/`mainBinaryName` "Clear Board", NSIS-only bundling).
 
-## Not official
-An independent study tool. It cites the **Canadian Rail Operating Rules** (a public document) and
-flags anything that's CN operating practice (GOI), not a rule. It is **not** affiliated with CN,
-Transport Canada, or the Railway Association of Canada.
+**Build env (Windows):** needs the GNU Rust toolchain **plus a complete MinGW-w64** on PATH —
+rustup's bundled MinGW lacks `as.exe`. Build with:
+```sh
+# PowerShell — WinLibs MinGW first, then cargo
+$env:PATH = "C:\projects\.toolchains\mingw64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
+npm run tauri build
+```
 
-Contact: Jordan · doerksen.jordan@gmail.com · MIT licensed.
+## Safety rules carried over (unchanged)
+- Only `trust: "verified"` content is ever drilled/graded; `needs-review` is reference-only (F1).
+- Verbatim CROR text ships (public document); the PDF is never committed.
+- Accessibility is core: dyslexia font, read-aloud, high contrast, bigger text, reduced-motion — all driven by `<html>` data-attributes + persisted.
