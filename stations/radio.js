@@ -12,7 +12,7 @@ const RADIO_CSS = `
 .radio-wrap .sigmark{ width:34px; height:48px; border-radius:9px; flex:none; background:var(--rcard2); border:1px solid var(--rline); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px }
 .radio-wrap .sigmark span{ width:8px; height:8px; border-radius:50%; background:#262b34 }
 .radio-wrap .rtitle{ font-size:17px; font-weight:700 } .radio-wrap .rsub{ font-size:12.5px; color:var(--rmuted) }
-.radio-wrap .stage{ background:#10131a; border:1px solid var(--rline); border-radius:12px; padding:8px; margin-bottom:14px }
+.radio-wrap .stage{ display:block; background:#10131a; border:1px solid var(--rline); border-radius:12px; padding:8px; margin-bottom:14px }
 .radio-wrap .stage svg{ display:block; width:100%; height:auto }
 .radio-wrap .cols{ display:flex; gap:14px; flex-wrap:wrap }
 .radio-wrap .radio{ flex:1 1 420px; background:var(--rcard); border:1px solid var(--rline); border-radius:12px; padding:14px }

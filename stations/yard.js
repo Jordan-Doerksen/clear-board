@@ -62,7 +62,8 @@ const YARD_CSS = `
   .yard-wrap .ord-mark { color: var(--ink); } .yard-wrap .ord-arrow { color: var(--dim); } .yard-wrap .ord-trk { color: var(--cror); }
   .yard-wrap .ord-fix { color: var(--si); font-size: 11px; font-style: italic; }
   .yard-wrap #certify { margin: 4px 0 2px; }
-  .yard-wrap .bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  /* note: Clear Board's home defines a global .bar (the 12px progress bar); these resets stop it leaking in */
+  .yard-wrap .bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; height: auto; overflow: visible; background: none; border: 0; border-radius: 0; margin: 12px 0; }
   .yard-wrap .readout {
     font: 700 16px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
     background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
