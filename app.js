@@ -122,8 +122,19 @@ function wireSettings() {
   for (const [id, key] of Object.entries(map)) {
     const el = document.getElementById(id);
     el.checked = settings[key];
-    el.addEventListener('change', e => { settings[key] = e.target.checked; saveSettings(); applySettings(); });
+    el.addEventListener('change', e => {
+      settings[key] = e.target.checked;
+      saveSettings(); applySettings();
+      if (key === 'audio' && e.target.checked) speak('Read aloud is on. Definitions, rules and questions will be read to you.');
+    });
   }
+  const rp = document.getElementById('resetProg');
+  if (rp) rp.addEventListener('click', () => {
+    if (confirm('Reset all your progress on this device? Mastery, drills and yard wins will be cleared. This cannot be undone.')) {
+      try { localStorage.removeItem('cb.profile.v1'); } catch {}
+      location.hash = ''; location.reload();
+    }
+  });
 }
 
 (async function boot() {

@@ -15,11 +15,12 @@
     --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   html[data-dys="1"]{ --font:"Atkinson Hyperlegible","Comic Sans MS",Verdana,sans-serif; --space:1.8; letter-spacing:.02em; word-spacing:.08em; }
-  html[data-contrast="1"]{ --ink:#ffffff; --muted:#cdd9e5; --line:#3d4855; }
+  html[data-contrast="1"]{ --ink:#ffffff; --muted:#d6e0ea; --line:#5b6a79; --surface:#1a212b; --surface-2:#222b37; }
 
   *{ box-sizing:border-box }
   html,body{ margin:0 }
-  body{ background:var(--bg); color:var(--ink); font-family:var(--font); font-size:var(--fs); line-height:var(--space); -webkit-font-smoothing:antialiased; }
+  html{ font-size:var(--fs) }   /* "Bigger text" sets --fs → drives rem → scales the whole app */
+  body{ background:var(--bg); color:var(--ink); font-family:var(--font); font-size:1rem; line-height:var(--space); -webkit-font-smoothing:antialiased; }
   a{ color:var(--focus) }
   .wrap{ max-width:var(--maxw); margin:0 auto; padding:20px 18px 80px }
   .muted{ color:var(--muted) }
@@ -105,6 +106,11 @@
   .set-h{ display:flex; justify-content:space-between; align-items:center; padding:16px 18px; border-bottom:1px solid var(--line) }
   .set-h h2{ margin:0; font-size:1.05rem }
   .set-body{ padding:8px 18px 18px }
+  .set-sample{ display:flex; align-items:center; gap:14px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:6px 0 14px }
+  .set-sample .ss-aa{ font-size:1.9rem; font-weight:800; color:var(--clear); line-height:1 }
+  .set-sample b{ display:block } .set-sample small{ color:var(--muted) }
+  .iconbtn.danger{ color:var(--stop); border-color:var(--stop) }
+  .set-note{ color:var(--muted); font-size:.8rem; margin:12px 0 0 }
   .row{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:13px 0; border-bottom:1px solid var(--line) }
   .row:last-child{ border-bottom:0 } .row label{ font-size:.95rem } .row small{ display:block; color:var(--muted); font-size:.8rem }
   .sw{ position:relative; width:50px; height:28px; flex:0 0 auto }
@@ -135,11 +141,17 @@
 <dialog id="settings" aria-label="Settings">
   <div class="set-h"><h2>Settings</h2><button class="iconbtn" id="closeSet">Done</button></div>
   <div class="set-body">
+    <div class="set-sample" id="setSample">
+      <span class="ss-aa">Aa</span>
+      <div><b>The quick brown fox jumps.</b><small>Rule 112 — secure unattended equipment. This preview reflects your settings live.</small></div>
+    </div>
     <div class="row"><div><label for="t-dys">Dyslexia-friendly text</label><small>Clearer font + looser spacing</small></div><span class="sw"><input type="checkbox" id="t-dys"><i></i></span></div>
     <div class="row"><div><label for="t-con">Higher contrast</label><small>Brighter text on dark</small></div><span class="sw"><input type="checkbox" id="t-con"><i></i></span></div>
     <div class="row"><div><label for="t-red">Reduce motion</label><small>No animations</small></div><span class="sw"><input type="checkbox" id="t-red"><i></i></span></div>
     <div class="row"><div><label for="t-aud">Read aloud</label><small>Speak rules &amp; questions (where supported)</small></div><span class="sw"><input type="checkbox" id="t-aud"><i></i></span></div>
-    <div class="row"><div><label for="t-big">Bigger text</label><small>Increase the type size</small></div><span class="sw"><input type="checkbox" id="t-big"><i></i></span></div>
+    <div class="row"><div><label for="t-big">Bigger text</label><small>Scales the whole app</small></div><span class="sw"><input type="checkbox" id="t-big"><i></i></span></div>
+    <div class="row"><div><label>Reset my progress</label><small>Clear mastery, drills &amp; yard wins on this device</small></div><button class="iconbtn danger" id="resetProg">Reset</button></div>
+    <p class="set-note">Everything is saved only on this device — no account, nothing sent anywhere.</p>
   </div>
 </dialog>
 
