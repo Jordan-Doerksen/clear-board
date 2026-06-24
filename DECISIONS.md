@@ -128,9 +128,14 @@ Drill · The Yard · Radio) + settings + profile run on React, 0 console errors.
 VERIFIED RUNNING (2026-06-24)** — `npm run tauri build` produces a self-contained `Clear Board.exe`
 (~18 MB, OS WebView2) + a `Clear Board_0.1.0_x64-setup.exe` NSIS installer (~4 MB); launched the exe,
 native window "Clear Board" opened, 35 MB resident, no crash. Build needed a complete MinGW-w64 on
-PATH (`C:\projects\.toolchains\mingw64\bin`) — rustup's bundled GNU MinGW lacks `as.exe`. Remaining:
-PWA service worker (vite-plugin-pwa already a dep), custom icon, then consolidate (this React folder
-replaces the vanilla one, which retires) + update map.md/Observatory.
+PATH (`C:\projects\.toolchains\mingw64\bin`) — rustup's bundled GNU MinGW lacks `as.exe`.
+**CONSOLIDATED (2026-06-24)** — the React build IS now `clear-board` (the vanilla folder was deleted;
+its tree is preserved in git history before this rebuild commit). Pushed to `main` and the repo's
+GitHub Pages switched from legacy root-serve to a GitHub Actions build (`.github/workflows/deploy.yml`);
+verified live at https://jordan-doerksen.github.io/clear-board/ serving the React bundle. `map.md` updated.
+Remaining: PWA service worker (vite-plugin-pwa already a dep), custom app icon (currently default Tauri
+logo), and the Observatory card-collapse (four rail cards → one Clear Board card, tied to retiring the
+old rail apps per D-0011).
 
 ---
 *V1. Edit as decisions are made or reversed.*
