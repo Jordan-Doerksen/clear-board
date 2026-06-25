@@ -66,13 +66,23 @@ export function drillable(items: ContentItem[] | undefined, content: Content): C
     && (i.type !== 'rule' || ((content.questionsByRule[i.id] || []).length > 0)));
 }
 
+// Until the learner has correctly read at least one actual signal aspect, the signals domain is
+// capped here — knowing the rule numbers on paper must never read as "can read a signal on sight."
+const SIGNALS_TEXT_CAP = 0.33;
+
 export function recomputeMastery(profile: Profile, content: Content): void {
   for (const d of DOMAINS) {
     const items = drillable(content.byDomain[d.id], content);
     if (!items.length) continue;
-    const sum = items.reduce((s, i) => s + decayedFam(profile.items[i.id]), 0);
+    let mastery = items.reduce((s, i) => s + decayedFam(profile.items[i.id]), 0) / items.length;
+    // Safety gate (REVAMP rec #9): signals is a read-it-on-sight skill. The aggregate already weights
+    // the 42 SVG-aspect items, but this makes the invariant explicit and robust to content changes —
+    // no aspect recalled yet ⇒ the domain can't read "mastered" off text alone. Lifts on first recall.
+    if (d.id === 'signals' && !items.some(i => i.type === 'signal' && (profile.items[i.id]?.correct ?? 0) > 0)) {
+      mastery = Math.min(mastery, SIGNALS_TEXT_CAP);
+    }
     profile.domains[d.id] = profile.domains[d.id] || { mastery: 0, lastDrill: null };
-    profile.domains[d.id].mastery = sum / items.length;
+    profile.domains[d.id].mastery = mastery;
   }
 }
 

@@ -22,6 +22,14 @@
   using the `tier` already on every question in `rule-questions.json`. (D-0020)
 - **Deploy gated.** The GitHub Actions Pages build runs `npm run check` before `vite build`, so a
   broken par or a leaked `needs-review` item can't ship. (D-0019)
+- **Signals can't read "mastered" on paper.** The signals domain mastery is capped until the learner
+  correctly reads ≥1 actual SVG aspect — a safety backstop for a sight-read skill (REVAMP rec #9). (D-0021)
+- **Thin domains drill again.** A domain with too few items (securement's 3) no longer dead-ends under
+  the 4-question floor — the Drill pads with distinct authored facets of its rules (≤3 per rule so none
+  dominates; a same-session repeat only records a miss, never a correct re-advance). (D-0021)
+- **`rule.12` flagged, not moved.** The swarm's "re-file hand signals out of radio" doesn't match the
+  data — the item titled Rule 12 actually carries the 123.2 doubt principle — so it's left for SME to
+  resolve, not guessed. (D-0021)
 - **Design pass:** `REVAMP-DESIGN.md` (+ `REVAMP-APPENDIX.md`) — a multi-agent review of the whole
   trainer (consolidated rule → mechanic map, prioritized backlog, redundancy verdict, gated validation
   checklist, sample taxonomies, open SME questions).

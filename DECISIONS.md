@@ -200,5 +200,30 @@ severity-weighted remediation queue is deferred — these are the high-leverage,
 the CROR 104 cite + a working "Look it up →" that lands on Rule 104; a fresh profile drills 10 tier-1
 questions, a high-mastery profile reaches tier 3.
 
+### D-0021 — Signals aspect-recall gate + thin-domain drill fill; rule.12 flagged not moved
+**Chosen:** three REVAMP §4/§9 items. (1) **Signal aspect-recall gate:** the `signals` domain mastery
+is capped (≤0.33) until the learner has correctly read at least one actual SVG aspect — knowing the
+signal *rules* on paper must never read as "can read a signal on sight." The aggregate already weights
+the 38 drillable aspect items, so this is an explicit, future-proof backstop more than a live hole.
+(2) **Thin-domain drill fill:** a domain with too few items (securement has only 3) couldn't reach the
+4-question floor, so its dedicated drill showed "Not enough verified content." The Drill now pads a thin
+session with DISTINCT authored facets of its rules — capped at 3 per rule so no one rule (rule.112 has
+17) dominates — and a same-session repeat only records a MISS, never a correct re-advance (no
+familiarity farming). (3) **rule.12 NOT moved** — flagged for SME (below).
+**Weighed:** capping rule.112 per session (moot — Drill already drew one question per item per session);
+lowering the 4-question floor (would allow trivially short sessions); moving rule.12's domain (would
+relocate a mislabeled item without fixing it).
+**Why:** signals is the one read-on-sight skill and deserves an explicit invariant; securement's drill
+was effectively dead; and rule.112's 17 facets were under-used (one seen per session). The heavier
+severity-ladder/remediation-queue (REVAMP §6) stays deferred.
+**rule.12 — open for SME (Q #4):** the swarm flagged "hand signals (rule.12) mis-filed under radio."
+But the data item titled "Rule 12" / cited "CROR 12" (which *is* hand signals in the CROR) carries the
+plain text *"Doubt = STOP… on the radio (123.2(v))"* — the 123.2 doubt principle, **not** hand signals.
+So it is mislabeled or mis-authored, not merely mis-filed; the correct fix (retitle/recite, or rewrite
+the plain text) is a CROR-accuracy call left to Jordan/SME — never guessed.
+**Verified live:** signals capped at 0.33 with no aspect recalled, lifts to full on first recall; the
+securement drill now builds a 5-question session (was dead); cross-domain + signals drills unaffected;
+0 console errors; `npm run check` green.
+
 ---
 *V1. Edit as decisions are made or reversed.*

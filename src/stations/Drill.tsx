@@ -1,12 +1,12 @@
 // Drill — adaptive (SM-2-lite) MC across content types; updates mastery → the path. (vanilla drill.js)
 // Definitions → term↔definition MC. Signals → read-the-aspect MC. Rules → authored MC bank. One loop, one profile.
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import { Signal } from './Signal';
 import { DOMAINS, drillable } from '../core/store';
 import { isDue } from '../core/sr';
-import type { Content, ContentItem, SignalAspect } from '../core/types';
+import type { Content, ContentItem, Question, SignalAspect } from '../core/types';
 
 const shuffle = <T,>(a: T[]): T[] => {
   const x = a.slice();
@@ -26,7 +26,12 @@ type Q =
   | { kind: 'signal'; heading: string; aspect: SignalAspect; correct: string; options: string[]; explain?: string }
   | { kind: 'text'; heading: string; promptText: string; correct: string; options: string[]; explain?: string };
 
-interface Built { chosen: ContentItem[]; pool: ContentItem[]; byType: Record<string, ContentItem[]>; drilledDomains: string[]; startMastery: Record<string, number>; ceiling: number }
+interface QCtx { pool: ContentItem[]; byType: Record<string, ContentItem[]>; ceiling: number }
+interface Slot { item: ContentItem; q: Q }
+interface Built { slots: Slot[]; drilledDomains: string[]; startMastery: Record<string, number> }
+
+const TARGET = 8;        // aim for a ~8-question session
+const PER_RULE_CAP = 3;  // …but no single rule may fill more than 3 of it (REVAMP §5, rule.112's 17)
 
 function distractors(item: ContentItem, pool: ContentItem[], byType: Record<string, ContentItem[]>, fieldFn: (o: ContentItem) => string): string[] {
   const same = (byType[item.type] || pool).filter(o => o.id !== item.id);
@@ -35,25 +40,27 @@ function distractors(item: ContentItem, pool: ContentItem[], byType: Record<stri
   return opts;
 }
 
-function buildQ(item: ContentItem, content: Content, b: Built): Q {
+// Build one question. For rules, `forceQ` pins a specific authored question (so a thin domain can
+// draw several DISTINCT facets of one rule); otherwise one is picked within the tier band.
+function buildQ(item: ContentItem, content: Content, ctx: QCtx, forceQ?: Question): Q {
   if (item.type === 'rule') {
     const qs = content.questionsByRule[item.id] || [];
-    const band = qs.filter(qq => (qq.tier ?? 1) <= b.ceiling);   // ask within the learner's tier band (#8)
+    const band = qs.filter(qq => (qq.tier ?? 1) <= ctx.ceiling);   // ask within the learner's tier band (#8)
     const from = band.length ? band : qs;
-    const Q = from[Math.floor(Math.random() * from.length)];
+    const Q = forceQ || from[Math.floor(Math.random() * from.length)];
     return { kind: 'rule', heading: 'What does the rule say?', promptText: Q.stem, correct: Q.answer, options: shuffle(Q.choices.slice()), explain: Q.explain };
   }
   if (item.type === 'signal') {
     const aspects = item.payload?.aspects || [];
     const aspect = aspects[Math.floor(Math.random() * aspects.length)];
     const correct = item.title;
-    return { kind: 'signal', heading: 'What signal is this?', aspect, correct, options: shuffle([correct, ...distractors(item, b.pool, b.byType, o => o.title)]) };
+    return { kind: 'signal', heading: 'What signal is this?', aspect, correct, options: shuffle([correct, ...distractors(item, ctx.pool, ctx.byType, o => o.title)]) };
   }
   const dir = Math.random() < 0.5 ? 'term' : 'def';
   const field = (it: ContentItem) => (dir === 'term' ? (it.plain || it.citation.verbatim || '') : it.title);
   const promptText = dir === 'term' ? item.title : (item.plain || item.citation.verbatim || '');
   const correct = field(item);
-  return { kind: 'text', heading: dir === 'term' ? 'What does this mean?' : 'Which term is this?', promptText, correct, options: shuffle([correct, ...distractors(item, b.pool, b.byType, field)]) };
+  return { kind: 'text', heading: dir === 'term' ? 'What does this mean?' : 'Which term is this?', promptText, correct, options: shuffle([correct, ...distractors(item, ctx.pool, ctx.byType, field)]) };
 }
 
 export function Drill({ domain }: { domain?: string }) {
@@ -61,6 +68,7 @@ export function Drill({ domain }: { domain?: string }) {
   const navigate = useNavigate();
   const profileRef = useRef(profile);
   profileRef.current = profile;
+  const gradedRef = useRef<Set<string>>(new Set());   // items already advanced this session (anti-marathon)
 
   const [sessionKey, setSessionKey] = useState(0);
   const [built, setBuilt] = useState<Built | null>(null);
@@ -68,7 +76,7 @@ export function Drill({ domain }: { domain?: string }) {
   const [score, setScore] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
 
-  // Build the session pool once per (content, domain, sessionKey). profileRef → pre-session snapshot.
+  // Build the session once per (content, domain, sessionKey). profileRef → pre-session snapshot.
   useEffect(() => {
     if (!content) return;
     let items: ContentItem[] = [];
@@ -87,6 +95,7 @@ export function Drill({ domain }: { domain?: string }) {
     const mast = cand.reduce((s, d) => s + (profileRef.current.domains[d]?.mastery || 0), 0) / Math.max(1, cand.length);
     const ceiling = !seenAny ? 1 : mast < 0.15 ? 1 : mast < 0.45 ? 2 : 3;
     const tierOK = (i: ContentItem) => itemTier(i, content) <= ceiling;
+    const ctx: QCtx = { pool: items, byType, ceiling };
 
     // Priority: due & in-band → in-band (not-due, fills a fresh session) → due but harder → the rest.
     const order = [
@@ -97,15 +106,54 @@ export function Drill({ domain }: { domain?: string }) {
     ];
     const seen = new Set<string>();
     const chosen = order.filter(i => !seen.has(i.id) && !!seen.add(i.id)).slice(0, 10);
-    const drilledDomains = [...new Set(chosen.map(i => i.domain))];
+
+    // One slot per chosen item, tracking which authored questions each rule has used so a thin
+    // domain (e.g. securement's 3 items) can pad with DISTINCT facets rather than stall under the
+    // 4-question floor — capped per rule so no one rule (rule.112 has 17) dominates the session.
+    const bandQs = (it: ContentItem) => {
+      const qs = content.questionsByRule[it.id] || [];
+      const b = qs.filter(qq => (qq.tier ?? 1) <= ceiling);
+      return b.length ? b : qs;
+    };
+    const usedQ: Record<string, Set<string>> = {};
+    const slots: Slot[] = [];
+    for (const it of chosen) {
+      if (it.type === 'rule') {
+        const qs = bandQs(it);
+        const pick = qs[Math.floor(Math.random() * qs.length)];
+        (usedQ[it.id] ||= new Set()).add(pick?.id ?? '');
+        slots.push({ item: it, q: buildQ(it, content, ctx, pick) });
+      } else slots.push({ item: it, q: buildQ(it, content, ctx) });
+    }
+    // Pad a thin session with extra distinct rule facets (round-robin, ≤ PER_RULE_CAP each).
+    const rules = chosen.filter(it => it.type === 'rule');
+    let progressed = rules.length > 0;
+    while (slots.length < TARGET && progressed) {
+      progressed = false;
+      for (const it of rules) {
+        if (slots.length >= TARGET) break;
+        const used = (usedQ[it.id] ||= new Set());
+        if (used.size >= PER_RULE_CAP) continue;
+        const unused = bandQs(it).filter(qq => !used.has(qq.id));
+        if (!unused.length) continue;
+        const pick = unused[Math.floor(Math.random() * unused.length)];
+        used.add(pick.id);
+        slots.push({ item: it, q: buildQ(it, content, ctx, pick) });
+        progressed = true;
+      }
+    }
+    const finalSlots = shuffle(slots).slice(0, 10);
+    const drilledDomains = [...new Set(finalSlots.map(s => s.item.domain))];
     const startMastery = Object.fromEntries(drilledDomains.map(d => [d, profileRef.current.domains[d]?.mastery || 0]));
 
-    setBuilt({ chosen, pool: items, byType, drilledDomains, startMastery, ceiling });
+    gradedRef.current = new Set();
+    setBuilt({ slots: finalSlots, drilledDomains, startMastery });
     setIdx(0); setScore(0); setPicked(null);
   }, [content, domain, sessionKey]);
 
-  const item = built && idx < built.chosen.length ? built.chosen[idx] : null;
-  const q = useMemo(() => (item && content && built ? buildQ(item, content, built) : null), [item, content, built]);
+  const slot = built && idx < built.slots.length ? built.slots[idx] : null;
+  const item = slot?.item ?? null;
+  const q = slot?.q ?? null;
 
   // Read-aloud the prompt (not the signal SVG) when a new question appears.
   useEffect(() => {
@@ -114,7 +162,7 @@ export function Drill({ domain }: { domain?: string }) {
 
   if (!content || !built) return <p className="muted">Loading…</p>;
 
-  if (built.chosen.length < 4) {
+  if (built.slots.length < 4) {
     return (
       <>
         <button className="back" onClick={() => navigate('/')}>← Home</button>
@@ -124,7 +172,7 @@ export function Drill({ domain }: { domain?: string }) {
   }
 
   // Finished — show the session summary with mastery deltas.
-  if (!item || !q) {
+  if (!slot || !item || !q) {
     const lines = built.drilledDomains.map(d => {
       const name = (DOMAINS.find(x => x.id === d) || {}).name || d;
       const end = profile.domains[d]?.mastery || 0;
@@ -135,7 +183,7 @@ export function Drill({ domain }: { domain?: string }) {
       <>
         <button className="back" onClick={() => navigate('/')}>← Home</button>
         <h2 className="view-title">Session done</h2>
-        <p className="big-score">{score} / {built.chosen.length}</p>
+        <p className="big-score">{score} / {built.slots.length}</p>
         <p className="muted">{lines}. Spaced out over the next days so it sticks.</p>
         <div className="opts">
           <button className="opt" onClick={() => setSessionKey(k => k + 1)}>Drill again</button>
@@ -154,13 +202,17 @@ export function Drill({ domain }: { domain?: string }) {
     const correct = value === q!.correct;
     setPicked(value);
     if (correct) setScore(s => s + 1);
-    recordAnswer(item!, correct);
+    // Advance SM-2 on the first answer for this item; a later same-session facet only records a
+    // MISS (a correct repeat must not farm familiarity — F2). Misses always carry their signal.
+    const first = !gradedRef.current.has(item!.id);
+    if (first || !correct) recordAnswer(item!, correct);
+    if (correct) gradedRef.current.add(item!.id);
   }
 
   return (
     <>
       <button className="back" onClick={() => navigate('/')}>← Home</button>
-      <div className="drill-top"><span className="muted">Question {idx + 1} of {built.chosen.length}</span><span className="muted">{score} correct</span></div>
+      <div className="drill-top"><span className="muted">Question {idx + 1} of {built.slots.length}</span><span className="muted">{score} correct</span></div>
       <h2 className="view-title">{q.heading}</h2>
       <div className={`prompt ${q.kind === 'signal' ? 'prompt-signal' : ''}`}>
         {q.kind === 'signal' ? <Signal aspect={q.aspect} /> : q.promptText}
@@ -178,7 +230,7 @@ export function Drill({ domain }: { domain?: string }) {
           <span className="cite">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
           <button className="iconbtn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
           <button className="iconbtn next" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>
-            {idx + 1 < built.chosen.length ? 'Next →' : 'Finish'}
+            {idx + 1 < built.slots.length ? 'Next →' : 'Finish'}
           </button>
         </div>
       )}
