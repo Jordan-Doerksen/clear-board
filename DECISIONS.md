@@ -271,5 +271,29 @@ reviewable starting point, not the final ladder.
 missed →" → the review round built exactly those 8; a securement (core) miss shows the cue; 0 console errors;
 `tsc -b` + lint + `npm run check` green.
 
+### D-0024 — The real S1/S2/S3 severity ladder (Drill tone + remediation order); rule.12 = operating confirmed
+**Chosen:** a 3-tier severity model in `src/core/severity.ts` (`severityOf(item)` → S1/S2/S3), built from
+transparent **domain defaults + a short reasoned override list** — a REVIEWABLE v1, not a legal safety
+ranking. Hands-on operational domains (securement / switching / signals / authority) default S3; comms +
+general procedure (radio / operating) S2; vocabulary (definitions) S1. Overrides downgrade sign-identification
+and "proceed"/plate signals to S2, and upgrade doubt=STOP / hand-signals to S3. Severity drives: (a)
+**feedback tone** — an S3 miss shows "Safety-critical — lock this one in," S2 "Worth nailing," S1 nothing;
+and (b) **remediation order** — the "practice your misses" round sorts **safety-critical first**.
+**Distribution (v1):** S3 = 103 · S2 = 39 · S1 = 63. S3 is broad (~half) because most conductor content is
+genuinely safety-relevant; to make S3 more selective, tune `DOMAIN_SEV` / `SEV_OVERRIDE` (e.g. signals
+default S2 with S3 only for the STOP/Restricting family).
+**Weighed:** hand-classifying all 100 rules (false precision); a live mid-session re-queue that jumps the
+SM-2 due order (deferred — the end-of-session review + S3-first order already weights safety).
+**Why:** Jordan asked for the real S1/S2/S3. Domain-default + overrides is the honest, reviewable shape — he
+owns the classification and can retune any rule in one line. The Yard already gives the strongest possible
+S3 response (it *blocks* unsafe moves) and an over-par win already reads as gentle S1, so the ladder's main
+learner-facing home is the Drill.
+**Deferred:** Yard refusal severity-tagging (emphasis only — moves are already blocked + cited); the live
+mid-session S3 re-queue.
+**rule.12 = `operating`: CONFIRMED by Jordan** (was flagged in D-0022). Resolved.
+**Verified live:** `severityOf` spot-checks all correct (rule.112 / 114 / 439 / 12 / 123.2 → S3; rule.405 /
+104.1 → S2; definitions → S1); a securement miss shows the S3 cue; `tsc -b` + lint + `npm run check` green;
+0 console errors.
+
 ---
 *V1. Edit as decisions are made or reversed.*

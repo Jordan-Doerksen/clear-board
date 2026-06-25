@@ -6,7 +6,7 @@ import { useApp } from '../state/AppContext';
 import { Signal } from './Signal';
 import { DOMAINS, drillable } from '../core/store';
 import { isDue } from '../core/sr';
-import { priorityOf } from '../core/severity';
+import { severityOf, SEV_RANK } from '../core/severity';
 import type { Content, ContentItem, Question, SignalAspect } from '../core/types';
 
 const shuffle = <T,>(a: T[]): T[] => {
@@ -108,7 +108,8 @@ export function Drill({ domain }: { domain?: string }) {
       ...shuffle(items.filter(i => !tierOK(i) && !due.includes(i))),
     ];
     const seen = new Set<string>();
-    const chosen = order.filter(i => !seen.has(i.id) && !!seen.add(i.id)).slice(0, 10);
+    let chosen = order.filter(i => !seen.has(i.id) && !!seen.add(i.id)).slice(0, 10);
+    if (focusIds) chosen = chosen.sort((a, b) => SEV_RANK[severityOf(a)] - SEV_RANK[severityOf(b)]);   // review: safety-critical misses first
 
     // One slot per chosen item, tracking which authored questions each rule has used so a thin
     // domain (e.g. securement's 3 items) can pad with DISTINCT facets rather than stall under the
@@ -145,7 +146,7 @@ export function Drill({ domain }: { domain?: string }) {
         progressed = true;
       }
     }
-    const finalSlots = shuffle(slots).slice(0, 10);
+    const finalSlots = (focusIds ? slots : shuffle(slots)).slice(0, 10);   // a review round keeps the safety-first order
     const drilledDomains = [...new Set(finalSlots.map(s => s.item.domain))];
     const startMastery = Object.fromEntries(drilledDomains.map(d => [d, profileRef.current.domains[d]?.mastery || 0]));
 
@@ -232,7 +233,9 @@ export function Drill({ domain }: { domain?: string }) {
         <div className="feedback" aria-live="polite">
           <b className={ok ? 'fb-ok' : 'fb-no'}>{ok ? 'Right.' : 'Not quite.'}</b>
           <span><b>{item.title}</b> — {q.explain || item.plain || c.verbatim}</span>
-          {!ok && priorityOf(item) === 'core' && <span className="muted">Core one — worth nailing; review your misses at the end.</span>}
+          {!ok && severityOf(item) !== 'S1' && (
+            <span className="muted">{severityOf(item) === 'S3' ? 'Safety-critical — lock this one in.' : 'Worth nailing.'} Review your misses at the end.</span>
+          )}
           <span className="cite">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
           <button className="iconbtn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
           <button className="iconbtn next" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>

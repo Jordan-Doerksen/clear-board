@@ -41,9 +41,11 @@
   the exact SM-2 schedule so the anti-false-confidence engine can't silently drift; SPEC §Retention
   reconciled to the real conservative V1 values. (D-0022)
 - **Practice your misses.** The Drill remembers what you got wrong and offers a focused "Practice the N
-  you missed →" review round at the end (built from exactly those items, any tier). A miss in a core
-  domain (switching / securement / signals) shows a calm "worth nailing" cue. The full S1/S2/S3 severity
-  ladder + Yard mistake-tracking stay deferred — severity classification is an SME call. (D-0023)
+  you missed →" review round at the end (built from exactly those items, any tier). (D-0023)
+- **Real S1/S2/S3 severity.** `src/core/severity.ts` classifies every item (domain defaults + a reasoned
+  override list — a reviewable v1) into S1 knowledge / S2 rule / S3 safety-critical. A Drill miss now shows
+  tone by severity ("Safety-critical — lock this one in" for S3, "Worth nailing" for S2), and the "practice
+  your misses" round puts safety-critical misses first. `rule.12 = operating` confirmed. (D-0024)
 - **Design pass:** `REVAMP-DESIGN.md` (+ `REVAMP-APPENDIX.md`) — a multi-agent review of the whole
   trainer (consolidated rule → mechanic map, prioritized backlog, redundancy verdict, gated validation
   checklist, sample taxonomies, open SME questions).
