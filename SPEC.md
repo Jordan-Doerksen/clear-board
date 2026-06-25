@@ -158,11 +158,15 @@ Our own SVG renders these; copyrighted screenshots are never shipped.
 ---
 
 ## Verification (no build, no CI)
-- **Switching scenarios:** solver/validator **committed** as `tools/verify-scenarios`, run manually
-  pre-ship; every scenario must report solvable at par. (B9)
+- **Switching scenarios:** solver/validator **committed** as `tools/solve.mjs` (drives the in-app
+  `src/stations/yard/solver.js`), run via `npm run check`; every puzzle must replay its authored line
+  to a win at par AND the solver's own optimum must agree. (B9; implemented 2026-06-25, D-0017)
+- **Content / trust (F1):** `tools/content-check.mjs` — legal `trust` enum, no duplicate ids, every
+  question's answer ∈ its choices, every `ruleId` resolves, and **no graded question hangs off a
+  `needs-review` item**. Also run by `npm run check`. (D-0017)
 - **Signal encodings:** stubbed-DOM harness asserts lamp count + flash-vs-steady per head vs the renderer.
-- **Pre-ship checklist** (committed): run both harnesses; run the accessibility pass; confirm no
-  `needs-review` item leaked into a graded drill.
+- **Pre-ship checklist** (committed): `npm run check` (solver + content gates) green; run the
+  accessibility pass; confirm no `needs-review` item leaked into a graded drill.
 
 ---
 

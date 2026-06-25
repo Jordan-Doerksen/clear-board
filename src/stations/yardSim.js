@@ -12,6 +12,25 @@ import { play, setSpeed } from './yard/anim.js';
 import { sfx, resume, toggleMute, isMuted } from './yard/sound.js';
 import { PUZZLES, RULES } from './yard/puzzles.js';
 
+// --- Clear Board: map the engine's rule chips → the content-library items a puzzle
+// exercises, so a genuine win feeds the SAME switching/securement mastery the Drill grades
+// (the "one brain"). Only chips with a real verified CROR ContentItem are listed; pure
+// special-instruction chips (loads / order / verify) map to nothing and grade nothing.
+const RULE_ITEMS = {
+  line:     ['rule.104'],                  // CROR 104 — line & examine the route
+  speed:    ['rule.105'],                  // CROR 105 — reduced yard speed
+  couple:   ['rule.113.0', 'rule.113.2'],  // CROR 113.0/113.2 — knuckle open, stretch the joint
+  shove:    ['rule.115'],                  // CROR 115 — shove only lined & protected
+  secure:   ['rule.112'],                  // CROR 112 — secure the unattended cut
+  kick:     ['rule.113.4', 'rule.113.5'],  // CROR 113.4/113.5 — where kicking is / isn't allowed
+  kickable: ['rule.113.5'],                // the kickable-track special instruction lives under 113.5
+};
+function masteryItemsFor(puzzle) {
+  const ids = new Set();
+  for (const key of puzzle.rules || []) for (const id of (RULE_ITEMS[key] || [])) ids.add(id);
+  return [...ids];
+}
+
 // Scoped CSS from switch-list/index.html — :root vars moved onto .yard-wrap and
 // every selector prefixed with .yard-wrap so nothing leaks into Clear Board.
 const YARD_CSS = `
@@ -105,6 +124,11 @@ const YARD_CSS = `
   .yard-wrap details { margin-top: 18px; color: var(--dim); font-size: 13px; }
   .yard-wrap details summary { cursor: pointer; color: var(--ink); font-weight: 600; }
   .yard-wrap code { background: var(--panel2); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+  .yard-wrap .banner .lookup {
+    margin-left: 10px; padding: 4px 9px; font: 600 12px system-ui, sans-serif;
+    color: #cfe8ff; background: #14313a; border: 1px solid #1d5563; border-radius: 6px; cursor: pointer;
+  }
+  .yard-wrap .banner .lookup:hover { background: #1a3d48; }
 `;
 
 // The .wrap body contents from switch-list/index.html (header dropped — Clear
@@ -203,7 +227,7 @@ export function mount(root, ctx) {
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   canvas.width = W * dpr; canvas.height = H * dpr; cctx.scale(dpr, dpr);
 
-  let puzzle, state, anim = null, busy = false, watching = false;
+  let puzzle, state, anim = null, busy = false, watching = false, fromDemo = false;
   let gen = 0, stopAnim = null;       // gen invalidates in-flight loops on (re)load; stopAnim aborts the live tween
   let ordered = true;                 // is the switch list verified? (true when there's no list to check)
   const flagged = new Set();          // indices the player has flagged as wrong
@@ -353,7 +377,7 @@ export function mount(root, ctx) {
     if (busy || cine) return;
     if (!ordered) { sfx.refuse(); banner('Verify the switch list first — flag the bad lines and certify the order.', 'bad'); return; }
     const chk = precheck(kind, id, n);
-    if (!chk.ok) { sfx.refuse(); banner(chk.msg, 'bad'); return; }
+    if (!chk.ok) { sfx.refuse(); refusalBanner(chk.msg); return; }
     busy = true;
     const g = gen;
     animateMove(kind, id, n).then(() => { if (gen !== g) return; busy = false; afterMove(); });
@@ -386,8 +410,10 @@ export function mount(root, ctx) {
     }
     if (gen !== myGen) return;
     setSpeed(fast()); busy = false; watching = false;
+    fromDemo = true;                                                  // a watched line is not the player's win — don't grade mastery
     afterMove();
     if (puzzle.goal.depart && checkWin(state, puzzle)) departOut();   // finish the demo by departing
+    fromDemo = false;
   }
 
   function afterMove() {
@@ -407,6 +433,9 @@ export function mount(root, ctx) {
   function recordWin() {
     if (!ctx.profile.yard) ctx.profile.yard = { completed: [] };
     if (!ctx.profile.yard.completed.includes(puzzle.id)) { ctx.profile.yard.completed.push(puzzle.id); ctx.save(); }
+    // One brain: a genuine player win feeds the SAME rule mastery the Drill grades. Skipped
+    // on a watched demo (fromDemo); AppContext only writes verified, currently-due items.
+    if (!fromDemo && typeof ctx.recordYardWin === 'function') ctx.recordYardWin(masteryItemsFor(puzzle), true);
   }
 
   function winBanner() {
@@ -543,6 +572,26 @@ export function mount(root, ctx) {
     const el = $('msg');
     el.textContent = text || '';
     el.className = `banner ${tone || ''}`;
+  }
+
+  // A refused move is a teaching moment: keep the cited rule, add a one-tap link to its
+  // plain-language Reference entry (cause → rule → correct action; REVAMP §6).
+  function refusalBanner(msg) {
+    const el = $('msg');
+    el.className = 'banner bad';
+    el.textContent = msg || '';
+    const id = ruleItemFromMsg(msg);
+    if (id && ctx && typeof ctx.go === 'function') {
+      const b = document.createElement('button');
+      b.className = 'lookup'; b.textContent = 'Look it up →';
+      b.addEventListener('click', () => ctx.go(`reference?focus=${id}`));
+      el.appendChild(b);
+    }
+  }
+  // "…(CROR 113.4/113.5(a)(v))" → rule.113.4; special-instruction-only refusals have no CROR item.
+  function ruleItemFromMsg(msg) {
+    const m = /CROR\s+(\d+(?:\.\d+)?)/.exec(msg || '');
+    return m ? `rule.${m[1]}` : null;
   }
 
   // arclength from the lead bumper to track i's switch, along its engine route

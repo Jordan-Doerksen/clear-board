@@ -14,12 +14,19 @@ const shuffle = <T,>(a: T[]): T[] => {
   return x;
 };
 
+// An item's intro difficulty: the easiest question a rule can ask; defs/signals are gentle (tier 1).
+function itemTier(item: ContentItem, content: Content): number {
+  if (item.type !== 'rule') return 1;
+  const tiers = (content.questionsByRule[item.id] || []).map(qq => qq.tier ?? 1);
+  return tiers.length ? Math.min(...tiers) : 1;
+}
+
 type Q =
   | { kind: 'rule'; heading: string; promptText: string; correct: string; options: string[]; explain: string }
   | { kind: 'signal'; heading: string; aspect: SignalAspect; correct: string; options: string[]; explain?: string }
   | { kind: 'text'; heading: string; promptText: string; correct: string; options: string[]; explain?: string };
 
-interface Built { chosen: ContentItem[]; pool: ContentItem[]; byType: Record<string, ContentItem[]>; drilledDomains: string[]; startMastery: Record<string, number> }
+interface Built { chosen: ContentItem[]; pool: ContentItem[]; byType: Record<string, ContentItem[]>; drilledDomains: string[]; startMastery: Record<string, number>; ceiling: number }
 
 function distractors(item: ContentItem, pool: ContentItem[], byType: Record<string, ContentItem[]>, fieldFn: (o: ContentItem) => string): string[] {
   const same = (byType[item.type] || pool).filter(o => o.id !== item.id);
@@ -31,7 +38,9 @@ function distractors(item: ContentItem, pool: ContentItem[], byType: Record<stri
 function buildQ(item: ContentItem, content: Content, b: Built): Q {
   if (item.type === 'rule') {
     const qs = content.questionsByRule[item.id] || [];
-    const Q = qs[Math.floor(Math.random() * qs.length)];
+    const band = qs.filter(qq => (qq.tier ?? 1) <= b.ceiling);   // ask within the learner's tier band (#8)
+    const from = band.length ? band : qs;
+    const Q = from[Math.floor(Math.random() * from.length)];
     return { kind: 'rule', heading: 'What does the rule say?', promptText: Q.stem, correct: Q.answer, options: shuffle(Q.choices.slice()), explain: Q.explain };
   }
   if (item.type === 'signal') {
@@ -70,11 +79,28 @@ export function Drill({ domain }: { domain?: string }) {
     const byType: Record<string, ContentItem[]> = {};
     for (const i of items) (byType[i.type] ||= []).push(i);
     const due = items.filter(i => isDue(profileRef.current.items[i.id]));
-    const chosen = shuffle(due.length ? due : items).slice(0, 10);
+
+    // Tier-aware seeding (#8): a fresh profile (nothing seen) starts gentle — tier-1 only — so the
+    // first session is winnable, never tier-3 cold; the band widens as domain mastery grows.
+    const cand = domain ? [domain] : DOMAINS.filter(d => d.live).map(d => d.id);
+    const seenAny = items.some(i => (profileRef.current.items[i.id]?.seen ?? 0) > 0);
+    const mast = cand.reduce((s, d) => s + (profileRef.current.domains[d]?.mastery || 0), 0) / Math.max(1, cand.length);
+    const ceiling = !seenAny ? 1 : mast < 0.15 ? 1 : mast < 0.45 ? 2 : 3;
+    const tierOK = (i: ContentItem) => itemTier(i, content) <= ceiling;
+
+    // Priority: due & in-band → in-band (not-due, fills a fresh session) → due but harder → the rest.
+    const order = [
+      ...shuffle(due.filter(tierOK)),
+      ...shuffle(items.filter(i => tierOK(i) && !due.includes(i))),
+      ...shuffle(due.filter(i => !tierOK(i))),
+      ...shuffle(items.filter(i => !tierOK(i) && !due.includes(i))),
+    ];
+    const seen = new Set<string>();
+    const chosen = order.filter(i => !seen.has(i.id) && !!seen.add(i.id)).slice(0, 10);
     const drilledDomains = [...new Set(chosen.map(i => i.domain))];
     const startMastery = Object.fromEntries(drilledDomains.map(d => [d, profileRef.current.domains[d]?.mastery || 0]));
 
-    setBuilt({ chosen, pool: items, byType, drilledDomains, startMastery });
+    setBuilt({ chosen, pool: items, byType, drilledDomains, startMastery, ceiling });
     setIdx(0); setScore(0); setPicked(null);
   }, [content, domain, sessionKey]);
 
@@ -150,6 +176,7 @@ export function Drill({ domain }: { domain?: string }) {
           <b className={ok ? 'fb-ok' : 'fb-no'}>{ok ? 'Right.' : 'Not quite.'}</b>
           <span><b>{item.title}</b> — {q.explain || item.plain || c.verbatim}</span>
           <span className="cite">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
+          <button className="iconbtn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
           <button className="iconbtn next" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>
             {idx + 1 < built.chosen.length ? 'Next →' : 'Finish'}
           </button>

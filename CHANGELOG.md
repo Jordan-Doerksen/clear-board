@@ -2,6 +2,30 @@
 
 ## [Unreleased] — V1 in progress
 
+### One-brain mastery, verification gates + learning-loop wins (2026-06-25)
+- **The Yard now feeds the single mastery model.** A genuine puzzle win grades the CROR rule items
+  the puzzle exercises (its `rules:[...]` chips → real `rule.*` items) into the SAME SM-2 model the
+  Drill uses — closing the "switching/securement read 0% no matter how you play" hole. Only
+  **verified** items, and only when **due** (no familiarity-farming by replaying an easy puzzle);
+  watched-optimal demos don't grade. The byte-for-byte engine is untouched — wiring lives in
+  `src/stations/yardSim.js` + `AppContext.recordYardWin`. Verified live: a `p2-kick` win moves
+  Switching 0 → 0.017, Securement 0 → 0.011. (D-0018)
+- **Committed verification gates** (`npm run check`): `tools/solve.mjs` proves every puzzle's par is
+  achievable **and** optimal (19/19 pass) by driving the existing in-app solver; `tools/content-check.mjs`
+  enforces the F1 trust firewall + data integrity (legal trust enum, no duplicate ids, answer ∈ choices,
+  every `ruleId` resolves, **no graded question on a needs-review item** — 226 questions, all clean). (D-0017)
+- **Errors now teach.** Every Drill miss and every Yard refusal carries a one-tap **Look it up →**
+  to the cited rule's plain-language Reference entry (`/reference?focus=<id>`; cause → rule → correct
+  action, REVAMP §6). (D-0020)
+- **Tier-aware Drill seeding.** A fresh profile starts gentle — tier-1 questions only — so the first
+  session is winnable, never tier-3 cold; the band widens (tier 2, then 3) as domain mastery grows,
+  using the `tier` already on every question in `rule-questions.json`. (D-0020)
+- **Deploy gated.** The GitHub Actions Pages build runs `npm run check` before `vite build`, so a
+  broken par or a leaked `needs-review` item can't ship. (D-0019)
+- **Design pass:** `REVAMP-DESIGN.md` (+ `REVAMP-APPENDIX.md`) — a multi-agent review of the whole
+  trainer (consolidated rule → mechanic map, prioritized backlog, redundancy verdict, gated validation
+  checklist, sample taxonomies, open SME questions).
+
 ### Rebuilt on React + TypeScript + Tauri (2026-06-24, D-0016)
 - **Stack moved off vanilla ES modules to Vite + React 19 + TypeScript** (reverses D-0005's
   "no build"). The offline-PWA + local-first + never-commit-the-PDF constraints still hold.

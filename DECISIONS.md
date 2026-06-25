@@ -137,5 +137,68 @@ Remaining: PWA service worker (vite-plugin-pwa already a dep), custom app icon (
 logo), and the Observatory card-collapse (four rail cards → one Clear Board card, tied to retiring the
 old rail apps per D-0011).
 
+### D-0017 — Committed verification gates (solver + content/trust), `npm run check`
+**Chosen:** two committed Node harnesses. `tools/solve.mjs` drives the existing in-app solver
+(`src/stations/yard/solver.js`): for every puzzle it replays the authored optimal line and asserts it
+wins in exactly `par`, and asserts `solve()`'s own optimum agrees. `tools/content-check.mjs` enforces
+the F1 firewall + integrity: legal `trust` enum, no duplicate ids, every question's answer ∈ its
+choices, every `ruleId` resolves, and **no graded question hangs off a non-verified item**. `npm run
+check` runs both; either failing exits non-zero.
+**Weighed:** the prior state — an uncommitted throwaway solver script (the harness `puzzles.js` *names*
+was never carried into the React build, so every `par` was an unverified claim and the trust firewall
+was runtime-only); a full hosted CI service (overkill for a no-build static app).
+**Why:** SPEC §Verification *promised* a committed solver + a pre-ship checklist enforcing F1, but
+nothing enforced them. Now it's a one-command gate. First run: **19/19 puzzles pass** (pars achievable
+AND optimal); **all six content checks pass** (226 questions; the 4 `needs-review` items are correctly
+untouched by any graded question). Honesty rule baked in: a failing par is *reported*, never patched by
+editing the solver or data to agree (fix order is data → par → engine).
+
+### D-0018 — The Yard feeds the ONE mastery model (close "switching = 0% forever")
+**Chosen:** a genuine Yard win grades the CROR rule items the puzzle exercises into the SAME SM-2
+mastery model the Drill writes. The map (engine rule-chips → real `rule.*` ContentItem ids) lives in
+the editable wrapper `yardSim.js` (`RULE_ITEMS`); `AppContext.recordYardWin(ids)` grades them and
+recomputes domain mastery. Two safety guards: only **verified** items are graded (F1), and only items
+currently **due** (so replaying an easy puzzle can't farm familiarity — F2). Watched-optimal demos do
+not grade. The byte-for-byte engine and `puzzles.js` are untouched — the puzzles already carry a
+curated `rules:[...]` list, which is the join key.
+**Weighed:** the prior state — a win only appended to `profile.yard.completed`, invisible to the path;
+a separate bespoke "yard mastery" number (would re-fragment the one brain); grading a sloppy/over-par
+win identically to a clean one.
+**Why:** Drill was the only station writing mastery, so The Yard / Signal Reader / Radio taught real
+skills and discarded the result — switching & securement read 0% no matter how well the yard was
+worked. This is the single biggest "one brain, not panels" fix (REVAMP-DESIGN §1). Verified live: a
+`p2-kick` win moves Switching 0 → 0.017 and Securement 0 → 0.011. The nudge is deliberately modest
+(one rep → `fam` ≈ 0.03, averaged over the domain) and still decays, so sim completion alone can never
+certify a rule.
+**Open (Jordan / SME):** should an over-par or refusal-heavy win grade *softer* than a clean one, and
+what exact `fam` weight? SM-2-lite is boolean today; this needs a quality signal. Tracked as tuning,
+not a blocker.
+
+### D-0019 — Pages deploy is gated on `npm run check`
+**Chosen:** the GitHub Actions deploy workflow runs `npm run check` (the solver + content/trust gates,
+D-0017) between `npm ci` and `npm run build`; a red gate fails the `build` job, so `deploy` (which
+`needs: build`) never publishes.
+**Weighed:** trust the pre-ship checklist by hand; a separate scheduled check.
+**Why:** a gate only protects the user if it actually blocks a bad ship. A broken par or a leaked
+`needs-review` item now stops the deploy instead of reaching the public site.
+
+### D-0020 — The practice loop teaches from errors and ramps gently
+**Chosen:** two REVAMP §4/§6 learning-loop wins. (1) **Errors teach:** every Drill miss and every Yard
+refusal shows a one-tap "Look it up →" to the cited rule's plain-language Reference entry
+(`/reference?focus=<itemId>`; Reference reads `?focus` and opens that item). The Yard maps its refusal
+text's "CROR n" cite → the matching `rule.n` item. (2) **Tier-aware Drill seeding:** a fresh profile
+(nothing seen) is clamped to tier-1 questions so the first session is winnable, never tier-3 cold; the
+ceiling widens (2, then 3) as the candidate domains' mastery grows, using the `tier` already on every
+question in `rule-questions.json`.
+**Weighed:** a full severity ladder + a dedicated remediation queue (REVAMP §6) now; a separate
+"easy mode" toggle.
+**Why:** Drill explained answers but never linked the *rule*, and the Yard's cited refusals were a
+dead end — the plain-language rule is the whole mission and should be one tap from the mistake. Novices
+were drawing tier-3 questions cold (the gentle ramp was specified but unimplemented). The heavier
+severity-weighted remediation queue is deferred — these are the high-leverage, low-risk slices.
+**Verified live:** Reference `?focus=rule.104` opens Rule 104; a Yard PULL-without-lining refusal shows
+the CROR 104 cite + a working "Look it up →" that lands on Rule 104; a fresh profile drills 10 tier-1
+questions, a high-mastery profile reaches tier 3.
+
 ---
 *V1. Edit as decisions are made or reversed.*

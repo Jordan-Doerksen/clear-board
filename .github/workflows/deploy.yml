@@ -26,6 +26,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - run: npm run check          # gate: solver proves every par + F1 trust/integrity — blocks deploy on red (D-0017)
       - run: npm run build          # tsc -b && vite build → dist/  (base:'./' works under /clear-board/)
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

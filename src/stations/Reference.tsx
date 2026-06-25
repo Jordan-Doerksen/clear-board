@@ -1,6 +1,6 @@
 // Reference — look anything up: plain words first, the rule text one tap deeper, always cited. (vanilla reference.js)
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import { Signal } from './Signal';
 import type { ContentItem, Trust } from '../core/types';
@@ -19,8 +19,18 @@ function Badge({ trust }: { trust: Trust }) {
 export function Reference() {
   const { content, settings, speak } = useApp();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const focusId = params.get('focus');
   const [q, setQ] = useState('');
   const [selected, setSelected] = useState<ContentItem | null>(null);
+
+  // Deep link: a Drill miss or a Yard refusal opens Reference focused on the exact rule
+  // (REVAMP §6 — every error one tap from the plain-language rule). ?focus=<itemId>.
+  useEffect(() => {
+    if (!focusId || !content) return;
+    const it = content.byId[focusId];
+    if (it) { setSelected(it); setQ(it.title); }
+  }, [focusId, content]);
 
   const items = useMemo(
     () => (content ? content.items.slice().sort((a, b) => a.title.localeCompare(b.title)) : []),

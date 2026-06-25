@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { freshProfile, loadContent, loadProfile, recomputeMastery, saveProfile } from '../core/store';
-import { grade } from '../core/sr';
+import { grade, isDue } from '../core/sr';
 import type { Content, ContentItem, Profile, Settings } from '../core/types';
 
 const SETTINGS_KEY = 'cb.settings.v1';
@@ -23,6 +23,7 @@ interface AppValue {
   setSetting: (key: keyof Settings, value: boolean) => void;
   resetProgress: () => void;
   recordAnswer: (item: ContentItem, correct: boolean) => void;
+  recordYardWin: (itemIds: string[], correct: boolean) => void;
   persistProfile: () => void;
   speak: (text: string) => void;
 }
@@ -80,6 +81,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [content]);
 
+  // One brain: The Yard grades the rule items a puzzle exercises, into the SAME mastery
+  // model the Drill uses. Safety guards: only VERIFIED items are ever graded (F1 — a
+  // needs-review item must never enter a graded path), and a correct rep only counts when
+  // the item is DUE, so replaying an easy puzzle can't farm familiarity (F2).
+  const recordYardWin = useCallback((itemIds: string[], correct: boolean) => {
+    if (!content) return;
+    setProfile(prev => {
+      const p = structuredClone(prev);
+      const now = new Date().toISOString();
+      let touched = false;
+      for (const id of itemIds) {
+        const item = content.byId[id];
+        if (!item || item.citation?.trust !== 'verified') continue;   // F1: never grade unverified
+        if (correct && !isDue(p.items[id])) continue;                 // F2: no same-session fam farming
+        p.items[id] = grade(p.items[id], correct);
+        const dom = p.domains[item.domain] || (p.domains[item.domain] = { mastery: 0, lastDrill: null });
+        dom.lastDrill = now;
+        touched = true;
+      }
+      if (!touched) return prev;                                      // nothing due — no write, no churn
+      recomputeMastery(p, content);
+      saveProfile(p);
+      return p;
+    });
+  }, [content]);
+
   // The Yard mutates profile.yard.completed in place (vanilla engine) then calls this to persist.
   const persistProfile = useCallback(() => {
     setProfile(prev => { saveProfile(prev); return prev; });
@@ -95,7 +122,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [settings, content]);
 
   return (
-    <Ctx.Provider value={{ content, profile, settings, setSetting, resetProgress, recordAnswer, persistProfile, speak }}>
+    <Ctx.Provider value={{ content, profile, settings, setSetting, resetProgress, recordAnswer, recordYardWin, persistProfile, speak }}>
       {children}
     </Ctx.Provider>
   );

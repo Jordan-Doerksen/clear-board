@@ -9,7 +9,7 @@ import { useApp } from '../state/AppContext';
 type StationModule = { mount: (host: HTMLElement, ctx: unknown) => void };
 
 export function useImperativeStation(load: () => Promise<StationModule>) {
-  const { profile, settings, persistProfile, speak } = useApp();
+  const { profile, settings, persistProfile, speak, recordYardWin } = useApp();
   const navigate = useNavigate();
   const hostRef = useRef<HTMLDivElement>(null);
 
@@ -19,12 +19,14 @@ export function useImperativeStation(load: () => Promise<StationModule>) {
     settings,
     speak,
     save: persistProfile,
+    recordYardWin,                     // one-brain: a Yard win grades the puzzle's rule items
     go: (route: string) => navigate(route ? `/${route}` : '/'),
   });
   ctxRef.current.profile = profile;
   ctxRef.current.settings = settings;
   ctxRef.current.speak = speak;
   ctxRef.current.save = persistProfile;
+  ctxRef.current.recordYardWin = recordYardWin;
 
   useEffect(() => {
     let cancelled = false;
