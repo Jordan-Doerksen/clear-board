@@ -626,7 +626,7 @@
   {
     "id": "q.12",
     "ruleId": "rule.12",
-    "domain": "radio",
+    "domain": "operating",
     "stem": "A hand or lantern signal swung from side to side, at right angle to the track, means…",
     "choices": [
       "STOP",
@@ -642,7 +642,7 @@
   {
     "id": "q.12.2",
     "ruleId": "rule.12",
-    "domain": "radio",
+    "domain": "operating",
     "stem": "A hand or lantern signal swung in a circle, at right angle to the track, means…",
     "choices": [
       "move backward",
@@ -658,7 +658,7 @@
   {
     "id": "q.12.3",
     "ruleId": "rule.12",
-    "domain": "radio",
+    "domain": "operating",
     "stem": "A hand or lantern signal raised and lowered means…",
     "choices": [
       "move forward",
@@ -674,7 +674,7 @@
   {
     "id": "q.12.4",
     "ruleId": "rule.12",
-    "domain": "radio",
+    "domain": "operating",
     "stem": "A signal held horizontally at arm's length means…",
     "choices": [
       "reduce speed",
@@ -690,7 +690,7 @@
   {
     "id": "q.12.5",
     "ruleId": "rule.12",
-    "domain": "radio",
+    "domain": "operating",
     "stem": "If there is any doubt as to the meaning of a signal, or for whom it is intended, it must be regarded as…",
     "choices": [
       "a STOP signal",
@@ -706,7 +706,7 @@
   {
     "id": "q.12.6",
     "ruleId": "rule.12",
-    "domain": "radio",
+    "domain": "operating",
     "stem": "While moving under hand signals, the signaller (or the signal light) disappears from view. This must be regarded as…",
     "choices": [
       "a STOP signal",

@@ -68,7 +68,6 @@ export function Drill({ domain }: { domain?: string }) {
   const navigate = useNavigate();
   const profileRef = useRef(profile);
   profileRef.current = profile;
-  const gradedRef = useRef<Set<string>>(new Set());   // items already advanced this session (anti-marathon)
 
   const [sessionKey, setSessionKey] = useState(0);
   const [built, setBuilt] = useState<Built | null>(null);
@@ -146,7 +145,6 @@ export function Drill({ domain }: { domain?: string }) {
     const drilledDomains = [...new Set(finalSlots.map(s => s.item.domain))];
     const startMastery = Object.fromEntries(drilledDomains.map(d => [d, profileRef.current.domains[d]?.mastery || 0]));
 
-    gradedRef.current = new Set();
     setBuilt({ slots: finalSlots, drilledDomains, startMastery });
     setIdx(0); setScore(0); setPicked(null);
   }, [content, domain, sessionKey]);
@@ -202,11 +200,7 @@ export function Drill({ domain }: { domain?: string }) {
     const correct = value === q!.correct;
     setPicked(value);
     if (correct) setScore(s => s + 1);
-    // Advance SM-2 on the first answer for this item; a later same-session facet only records a
-    // MISS (a correct repeat must not farm familiarity — F2). Misses always carry their signal.
-    const first = !gradedRef.current.has(item!.id);
-    if (first || !correct) recordAnswer(item!, correct);
-    if (correct) gradedRef.current.add(item!.id);
+    recordAnswer(item!, correct);   // AppContext gates a correct re-advance by due-ness (anti-marathon, F2)
   }
 
   return (

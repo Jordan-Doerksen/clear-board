@@ -122,10 +122,17 @@ Profile {
 ## Retention model (SM-2-lite)
 The anti-false-confidence engine (mitigates F2). Each drilled item runs a SuperMemo-2-style schedule:
 - **State per item:** `ease` (default 2.5, floor 1.3), `interval` (days), `due`.
-- **Correct recall:** 1st → 1d; 2nd → 6d; thereafter → `round(interval × ease)`; ease nudges by
-  recall quality (+0.1 easy / −0.15 hard).
+- **Correct recall:** 1st → 1d; 2nd → 6d; thereafter → `round(interval × ease)`; `ease += 0.05`,
+  capped at **2.8**. (V1 grades on a single correct/incorrect signal — no easy/hard buttons yet — so the
+  bump is the conservative `+0.05`; the future easy/hard grading is what would split it into ±. The
+  conservative bump is *deliberate*: slower familiarity growth is safer for an anti-false-confidence engine.)
 - **Miss:** interval resets (re-show same session), `ease −= 0.2` (floor 1.3).
+- A correct answer only advances the schedule when the item is **due** — re-drilling early can't farm
+  familiarity (anti-marathon, F2 / validation #7).
 - **`fam` (0..1)** = `min(1, interval / 30)` — not "familiar" until it survives ~a month of spacing.
+- **Golden vectors** (pinned by `tools/sr-vectors.mjs`, run in `npm run check` — drift fails the gate):
+  fresh → `1✓ {int 1, ease 2.55, fam .033}` → `2✓ {6, 2.60, .20}` → `3✓ {16, 2.65, .533}` → `✗ {0, 2.45}`;
+  ease ceiling **2.8**, floor **1.3**.
 - **Domain `mastery` (0..1)** = mean `fam` of the domain's *verified* items, decayed by time since
   `lastSeen` (half-life 60d). Decay is why mastery falls if you stop — it reflects retention, not activity.
 - A future **retention check** (for the deferred test-ready) = a mixed sample of items past their

@@ -30,6 +30,16 @@
 - **`rule.12` flagged, not moved.** The swarm's "re-file hand signals out of radio" doesn't match the
   data — the item titled Rule 12 actually carries the 123.2 doubt principle — so it's left for SME to
   resolve, not guessed. (D-0021)
+- **`rule.12` corrected to Hand Signals — from the verified source.** Resolving the above: CROR Rule 12
+  *is* hand signals, and the item's 6 questions already were hand-signals questions. Its `plain` (the
+  123.2 doubt text, already in `rule.123.2`) was replaced with the verbatim CROR hand-signals content
+  from `training-assistant`, and the item + its 6 questions moved `radio` → `operating`. Not guessed. (D-0022)
+- **Anti-marathon gate.** A correct answer advances the SM-2 schedule only when the item is *due* —
+  cramming can't farm familiarity (validation #7); misses always count. The Drill's same-session guard
+  is removed (subsumed). (D-0022)
+- **SR golden-vector pin.** `tools/sr-vectors.mjs` (now in `npm run check`) transpiles `sr.ts` and pins
+  the exact SM-2 schedule so the anti-false-confidence engine can't silently drift; SPEC §Retention
+  reconciled to the real conservative V1 values. (D-0022)
 - **Design pass:** `REVAMP-DESIGN.md` (+ `REVAMP-APPENDIX.md`) — a multi-agent review of the whole
   trainer (consolidated rule → mechanic map, prioritized backlog, redundancy verdict, gated validation
   checklist, sample taxonomies, open SME questions).

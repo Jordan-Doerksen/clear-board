@@ -72,6 +72,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const recordAnswer = useCallback((item: ContentItem, correct: boolean) => {
     setProfile(prev => {
       const p = structuredClone(prev);
+      // Anti-marathon (F2 / validation #7): a CORRECT answer only advances the schedule when the item
+      // is actually due — re-drilling before its interval elapses can't farm familiarity. A miss always
+      // counts (resetting the interval is safety signal regardless of timing).
+      if (correct && !isDue(p.items[item.id])) return prev;
       p.items[item.id] = grade(p.items[item.id], correct);
       const dom = p.domains[item.domain] || (p.domains[item.domain] = { mastery: 0, lastDrill: null });
       dom.lastDrill = new Date().toISOString();

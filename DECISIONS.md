@@ -225,5 +225,30 @@ the plain text) is a CROR-accuracy call left to Jordan/SME — never guessed.
 securement drill now builds a 5-question session (was dead); cross-domain + signals drills unaffected;
 0 console errors; `npm run check` green.
 
+### D-0022 — rule.12 corrected to Hand Signals (verified migration); marathon gate; SR golden vectors
+**Chosen:** three integrity fixes. (1) **rule.12 fixed, not guessed:** a read-only pass over the verified
+source repos found CROR Rule 12 *is* "Hand Signals," and `training-assistant/content/operating.js` (op-12,
+sourced verbatim from the Jan 2025 CROR) carries the hand-signals text; rule.12's six questions
+(`q.12`–`q.12.6`) were already correct hand-signals questions. So rule.12's `plain` — wrongly the 123.2(v)
+*doubt* text, which `rule.123.2` already covers — was replaced with the verified hand-signals content, and
+the item **plus its six questions moved `radio` → `operating`**. Citation "CROR 12" kept. (2) **Anti-marathon
+gate:** `recordAnswer` now advances the SM-2 schedule on a CORRECT answer only when the item is **due** — a
+miss always counts (resetting is safety signal). Closes the marathon false-mastery hole (validation #7) and
+subsumes the Drill's same-session guard (now removed). (3) **SR golden vectors:** `tools/sr-vectors.mjs`
+transpiles `sr.ts` with the installed tsc and pins the exact schedule (1✓→{int 1, ease 2.55, fam .033} …
+ceiling 2.8 / floor 1.3); added to `npm run check`; SPEC §Retention reconciled to the actual conservative V1
+values (`+0.05` correct / `−0.2` miss — no easy/hard buttons yet).
+**Weighed (rule.12):** guessing the content; leaving it flagged; moving only the domain (would relocate
+wrong text). The verified source made a proper, non-guessed fix possible.
+**Why:** safety-critical content must be right *and* sourced; cramming must not read as retention; the
+retention engine must provably match its docs.
+**rule.12 domain — flagged for Jordan:** placed in `operating` to mirror the verified source's own
+classification (its tags were signals / hand-signals / switching). If you'd rather it sit under `signals`
+or `switching`, that's a one-line change — flagging the bucket, not the content.
+**Verified live:** rule.12 reference shows the hand-signals text in `operating`; the marathon gate holds (a
+2nd immediate correct doesn't advance the interval); sr-vectors 7/7; `npm run check` + `tsc -b` + lint all
+green. (The new SR gate even caught a Date-overflow in its own 20-correct ceiling test — fixed as a test
+artifact; not reachable in real use, especially now that correct-advances are due-gated.)
+
 ---
 *V1. Edit as decisions are made or reversed.*

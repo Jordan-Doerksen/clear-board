@@ -46,10 +46,10 @@
   },
   {
     "id": "rule.12",
-    "domain": "radio",
+    "domain": "operating",
     "type": "rule",
     "title": "Rule 12",
-    "plain": "Doubt = STOP. The same principle applies on the radio (123.2(v)).",
+    "plain": "Rule 12 (Hand Signals): hand, lantern or flag indications — STOP = swung from side to side at right angle to the track; MOVE BACKWARD = swung in a circle at right angle to the track (speed proportional); MOVE FORWARD = raised and lowered (speed proportional); APPLY AIR BRAKES = raised and swung horizontally above the head; RELEASE AIR BRAKES = raised and held at arm's length above the head; REDUCE SPEED = held horizontally at arm's length. Any object waved violently by anyone on or near the track means STOP. If there is doubt as to a signal's meaning or for whom it is intended, regard it as STOP; if the signaller (or the signal lights) disappears from view, that too is STOP. Forward/backward are relative to the front of the controlling locomotive.",
     "citation": {
       "source": "CROR",
       "ref": "CROR 12",
