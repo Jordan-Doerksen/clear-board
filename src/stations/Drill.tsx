@@ -6,6 +6,7 @@ import { useApp } from '../state/AppContext';
 import { Signal } from './Signal';
 import { DOMAINS, drillable } from '../core/store';
 import { isDue } from '../core/sr';
+import { priorityOf } from '../core/severity';
 import type { Content, ContentItem, Question, SignalAspect } from '../core/types';
 
 const shuffle = <T,>(a: T[]): T[] => {
@@ -74,12 +75,15 @@ export function Drill({ domain }: { domain?: string }) {
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
+  const [focusIds, setFocusIds] = useState<string[] | null>(null);   // set ⇒ a "practice your misses" round
+  const missedRef = useRef<Set<string>>(new Set());                  // items missed in the current session
 
   // Build the session once per (content, domain, sessionKey). profileRef → pre-session snapshot.
   useEffect(() => {
     if (!content) return;
     let items: ContentItem[] = [];
-    if (domain) items = drillable(content.byDomain[domain], content);
+    if (focusIds) items = focusIds.map(id => content.byId[id]).filter((i): i is ContentItem => !!i);   // misses-review round
+    else if (domain) items = drillable(content.byDomain[domain], content);
     else for (const d of DOMAINS.filter(d => d.live)) items.push(...drillable(content.byDomain[d.id], content));
     items = items.filter(i => i.type !== 'signal' || (i.payload?.aspects?.length ?? 0) > 0);
 
@@ -92,7 +96,7 @@ export function Drill({ domain }: { domain?: string }) {
     const cand = domain ? [domain] : DOMAINS.filter(d => d.live).map(d => d.id);
     const seenAny = items.some(i => (profileRef.current.items[i.id]?.seen ?? 0) > 0);
     const mast = cand.reduce((s, d) => s + (profileRef.current.domains[d]?.mastery || 0), 0) / Math.max(1, cand.length);
-    const ceiling = !seenAny ? 1 : mast < 0.15 ? 1 : mast < 0.45 ? 2 : 3;
+    const ceiling = focusIds ? Infinity : !seenAny ? 1 : mast < 0.15 ? 1 : mast < 0.45 ? 2 : 3;   // a review round includes every miss, any tier
     const tierOK = (i: ContentItem) => itemTier(i, content) <= ceiling;
     const ctx: QCtx = { pool: items, byType, ceiling };
 
@@ -145,9 +149,10 @@ export function Drill({ domain }: { domain?: string }) {
     const drilledDomains = [...new Set(finalSlots.map(s => s.item.domain))];
     const startMastery = Object.fromEntries(drilledDomains.map(d => [d, profileRef.current.domains[d]?.mastery || 0]));
 
+    missedRef.current = new Set();
     setBuilt({ slots: finalSlots, drilledDomains, startMastery });
     setIdx(0); setScore(0); setPicked(null);
-  }, [content, domain, sessionKey]);
+  }, [content, domain, sessionKey, focusIds]);
 
   const slot = built && idx < built.slots.length ? built.slots[idx] : null;
   const item = slot?.item ?? null;
@@ -160,7 +165,7 @@ export function Drill({ domain }: { domain?: string }) {
 
   if (!content || !built) return <p className="muted">Loading…</p>;
 
-  if (built.slots.length < 4) {
+  if (built.slots.length < (focusIds ? 1 : 4)) {
     return (
       <>
         <button className="back" onClick={() => navigate('/')}>← Home</button>
@@ -180,11 +185,16 @@ export function Drill({ domain }: { domain?: string }) {
     return (
       <>
         <button className="back" onClick={() => navigate('/')}>← Home</button>
-        <h2 className="view-title">Session done</h2>
+        <h2 className="view-title">{focusIds ? 'Review done' : 'Session done'}</h2>
         <p className="big-score">{score} / {built.slots.length}</p>
         <p className="muted">{lines}. Spaced out over the next days so it sticks.</p>
         <div className="opts">
-          <button className="opt" onClick={() => setSessionKey(k => k + 1)}>Drill again</button>
+          {missedRef.current.size > 0 && (
+            <button className="opt" onClick={() => { setFocusIds([...missedRef.current]); setSessionKey(k => k + 1); }}>
+              Practice the {missedRef.current.size} you missed →
+            </button>
+          )}
+          <button className="opt" onClick={() => { setFocusIds(null); setSessionKey(k => k + 1); }}>Drill again</button>
           <button className="opt" onClick={() => navigate('/')}>Back to the path</button>
         </div>
       </>
@@ -200,6 +210,7 @@ export function Drill({ domain }: { domain?: string }) {
     const correct = value === q!.correct;
     setPicked(value);
     if (correct) setScore(s => s + 1);
+    else missedRef.current.add(item!.id);   // remembered for the end-of-session review round (#10)
     recordAnswer(item!, correct);   // AppContext gates a correct re-advance by due-ness (anti-marathon, F2)
   }
 
@@ -221,6 +232,7 @@ export function Drill({ domain }: { domain?: string }) {
         <div className="feedback" aria-live="polite">
           <b className={ok ? 'fb-ok' : 'fb-no'}>{ok ? 'Right.' : 'Not quite.'}</b>
           <span><b>{item.title}</b> — {q.explain || item.plain || c.verbatim}</span>
+          {!ok && priorityOf(item) === 'core' && <span className="muted">Core one — worth nailing; review your misses at the end.</span>}
           <span className="cite">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
           <button className="iconbtn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
           <button className="iconbtn next" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>

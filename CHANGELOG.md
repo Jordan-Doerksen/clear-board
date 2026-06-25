@@ -40,6 +40,10 @@
 - **SR golden-vector pin.** `tools/sr-vectors.mjs` (now in `npm run check`) transpiles `sr.ts` and pins
   the exact SM-2 schedule so the anti-false-confidence engine can't silently drift; SPEC §Retention
   reconciled to the real conservative V1 values. (D-0022)
+- **Practice your misses.** The Drill remembers what you got wrong and offers a focused "Practice the N
+  you missed →" review round at the end (built from exactly those items, any tier). A miss in a core
+  domain (switching / securement / signals) shows a calm "worth nailing" cue. The full S1/S2/S3 severity
+  ladder + Yard mistake-tracking stay deferred — severity classification is an SME call. (D-0023)
 - **Design pass:** `REVAMP-DESIGN.md` (+ `REVAMP-APPENDIX.md`) — a multi-agent review of the whole
   trainer (consolidated rule → mechanic map, prioritized backlog, redundancy verdict, gated validation
   checklist, sample taxonomies, open SME questions).

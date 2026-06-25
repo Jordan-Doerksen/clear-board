@@ -250,5 +250,26 @@ or `switching`, that's a one-line change — flagging the bucket, not the conten
 green. (The new SR gate even caught a Date-overflow in its own 20-correct ceiling test — fixed as a test
 artifact; not reachable in real use, especially now that correct-advances are due-gated.)
 
+### D-0023 — Mistake-driven remediation: "practice your misses" + a core-priority cue (#10, partial)
+**Chosen:** the remediation half of REVAMP #10/§6. (1) The Drill remembers the items you miss in a session
+and offers a **"Practice the N you missed →"** round at the end — a focused review built from exactly those
+items, tier-unfiltered (you see every miss regardless of its tier band). (2) A transparent, domain-based
+**priority cue:** a miss in a "core" domain (switching / securement / signals — the hands-on, someone-gets-
+hurt ones) shows a calm "Core one — worth nailing; review your misses at the end" note. The priority lives
+in `src/core/severity.ts` and is explicitly **not** a per-rule safety classification.
+**Weighed:** a full per-rule S1/S2/S3 severity ladder; a live in-session re-queue that jumps the SM-2 due
+order; hand-tagging all 226 questions with a severity.
+**Why:** "log mistakes and adapt" is the heart of remediation and needs no risky per-rule safety labelling.
+The end-of-session review is contained, calm (the audience is anxious learners — a miss is a UX gap to
+scaffold, never a scolding), and rides the existing SM-2 + due-gate: a missed item is now due, so the review
+correctly re-advances it on a clean recall.
+**Deferred — flagged for SME/Jordan:** the full S1/S2/S3 ladder requires deciding which rules are
+safety-critical (the same kind of CROR-judgment call as rule.12 — won't guess); and Yard mistake-attempt
+tracking (repeated illegal-move attempts feeding remediation). `severity.ts`'s core/standard split is a
+reviewable starting point, not the final ladder.
+**Verified live:** drove a 10-question operating drill, missed 8 → the summary offered "Practice the 8 you
+missed →" → the review round built exactly those 8; a securement (core) miss shows the cue; 0 console errors;
+`tsc -b` + lint + `npm run check` green.
+
 ---
 *V1. Edit as decisions are made or reversed.*
