@@ -17,7 +17,8 @@ a{ color:var(--focus) }
 .wrap{ max-width:var(--maxw); margin:0 auto; padding:20px 18px 80px }
 .muted{ color:var(--muted) }
 :focus-visible{ outline:3px solid var(--focus); outline-offset:2px; border-radius:6px }
-.skip{ position:absolute; left:-999px; top:0; background:var(--clear); color:#062; padding:8px 12px; border-radius:0 0 8px 0; z-index:50 }
+/* interaction-state polish: AA contrast — skip-link ink #062 on #3fb950 measured 2.83:1; #00340f measures 5.52:1 (same green hue) */
+.skip{ position:absolute; left:-999px; top:0; background:var(--clear); color:#00340f; padding:8px 12px; border-radius:0 0 8px 0; z-index:50 }
 .skip:focus{ left:0 }
 
 header.top{ display:flex; align-items:center; gap:14px; padding:6px 0 18px; border-bottom:1px solid var(--line); margin-bottom:22px }
@@ -56,7 +57,7 @@ button.card:hover{ border-color:var(--clear) }
 .stations{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px }
 .station{ background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:14px; text-align:left; color:var(--ink); font:inherit; cursor:pointer; min-height:64px }
 .station:hover{ border-color:var(--clear) } .station b{ display:block } .station small{ color:var(--muted) }
-.station[disabled]{ cursor:default; opacity:.5 } .station[disabled]:hover{ border-color:var(--line) }
+.station[disabled]{ cursor:not-allowed; opacity:.5 } .station[disabled]:hover{ border-color:var(--line) } /* interaction-state polish: not-allowed cursor on disabled station */
 
 footer{ margin-top:40px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:.82rem }
 footer .tip{ display:inline-block; border:1px solid var(--caution); color:var(--caution); border-radius:999px; padding:6px 13px; margin-bottom:10px; text-decoration:none; min-height:auto }
@@ -86,6 +87,9 @@ blockquote{ margin:10px 0 0; padding:10px 14px; border-left:3px solid var(--line
 .opts{ display:flex; flex-direction:column; gap:10px }
 .opt{ text-align:left; background:var(--surface-2); border:1px solid var(--line); color:var(--ink); border-radius:10px; padding:13px 15px; font:inherit; cursor:pointer; min-height:48px }
 .opt:hover:not(:disabled){ border-color:var(--clear) }
+/* interaction-state polish: after answering, options are disabled — mark the cursor and dim the non-feedback ones (keep .right/.wrong at full strength so the answer stays readable) */
+.opt:disabled{ cursor:not-allowed }
+.opt:disabled:not(.right):not(.wrong){ opacity:.55 }
 .opt.right{ border-color:var(--clear); background:rgba(63,185,80,.16) }
 .opt.wrong{ border-color:var(--stop); background:rgba(248,81,73,.14) }
 .feedback{ margin-top:16px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px; display:flex; flex-direction:column; gap:8px }
@@ -113,4 +117,17 @@ dialog#settings::backdrop{ background:rgba(0,0,0,.6) }
 .sw input:checked + i{ background:rgba(63,185,80,.25); border-color:var(--clear) }
 .sw input:checked + i::after{ left:25px; background:var(--clear) }
 html[data-reduce="1"] .sw i, html[data-reduce="1"] .sw i::after{ transition:none }
-@media (prefers-reduced-motion: reduce){ *{ transition:none !important } }
+/* interaction-state polish: pressed feedback on the app's button-like controls (instant transform, no transition — reduced-motion safe) */
+.iconbtn:active, button.card:active, .ref-row:active, .back:active, footer .tip:active,
+.station:active:not([disabled]), .opt:active:not(:disabled){ transform:translateY(1px) }
+
+/* interaction-state polish: reduced-motion catch-all — was transitions only; now also guards animations + smooth scroll */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    transition:none !important;
+    scroll-behavior:auto !important;
+  }
+}
