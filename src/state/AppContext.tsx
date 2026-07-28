@@ -24,6 +24,7 @@ interface AppValue {
   resetProgress: () => void;
   recordAnswer: (item: ContentItem, correct: boolean) => void;
   recordYardWin: (itemIds: string[], correct: boolean) => void;
+  recordRadioStep: (itemId: string, correct: boolean) => void;
   persistProfile: () => void;
   speak: (text: string) => void;
 }
@@ -85,11 +86,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [content]);
 
-  // One brain: The Yard grades the rule items a puzzle exercises, into the SAME mastery
+  // One brain: the stations outside the Drill grade real content items into the SAME mastery
   // model the Drill uses. Safety guards: only VERIFIED items are ever graded (F1 — a
-  // needs-review item must never enter a graded path), and a correct rep only counts when
-  // the item is DUE, so replaying an easy puzzle can't farm familiarity (F2).
-  const recordYardWin = useCallback((itemIds: string[], correct: boolean) => {
+  // needs-review or operating-practice item must never enter a graded path), and a correct rep
+  // only counts when the item is DUE, so replaying easy content can't farm familiarity (F2).
+  const gradeItems = useCallback((itemIds: string[], correct: boolean) => {
     if (!content) return;
     setProfile(prev => {
       const p = structuredClone(prev);
@@ -111,6 +112,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [content]);
 
+  // The Yard: a puzzle win grades the rule items it exercises.
+  const recordYardWin = gradeItems;
+  // Radio "Call it yourself": one graded call per step. The six steps with no verified CROR
+  // citation (the closing counts, and the two CN GOI steps) are `operating-practice` in
+  // radio-script.json, so gradeItems' F1 filter drops them — they play, they explain, they
+  // never move the bar. That is the point, not a gap (D-0025).
+  const recordRadioStep = useCallback((itemId: string, correct: boolean) => {
+    gradeItems([itemId], correct);
+  }, [gradeItems]);
+
   // The Yard mutates profile.yard.completed in place (vanilla engine) then calls this to persist.
   const persistProfile = useCallback(() => {
     setProfile(prev => { saveProfile(prev); return prev; });
@@ -126,7 +137,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [settings, content]);
 
   return (
-    <Ctx.Provider value={{ content, profile, settings, setSetting, resetProgress, recordAnswer, recordYardWin, persistProfile, speak }}>
+    <Ctx.Provider value={{ content, profile, settings, setSetting, resetProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak }}>
       {children}
     </Ctx.Provider>
   );

@@ -117,9 +117,24 @@ dialog#settings::backdrop{ background:rgba(0,0,0,.6) }
 .sw input:checked + i{ background:rgba(63,185,80,.25); border-color:var(--clear) }
 .sw input:checked + i::after{ left:25px; background:var(--clear) }
 html[data-reduce="1"] .sw i, html[data-reduce="1"] .sw i::after{ transition:none }
+/* Radio — mode switch (guided vs. call it yourself) + the test-mode readout */
+.mode-tabs{ display:flex; gap:8px; margin:10px 0 16px; flex-wrap:wrap }
+.mode-tab{ flex:1 1 220px; display:flex; flex-direction:column; gap:3px; text-align:left; font:inherit;
+  background:var(--surface-2); border:1px solid var(--line); color:var(--muted);
+  border-radius:10px; padding:11px 14px; cursor:pointer; min-height:48px }
+.mode-tab small{ font-size:.76rem; color:var(--muted) }
+.mode-tab.on{ color:var(--ink); border-color:var(--clear); background:var(--surface) }
+.mode-tab:hover:not(.on){ border-color:var(--clear) }
+.radio-readout{ font-size:1.15rem; font-weight:700; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r); padding:12px 15px; margin:8px 0 12px }
+.radio-incoming, .radio-ack{ display:block; background:var(--surface-2); border:1px solid var(--line);
+  border-radius:10px; padding:9px 12px; font-size:.92rem }
+.radio-incoming{ margin:0 0 12px }
+.who{ display:block; font-size:.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px }
+
 /* interaction-state polish: pressed feedback on the app's button-like controls (instant transform, no transition — reduced-motion safe) */
 .iconbtn:active, button.card:active, .ref-row:active, .back:active, footer .tip:active,
-.station:active:not([disabled]), .opt:active:not(:disabled){ transform:translateY(1px) }
+.station:active:not([disabled]), .opt:active:not(:disabled), .mode-tab:active{ transform:translateY(1px) }
 
 /* interaction-state polish: reduced-motion catch-all — was transitions only; now also guards animations + smooth scroll */
 @media (prefers-reduced-motion: reduce){

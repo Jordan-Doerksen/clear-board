@@ -14,7 +14,7 @@ export const DOMAINS: DomainDef[] = [
 ];
 
 const PROFILE_KEY = 'cb.profile.v1';
-const CONTENT_FILES = ['data/definitions.json', 'data/signals.json', 'data/rules.json']; // grows as domains migrate
+const CONTENT_FILES = ['data/definitions.json', 'data/signals.json', 'data/rules.json', 'data/radio-script.json']; // grows as domains migrate
 const QUESTION_FILES = ['data/rule-questions.json'];                                      // authored MC banks, keyed to a ruleId
 const url = (f: string) => `${import.meta.env.BASE_URL}${f}`;
 
@@ -24,12 +24,17 @@ export function freshProfile(settings: Settings): Profile {
     settings, items: {},
     domains: Object.fromEntries(DOMAINS.map(d => [d.id, { mastery: 0, lastDrill: null }])),
     yard: { completed: [] },
-    radio: { done: false },
     path: { stage: 'First-day trainee', unlocked: ['reference', 'drill'], testReady: false },
   };
 }
 export function loadProfile(settings: Settings): Profile {
-  try { const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null'); if (p && p.schema === 1) return p as Profile; } catch { /* fall through */ }
+  try {
+    const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
+    if (p && p.schema === 1) {
+      delete p.radio;   // D-0025: the write-only `radio.done` boolean is retired; nothing gated on it
+      return p as Profile;
+    }
+  } catch { /* fall through */ }
   return freshProfile(settings);
 }
 export function saveProfile(p: Profile): void {

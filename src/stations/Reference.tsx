@@ -59,12 +59,14 @@ export function Reference() {
           : <p className="muted">No match. Try another word.</p>}
       </div>
 
-      {selected && <Detail key={selected.id} item={selected} audio={settings.audio} onSpeak={speak} />}
+      {selected && <Detail key={selected.id} item={selected} audio={settings.audio} onSpeak={speak}
+        onDrillSignals={() => navigate('/signals')} />}
     </>
   );
 }
 
-function Detail({ item, audio, onSpeak }: { item: ContentItem; audio: boolean; onSpeak: (t: string) => void }) {
+function Detail({ item, audio, onSpeak, onDrillSignals }:
+  { item: ContentItem; audio: boolean; onSpeak: (t: string) => void; onDrillSignals: () => void }) {
   const c = item.citation;
   const aspects = item.type === 'signal' ? item.payload?.aspects ?? [] : [];
   return (
@@ -76,6 +78,9 @@ function Detail({ item, audio, onSpeak }: { item: ContentItem; audio: boolean; o
         <>
           <div className="aspects">{aspects.slice(0, 8).map((a, idx) => <Signal key={idx} aspect={a} />)}</div>
           <p className="muted small">Hardware variants — all the same indication.</p>
+          {/* Browsing an aspect was a dead end: the graded read-the-aspect drill already exists at
+              /signals, so this is a route into it — not a second answer surface. */}
+          <button className="iconbtn" onClick={onDrillSignals}>Drill these aspects →</button>
         </>
       )}
       {c.verbatim && (

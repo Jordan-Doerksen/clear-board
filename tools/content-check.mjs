@@ -23,14 +23,24 @@ function load(name) {
 const definitions = load('definitions.json');
 const signals = load('signals.json');
 const rules = load('rules.json');
+const radioScript = load('radio-script.json');
 const questions = load('rule-questions.json');
 
 const contentFiles = {
   'definitions.json': definitions,
   'signals.json': signals,
   'rules.json': rules,
+  'radio-script.json': radioScript,
 };
-const allContent = [...definitions, ...signals, ...rules];
+const allContent = [...definitions, ...signals, ...rules, ...radioScript];
+
+// The radio call wording lives in exactly ONE place — radioSim.js's STEPS. Read it as text (it is a
+// browser module: importing it here would drag in the DOM) so the gate can prove the JSON and the
+// script agree on how many steps exist and that every call has usable distractors.
+const radioSimSrc = readFileSync(join(__dirname, '..', 'src', 'stations', 'radioSim.js'), 'utf8');
+const RADIO_CALLS = [...radioSimSrc.matchAll(/\bcall:\s*"((?:[^"\\]|\\.)*)"/g)].map((m) =>
+  m[1].replace(/\\(.)/g, '$1'),
+);
 
 // failures: array of { check, detail }
 const failures = [];
@@ -104,6 +114,61 @@ for (const q of questions) {
   }
 }
 
+// ── G. radio-script indexes radioSim's STEPS exactly: one item per call, unique, contiguous ──
+{
+  if (radioScript.length !== RADIO_CALLS.length) {
+    fail('G', `radio-script.json has ${radioScript.length} items but radioSim.js has ${RADIO_CALLS.length} calls`);
+  }
+  const seen = new Set();
+  for (const it of radioScript) {
+    const s = it.payload && it.payload.step;
+    if (!Number.isInteger(s) || s < 0 || s >= RADIO_CALLS.length) {
+      fail('G', `${it.id} payload.step ${JSON.stringify(s)} is not a valid index into STEPS (0..${RADIO_CALLS.length - 1})`);
+    } else if (seen.has(s)) {
+      fail('G', `${it.id} payload.step ${s} is used by more than one item`);
+    } else {
+      seen.add(s);
+    }
+  }
+}
+
+// ── H. CARDINAL (F1): a GRADED radio step must cite a verified CROR rule ──
+// A radio-script item is graded iff its own trust is "verified" (store.ts `drillable`). CN GOI
+// practice and the uncited closing counts must therefore NOT be verified — they play and explain,
+// they never move mastery. This is the check that keeps that honest.
+for (const it of radioScript) {
+  const trust = it.citation && it.citation.trust;
+  const source = it.citation && it.citation.source;
+  if (trust === 'verified') {
+    if (source !== 'CROR') {
+      fail('H', `${it.id} is graded (trust=verified) but its source is "${source}" — only CROR may be graded`);
+    }
+    const target = contentById.get(it.payload && it.payload.ruleId);
+    if (!target) {
+      fail('H', `${it.id} is graded but payload.ruleId "${it.payload && it.payload.ruleId}" resolves to nothing`);
+    } else if (target.citation.trust !== 'verified') {
+      fail('H', `${it.id} is graded but its rule "${target.id}" has trust "${target.citation.trust}"`);
+    }
+  } else if (source === 'CROR') {
+    fail('H', `${it.id} cites CROR but is not verified — decide: gradable, or drop the CROR source`);
+  }
+}
+
+// ── I. Quiz validity (§7.5): every call has ≥2 usable distractors among the other real calls ──
+// "Usable" = not equal to, containing, or contained by the answer — the same test RadioTest.tsx
+// applies at runtime. Fewer than 2 and the station would silently show a short option list.
+for (let i = 0; i < RADIO_CALLS.length; i++) {
+  const answer = RADIO_CALLS[i].toLowerCase();
+  const usable = RADIO_CALLS.filter((other, j) => {
+    if (j === i) return false;
+    const b = other.toLowerCase();
+    return b !== answer && !answer.includes(b) && !b.includes(answer);
+  });
+  if (usable.length < 2) {
+    fail('I', `radio call ${i} ("${RADIO_CALLS[i]}") has only ${usable.length} usable distractor(s)`);
+  }
+}
+
 // ── Print check results ──
 const CHECK_NAMES = {
   A: 'A. citation.trust is a legal value',
@@ -112,9 +177,12 @@ const CHECK_NAMES = {
   D: 'D. answer is one of its choices',
   E: 'E. ruleId resolves to a ContentItem',
   F: 'F. (F1) graded question only on a verified item',
+  G: 'G. radio-script indexes radioSim STEPS 1:1',
+  H: 'H. (F1) graded radio step cites a verified CROR rule',
+  I: 'I. every radio call has ≥2 usable distractors',
 };
 console.log('── checks ──');
-for (const key of ['A', 'B', 'C', 'D', 'E', 'F']) {
+for (const key of ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']) {
   const these = failures.filter((f) => f.check === key);
   if (these.length === 0) {
     console.log(`  ✓ ${CHECK_NAMES[key]}`);
@@ -178,7 +246,7 @@ for (const [ruleId, n] of monopolizers) {
 // ── Verdict / exit ──
 console.log('\n─── summary ───');
 if (failures.length === 0) {
-  console.log('✓ All checks A–F passed.');
+  console.log('✓ All checks A–I passed.');
   process.exit(0);
 } else {
   const byCheck = {};

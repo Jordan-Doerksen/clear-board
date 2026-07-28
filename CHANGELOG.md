@@ -2,6 +2,31 @@
 
 ## [Unreleased] — V1 in progress
 
+### Radio joins the one brain — "Call it yourself" (2026-07-28)
+- **The last dead-end station now writes to mastery.** Radio has two modes: **Guided** (the SME-tuned
+  walkthrough, byte-for-byte, still **ungraded** — REVAMP §5: merging it with grading turns a
+  confidence-builder into a test) and **Call it yourself**, which hides the call and asks you to pick it
+  from three real transmissions. Correct calls grade into the SAME SM-2 model the Drill and the Yard use,
+  through `recordRadioStep` with the Yard's exact F1/F2 guards. (D-0025)
+- **Eight of the fourteen calls are gradable — deliberately.** A step is graded only if it carries a
+  verified CROR citation. The two CN GOI steps (set-and-center, cutting the air in) and the four uncited
+  closing counts are `operating-practice`: played, explained, never scored — and the screen says so
+  ("● CN practice (GOI), not a CROR rule"). Gate check **H** makes it structural: a graded radio step must
+  cite a verified CROR rule, and a CROR-sourced step must be gradable. (D-0025)
+- **Distractors are other real calls**, never invented — the genuine confusions are which call belongs
+  where (engine number past two car lengths, "over" on a running count, feet too early). Gate checks **G**
+  (radio-script indexes radioSim's STEPS 1:1) and **I** (every call has ≥2 usable distractors) pin it.
+- **`profile.radio.done` retired.** It graded attendance and could never decay; old profiles drop it on
+  load. The declared-but-unused `radio-script` item type is now real content
+  (`public/data/radio-script.json`, 14 items) and the Drill explicitly excludes it.
+- **Signal Reader:** rec #19's "add a graded mode" was already built — `/signals` has been the graded
+  read-the-aspect Drill since D-0016. Instead of duplicating it, Reference's aspect card gets a
+  **Drill these aspects →** route into it.
+- Verified live: fresh profile → call 1 correct moves Radio 0 → 0.0026 (exactly one item graded); a 14/14
+  run grades exactly the 8 verified steps and reads "+2% → 2%"; an immediate perfect replay moves mastery
+  by **zero** (anti-marathon); misses deep-link to the cited rule and feed the review round; guided mode
+  unchanged; radioSim keeps its own lazy chunk. `npm run check` A–I green.
+
 ### One-brain mastery, verification gates + learning-loop wins (2026-06-25)
 - **The Yard now feeds the single mastery model.** A genuine puzzle win grades the CROR rule items
   the puzzle exercises (its `rules:[...]` chips → real `rule.*` items) into the SAME SM-2 model the

@@ -86,6 +86,10 @@ export function Drill({ domain }: { domain?: string }) {
     else if (domain) items = drillable(content.byDomain[domain], content);
     else for (const d of DOMAINS.filter(d => d.live)) items.push(...drillable(content.byDomain[d.id], content));
     items = items.filter(i => i.type !== 'signal' || (i.payload?.aspects?.length ?? 0) > 0);
+    // radio-script items are graded in the Radio station's "Call it yourself" mode, where the
+    // question is "which call comes next" — they have no term↔definition reading, so the Drill
+    // must never draw them (they'd fall to the text branch and ask nonsense).
+    items = items.filter(i => i.type !== 'radio-script');
 
     const byType: Record<string, ContentItem[]> = {};
     for (const i of items) (byType[i.type] ||= []).push(i);

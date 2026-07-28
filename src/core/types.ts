@@ -31,7 +31,9 @@ export interface ContentItem {
   title: string;
   plain: string;
   citation: Citation;
-  payload: ({ aspects?: SignalAspect[] } & Record<string, unknown>) | null;
+  // `step`/`ruleId` belong to radio-script items: the index into radioSim's STEPS this item grades,
+  // and the rule item a miss deep-links to in Reference.
+  payload: ({ aspects?: SignalAspect[]; step?: number; ruleId?: string } & Record<string, unknown>) | null;
 }
 
 export interface Question {
@@ -73,7 +75,6 @@ export interface Profile {
   items: Record<string, SRState>;
   domains: Record<string, DomainState>;
   yard: { completed: string[] };
-  radio: { done: boolean };
   path: { stage: string; unlocked: string[]; testReady: boolean };
 }
 

@@ -295,5 +295,46 @@ mid-session S3 re-queue.
 104.1 → S2; definitions → S1); a securement miss shows the S3 cue; `tsc -b` + lint + `npm run check` green;
 0 console errors.
 
+### D-0025 — Radio joins the one brain via a SECOND mode, not by grading the walkthrough (#19)
+**Chosen:** the Radio station gets two modes. **Guided** is the existing "Back to a Joint" walkthrough,
+byte-for-byte and **ungraded**. **Call it yourself** replays the same procedure with the call hidden and
+three options — the real call plus two other real calls from the same procedure — and grades it into the
+one SM-2 model via `recordRadioStep` (`AppContext`), reusing the Yard's exact F1/F2 guards.
+`public/data/radio-script.json` adds 14 `radio-script` ContentItems, one per step, each indexing radioSim's
+`STEPS`; the call wording stays in radioSim only, so the two modes cannot drift.
+**Supersedes the literal wording of REVAMP rec #19** ("per-step graded Radio"), which contradicted §5 of
+the same document — *"merging turns a confidence-builder into a test."* It was also hollow: pressing
+**Key the radio ▶** has no wrong answer, so grading it would have graded attendance.
+**Only 8 of the 14 steps are gradable, on purpose.** A step is graded iff its own trust is `verified`,
+which requires a CROR citation. The two CN GOI steps (set-and-center, cutting the air in) and the four
+uncited closing counts are `operating-practice` — they play, they explain, they never move the bar, and
+the station **says so on screen** rather than scoring them silently. New gate checks H (a graded radio step
+must cite a verified CROR rule; a CROR-sourced step must be gradable) and G/I (1:1 with `STEPS`; every call
+has ≥2 usable distractors) make that structural instead of a convention.
+**Distractors are never invented** — they are other real calls from the procedure, because the true
+confusions are *which* call belongs *where* (engine number past two car lengths, "over" on a running count,
+feet too early). §7.5's collision test is applied at runtime and at the gate.
+**`profile.radio.done` is retired** — it graded attendance and could never decay. Old profiles drop the
+field on load. `radio-script` is no longer a declared-but-unused type; the Drill explicitly excludes those
+items (they have no term↔definition reading).
+**Also:** Reference's signal-aspect card gets **Drill these aspects →** into `/signals`. Rec #19's other
+half — "a light graded mode in the Signal Reader" — was **already built and is not rebuilt**: `/signals`
+has routed to `<Drill domain="signals">` since D-0016, and D-0021 already gates signals mastery on a real
+SVG recall. Building a second answer surface would have been the duplication §5 forbids.
+**Weighed:** grading each guided step (rejected — §5, and nothing to get wrong); a call-ordering puzzle
+(rejected — tests sequence, not wording, and the wording is the SME-tuned asset); leaving Radio ungraded
+and retiring the boolean only (rejected — the station would still teach and throw it away).
+**Known effect:** the 8 new verified items enlarge the `radio` domain denominator, so an existing profile's
+Radio mastery reads slightly lower than before. That is honest — there is now more in the domain to know.
+**Open for SME:** steps 6 and 8–10 ("last car, one" and the feet counts) are correct practice with no CROR
+paragraph cited in the verified source. If they map to one, they become gradable. Left uncited, not guessed.
+**Verified live:** a fresh profile answering call 1 correctly moves Radio 0 → 0.0026 with exactly
+`radio.joint.01` graded; a full 14/14 run grades exactly the 8 verified steps (06/08/09/10 answered, not
+graded) and reads "+2% → 2%"; an immediate perfect replay moves mastery by **zero** (F2); call 6 shows
+"● No CROR citation in the verified source", call 12 shows "● CN practice (GOI), not a CROR rule"; a miss
+offers **Look it up →** and the misses-review round; guided mode still mounts and renders its first call
+identically; radioSim keeps its own 13.4 kB lazy chunk; `npm run check` A–I green, `tsc -b` + build clean,
+0 console errors.
+
 ---
 *V1. Edit as decisions are made or reversed.*

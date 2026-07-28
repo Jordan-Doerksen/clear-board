@@ -79,7 +79,9 @@ const RADIO_HTML = `
 </div>`;
 
 // VERBATIM from the source module — do not reword (SME-tuned, real-world-accurate).
-const STEPS = [
+// Exported so "Call it yourself" mode (RadioTest.tsx) draws its prompts and its distractors from
+// THIS one array — the call wording lives in exactly one place and cannot drift between modes.
+export const STEPS = [
  {call:"CN two-two-zero-four, this is the conductor on the ground, west end. Over.",
   ack:"Conductor, CN two-two-zero-four, go ahead.", rule:"Rule 121 — Positive identification",
   note:"Commence with railway initials and engine number, digit by digit — 'C-N, two-two-zero-four' — then identify yourself. Both parties identify; initiator ends the initial call with 'over' (121b).",
@@ -179,8 +181,9 @@ export function mount(root, ctx) {
     if (idx >= STEPS.length) {
       doneEl.className = 'done show';
       doneEl.innerHTML = '<b>Coupled, proven, protected, air to the tail.</b> Counted cars then feet, made the joint, stretched it, set &amp; centered, cut the air in; the engineer called air to the tail, you repeated it and called "going for hand brakes." The move/departure is the next layer.';
-      if (!ctx.profile.radio) ctx.profile.radio = { done: false };
-      ctx.profile.radio.done = true; ctx.save();
+      // Guided mode grades NOTHING (REVAMP §5 — the walkthrough is a confidence-builder, not a test).
+      // The old profile.radio.done boolean was retired with D-0025: it graded attendance and could
+      // never decay. Radio mastery now comes from "Call it yourself" through the one SM-2 model.
     }
   }
   function reset() {
