@@ -6,7 +6,7 @@
 // back button, reduced-motion, sound default). No top-level side effects.
 
 import { W, H, NTRACK, TRACK_IDS, switchPos, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
-import { freshState, lineSwitch, canPull, canSpot, canKick, spotPlan, pull, spot, kick, checkWin, grade } from './yard/model.js';
+import { freshState, lineSwitch, canPull, canSpot, canKick, canSecure, spotPlan, pull, spot, kick, secure, checkWin, unsecuredGoal, grade } from './yard/model.js';
 import { render } from './yard/render.js';
 import { play, setSpeed } from './yard/anim.js';
 import { sfx, resume, toggleMute, isMuted } from './yard/sound.js';
@@ -152,6 +152,7 @@ const YARD_HTML = `
         <option value="pull">PULL</option>
         <option value="spot">SPOT</option>
         <option value="kick">KICK</option>
+        <option value="secure">SECURE</option>
       </select>
       <select id="count" title="How many cars"></select>
       <span style="color:var(--dim)">cars</span>
@@ -302,6 +303,7 @@ export function mount(root, ctx) {
   // Full validation up front (lining + count + foul/clearance) so a fouling move is
   // refused before the engine ever moves.
   function precheck(kind, id, n) {
+    if (kind === 'secure') return canSecure(state, id);
     return kind === 'pull' ? canPull(state, id, n) : kind === 'kick' ? canKick(state, id, n) : canSpot(state, id, n);
   }
 
@@ -378,6 +380,8 @@ export function mount(root, ctx) {
     if (!ordered) { sfx.refuse(); banner('Verify the switch list first — flag the bad lines and certify the order.', 'bad'); return; }
     const chk = precheck(kind, id, n);
     if (!chk.ok) { sfx.refuse(); refusalBanner(chk.msg); return; }
+    // SECURE is the conductor on the ground, not an engine leg — no animation, no move cost.
+    if (kind === 'secure') { secure(state, id); sfx.points(); afterMove(); return; }
     busy = true;
     const g = gen;
     animateMove(kind, id, n).then(() => { if (gen !== g) return; busy = false; afterMove(); });
@@ -403,7 +407,9 @@ export function mount(root, ctx) {
       if (gen !== myGen) return;
       autoLine(trk); sfx.points(); paint(); await sleep(520);
       if (gen !== myGen) return;
-      await animateMove(act, trk, n);
+      // SECURE has no engine movement to animate — show it as the beat it is.
+      if (act === 'secure') { secure(state, trk); banner(state.msg, 'ok'); paint(); await sleep(420); }
+      else await animateMove(act, trk, n);
       if (gen !== myGen) return;
       $('readout').textContent = `Moves ${state.moves} / par ${puzzle.par} · Joints ${state.joints}`;
       await sleep(320);
@@ -427,6 +433,12 @@ export function mount(root, ctx) {
     } else {
       $('depart').disabled = true;
       if (done) winBanner();
+      else {
+        // Built right but left loose. This is the one refusal that isn't a mistake in the work —
+        // it's the step people forget, so name it plainly instead of just withholding the win.
+        const loose = unsecuredGoal(state, puzzle);
+        if (loose) refusalBanner(`The cars are where they belong, but ${loose} is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE ${loose} to finish the job.`);
+      }
     }
   }
 
@@ -514,8 +526,12 @@ export function mount(root, ctx) {
   function syncBuilder() {
     // keep the count cap sensible for the chosen action
     const kind = $('act').value, id = $('track').value;
+    const cntSel = $('count');
+    // SECURE acts on the whole standing cut — a car count would be meaningless.
+    cntSel.disabled = kind === 'secure';
+    cntSel.style.opacity = kind === 'secure' ? '.45' : '';
     const max = kind === 'pull' ? (state.tracks[id]?.length || 1) : Math.max(1, state.engine.length);
-    const cnt = $('count'); const cur = +cnt.value;
+    const cnt = cntSel; const cur = +cnt.value;
     cnt.innerHTML = '';
     for (let k = 1; k <= Math.max(1, max); k++) {
       const o = document.createElement('option'); o.value = k; o.textContent = k; cnt.appendChild(o);

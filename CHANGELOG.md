@@ -2,6 +2,22 @@
 
 ## [Unreleased] — V1 in progress
 
+### Securement becomes a decision, not a flag (2026-07-28)
+- **Rule 112 is now something you do.** The engine used to tie down every cut for you — spotting 2+ cars
+  silently set `secured = true`. There's a real **SECURE** action now: spotting leaves cars standing
+  loose, walking away from a loose cut isn't a win, and a kick backstop must be tied by you. (D-0029)
+- **Every par is unchanged.** SECURE costs zero engine moves, which is the honest physics — `moves`
+  counts engine legs and hand brakes are the conductor on the ground. All 19 pars re-proven, none
+  dropped to "optimality unverified". (D-0029)
+- **Visible on the track:** a standing 2+ cut is tagged **TIED** or **LOOSE** on the canvas itself —
+  words, not colour alone — instead of only surfacing in a banner after you try to leave. The refusal
+  names the track and cites 112.
+- **New gate:** `tools/securement-check.mjs` (GATE 3 in `npm run check`) — 13 assertions so the mechanic
+  can't quietly revert. Writing it caught a false pass in the first version of the test, where a kick was
+  being refused for having an empty engine rather than an untied backstop. (D-0029)
+- **Deferred:** the point-protection acknowledgment on shove. It would add a confirmation to the primary
+  verb several times a minute — a game-feel call for the owner, not a silent one. (D-0029)
+
 ### Offline for real — PWA wired (2026-07-28)
 - **Works with no signal.** `vite-plugin-pwa` was a devDep for months without being wired; it's now
   configured and shipping a service worker. Verified by building, serving `dist/`, **stopping the

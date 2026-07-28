@@ -138,7 +138,15 @@ function drawTrackLabels(ctx, state, showSecured) {
     const id = TRACK_IDS[i], y = trackY(i);
     tag(ctx, id, TRACK_RIGHT + 10, y, 'left', C.label, '700 13px ui-monospace, monospace');
     let sub = y + 16;
-    if (showSecured && state.secured[id]) { tag(ctx, 'TIED', TRACK_RIGHT + 10, sub, 'left', C.reverse, '700 10px ui-monospace, monospace'); sub += 13; }
+    // Securement state at its source, on the track itself — not only in a banner after you
+    // try to walk away. A standing 2+ cut is either TIED or LOOSE; a single car is neither
+    // (Rule 112 is about a standing cut). Words, never colour alone.
+    if (showSecured && state.tracks[id].length >= 2) {
+      const tied = state.secured[id];
+      tag(ctx, tied ? 'TIED' : 'LOOSE', TRACK_RIGHT + 10, sub, 'left', tied ? C.reverse : C.clear,
+        '700 10px ui-monospace, monospace');
+      sub += 13;
+    }
     if (state.kickable && state.kickable.includes(id)) tag(ctx, '⚡ KICKABLE', TRACK_RIGHT + 10, sub, 'left', C.reverse, '700 9px ui-monospace, monospace');
   }
 }

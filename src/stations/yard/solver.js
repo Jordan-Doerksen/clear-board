@@ -3,7 +3,7 @@
 // Dijkstra over states, cost = (moves, then joints). It applies the REAL engine
 // moves, so solver and game can never disagree. Lining is auto-satisfied per move.
 
-import { freshState, pull, spot, kick, checkWin } from './model.js';
+import { freshState, pull, spot, kick, secure, checkWin } from './model.js';
 import { TRACK_IDS } from './geometry.js';
 
 function clone(s) {
@@ -45,7 +45,16 @@ export function solve(puzzle, { maxMoves = 28, maxStates = 150000 } = {}) {
   while (h.size) {
     const cur = h.pop();
     if (++explored > maxStates) return null;
-    if (checkWin(cur.s, puzzle)) return { par: cur.s.moves, joints: cur.s.joints, opt: cur.path, explored };
+    // Search WITHOUT the securement requirement: SECURE costs 0 moves and is always available,
+    // so it cannot change the fewest-moves line — including it in the search space would only
+    // multiply states. On a win, append the SECURE the strict rules demand, so the emitted line
+    // is one the game will actually accept (D-0029).
+    if (checkWin(cur.s, puzzle, { requireSecured: false })) {
+      const g = puzzle.goal;
+      const needsTie = !g.depart && cur.s.tracks[g.track].length >= 2 && !cur.s.secured[g.track];
+      const opt = needsTie ? cur.path.concat([['secure', g.track, 0]]) : cur.path;
+      return { par: cur.s.moves, joints: cur.s.joints, opt, explored };
+    }
     if (cur.s.moves >= maxMoves) continue;
 
     for (const T of TRACK_IDS) {
@@ -68,7 +77,7 @@ export function solve(puzzle, { maxMoves = 28, maxStates = 150000 } = {}) {
   }
   return null;
 }
-const MOVE_FN = { pull, spot, kick };
+const MOVE_FN = { pull, spot, kick, secure: (s, T) => secure(s, T) };
 function step(cur, act, T, n, h, best) {
   const s = clone(cur.s); autoLine(s, T);
   if (!MOVE_FN[act](s, T, n).ok) return;

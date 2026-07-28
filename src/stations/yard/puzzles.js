@@ -38,7 +38,7 @@ export const PUZZLES = [
     id: 'p0-1', tier: 0,
     title: 'Make up the cut',
     hint: 'Six cars for AS75 — three on AS72, three on AS73. PULL one cut, PULL the other onto it, then SPOT all six onto AS75. The rest of the yard is full of cars that aren’t yours. Three handlings — par 5.',
-    rules: ['line', 'speed', 'couple', 'shove'],
+    rules: ['secure', 'line', 'speed', 'couple', 'shove'],
     start: {
       AS72: [180, 'CN 411002', 'CN 411040', 'CN 411068'],
       AS73: [200, 'CN 412110', 'CN 412128', 'CN 412146'],
@@ -49,13 +49,13 @@ export const PUZZLES = [
     goal: { track: 'AS75', cars: ['CN 411002', 'CN 411040', 'CN 411068', 'CN 412110', 'CN 412128', 'CN 412146'] },
     par: 5,
     optJoints: 2,
-    opt: [['pull', 'AS73', 3], ['pull', 'AS72', 3], ['spot', 'AS75', 6]],
+    opt: [['pull', 'AS73', 3], ['pull', 'AS72', 3], ['spot', 'AS75', 6], ['secure', 'AS75']],
   },
   {
     id: 'p0-2', tier: 0,
     title: 'Add to the cut',
     hint: 'AS73 already holds a three-car cut sitting deep. Bring the two off AS71 and the two off AS72 onto your engine, then SPOT all four ahead of it on AS73. Three handlings — par 5.',
-    rules: ['line', 'speed', 'couple', 'shove'],
+    rules: ['secure', 'line', 'speed', 'couple', 'shove'],
     start: {
       AS73: [300, 'CN 198450', 'CN 198212', 'CN 198330'],
       AS71: [160, 'BNSF 7244', 'CP 38819'],
@@ -66,13 +66,13 @@ export const PUZZLES = [
     goal: { track: 'AS73', cars: ['CN 198450', 'CN 198212', 'CN 198330', 'BNSF 7244', 'CP 38819', 'CN 199388', 'CN 199402'] },
     par: 5,
     optJoints: 3,
-    opt: [['pull', 'AS71', 2], ['pull', 'AS72', 2], ['spot', 'AS73', 4]],
+    opt: [['pull', 'AS71', 2], ['pull', 'AS72', 2], ['spot', 'AS73', 4], ['secure', 'AS73']],
   },
   {
     id: 'p0-3', tier: 0,
     title: 'Across the ladder',
     hint: 'Three cars up on AS76, three on AS72 — all six build on AS71. Line each route (the far switch reverse, the rest normal), gather them across the ladder, and SPOT. Three handlings — par 5.',
-    rules: ['line', 'speed', 'couple', 'shove'],
+    rules: ['secure', 'line', 'speed', 'couple', 'shove'],
     start: {
       AS76: [180, 'CN 210044', 'CN 210052', 'CN 210066'],
       AS72: [200, 'CN 211110', 'CN 211128', 'CN 211146'],
@@ -83,13 +83,13 @@ export const PUZZLES = [
     goal: { track: 'AS71', cars: ['CN 210044', 'CN 210052', 'CN 210066', 'CN 211110', 'CN 211128', 'CN 211146'] },
     par: 5,
     optJoints: 2,
-    opt: [['pull', 'AS72', 3], ['pull', 'AS76', 3], ['spot', 'AS71', 6]],
+    opt: [['pull', 'AS72', 3], ['pull', 'AS76', 3], ['spot', 'AS71', 6], ['secure', 'AS71']],
   },
   {
     id: 'p0-4', tier: 0,
     title: 'Make up the train',
     hint: 'Six cars on three tracks all go to AS74. Gather them onto your engine — fewest trips — then SPOT the whole cut. Watch the loaded tank string on AS73; it’s not yours. Four handlings — par 7.',
-    rules: ['line', 'speed', 'couple', 'shove'],
+    rules: ['secure', 'line', 'speed', 'couple', 'shove'],
     start: {
       AS71: [180, 'BNSF 8801', 'BNSF 8829'],
       AS72: [200, 'CP 77012', 'CP 77040'],
@@ -100,7 +100,7 @@ export const PUZZLES = [
     goal: { track: 'AS74', cars: ['BNSF 8801', 'BNSF 8829', 'CP 77012', 'CP 77040', 'CN 41002', 'CN 41044'] },
     par: 7,
     optJoints: 3,
-    opt: [['pull', 'AS75', 2], ['pull', 'AS72', 2], ['pull', 'AS71', 2], ['spot', 'AS74', 6]],
+    opt: [['pull', 'AS75', 2], ['pull', 'AS72', 2], ['pull', 'AS71', 2], ['spot', 'AS74', 6], ['secure', 'AS74']],
   },
 
   // ---- Tier 1 — work it (dig / sort / clear / messy) ----
@@ -108,7 +108,7 @@ export const PUZZLES = [
     id: 'p1-dig', tier: 1,
     title: 'Dig out the block',
     hint: 'Three of your cars are buried behind two bad-order cars on AS71; two more sit on AS73. Pull the AS71 cut, grab the AS73 pair, SPOT your five onto AS75, then stash the two bad-order cars clear. Busy yard — read the marks.',
-    rules: ['line', 'speed', 'couple', 'shove'],
+    rules: ['secure', 'line', 'speed', 'couple', 'shove'],
     start: {
       AS71: [160, ['TILX 44102', 'tank'], ['TILX 44280', 'tank'], 'CN 720019', 'CN 720037', 'CN 720055'],
       AS73: [200, 'CN 720073', 'CN 720091'],
@@ -119,7 +119,7 @@ export const PUZZLES = [
     goal: { track: 'AS75', cars: ['CN 720019', 'CN 720037', 'CN 720055', 'CN 720073', 'CN 720091'] },
     par: 7,
     optJoints: 2,
-    opt: [['pull', 'AS71', 5], ['pull', 'AS73', 2], ['spot', 'AS75', 5], ['spot', 'AS71', 2]],
+    opt: [['pull', 'AS71', 5], ['pull', 'AS73', 2], ['spot', 'AS75', 5], ['spot', 'AS71', 2], ['secure', 'AS75']],
   },
   {
     // Tier 3, not 1: at par 19 it is more than twice any other tier-0/1 job, and it is the only
@@ -129,7 +129,7 @@ export const PUZZLES = [
     id: 'p1-sort', tier: 3,
     title: 'Build it in order',
     hint: 'AS72 holds five cars in the WRONG order for your manifest. Build AS74 in order — CN 305001 … 305005 (front to back) — which means handling them one at a time. The other tracks are full of cars that aren’t yours.',
-    rules: ['order', 'line', 'speed', 'couple', 'shove'],
+    rules: ['secure', 'order', 'line', 'speed', 'couple', 'shove'],
     start: {
       AS72: [220, 'CN 305005', 'CN 305004', 'CN 305003', 'CN 305002', 'CN 305001'],
       AS71: [200, ['SHPX 6610', 'hopper'], ['SHPX 6628', 'hopper']],
@@ -140,13 +140,13 @@ export const PUZZLES = [
     goal: { track: 'AS74', cars: ['CN 305001', 'CN 305002', 'CN 305003', 'CN 305004', 'CN 305005'], ordered: true },
     par: 19,
     optJoints: 9,
-    opt: [['pull', 'AS72', 1], ['spot', 'AS74', 1], ['pull', 'AS72', 1], ['spot', 'AS74', 1], ['pull', 'AS72', 1], ['spot', 'AS74', 1], ['pull', 'AS72', 1], ['spot', 'AS74', 1], ['pull', 'AS72', 1], ['spot', 'AS74', 1]],
+    opt: [['pull', 'AS72', 1], ['spot', 'AS74', 1], ['pull', 'AS72', 1], ['spot', 'AS74', 1], ['pull', 'AS72', 1], ['spot', 'AS74', 1], ['pull', 'AS72', 1], ['spot', 'AS74', 1], ['pull', 'AS72', 1], ['spot', 'AS74', 1], ['secure', 'AS74']],
   },
   {
     id: 'p1-clear', tier: 1,
     title: 'Clear the build track',
     hint: 'AS74 is your build track, but a three-car autorack cut is sitting on it. Pull it off and stash it clear (AS76 is open), then bring CN 480012 / 480044 (AS72) and CN 480066 / 480088 (AS73) and build your four-car cut on AS74.',
-    rules: ['line', 'speed', 'couple', 'shove'],
+    rules: ['secure', 'line', 'speed', 'couple', 'shove'],
     start: {
       AS74: [140, ['DTTX 9001', 'autorack'], ['DTTX 9028', 'autorack'], ['DTTX 9044', 'autorack']],
       AS72: [180, 'CN 480012', 'CN 480044'],
@@ -157,13 +157,13 @@ export const PUZZLES = [
     goal: { track: 'AS74', cars: ['CN 480012', 'CN 480044', 'CN 480066', 'CN 480088'] },
     par: 9,
     optJoints: 3,
-    opt: [['pull', 'AS74', 3], ['pull', 'AS73', 2], ['pull', 'AS72', 2], ['spot', 'AS74', 4], ['spot', 'AS76', 3]],
+    opt: [['pull', 'AS74', 3], ['pull', 'AS73', 2], ['pull', 'AS72', 2], ['spot', 'AS74', 4], ['spot', 'AS76', 3], ['secure', 'AS74']],
   },
   {
     id: 'p1-messy', tier: 1,
     title: 'Work the yard',
     hint: 'Busy yard. CN 501001 is buried behind a stray on AS72; CN 501002 + 501004 sit on AS73 (a stray behind them); CN 501003 is at the throat of AS71 with a stray behind it. Dig the buried one, gather all four, build AS75 — leave the strays be.',
-    rules: ['line', 'speed', 'couple', 'shove'],
+    rules: ['secure', 'line', 'speed', 'couple', 'shove'],
     start: {
       AS72: [180, 'WFRX 3300', 'CN 501001'],
       AS73: [220, 'CN 501002', 'CN 501004', 'GATX 1120'],
@@ -174,7 +174,7 @@ export const PUZZLES = [
     goal: { track: 'AS75', cars: ['CN 501001', 'CN 501002', 'CN 501003', 'CN 501004'] },
     par: 9,
     optJoints: 3,
-    opt: [['pull', 'AS72', 2], ['pull', 'AS71', 1], ['pull', 'AS73', 2], ['spot', 'AS75', 4], ['spot', 'AS72', 1]],
+    opt: [['pull', 'AS72', 2], ['pull', 'AS71', 1], ['pull', 'AS73', 2], ['spot', 'AS75', 4], ['spot', 'AS72', 1], ['secure', 'AS75']],
   },
 
   // ---- mechanic demos (kept compact; their tiers get the meaty pass later) ----
@@ -182,7 +182,7 @@ export const PUZZLES = [
     id: 'p2-list', tier: 2,
     title: 'Trust the marks, not the list',
     hint: 'The switch list is wrong somewhere. Walk the yard, check each listed car against what is actually on the track, flag the bad lines, then work the real cars onto AS73.',
-    rules: ['verify', 'line', 'speed', 'couple', 'shove'],
+    rules: ['secure', 'verify', 'line', 'speed', 'couple', 'shove'],
     listed: [
       { listedMark: 'CN 318044', listedTrack: 'AS75', trueMark: 'CN 318044', trueTrack: 'AS71', error: 'location' },
       { listedMark: 'BNSF 5512', listedTrack: 'AS74', trueMark: 'BNSF 5521', trueTrack: 'AS74', error: 'mark' },
@@ -197,7 +197,7 @@ export const PUZZLES = [
     goal: { track: 'AS73', cars: ['CN 318044', 'BNSF 5521'] },
     par: 5,
     optJoints: 2,
-    opt: [['pull', 'AS71', 1], ['pull', 'AS74', 1], ['spot', 'AS73', 2]],
+    opt: [['pull', 'AS71', 1], ['pull', 'AS74', 1], ['spot', 'AS73', 2], ['secure', 'AS73']],
   },
   {
     id: 'p2-kick', tier: 2,
@@ -336,7 +336,7 @@ export const PUZZLES = [
     id: 'p5-long', tier: 5,
     title: 'Long string, short lead',
     hint: 'Eight autoracks build on AS71 — but autoracks are LONG, and the lead won’t hold more than about seven at once. You can’t gather them all in one grab; bring them over in two cuts.',
-    rules: ['line', 'speed', 'couple', 'shove'],
+    rules: ['secure', 'line', 'speed', 'couple', 'shove'],
     start: {
       AS73: [200, ['ETTX 9001', 'autorack'], ['ETTX 9020', 'autorack'], ['ETTX 9044', 'autorack'], ['ETTX 9068', 'autorack']],
       AS74: [200, ['DTTX 7001', 'autorack'], ['DTTX 7020', 'autorack'], ['DTTX 7044', 'autorack'], ['DTTX 7068', 'autorack']],
@@ -347,13 +347,13 @@ export const PUZZLES = [
     goal: { track: 'AS71', cars: ['ETTX 9001', 'ETTX 9020', 'ETTX 9044', 'ETTX 9068', 'DTTX 7001', 'DTTX 7020', 'DTTX 7044', 'DTTX 7068'] },
     par: 7,
     optJoints: 3,
-    opt: [['pull', 'AS73', 4], ['spot', 'AS71', 4], ['pull', 'AS74', 4], ['spot', 'AS71', 4]],
+    opt: [['pull', 'AS73', 4], ['spot', 'AS71', 4], ['pull', 'AS74', 4], ['spot', 'AS71', 4], ['secure', 'AS71']],
   },
   {
     id: 'p5-room', tier: 5,
     title: 'Long cars need long room',
     hint: 'Build four autoracks on AS74 — but a three-autorack cut is already sitting there, and autoracks are long. Pull it off and stash it where it fits, then bring your four (AS72, AS73) and build.',
-    rules: ['line', 'speed', 'couple', 'shove'],
+    rules: ['secure', 'line', 'speed', 'couple', 'shove'],
     start: {
       AS74: [180, ['TTGX 6010', 'autorack'], ['TTGX 6028', 'autorack'], ['TTGX 6044', 'autorack']],
       AS72: [200, ['BNSF 8810', 'autorack'], ['BNSF 8829', 'autorack']],
@@ -364,7 +364,7 @@ export const PUZZLES = [
     goal: { track: 'AS74', cars: ['BNSF 8810', 'BNSF 8829', 'BNSF 8844', 'BNSF 8861'] },
     par: 9,
     optJoints: 3,
-    opt: [['pull', 'AS74', 3], ['pull', 'AS73', 2], ['pull', 'AS72', 2], ['spot', 'AS74', 4], ['spot', 'AS71', 3]],
+    opt: [['pull', 'AS74', 3], ['pull', 'AS73', 2], ['pull', 'AS72', 2], ['spot', 'AS74', 4], ['spot', 'AS71', 3], ['secure', 'AS74']],
   },
   {
     id: 'p6-road', tier: 6,

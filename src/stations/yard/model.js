@@ -149,7 +149,10 @@ export function spot(state, id, n) {
   state.tracks[id] = taken.concat(state.tracks[id]);
   state.pos[id] = plan.yourPos.concat(plan.newStanding);
   if (onto) state.joints += 1;
-  if (state.tracks[id].length >= 2) state.secured[id] = true;
+  // D-0029: spotting does NOT tie the cut down. Cars you just set out are standing loose
+  // until YOU apply hand brakes (CROR 112). This used to auto-secure, which made the single
+  // most safety-critical rule in the yard a thing that happened to you.
+  state.secured[id] = false;
   const cost = (state.out ? 0 : 1) + 1; state.out = false;  // (pull clear first if needed) + shove in; pull-out deferred until you leave
   return commit(state, `Spotted ${n} to ${id}.`, cost);
 }
@@ -196,6 +199,30 @@ export function kick(state, id, n) {
   return commit(state, `Kicked ${n} to ${id}.`, cost);
 }
 
+// SECURE T — apply hand brakes to a standing cut (CROR 112). D-0029 makes this a real player
+// ACTION instead of a flag the engine set for you.
+//
+// It costs ZERO moves on purpose, and that is the honest physics: `moves` counts ENGINE
+// direction-legs, and tying down hand brakes is the conductor on the ground — the engine doesn't
+// move. So every authored par still means exactly what it meant. What securement costs you is
+// remembering to do it, which is the thing being trained.
+export function canSecure(state, id) {
+  if (state.tracks[id].length === 0)
+    return { ok: false, msg: `Nothing standing on ${id} to tie down.` };
+  if (state.tracks[id].length < 2)
+    return { ok: false, msg: `${id} holds a single car — securement applies to a standing cut of 2 or more (CROR 112).` };
+  if (state.secured[id])
+    return { ok: false, msg: `${id} is already tied down.` };
+  return { ok: true, msg: '' };
+}
+
+export function secure(state, id) {
+  const v = canSecure(state, id);
+  if (!v.ok) return refuse(state, v.msg);
+  state.secured[id] = true;
+  return commit(state, `Hand brakes applied — ${id} is tied down.`, 0);
+}
+
 function refuse(state, msg) { state.msg = msg; return { ok: false, msg }; }
 // MOVES = engine direction-moves (legs). Each op's cost is computed in pull/spot/kick from
 // the engine's `out` state: a PULL is back-in + pull-out (2); a SPOT is just the shove-in (1),
@@ -213,12 +240,28 @@ const sameOrder = (a, b) => a.length === b.length && a.every((c, k) => c === b[k
 //    final spot). Engine holds the consist (in manifest order if `ordered`).
 //  • otherwise — the consist is built on the goal track and the loco is empty.
 // goal.ordered ⇒ exact order (manifest / blocking); else set. The Depart call is UI.
-export function checkWin(state, puzzle) {
+// `requireSecured: false` is for the SOLVER only — securement costs 0 moves and is always
+// available, so it can never change the fewest-moves line. The solver searches without it and
+// appends the needed SECURE step when it wins; replay and the game use the strict check.
+export function checkWin(state, puzzle, { requireSecured = true } = {}) {
   const g = puzzle.goal;
   if (g.depart) return g.ordered ? sameOrder(state.engine, g.cars) : sameSet(state.engine, g.cars);
   if (state.engine.length > 0) return false;
   const have = state.tracks[g.track];
-  return g.ordered ? sameOrder(have, g.cars) : sameSet(have, g.cars);
+  const built = g.ordered ? sameOrder(have, g.cars) : sameSet(have, g.cars);
+  if (!built) return false;
+  // You do not walk away from a standing cut you left. (CROR 112 — D-0029.)
+  if (requireSecured && have.length >= 2 && !state.secured[g.track]) return false;
+  return true;
+}
+
+// Why a built-but-unwon job isn't finished — so the refusal can teach instead of just failing.
+export function unsecuredGoal(state, puzzle) {
+  const g = puzzle.goal;
+  if (g.depart || state.engine.length > 0) return null;
+  const have = state.tracks[g.track];
+  const built = g.ordered ? sameOrder(have, g.cars) : sameSet(have, g.cars);
+  return built && have.length >= 2 && !state.secured[g.track] ? g.track : null;
 }
 
 export function grade(state, puzzle) {

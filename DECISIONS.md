@@ -417,5 +417,41 @@ tool's default mark, which would be a provenance problem, not a style preference
 icon actually be. Once there is a source mark, `npm run tauri icon <src>` generates the full desktop
 set and PNG manifest icons in one step.
 
+### D-0029 — Securement becomes a player ACTION (#18); point protection deferred
+**The problem:** Rule 112 is the most safety-critical thing the Yard teaches, and the engine was
+doing it *for* you — `spot()` set `secured = true` automatically on any 2+ car cut. The learner never
+decided anything; securement was a flag that happened to them. Same for the kick backstop.
+**Chosen:** a real **SECURE T** move (`model.js` — `canSecure` / `secure`). Spotting no longer ties a
+cut down; leaving the goal track's standing cut loose is **not a win**; kicking still demands a secured
+backstop, which you must now tie yourself.
+**SECURE costs ZERO engine moves — and that is the honest physics, not a dodge.** `moves` counts engine
+direction-legs; applying hand brakes is the conductor on the ground and the engine doesn't move. The
+consequence matters enormously: **every authored par still means exactly what it meant.** All 19 pars
+re-proven unchanged, with **0 puzzles dropping to "optimality unverified"** — the risk that an engine
+edit would invalidate hand-tuned puzzle design did not materialise. What securement costs you is
+remembering, which is the thing being trained.
+**Solver:** searches with `checkWin(..., { requireSecured: false })` and appends the required SECURE on
+a win. Sound because a 0-cost, always-available action cannot change a fewest-moves line — and it keeps
+the search space from multiplying (`key()` doesn't encode securement, so including it would have been
+incorrect as well as expensive).
+**Data:** 11 authored `opt` lines gained a trailing `['secure', <goal>]` (the 7 kick puzzles already
+end tied, since a kick lands on a secured backstop; `p6-road` departs, so nothing is left standing).
+The same 11 gained the `secure` rule chip — every non-depart job genuinely exercises CROR 112 now, so
+the chips say so and `masteryItemsFor` grades it on every win.
+**Visible at its source:** the canvas tags a standing 2+ cut **TIED** or **LOOSE** on the track itself,
+words not colour alone — not just a banner after you try to walk away. The refusal names the specific
+track and cites 112.
+**New gate — `tools/securement-check.mjs` (GATE 3, in `npm run check`).** 13 assertions pin the
+behaviour so it cannot quietly revert to a passive flag. Writing it caught a **false pass in my own
+first test**: "kick refused onto an untied backstop" was passing because the engine was empty
+("You're only holding 0 cars"), not because of securement. The committed version replays up to the
+kick so the engine is actually holding cars, asserts the kick is ALLOWED when tied, and requires the
+refusal to cite 113.4/113.5.
+**DEFERRED — the point-protection acknowledgment on shove.** #18's second half would put a
+confirmation in front of every SPOT and KICK, i.e. on the primary verb, several times a minute. That is
+a game-feel call about the moment-to-moment rhythm of the core loop, and it belongs to the owner with
+hands on the controls — not to a silent judgment here. Securement was separable and is done; this half
+is not started.
+
 ---
 *V1. Edit as decisions are made or reversed.*
