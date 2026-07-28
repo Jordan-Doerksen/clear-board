@@ -1,6 +1,12 @@
 // yard.js — Clear Board station wrapping the switch-list canvas sim.
-// The 7 engine modules in ./yard/ are BYTE-FOR-BYTE copies of switch-list/src
-// (verified switching logic — do not edit). This file is the only adaptation:
+//
+// The 7 engine modules in ./yard/ WERE byte-for-byte copies of switch-list/src. That is no longer
+// true: D-0029 made securement a player action, which required editing model.js, solver.js,
+// render.js and puzzles.js. Divergence from switch-list is now deliberate and gated —
+// tools/solve.mjs re-proves all 19 pars and tools/securement-check.mjs pins the new behaviour.
+// Treat those files as OWNED here, not mirrored: don't re-sync them from switch-list.
+//
+// This file is the station adaptation:
 // switch-list/src/main.js, wrapped in mount(root, ctx) with all DOM scoped to
 // `root`, CSS scoped to `.yard-wrap`, and Clear Board hooks (profile/save,
 // back button, reduced-motion, sound default). No top-level side effects.

@@ -19,10 +19,21 @@ Design-gate docs live alongside: `SPEC.md`, `DECISIONS.md`, `GAP-REVIEW.md`.
 
 **This is now at feature parity with the vanilla build** — all five stations run on React, verified live.
 
-## Next
-- PWA service worker (offline on the train) — `vite-plugin-pwa` is already a devDep, just needs wiring.
-- Custom app icon (currently the default Tauri logo).
+## Next — needs the owner, not more code
+- **The app icon.** `public/favicon.svg` is a purple lightning bolt with nothing to do with railroading,
+  and it's currently the whole visual identity (favicon + PWA manifest); the Tauri build still wears the
+  default Tauri logo. Two questions: where that SVG came from (it resembles a third-party tool's default
+  mark — a provenance issue, not a style one), and what the icon should be. With a source mark,
+  `npm run tauri icon <src>` generates the desktop set and PNG manifest icons in one step. (D-0028)
+- **Point protection on shove** — the deferred half of D-0029. It would put a confirmation on the primary
+  verb several times a minute; that's a game-feel call to make with hands on the controls.
+- **A scaffold rung before `p1-sort`** — optional. The par-19 job now sits in tier 3 where it belongs
+  (D-0026); judge whether it still needs a gentler `order` puzzle in front of it.
 - Consolidate — this folder replaces the vanilla `../clear-board`, which retires; update the map + Observatory.
+
+## Done since the revamp design pass
+Radio "Call it yourself" (D-0025) · visible Yard tiers (D-0026) · solver-owned "clean" badge + best
+records (D-0027) · **PWA offline** (D-0028) · **securement as a player action** (D-0029).
 
 ## Run / build
 ```sh
