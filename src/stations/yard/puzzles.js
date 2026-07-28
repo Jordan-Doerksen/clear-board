@@ -48,6 +48,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS75', cars: ['CN 411002', 'CN 411040', 'CN 411068', 'CN 412110', 'CN 412128', 'CN 412146'] },
     par: 5,
+    optJoints: 2,
     opt: [['pull', 'AS73', 3], ['pull', 'AS72', 3], ['spot', 'AS75', 6]],
   },
   {
@@ -64,6 +65,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS73', cars: ['CN 198450', 'CN 198212', 'CN 198330', 'BNSF 7244', 'CP 38819', 'CN 199388', 'CN 199402'] },
     par: 5,
+    optJoints: 3,
     opt: [['pull', 'AS71', 2], ['pull', 'AS72', 2], ['spot', 'AS73', 4]],
   },
   {
@@ -80,6 +82,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS71', cars: ['CN 210044', 'CN 210052', 'CN 210066', 'CN 211110', 'CN 211128', 'CN 211146'] },
     par: 5,
+    optJoints: 2,
     opt: [['pull', 'AS72', 3], ['pull', 'AS76', 3], ['spot', 'AS71', 6]],
   },
   {
@@ -96,6 +99,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS74', cars: ['BNSF 8801', 'BNSF 8829', 'CP 77012', 'CP 77040', 'CN 41002', 'CN 41044'] },
     par: 7,
+    optJoints: 3,
     opt: [['pull', 'AS75', 2], ['pull', 'AS72', 2], ['pull', 'AS71', 2], ['spot', 'AS74', 6]],
   },
 
@@ -114,6 +118,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS75', cars: ['CN 720019', 'CN 720037', 'CN 720055', 'CN 720073', 'CN 720091'] },
     par: 7,
+    optJoints: 2,
     opt: [['pull', 'AS71', 5], ['pull', 'AS73', 2], ['spot', 'AS75', 5], ['spot', 'AS71', 2]],
   },
   {
@@ -134,6 +139,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS74', cars: ['CN 305001', 'CN 305002', 'CN 305003', 'CN 305004', 'CN 305005'], ordered: true },
     par: 19,
+    optJoints: 9,
     opt: [['pull', 'AS72', 1], ['spot', 'AS74', 1], ['pull', 'AS72', 1], ['spot', 'AS74', 1], ['pull', 'AS72', 1], ['spot', 'AS74', 1], ['pull', 'AS72', 1], ['spot', 'AS74', 1], ['pull', 'AS72', 1], ['spot', 'AS74', 1]],
   },
   {
@@ -150,6 +156,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS74', cars: ['CN 480012', 'CN 480044', 'CN 480066', 'CN 480088'] },
     par: 9,
+    optJoints: 3,
     opt: [['pull', 'AS74', 3], ['pull', 'AS73', 2], ['pull', 'AS72', 2], ['spot', 'AS74', 4], ['spot', 'AS76', 3]],
   },
   {
@@ -166,6 +173,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS75', cars: ['CN 501001', 'CN 501002', 'CN 501003', 'CN 501004'] },
     par: 9,
+    optJoints: 3,
     opt: [['pull', 'AS72', 2], ['pull', 'AS71', 1], ['pull', 'AS73', 2], ['spot', 'AS75', 4], ['spot', 'AS72', 1]],
   },
 
@@ -188,6 +196,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS73', cars: ['CN 318044', 'BNSF 5521'] },
     par: 5,
+    optJoints: 2,
     opt: [['pull', 'AS71', 1], ['pull', 'AS74', 1], ['spot', 'AS73', 2]],
   },
   {
@@ -206,6 +215,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS73', cars: ['CN 445010', 'CN 445028', 'CN 661012', 'CN 661140'] },
     par: 3,
+    optJoints: 1,
     opt: [['pull', 'AS71', 2], ['kick', 'AS73', 2]],
   },
   {
@@ -224,6 +234,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS73', cars: ['CN 220140', 'CN 220158', 'CN 220210', 'CN 220234'] },
     par: 4,
+    optJoints: 2,
     opt: [['pull', 'AS71', 3], ['kick', 'AS73', 2], ['spot', 'AS74', 1]],
   },
   {
@@ -242,6 +253,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS73', cars: ['CN 330110', 'CN 330128', 'CN 330210', 'CN 330234'] },
     par: 6,
+    optJoints: 2,
     opt: [['pull', 'AS71', 3], ['kick', 'AS73', 1], ['spot', 'AS72', 1], ['kick', 'AS73', 1]],
   },
   {
@@ -260,6 +272,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS73', cars: ['CN 410110', 'CN 410128', 'CN 410210', 'CN 410234', 'CN 410318', 'CN 410342'] },
     par: 7,
+    optJoints: 2,
     opt: [['pull', 'AS72', 2], ['kick', 'AS73', 2], ['pull', 'AS71', 3], ['kick', 'AS73', 2], ['spot', 'AS71', 1]],
   },
   {
@@ -278,6 +291,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS73', cars: ['CN 70010', 'CN 70028', 'CN 81002', 'CN 81044'] },
     par: 3,
+    optJoints: 1,
     opt: [['pull', 'AS71', 2], ['kick', 'AS73', 2]],
   },
   {
@@ -296,6 +310,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS73', cars: ['CN 600110', 'CN 600128', 'CN 600210', 'CN 600234', 'CN 600252', 'CN 600276', 'CN 600290'] },
     par: 5,
+    optJoints: 1,
     opt: [['pull', 'AS71', 6], ['kick', 'AS73', 3], ['kick', 'AS73', 2], ['spot', 'AS71', 1]],
   },
   {
@@ -314,6 +329,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS73', cars: ['CN 70010', 'CN 70028', 'CN 70110', 'CN 70134'] },
     par: 6,
+    optJoints: 2,
     opt: [['pull', 'AS71', 3], ['kick', 'AS73', 1], ['spot', 'AS72', 1], ['kick', 'AS73', 1]],
   },
   {
@@ -330,6 +346,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS71', cars: ['ETTX 9001', 'ETTX 9020', 'ETTX 9044', 'ETTX 9068', 'DTTX 7001', 'DTTX 7020', 'DTTX 7044', 'DTTX 7068'] },
     par: 7,
+    optJoints: 3,
     opt: [['pull', 'AS73', 4], ['spot', 'AS71', 4], ['pull', 'AS74', 4], ['spot', 'AS71', 4]],
   },
   {
@@ -346,6 +363,7 @@ export const PUZZLES = [
     },
     goal: { track: 'AS74', cars: ['BNSF 8810', 'BNSF 8829', 'BNSF 8844', 'BNSF 8861'] },
     par: 9,
+    optJoints: 3,
     opt: [['pull', 'AS74', 3], ['pull', 'AS73', 2], ['pull', 'AS72', 2], ['spot', 'AS74', 4], ['spot', 'AS71', 3]],
   },
   {
@@ -364,6 +382,7 @@ export const PUZZLES = [
     },
     goal: { cars: ['CN 401001', 'CN 401002', 'CN 401003'], ordered: true, depart: true },
     par: 4,
+    optJoints: 2,
     opt: [['pull', 'AS72', 1], ['pull', 'AS73', 2]],
   },
 ];

@@ -66,9 +66,18 @@ for (const puzzle of PUZZLES) {
     optimalityOk = null;
   }
 
+  // ---- Step 1b: the authored optJoints must equal the optimal line's real joint count ----
+  // The Yard's "clean" badge is scored against this number, so a stale value would praise a
+  // sloppy run. It used to be guessed in the engine as ceil(par/2) — wrong on 16 of 19 puzzles
+  // and always too generous. Show nothing false.
+  const jointsOk = rp.ok !== true || rp.joints === puzzle.optJoints;
+  if (!jointsOk) {
+    console.log(`     ✗ HARD FAIL ${id}: optJoints=${puzzle.optJoints} but the optimal line makes ${rp.joints} joint(s).`);
+  }
+
   // ---- Verdict ----
   let verdict;
-  if (!replayOk) {
+  if (!replayOk || !jointsOk) {
     verdict = 'FAIL';
     hardFails++;
   } else if (optimalityOk === false) {

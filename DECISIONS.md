@@ -365,5 +365,32 @@ tiers visible; per-puzzle best records (#14); solver-emitted `optJoints` (#17).
 2 ✓ and 1 → on the next puzzle; `npm run check` green (p1-sort still `par=19 solver=19`); build clean;
 0 console errors.
 
+### D-0027 — The "clean" badge stops guessing (#17); per-puzzle best records (#14); #20 is already resolved
+**#17 — the badge was praising sloppy runs.** `bestJoints()` was `ceil(par / 2)`, a placeholder that
+was **wrong on 16 of 19 puzzles and always too generous** — `p2-build` awarded "clean" at 4 joints when
+the optimal line makes 2; `p4-split` at 3 when the answer is 1. Every puzzle now carries a solver-derived
+`optJoints`, taken from `replay(puzzle, puzzle.opt).joints` — the real joint count of the authored
+optimal line — and `tools/solve.mjs` **hard-fails** if the stored number ever disagrees. Verified by a
+deliberate corruption: setting `p0-1` to `optJoints: 9` produced
+`✗ HARD FAIL p0-1: optJoints=9 but the optimal line makes 2 joint(s)`, exit 1; restoring it went green.
+**#14 — per-puzzle best records.** `profile.yard.best[id] = {moves, joints, beatPar, departed}`, added
+**alongside** the existing `completed: string[]` rather than replacing it (everything already reads that
+list; a migration would have been churn for no gain). Fewer moves wins, joints break the tie, and a
+worse run never overwrites a better one. The picker shows `· your best 6m` only where a record exists —
+a profile from before this ships shows **blank, not a fabricated record**. The win banner reads
+`· new best (was 7m/3j)` or `· your best: 5m/2j`; a first clear says nothing, because there is no best yet.
+**A watched-optimal demo never sets a record** — it is the answer, not your run (`fromDemo` guard, the
+same one that already blocks mastery writes).
+**#20 was already resolved — no work done.** The doc says the `authority` and `protection` domains are
+empty and read 0% on Home. In fact `authority` has **37 drillable verified items**, and `protection` is
+not in `DOMAINS` at all, so it is never rendered. `recomputeMastery` also skips any domain with no items.
+There is nothing to fix; recorded here so it is not "fixed" again later.
+**Not verified live:** the end-to-end win path (play → banner → best written) could not be exercised in
+this session — the Yard's animations run on `requestAnimationFrame`, which is suspended while the
+browser pane is hidden, so neither a played win nor the watched demo can complete. What *was* verified:
+the gate (including the negative test above), the picker rendering a seeded record correctly while
+leaving unrecorded puzzles blank, `tsc -b` + build clean, 0 console errors. **The banner text and the
+first real win still need the owner's screenshot loop.**
+
 ---
 *V1. Edit as decisions are made or reversed.*

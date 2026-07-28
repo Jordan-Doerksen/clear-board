@@ -430,22 +430,58 @@ export function mount(root, ctx) {
     }
   }
 
+  // Returns the PREVIOUS best for this puzzle (before this win is folded in), or null.
+  function bestRecord() {
+    const b = ctx.profile.yard && ctx.profile.yard.best;
+    return (b && b[puzzle.id]) || null;
+  }
+
   function recordWin() {
-    if (!ctx.profile.yard) ctx.profile.yard = { completed: [] };
-    if (!ctx.profile.yard.completed.includes(puzzle.id)) {
-      ctx.profile.yard.completed.push(puzzle.id); ctx.save();
+    if (!ctx.profile.yard) ctx.profile.yard = { completed: [], best: {} };
+    if (!ctx.profile.yard.best) ctx.profile.yard.best = {};   // migrate a pre-D-0027 profile
+    const y = ctx.profile.yard;
+    let dirty = false;
+
+    if (!y.completed.includes(puzzle.id)) {
+      y.completed.push(puzzle.id); dirty = true;
       buildPicker();   // ✓ / → move as you play instead of going stale until the station re-mounts
     }
+
+    // Per-puzzle best record (#14). A watched-optimal demo is NOT your record — it's the answer.
+    if (!fromDemo) {
+      const prev = y.best[puzzle.id];
+      const now = {
+        moves: state.moves, joints: state.joints,
+        beatPar: state.moves <= puzzle.par, departed: !!puzzle.goal.depart,
+      };
+      // Fewer moves wins; joints break the tie. Never overwrite a better run with a worse one.
+      const better = !prev || now.moves < prev.moves || (now.moves === prev.moves && now.joints < prev.joints);
+      if (better) { y.best[puzzle.id] = now; dirty = true; }
+    }
+
+    if (dirty) ctx.save();
+
     // One brain: a genuine player win feeds the SAME rule mastery the Drill grades. Skipped
     // on a watched demo (fromDemo); AppContext only writes verified, currently-due items.
     if (!fromDemo && typeof ctx.recordYardWin === 'function') ctx.recordYardWin(masteryItemsFor(puzzle), true);
   }
 
+  // "Beat your best" (#14): compare against the record BEFORE this win is folded in. A first
+  // clear says nothing (there is no best yet) rather than claiming a record.
+  function bestSuffix(prev) {
+    if (fromDemo || !prev) return '';
+    if (state.moves < prev.moves || (state.moves === prev.moves && state.joints < prev.joints)) {
+      return ` · new best (was ${prev.moves}m/${prev.joints}j)`;
+    }
+    return ` · your best: ${prev.moves}m/${prev.joints}j`;
+  }
+
   function winBanner() {
     const g = grade(state, puzzle);
+    const prev = bestRecord();
     sfx.win();
     const clean = state.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
-    banner(`${g.beatPar ? '✓ ' : ''}${g.head}${clean}`, g.beatPar ? 'win' : 'ok');
+    banner(`${g.beatPar ? '✓ ' : ''}${g.head}${clean}${bestSuffix(prev)}`, g.beatPar ? 'win' : 'ok');
     recordWin();
   }
 
@@ -454,9 +490,10 @@ export function mount(root, ctx) {
   function departOut() {
     if (busy || !puzzle.goal.depart || !checkWin(state, puzzle)) return;
     const g = grade(state, puzzle);
+    const prev = bestRecord();
     sfx.win();
     const clean = state.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
-    banner(`✓ Departed out the lead — ${g.head}${clean}`, g.beatPar ? 'win' : 'ok');   // win registered now
+    banner(`✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev)}`, g.beatPar ? 'win' : 'ok');   // win registered now
     recordWin();
     $('depart').disabled = true;
     // flavor: pull the whole train out the lead, off-frame left
@@ -468,8 +505,11 @@ export function mount(root, ctx) {
       { onFrame: paint, onDone: () => { stopAnim = null; anim = null; busy = false; paint(); } });
   }
 
-  // rough "clean" benchmark until the solver owns it
-  function bestJoints() { return Math.max(1, Math.ceil(puzzle.par / 2)); }
+  // The joint count of the solver-proven optimal line, baked into each puzzle by tools/solve.mjs
+  // and asserted by the gate. This used to be `ceil(par/2)` — a guess that was wrong on 16 of 19
+  // puzzles and always too generous (p2-build awarded "clean" at 4 joints when 2 is optimal).
+  // Show nothing false: the badge now means what it says.
+  function bestJoints() { return Math.max(1, puzzle.optJoints ?? Math.ceil(puzzle.par / 2)); }
 
   function syncBuilder() {
     // keep the count cap sensible for the chosen action
@@ -619,6 +659,7 @@ export function mount(root, ctx) {
 
   function buildPicker() {
     const completed = completedIds();
+    const best = (ctx.profile && ctx.profile.yard && ctx.profile.yard.best) || {};
     const keep = picker.value;
     const ordered = TIERS.flatMap((t) => PUZZLES
       .map((p, k) => ({ p, k }))
@@ -633,9 +674,11 @@ export function mount(root, ctx) {
       g.label = t.label;
       for (const { p, k } of inTier) {
         const mark = completed.includes(p.id) ? '✓ ' : (next && next.p.id === p.id ? '→ ' : '');
+        const b = best[p.id];
+        const yours = b ? ` · your best ${b.moves}m` : '';   // blank, never a guess, if unrecorded
         const o = document.createElement('option');
         o.value = k;
-        o.textContent = `${mark}${p.title} · par ${p.par}`;
+        o.textContent = `${mark}${p.title} · par ${p.par}${yours}`;
         g.appendChild(o);
       }
       picker.appendChild(g);

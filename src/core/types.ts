@@ -68,13 +68,18 @@ export interface Settings {
 
 export interface DomainState { mastery: number; lastDrill: string | null }
 
+export interface YardBest { moves: number; joints: number; beatPar: boolean; departed: boolean }
+
 export interface Profile {
   schema: 1;
   createdAt: string; updatedAt: string;
   settings: Settings;
   items: Record<string, SRState>;
   domains: Record<string, DomainState>;
-  yard: { completed: string[] };
+  // `completed` stays a plain id list (everything already reads it); `best` is the per-puzzle
+  // record added in D-0027. A profile from before it simply has no entries — an honest blank,
+  // not a fabricated record.
+  yard: { completed: string[]; best?: Record<string, YardBest> };
   path: { stage: string; unlocked: string[]; testReady: boolean };
 }
 

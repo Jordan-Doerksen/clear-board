@@ -2,6 +2,18 @@
 
 ## [Unreleased] — V1 in progress
 
+### The "clean" badge stops guessing; per-puzzle best records (2026-07-28)
+- **The "clean" badge was praising sloppy runs.** It scored against `ceil(par/2)` — a placeholder that
+  was wrong on **16 of 19** puzzles and always too generous (`p2-build` called 4 joints clean when 2 is
+  optimal). Every puzzle now carries a solver-derived `optJoints`, and `tools/solve.mjs` hard-fails if it
+  ever drifts. Proven with a deliberate corruption, which failed the gate exactly as it should. (D-0027)
+- **Per-puzzle best records** — `{moves, joints, beatPar, departed}` per puzzle. The picker shows
+  `· your best 6m` where a record exists and **blank where none does**; the win banner reads "new best
+  (was 7m/3j)" or "your best: 5m/2j". A watched-optimal demo never sets a record — it's the answer, not
+  your run. (D-0027)
+- **#20 needed no work:** the `authority` domain has 37 drillable verified items and `protection` isn't a
+  live domain, so the "empty domains reading 0%" the design doc describes doesn't exist. (D-0027)
+
 ### The Yard's ramp becomes visible (2026-07-28)
 - **`tier` was a dead field.** Every puzzle has carried a tier number since the start and *nothing read
   it* — the picker was a flat list of all 19 in array order. The authored ramp existed in the data and
