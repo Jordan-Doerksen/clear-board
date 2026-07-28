@@ -2,6 +2,19 @@
 
 ## [Unreleased] — V1 in progress
 
+### Offline for real — PWA wired (2026-07-28)
+- **Works with no signal.** `vite-plugin-pwa` was a devDep for months without being wired; it's now
+  configured and shipping a service worker. Verified by building, serving `dist/`, **stopping the
+  server**, and reloading: `index.html` and all five content files still resolved from cache and a hard
+  navigation to `/#/drill` rendered a real signal question. (D-0028)
+- **Caught a trap that would have shipped a lying app:** Workbox's default glob excludes `.json`, so the
+  default config would have advertised offline support and then 404'd the entire rulebook offline. The
+  glob now names `json` explicitly. (D-0028)
+- Fixed `index.html` referencing `/favicon.svg` absolutely while `base` is `'./'` — it 404'd on the Pages
+  subpath and inside Tauri. Added `theme-color`.
+- **The app icon is still open and needs the owner** — see D-0028. The manifest points at the existing
+  mark rather than inventing a logo.
+
 ### The "clean" badge stops guessing; per-puzzle best records (2026-07-28)
 - **The "clean" badge was praising sloppy runs.** It scored against `ceil(par/2)` — a placeholder that
   was wrong on **16 of 19** puzzles and always too generous (`p2-build` called 4 joints clean when 2 is

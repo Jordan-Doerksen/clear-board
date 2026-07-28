@@ -392,5 +392,30 @@ the gate (including the negative test above), the picker rendering a seeded reco
 leaving unrecorded puzzles blank, `tsc -b` + build clean, 0 console errors. **The banner text and the
 first real win still need the owner's screenshot loop.**
 
+### D-0028 — PWA offline shipped; the app icon is NOT decided (it needs the owner)
+**Offline is the point, not a nicety** — this gets studied on a train with no signal (SPEC:
+local-first). `vite-plugin-pwa` was a devDep for months without being wired; it is now configured in
+`vite.config.ts` with `registerType: 'autoUpdate'`.
+**The trap that would have shipped a lying app:** Workbox's default `globPatterns` does **not** include
+`.json`. Left at the default, Clear Board would have advertised offline support and then 404'd its
+entire rulebook the moment the signal dropped — the four content files *are* the app. The glob is
+explicit: `**/*.{js,css,html,svg,json,woff2}`.
+**Also fixed:** `index.html` referenced `/favicon.svg` absolutely while `base` is `'./'`, so the icon
+404'd on the Pages subpath and inside Tauri. Now relative. Added `theme-color`.
+**Verified live, properly:** built, served `dist/`, confirmed the SW registers and takes control
+(1 registration, `controller` non-null, 14 cache entries), then **stopped the server** and reloaded.
+With nothing listening, `index.html` and all five data files still resolved from cache
+(definitions 63 · signals 42 · rules 100 · rule-questions 226 · radio-script 14), and a hard navigation
+to `/#/drill` rendered a real signal question. That is genuine offline operation, not a manifest audit.
+**The app icon is deliberately NOT resolved.** `public/favicon.svg` is a purple lightning-bolt mark with
+no relationship to railroading or to Clear Board, and it is currently the app's whole visual identity
+(web favicon + the manifest icon); the Tauri desktop build still wears the default Tauri logo. The
+manifest points at the existing mark rather than a generated PNG set **on purpose** — designing a logo
+is a taste call that belongs to the owner, and an identity mark is not something to decide silently.
+**Two questions for the owner:** (1) where did `favicon.svg` come from — it resembles a third-party
+tool's default mark, which would be a provenance problem, not a style preference; (2) what should the
+icon actually be. Once there is a source mark, `npm run tauri icon <src>` generates the full desktop
+set and PNG manifest icons in one step.
+
 ---
 *V1. Edit as decisions are made or reversed.*
