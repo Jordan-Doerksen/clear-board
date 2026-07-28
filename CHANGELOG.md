@@ -2,6 +2,20 @@
 
 ## [Unreleased] — V1 in progress
 
+### The Yard's ramp becomes visible (2026-07-28)
+- **`tier` was a dead field.** Every puzzle has carried a tier number since the start and *nothing read
+  it* — the picker was a flat list of all 19 in array order. The authored ramp existed in the data and
+  never reached the screen. The picker now groups by tier (`<optgroup>`, still a native select — keyboard
+  and screen-reader correct for free), labelled by what each tier teaches, with **par on every option**. (D-0026)
+- **The cliff was a sequencing bug, not missing content.** `p1-sort` (par 19) sat sixth in that flat list,
+  right after three par-5 warm-ups, and was the only tier-0/1 puzzle introducing the `order` rule. It moves
+  **tier 1 → tier 3**, filling the previously empty tier 3 and sitting beside the rule it teaches. Layout,
+  par and rules unchanged — the solver proves the same par 19. Tier 1 now reads 7/9/9. (D-0026)
+- **✓ / → marks.** Completed puzzles show ✓; the first uncompleted one in tier order shows →. Rebuilt on
+  every win so they never go stale. The arrow is a **marker, not a lock** — all 19 stay selectable.
+- Corrects `REVAMP-DESIGN.md` §4 #16, which claimed tiers 2/4/5/6 held 1–2 puzzles each (tier 2 has five)
+  and put the cliff between tiers rather than inside tier 1.
+
 ### Radio joins the one brain — "Call it yourself" (2026-07-28)
 - **The last dead-end station now writes to mastery.** Radio has two modes: **Guided** (the SME-tuned
   walkthrough, byte-for-byte, still **ungraded** — REVAMP §5: merging it with grading turns a

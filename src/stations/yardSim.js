@@ -10,7 +10,7 @@ import { freshState, lineSwitch, canPull, canSpot, canKick, spotPlan, pull, spot
 import { render } from './yard/render.js';
 import { play, setSpeed } from './yard/anim.js';
 import { sfx, resume, toggleMute, isMuted } from './yard/sound.js';
-import { PUZZLES, RULES } from './yard/puzzles.js';
+import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
 
 // --- Clear Board: map the engine's rule chips → the content-library items a puzzle
 // exercises, so a genuine win feeds the SAME switching/securement mastery the Drill grades
@@ -432,7 +432,10 @@ export function mount(root, ctx) {
 
   function recordWin() {
     if (!ctx.profile.yard) ctx.profile.yard = { completed: [] };
-    if (!ctx.profile.yard.completed.includes(puzzle.id)) { ctx.profile.yard.completed.push(puzzle.id); ctx.save(); }
+    if (!ctx.profile.yard.completed.includes(puzzle.id)) {
+      ctx.profile.yard.completed.push(puzzle.id); ctx.save();
+      buildPicker();   // ✓ / → move as you play instead of going stale until the station re-mounts
+    }
     // One brain: a genuine player win feeds the SAME rule mastery the Drill grades. Skipped
     // on a watched demo (fromDemo); AppContext only writes verified, currently-due items.
     if (!fromDemo && typeof ctx.recordYardWin === 'function') ctx.recordYardWin(masteryItemsFor(puzzle), true);
@@ -605,11 +608,42 @@ export function mount(root, ctx) {
   TRACK_IDS.forEach((id) => { const o = document.createElement('option'); o.value = id; o.textContent = id; trackSel.appendChild(o); });
 
   // --- puzzle picker -------------------------------------------------------
+  // Grouped by tier so the authored ramp is visible. It used to be a flat list of all 19, which
+  // put par-19 'Build it in order' sixth, right after three par-5 warm-ups. Still a native
+  // <select>: keyboard-complete and screen-reader-correct for free.
+  //
+  // ✓ = completed · → = recommended next (first uncompleted, in tier order). The arrow is a
+  // MARKER, NOT A LOCK — every job stays selectable (REVAMP §3: soft gates, never lock content).
   const picker = $('picker');
-  PUZZLES.forEach((p, k) => {
-    const o = document.createElement('option'); o.value = k; o.textContent = `${k + 1}. ${p.title}`;
-    picker.appendChild(o);
-  });
+  const completedIds = () => (ctx.profile && ctx.profile.yard && ctx.profile.yard.completed) || [];
+
+  function buildPicker() {
+    const completed = completedIds();
+    const keep = picker.value;
+    const ordered = TIERS.flatMap((t) => PUZZLES
+      .map((p, k) => ({ p, k }))
+      .filter((e) => e.p.tier === t.tier));
+    const next = ordered.find((e) => !completed.includes(e.p.id));
+
+    picker.innerHTML = '';
+    for (const t of TIERS) {
+      const inTier = ordered.filter((e) => e.p.tier === t.tier);
+      if (!inTier.length) continue;                       // never render an empty group
+      const g = document.createElement('optgroup');
+      g.label = t.label;
+      for (const { p, k } of inTier) {
+        const mark = completed.includes(p.id) ? '✓ ' : (next && next.p.id === p.id ? '→ ' : '');
+        const o = document.createElement('option');
+        o.value = k;
+        o.textContent = `${mark}${p.title} · par ${p.par}`;
+        g.appendChild(o);
+      }
+      picker.appendChild(g);
+    }
+    if (keep !== '') picker.value = keep;                 // a rebuild must not change the selection
+  }
+
+  buildPicker();
   picker.addEventListener('change', () => load(PUZZLES[+picker.value]));
 
   // sound default: start muted if Clear Board's audio setting is off.

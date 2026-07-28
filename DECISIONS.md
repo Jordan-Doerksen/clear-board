@@ -336,5 +336,34 @@ offers **Look it up →** and the misses-review round; guided mode still mounts 
 identically; radioSim keeps its own 13.4 kB lazy chunk; `npm run check` A–I green, `tsc -b` + build clean,
 0 console errors.
 
+### D-0026 — The Yard's tiers become real; `p1-sort` re-placed to tier 3 (#16 + #15)
+**The revamp doc was wrong about this one.** `REVAMP-DESIGN.md` §4 #16 says tiers 2/4/5/6 hold 1–2
+puzzles each and describes a par-5 → par-19 cliff *between* tiers, plus a "19-vs-22 count" question.
+The actual set is **19 puzzles**: T0=4 (par 5,5,5,7) · T1=4 (7,**19**,9,9) · T2=**5** (5,3,4,6,7) ·
+**T3=0** · T4=3 (3,5,6) · T5=2 (7,9) · T6=1 (4). Tier 2 has five, not one or two.
+**The real defect:** `tier` was a **dead field** — authored on every puzzle since the start and read by
+**nothing** in the repo. The picker was a flat `<select>` of all 19 in array order, so the ramp existed
+in the data and never reached the screen. And `p1-sort` (par 19) sat *sixth in that flat list*, right
+after three par-5 warm-ups, while being the only tier-0/1 puzzle that introduces the `order` rule. The
+cliff was a **sequencing bug, not a content gap**.
+**Chosen:** (a) `p1-sort` moves **tier 1 → tier 3**, filling the empty tier and sitting beside the rule
+it teaches. Layout, par and `rules[]` are untouched — `solve.mjs` proves the same par 19. (b) The picker
+groups into `<optgroup>`s from a new `TIERS` table in `puzzles.js`, labelled by what each tier teaches,
+with par on every option. (c) **✓** marks completed, **→** marks the recommended next (first uncompleted
+in tier order), rebuilt on each win so the marks never go stale.
+**The arrow is a marker, not a lock** — every puzzle stays selectable (REVAMP §3: soft gates, never lock
+learning content). Verified: 0 disabled options.
+**Kept a native `<select>`** rather than a bespoke menu — keyboard-complete and screen-reader-correct
+for free, and `optgroup` is exactly the grouping primitive this needed.
+**`TIERS` lives in `puzzles.js`,** not a `.json`. Tunables belong in config, but the Yard island is
+byte-for-byte vanilla with its content inline; making the engine fetch JSON for a label table would be
+a real architecture change for no gain. It sits with `PUZZLES`/`RULES`, where every tier number already lived.
+**Deferred:** authoring a scaffold rung before `p1-sort` — the owner's call after seeing the ramp with
+tiers visible; per-puzzle best records (#14); solver-emitted `optJoints` (#17).
+**Verified live:** picker renders **7 groups, none empty, 19 options, 0 disabled**; tier 1 now reads
+7/9/9 with no par-19 wall; tier 3 is populated; a profile with `p0-1`/`p0-2` completed shows exactly
+2 ✓ and 1 → on the next puzzle; `npm run check` green (p1-sort still `par=19 solver=19`); build clean;
+0 console errors.
+
 ---
 *V1. Edit as decisions are made or reversed.*

@@ -19,6 +19,19 @@ export const RULES = {
   order:  { kind: 'si',   cite: 'Manifest / blocking', label: 'Build the outbound in order, then DEPART out the lead' },
 };
 
+// What each tier teaches. The `tier` number was authored from the start but nothing read it —
+// the picker was a flat list of all 19 — so the ramp existed in the data and never reached the
+// screen. These labels group the picker; the order here is the order tiers are offered.
+export const TIERS = [
+  { tier: 0, label: 'Tier 0 — learn the move' },
+  { tier: 1, label: 'Tier 1 — work the yard' },
+  { tier: 2, label: 'Tier 2 — kicking & securement' },
+  { tier: 3, label: 'Tier 3 — build it in order' },
+  { tier: 4, label: 'Tier 4 — loads & empties' },
+  { tier: 5, label: 'Tier 5 — room & reach' },
+  { tier: 6, label: 'Tier 6 — the road job' },
+];
+
 export const PUZZLES = [
   // ---- Tier 0 — learn the move (modest gathers, bigger cuts) ----
   {
@@ -104,7 +117,11 @@ export const PUZZLES = [
     opt: [['pull', 'AS71', 5], ['pull', 'AS73', 2], ['spot', 'AS75', 5], ['spot', 'AS71', 2]],
   },
   {
-    id: 'p1-sort', tier: 1,
+    // Tier 3, not 1: at par 19 it is more than twice any other tier-0/1 job, and it is the only
+    // one of them that introduces `order`. It sat sixth in a flat picker right after three par-5
+    // warm-ups — that placement is what made the ramp read as personal failure. Layout, par and
+    // rules are unchanged, so solve.mjs proves the same par 19.
+    id: 'p1-sort', tier: 3,
     title: 'Build it in order',
     hint: 'AS72 holds five cars in the WRONG order for your manifest. Build AS74 in order — CN 305001 … 305005 (front to back) — which means handling them one at a time. The other tracks are full of cars that aren’t yours.',
     rules: ['order', 'line', 'speed', 'couple', 'shove'],
