@@ -1,6 +1,6 @@
 /* signal.ts — VERBATIM copy of the verified SVG signal renderer.
  *
- * Source: C:\projects\CN Conductor Trainer\modules\Signal Reading.html (inline <script>),
+ * Source: C:\projects\rail\CN Conductor Trainer\modules\Signal Reading.html (inline <script>),
  * carried through the vanilla clear-board build unchanged. drawSignal() and lampFill() are
  * preserved byte-for-byte — NOT reimplemented or cleaned up — because the rendered aspect is
  * safety-critical. Only TypeScript parameter annotations (and one Record cast so the lamp map
