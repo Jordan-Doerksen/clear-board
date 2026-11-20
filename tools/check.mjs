@@ -17,6 +17,10 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const scripts = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).scripts;
 
+// The limit of lint warnings. The five warnings of today are in files of other jobs. The closing
+// commit of the G1 line lowers this number when a job removes a warning. It never goes up.
+const LINT_WARNING_LIMIT = 5;
+
 // The steps, in the order of the run. `script` is an npm script name. `command` is a command
 // line for a step that has no npm script name. `extra` is text that the runner adds to the
 // command of the script.
@@ -25,6 +29,7 @@ const STEPS = [
   { n: 2, name: 'check:dusk', script: 'check:dusk' },
   { n: 3, name: 'check:colour', script: 'check:colour' },
   { n: 4, name: 'check:names', script: 'check:names' },
+  { n: 5, name: 'lint', script: 'lint', extra: `--max-warnings ${LINT_WARNING_LIMIT}` },
   { n: 8, name: 'sr-vectors', command: 'node tools/sr-vectors.mjs' },
   { n: 9, name: 'solve', command: 'node tools/solve.mjs' },
   { n: 10, name: 'content-check', command: 'node tools/content-check.mjs' },
