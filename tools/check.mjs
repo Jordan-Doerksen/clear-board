@@ -21,6 +21,7 @@ const scripts = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).scr
 // line for a step that has no npm script name. `extra` is text that the runner adds to the
 // command of the script.
 const STEPS = [
+  { n: 1, name: 'check:frozen', script: 'check:frozen' },
   { n: 8, name: 'sr-vectors', command: 'node tools/sr-vectors.mjs' },
   { n: 9, name: 'solve', command: 'node tools/solve.mjs' },
   { n: 10, name: 'content-check', command: 'node tools/content-check.mjs' },

@@ -1,0 +1,161 @@
+{
+  "note": "The baseline of the frozen-file hash gate (tools/frozen-check.mjs). Each value is computed from the baseline commit. A build job does not edit this file.",
+  "baselineCommit": "94a41c522b8b4be7bc6ac11f1d7da29cf2defbf1",
+  "files": {
+    "public/data/definitions.json": "4ebe84b34c054e7502586cf43eda339026606cb4ebd27796944db0cc2c129366",
+    "public/data/radio-script.json": "1c5fda97e2950c796386fe88ffce7f8d1b0868bfaf5f473b1e650a862ab1dda4",
+    "public/data/rule-questions.json": "74ce0ca5d7f412dd4d8864d5b71a1f5ecd2dbac4130a764b8456181ec809226a",
+    "public/data/rules.json": "895316b97d6a27240f1e9f8bc5212e923a188779454402010f30cc50cf0a30fb",
+    "public/data/signals.json": "2c24e1584c8b748acf763baa90d06a6f462e85e9c749095d3d57c56205b4a15c",
+    "src/core/signal.ts": "bf034f68af809da7e7a0a78d533ef70e11fb3827a8cec6335a3f837d814a89e4",
+    "src/stations/yard/model.js": "144ec68621795ff6c4186335c2129dabcbde41fe12cfae800034563f65ba0ceb",
+    "src/stations/yard/solver.js": "e547180bca95f723c30e16b89e7af0b4d0595d73764bd8dac1119a38a5bc2215",
+    "src/stations/yard/puzzles.js": "633cc6056cdca7df5249508c566ac0891aedbf03ee7b9189d2617b913869bb9b",
+    "src/stations/yard/geometry.js": "49bc3f5e0703d8dbde31219ce95e86525f8e7fbbf0f027689eef15a9077c13d5"
+  },
+  "dataFolder": {
+    "path": "public/data",
+    "files": [
+      "definitions.json",
+      "radio-script.json",
+      "rule-questions.json",
+      "rules.json",
+      "signals.json"
+    ]
+  },
+  "region": {
+    "name": "STEPS",
+    "path": "src/stations/radioSim.js",
+    "startAnchor": "export const STEPS = [",
+    "endAnchor": "\n];",
+    "endRule": "The region ends with the first end anchor after the start anchor.",
+    "bytes": 4385,
+    "textSha256": "43de095fd0353da3cfef329692416cb0532691f8795e6fd1b43329026e7b4add",
+    "jsonSha256": "bfa768b5db3d4ac7a6848b65a4f5ebd43b1df4a585d0cd827072cf9a49b0b84c",
+    "stepCount": 14,
+    "fields": [
+      "call",
+      "ack",
+      "rule",
+      "note",
+      "feet",
+      "read",
+      "status",
+      "goi",
+      "pre"
+    ],
+    "stepFieldSha256": [
+      {
+        "call": "67e9e6e5edb701c0f3897d0d4a4689c5ae0a7d6127a29381329fa976c008246e",
+        "ack": "1fccd413bebdf709ba79e76e6fc1b78f61b8dc4f21cdab2f24e3f19ddd59026b",
+        "rule": "7559dbe85498faafc92bd8596c351ab0a044a8b71fca5ff9f0aa09aab26ace9e",
+        "note": "938f0de159e91242295dd4cb410f0d884d9dd5afcf53248916ee03cf1f1ef68b",
+        "feet": "0604cd3138feed202ef293e062da2f4720f77a05d25ee036a7a01c9cfcdd1f0a",
+        "read": "2cd409a1573b03db7da78986a9cf5b7178bcdeccda2f35a48b2fb98baae5c778"
+      },
+      {
+        "call": "da2b249cf6beff944f75cd980afe6b165c52ab8be0004e6b9962db04962d28ab",
+        "ack": "f74db930bd9e1e914a85e5976e83bb6bd8339cdfffe8d1c8adec962639f11427",
+        "rule": "c5520cf91aa6c1b020f6b5f3bceae36fb1f9d3c410aa614b1f5b6e5da893240e",
+        "note": "646d8c293cea827fa77941aa7d121cd202b54c8a1cab87fa284005f10910b66f",
+        "feet": "0604cd3138feed202ef293e062da2f4720f77a05d25ee036a7a01c9cfcdd1f0a",
+        "read": "567b93901f0935a0e88262de188b4383dbf2b382825f2d0ebd0c2fbb2cc95b0a"
+      },
+      {
+        "call": "04e8ef9ffe1be8f5b0facadccf7a6915e36ede20e9ed915b993e4b99f0e8bdb3",
+        "ack": "f84ebbb203ad6cef0ec44b68d2fff474ba104f0ccb05b19865fca1568c7fb78b",
+        "rule": "c6b247ab04cdfb9611dc5761033b91704230288ad94f69c9679b48c3a8ac9144",
+        "note": "fc56a451e0cc11b495396b797c547bbc470d531282512fe3861edccbe39d9697",
+        "feet": "1e472b39b105d349bcd069c4a711b44a2fffb8e274714bb07ecfff69a9a7f67b",
+        "read": "d73c3b5ec60ea5f85b53e45b27c49cf74afc659b61ecc22407d4b51b7499f79c"
+      },
+      {
+        "call": "3a76b2c17d067c18cfb6a45e36c8cf8e1fbc22be4e98973f860ceb908b316b0a",
+        "ack": "9225fd752e32b1606f3d9b3e3ae9703dc3d18a6414129833744316b49ee2d097",
+        "rule": "d0699661942c56c81ccfc2e82a427337a0ea91c643414c2e6031202c85ba8045",
+        "note": "472d7ab974876fa3a8c5882526736238686c62ace39b8bfeb71366c06c4b33c7",
+        "feet": "9ae2bdd7beedc2e766c6b76585530e16925115707dc7a06ab5ee4aa2776b2c7b",
+        "read": "c1d64143e9f54371d16984bdfd1032471fd3bc532b99b0f5a8d3dde276a65282"
+      },
+      {
+        "call": "e9250f28a44ad498309143e784869e7c642d0406344e095570636a1fd5367964",
+        "ack": "938251b29b2da764a6fde200982cf44c0cf1b7bf8b09789e208c652320215ec5",
+        "rule": "111d5f01d2e4afed605e6f63836be4e7aec8f2a295090984c59bc5650b26b332",
+        "note": "63bdfa9808d7c211e36bcf11fd260f19f702dfea0918b3feae8e07abe3b02b4b",
+        "feet": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306",
+        "read": "ec7b2b453c3a83185450913c22d957c7d04ab38a46d60b2eb496a3c3b35209f2"
+      },
+      {
+        "call": "4e875ea81fc9ff6d2cd7bfa5f4e03d2f5f73b77de41cac3d07142f63e2768cfb",
+        "ack": "e1f059fc66be14c50178095e6b1f29d7f3d4a0ee845dce4b1f75742fb5a96bdc",
+        "rule": "8fe47a2bdff66c4f3c1e2ce3b33b639e6d2fc94891086a6be8652d7709e8e53a",
+        "note": "76caa08a9a492eb8b3ea0a41d89697ab630a4e443f37c068d0e1a8238d9f32f6",
+        "feet": "1a6562590ef19d1045d06c4055742d38288e9e6dcd71ccde5cee80f1d5a774eb",
+        "read": "1061931a47b77dc65dcd85c6893fee853a95e87eaa08b27f72038ded0aff620d"
+      },
+      {
+        "call": "6752b2d5a69ff9d1eef482e52ffe1ea79b59d4a8424265a255bc78fd810e8d49",
+        "rule": "e2fa0fb4709f130a1592c0028ebce2b7a8522bc5929d76c565725f950eb5cc8c",
+        "note": "ca1f4d88a4ade207709184f30a36e0ad4daebac43f93e1ca28f83dd722275ae0",
+        "feet": "b7a56873cd771f2c446d369b649430b65a756ba278ff97ec81bb6f55b2e73569",
+        "read": "465452da80ed0548fb18c0722a8b7325f97e212ad9564e33d630b3627e37ecf1"
+      },
+      {
+        "call": "af5de5c9d40d41341190c2d50e473e2905a78477119c7da820ab6dce7bf59dcd",
+        "rule": "917393aecc1c1f30f876e8ce794d33601643f63d1482ce98b09a23958d1ac6d8",
+        "note": "89447aaa3fdc057304d71e7f4829d226b52969de0df6c967633acb6368fdacc5",
+        "feet": "f5ca38f748a1d6eaf726b8a42fb575c3c71f1864a8143301782de13da2d9202b",
+        "read": "b770021addac751cd15f6b53a1967ff641abadde98a89f157e0cb8acab4b812f"
+      },
+      {
+        "call": "d6486c8ec49105d80ab6c86cb80f38e35a80909ea95065e3bc566d62d6dceb16",
+        "rule": "af466e1917c17dfa0b8825ac0a79b401b1a535e03d944e58e938a92b8e7ce6ad",
+        "note": "46faa2e932330da53d92ec454efbd7915c4f157e3fa32e4181b07952f951ebd5",
+        "feet": "4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5",
+        "read": "8b57d2d8c732c3d674f805f3e146616dbfbaee354f7b0342e662e366c9f9c1e7"
+      },
+      {
+        "call": "6cbc0b532f4e66f751643ad2d3ce4c86418eb9c40601cbfc3bafdff8e6287764",
+        "rule": "af466e1917c17dfa0b8825ac0a79b401b1a535e03d944e58e938a92b8e7ce6ad",
+        "note": "fc160b379325a4387abfd54571abac3f1fca6544c0b45b4c6538088f20785693",
+        "feet": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
+        "read": "c15cc0b275f557cd31ea1891581d213c9aea886e304f196a36b59ae1079f109d"
+      },
+      {
+        "call": "0dc19bed2e7adaea15c0b8db0a07f46fe47162e559d1821b75b8dcd33059c79e",
+        "ack": "5cfaa46302ed2b55ed325cd3044ffc46d59371ed4180b667b9f1f8e86d1a8992",
+        "rule": "9b1ed64866ef02cbade90906ce4a9ac8f908147129520e73f4a24af5c8b72508",
+        "note": "68987742541a25e9af5e4b62250657ee4f32cdbc47937351507e8434196ce59b",
+        "feet": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+        "status": "c6aae9104aa20e6e0b60efb19bf02736ffd7caf4c2d82383377d7c723a9e94f6"
+      },
+      {
+        "call": "1469abd4a162f283eb034c989da8a522677beaa9b0999ae3120a833aceb15df0",
+        "ack": "c747ff5515f4ab9b81dd65be527428fbdd99c25ada98a5d155694d87bc619d4c",
+        "rule": "d388307dc68bb9e6b6474d67d641dcad651ba55bec7fe444353c98c374c4289e",
+        "goi": "b92f49d454b8d42bc5835c937f40df4889cb1d8090ba4e37b6fbcdd57265fd41",
+        "note": "98e24f01781440ac9c1043af1084ec10b6ed51528ff9e8ce03469762e09b137f",
+        "feet": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+        "status": "e5dab4869065c0bae1e96fb066de76cb8ead5ef5a4b20cf57cc5cfda511519e6"
+      },
+      {
+        "call": "a6de2854f112328e34339fd241d29590f7a63d9d34072a88daeb6f28dc05cb29",
+        "ack": "4799c595167b58c89f8fd998ec40979605a86f12ff3c1eb32369629a6ccf1efd",
+        "rule": "ae942ded5660554ecb66eb7482d0d8661fd5cc0585c440bf3f0d8c045304dc9a",
+        "goi": "4b98c39b600db2101bfde52dd79fc4f44ba91768eddcc84f037c8d157b91bc8b",
+        "note": "8c961651340825f72fd4a2e7eb987450d2dccaac21306b3089904c54416802a0",
+        "feet": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+        "status": "80986044433ecb27dae8831d980aee2db1a19bbc6f70583e2549401430fb5804"
+      },
+      {
+        "pre": "e3567ab75a310b7d14fb7bd47b5ae84671c9697969027e5ed7c3f43add3ca8f5",
+        "call": "124dc86a567d01fde5ab54de99b342fe6bb999b3109f9bfcab1e22ee009e9cf0",
+        "ack": "a3b3b64356e67e772b51262ba396c289e5a3054e4e7fc77a57c581bdd23d44b3",
+        "rule": "d03e79a9fa16a7aa0e8f8206c4b6b8f5412f29f4509859c1af073113acde73c1",
+        "note": "cbbbd69468208dd467e2e87afd3d62d7ba0b48fd2324a8346a2ffda9cf7718f5",
+        "feet": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+        "status": "556ec03f3933d74a5c6bb76458424cfb067ea15995da60359aa9bdfd66fdaa78"
+      }
+    ]
+  }
+}
