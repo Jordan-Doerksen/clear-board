@@ -11,14 +11,14 @@
 // `root`, CSS scoped to `.yard-wrap`, and Clear Board hooks (profile/save,
 // back button, reduced-motion, sound default). No top-level side effects.
 
-import { W, H, NTRACK, TRACK_IDS, switchPos, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
+import { TRACK_IDS, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
 import { freshState, lineSwitch, canPull, canSpot, canKick, canSecure, spotPlan, pull, spot, kick, secure, checkWin, unsecuredGoal, grade } from './yard/model.js';
-import { render } from './yard/render.js';
 import { play, setSpeed } from './yard/anim.js';
 import { sfx, resume, toggleMute, isMuted } from './yard/sound.js';
 import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
-import { createView } from './yard/view.ts';
 import './yard/yard.css';
+import { createView } from './yard/view.ts';
+import { createDrawing } from './yard/draw.ts';
 
 // --- Clear Board: map the engine's rule chips → the content-library items a puzzle
 // exercises, so a genuine win feeds the SAME switching/securement mastery the Drill grades
@@ -51,10 +51,7 @@ export function mount(root, ctx) {
   const fast = () => reduce ? 6 : 1;          // setSpeed(6) ≈ instant; setSpeed(1) = normal
 
   // --- everything below is switch-list/src/main.js, scoped to `root` ----------
-  const canvas = view.el('yard');
-  const cctx = canvas.getContext('2d');
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  canvas.width = W * dpr; canvas.height = H * dpr; cctx.scale(dpr, dpr);
+  const drawing = createDrawing(view.drawHost, { onPick });
 
   let puzzle, state, anim = null, busy = false, fromDemo = false;
   let gen = 0, stopAnim = null;       // gen invalidates in-flight loops on (re)load; stopAnim aborts the live tween
@@ -83,7 +80,7 @@ export function mount(root, ctx) {
     arrivalCinematic();
   }
 
-  function paint() { render(cctx, state, puzzle, { anim, cine }); }
+  function paint() { drawing.paint(state, puzzle, { anim, cine }); }
 
   // Inbound road train (only on `inbound` puzzles): in off the main, STOP, set out a
   // few cars onto the set-out track, then DEPART out the lead — your power is off-scene
@@ -104,18 +101,13 @@ export function mount(root, ctx) {
   }
 
   // --- input: line a switch by clicking its target -------------------------
-  canvas.addEventListener('click', (e) => {
+  // The drawing adapter calls this for each click on the drawing: with the track id of the
+  // switch that was hit, or with null. A click that hits no switch still resumes the sound.
+  function onPick(id) {
     if (busy || cine) return;
     resume();
-    const r = canvas.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
-    let best = -1, bd = 18;
-    for (let i = 0; i < NTRACK; i++) {
-      const s = switchPos(i), d = Math.hypot(s.x - x, s.y - y);
-      if (d < bd) { bd = d; best = i; }
-    }
-    if (best >= 0) { lineSwitch(state, TRACK_IDS[best]); sfx.points(); paint(); }
-  });
+    if (id !== null) { lineSwitch(state, id); sfx.points(); paint(); }
+  }
 
   // --- the move builder ----------------------------------------------------
   $('work').addEventListener('click', () => {

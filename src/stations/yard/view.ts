@@ -94,7 +94,7 @@ const YARD_HTML = `
 
     <div class="workorder" id="workorder"></div>
 
-    <div class="yardframe"><canvas id="yard"></canvas></div>
+    <div class="yardframe" data-cb="yard-drawing"></div>
 
     <div class="bar">
       <select id="act" title="Action">
