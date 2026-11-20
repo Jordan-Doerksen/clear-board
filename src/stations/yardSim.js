@@ -17,6 +17,7 @@ import { render } from './yard/render.js';
 import { play, setSpeed } from './yard/anim.js';
 import { sfx, resume, toggleMute, isMuted } from './yard/sound.js';
 import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
+import './yard/yard.css';
 
 // --- Clear Board: map the engine's rule chips → the content-library items a puzzle
 // exercises, so a genuine win feeds the SAME switching/securement mastery the Drill grades
@@ -36,106 +37,6 @@ function masteryItemsFor(puzzle) {
   for (const key of puzzle.rules || []) for (const id of (RULE_ITEMS[key] || [])) ids.add(id);
   return [...ids];
 }
-
-// Scoped CSS from switch-list/index.html — :root vars moved onto .yard-wrap and
-// every selector prefixed with .yard-wrap so nothing leaks into Clear Board.
-const YARD_CSS = `
-  .yard-wrap {
-    --bg: #0b0e12; --panel: #14181f; --panel2: #1b212a; --line: #2a313b;
-    --ink: #e7ebf0; --dim: #8b94a0; --steel: #7d8794;
-    --cror: #9cc3ff; --crorbg: #18243a; --si: #f2b134; --sibg: #2e2410;
-    --good: #39b58a; --bad: #e2574c;
-    background: radial-gradient(1200px 600px at 60% -10%, #161c25, var(--bg));
-    color: var(--ink); font: 15px/1.5 system-ui, -apple-system, Segoe UI, sans-serif;
-    display: block; padding: 4px 0 20px;
-  }
-  .yard-wrap * { box-sizing: border-box; }
-  .yard-wrap button.back {
-    font: 600 14px system-ui, sans-serif; color: var(--ink);
-    background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
-    padding: 8px 12px; cursor: pointer; margin-bottom: 10px;
-  }
-  .yard-wrap button.back:hover { border-color: #3a4554; }
-  /* fit the reading column — no break-out inside Clear Board (it mispositioned + clipped) */
-  .yard-wrap .yardframe {
-    width: 100%; margin: 12px 0 14px; border: 1px solid var(--line); border-radius: 12px;
-    background: #0f1216; overflow: hidden; box-shadow: 0 14px 50px rgba(0,0,0,.45);
-  }
-  .yard-wrap canvas#yard { display: block; width: 100%; height: auto; aspect-ratio: 1340 / 460; }
-  .yard-wrap .workorder {
-    margin-top: 10px; padding: 12px 16px; border-radius: 10px;
-    background: linear-gradient(180deg, #171c24, #11151b);
-    border: 1px solid var(--line); border-left: 4px solid #19b6d8;
-  }
-  .yard-wrap .wo-top { font: 700 11px ui-monospace, monospace; letter-spacing: .6px; color: var(--dim); }
-  .yard-wrap .wo-tag { color: #19b6d8; } .yard-wrap .wo-id { color: var(--ink); }
-  .yard-wrap .wo-job { font-size: 16px; margin-top: 5px; color: var(--ink); }
-  .yard-wrap .wo-job b { color: #cfe8ff; }
-  .yard-wrap .wo-from { color: var(--dim); font-weight: 600; font-size: 13px; }
-  .yard-wrap .wo-meta { font-size: 12.5px; color: var(--dim); margin-top: 5px; }
-  .yard-wrap .wo-tip { display: block; margin-top: 3px; color: #6f7884; font-style: italic; }
-  .yard-wrap .ord-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
-  .yard-wrap .ord-row {
-    display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer;
-    border: 1px solid var(--line); border-radius: 8px; background: var(--panel2);
-    font: 700 14px ui-monospace, monospace; user-select: none; max-width: 360px;
-  }
-  .yard-wrap .ord-row:hover { border-color: #3a4554; }
-  .yard-wrap .ord-row.flagged { border-color: var(--si); background: var(--sibg); }
-  .yard-wrap .ord-flag { font-size: 15px; width: 16px; color: var(--dim); }
-  .yard-wrap .ord-row.flagged .ord-flag { color: var(--si); }
-  .yard-wrap .ord-mark { color: var(--ink); } .yard-wrap .ord-arrow { color: var(--dim); } .yard-wrap .ord-trk { color: var(--cror); }
-  .yard-wrap .ord-fix { color: var(--si); font-size: 11px; font-style: italic; }
-  .yard-wrap #certify { margin: 4px 0 2px; }
-  /* note: Clear Board's home defines a global .bar (the 12px progress bar); these resets stop it leaking in */
-  .yard-wrap .bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; height: auto; overflow: visible; background: none; border: 0; border-radius: 0; margin: 12px 0; }
-  .yard-wrap .readout {
-    font: 700 16px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-    background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
-    padding: 10px 14px; color: var(--ink);
-  }
-  .yard-wrap select, .yard-wrap button {
-    font: 600 14px system-ui, sans-serif; color: var(--ink);
-    background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
-    padding: 9px 12px; cursor: pointer;
-  }
-  .yard-wrap button.go { background: #1d4ed8; border-color: #2c5bdc; }
-  .yard-wrap button.go:hover { background: #2356e6; }
-  .yard-wrap button#optimal { background: #14313a; border-color: #1d5563; color: #aee9f6; }
-  .yard-wrap button#optimal:hover { background: #1a3d48; }
-  .yard-wrap button#depart { background: #1f4a3c; border-color: #2a6b54; color: #bdf0db; }
-  .yard-wrap button#depart:hover { background: #245741; }
-  .yard-wrap button#depart:disabled { opacity: .4; cursor: default; }
-  .yard-wrap button:hover { border-color: #3a4554; }
-  .yard-wrap .spacer { flex: 1; }
-  .yard-wrap .banner {
-    min-height: 22px; margin: 12px 0; padding: 10px 14px; border-radius: 8px;
-    background: var(--panel); border: 1px solid var(--line); color: var(--dim); font-weight: 600;
-  }
-  .yard-wrap .banner.ok { color: var(--ink); }
-  .yard-wrap .banner.bad { color: var(--bad); border-color: #4a2723; background: #1d1413; }
-  .yard-wrap .banner.win { color: var(--good); border-color: #1f4a3c; background: #102019; }
-  .yard-wrap .legend { color: var(--dim); font-size: 12.5px; margin: 6px 0 2px; }
-  .yard-wrap .legend .k { color: var(--cror); font-weight: 700; }
-  .yard-wrap .legend .s { color: var(--si); font-weight: 700; }
-  .yard-wrap .rules { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-  .yard-wrap .chip {
-    display: flex; flex-direction: column; gap: 2px; padding: 8px 12px;
-    border-radius: 8px; border: 1px solid var(--line); background: var(--panel); min-width: 150px;
-  }
-  .yard-wrap .chip b { font: 700 12px ui-monospace, monospace; }
-  .yard-wrap .chip span { font-size: 12.5px; color: var(--dim); }
-  .yard-wrap .chip.cror { border-left: 3px solid var(--cror); } .yard-wrap .chip.cror b { color: var(--cror); }
-  .yard-wrap .chip.si { border-left: 3px solid var(--si); background: var(--sibg); } .yard-wrap .chip.si b { color: var(--si); }
-  .yard-wrap details { margin-top: 18px; color: var(--dim); font-size: 13px; }
-  .yard-wrap details summary { cursor: pointer; color: var(--ink); font-weight: 600; }
-  .yard-wrap code { background: var(--panel2); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
-  .yard-wrap .banner .lookup {
-    margin-left: 10px; padding: 4px 9px; font: 600 12px system-ui, sans-serif;
-    color: #cfe8ff; background: #14313a; border: 1px solid #1d5563; border-radius: 6px; cursor: pointer;
-  }
-  .yard-wrap .banner .lookup:hover { background: #1a3d48; }
-`;
 
 // The .wrap body contents from switch-list/index.html (header dropped — Clear
 // Board has its own), with a Back button prepended, wrapped in .yard-wrap.
@@ -211,13 +112,6 @@ const YARD_HTML = `
 `;
 
 export function mount(root, ctx) {
-  // CSS once — guard with an id so re-mounting (navigate away & back) doesn't duplicate it.
-  if (!document.getElementById('yard-style')) {
-    const st = document.createElement('style');
-    st.id = 'yard-style';
-    st.textContent = YARD_CSS;
-    document.head.appendChild(st);
-  }
   // Inject the scoped markup into the container Clear Board gave us.
   root.innerHTML = YARD_HTML;
 
