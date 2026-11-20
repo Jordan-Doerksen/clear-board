@@ -1,7 +1,8 @@
 /* clear-board.parts.css - the page-local parts of Clear Board, on Dusk 0.2.0.
    This file loads after the five Dusk layers and the bridge, and before the app sheet.
    Each part has the prefix cb-. Each rule reads Dusk tokens and --cb- names only.
-   A rule that names a Dusk class has the app class .cb-app or .cb-win in front.
+   A rule that names a Dusk class has the app class .cb-app or .cb-win in front. One rule has a
+   part class in front: the lamp of the home mark, .cb-mark .dusk-led.
    The file declares no custom property that Dusk declares. */
 
 /* ---- the app root ---------------------------------------------------------------------------
