@@ -22,13 +22,14 @@
 // The output folder holds `baseline/`, `current/`, `diff/` and the report page `report.html`.
 // It is not committed.
 //
-// The same on each run: a new browser context and a new page for each picture; a full-page
+// The same on each run: a new browser process and a new page for each picture; a full-page
 // picture at device scale factor 1; reduced motion on; the service worker blocked; a fixed
 // page clock, locale and time zone; no request to another host; fonts awaited; CSS animations
-// and the caret off; each `svg` element paused at time 0, so that a lamp of a signal drawing
-// does not flash between two pictures; the whole page painted again from nothing before the
-// picture; the picture taken until two pictures in a row of the page are equal. A page with `"seed": true` gets a fixed generator in
-// place of `Math.random` before the page loads.
+// and the caret off; the pointer moved to the corner of the page; each `svg` element paused at
+// time 0, so that a lamp of a signal drawing does not flash between two pictures; the whole
+// page painted again from nothing before the picture; the picture taken until two pictures in
+// a row of the page are equal. A page with `"seed": true` gets a fixed generator in place of
+// `Math.random` before the page loads.
 //
 // `compare` fails on these facts: an element id that is gone (an id of `idsMayGo` gives a
 // warning only); a class name that is gone (a class of `classesMayGo` gives a warning only; an
@@ -110,12 +111,16 @@ await new Promise((done, fail) => { server.once('error', fail); server.listen(Nu
   .catch((err) => stop(`the server did not start: ${err.message}`));
 const base = `http://127.0.0.1:${server.address().port}`;
 
-let browser;
-try {
-  browser = await chromium.launch();
-} catch (err) {
-  server.close();
-  stop(`Chromium did not start. The look harness needs the Chromium of Playwright.\n${String(err.message).split('\n')[0]}`);
+// Each picture comes from a new browser process. In one process, the pages that were drawn
+// before can change one or two pixels of a rounded edge of a later page, and then a picture
+// depends on the order of the shots.
+async function launch() {
+  try {
+    return await chromium.launch();
+  } catch (err) {
+    server.close();
+    return stop(`Chromium did not start. The look harness needs the Chromium of Playwright.\n${String(err.message).split('\n')[0]}`);
+  }
 }
 
 // ---- One shot.
@@ -164,9 +169,10 @@ async function runStep(page, step) {
   else throw new Error(`a step of the config has no known kind: ${JSON.stringify(step)}`);
 }
 
-// Take one picture and its facts, in a new context and a new page.
+// Take one picture and its facts, in a new browser process, a new context and a new page.
 async function take(shot) {
   const size = config.sizes[shot.size];
+  const browser = await launch();
   const context = await browser.newContext({
     viewport: { width: size.width, height: size.height },
     deviceScaleFactor: 1,
@@ -187,6 +193,8 @@ async function take(shot) {
     await page.goto(`${base}/#${shot.page.route}`, { waitUntil: 'networkidle' });
     if (shot.page.waitFor) await page.locator(shot.page.waitFor).first().waitFor();
     for (const step of shot.page.steps ?? []) await runStep(page, step);
+    // Move the pointer off the page content, so that no picture shows a hover state of a step.
+    await page.mouse.move(0, 0);
     await page.evaluate(async () => {
       await document.fonts.ready;
       // Paint the whole page again from nothing. A page that got its content in two paints
@@ -215,15 +223,19 @@ async function take(shot) {
     }
     return { png, sha256: createHash('sha256').update(png).digest('hex'), facts: { ...facts, errors }, settled };
   } finally {
-    await context.close();
+    await browser.close();
   }
 }
 
 // Count the pixels that differ, in a browser page. The page decodes both files and makes the
 // diff picture: a pale copy of the first picture, with a strong mark on each pixel that differs.
+let diffBrowser = null;
 let diffPage = null;
 async function pixelDiff(a, b) {
-  if (!diffPage) diffPage = await (await browser.newContext()).newPage();
+  if (!diffPage) {
+    diffBrowser = await launch();
+    diffPage = await diffBrowser.newPage();
+  }
   return diffPage.evaluate(async ([first, second]) => {
     const load = async (b64) => { const image = new Image(); image.src = `data:image/png;base64,${b64}`; await image.decode(); return image; };
     const [one, two] = [await load(first), await load(second)];
@@ -420,7 +432,7 @@ try {
     if (failed) exitCode = 1;
   }
 } finally {
-  await browser.close();
+  if (diffBrowser) await diffBrowser.close();
   await new Promise((done) => server.close(done));
   if (builtDir) {
     // Remove the link to node_modules first, so that the removal of the folder cannot follow it.
