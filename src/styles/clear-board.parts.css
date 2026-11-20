@@ -523,3 +523,36 @@
   color: var(--cb-attn-ink);
 }
 /* css-mark:end */
+
+/* ---- the reading modes ----------------------------------------------------------------------------
+   The bridge sets the tokens of each mode. These rules do the work that a token cannot do. */
+
+/* High contrast: a tile cap becomes one flat, darker colour, and the edge of an icon square reads
+   the same token. The edge gets the edge of a container, so that the square still shows. */
+html[data-contrast="1"] .cb-app .dusk-ico { border-color: var(--lit-line); }
+
+/* Dyslexia type: a browser does not pass the letter spacing and the word spacing of the page into
+   a form control. This rule carries both. */
+html[data-dys="1"] button,
+html[data-dys="1"] input,
+html[data-dys="1"] select {
+  letter-spacing: inherit;
+  word-spacing: inherit;
+}
+
+/* Reduced motion: Dusk stops its transitions and its tile lift on the device flag only. These
+   three rules do the same on the setting of the app. The brighter edge, the washes and the focus
+   ring stay, so each state still shows with no movement. A rule in a later sheet that sets a
+   transition with more weight than rule 3 must stop it under the same attribute. */
+html[data-reduce="1"] .cb-app .dusk-tile,
+html[data-reduce="1"] .cb-app .dusk-btn,
+html[data-reduce="1"] .cb-app .dusk-seg button,
+html[data-reduce="1"] .cb-app .dusk-row { transition: none; }
+
+html[data-reduce="1"] .cb-app .dusk-tile:hover,
+html[data-reduce="1"] .cb-app .dusk-tile:focus-within { transform: none; }
+
+html[data-reduce="1"] [class*="cb-"] {
+  transition: none;
+  animation: none;
+}
