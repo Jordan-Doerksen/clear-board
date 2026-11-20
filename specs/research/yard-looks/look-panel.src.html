@@ -156,6 +156,7 @@ body { font-variant-emoji: text; }   /* ⚡ ▶ ◄ are text glyphs in token ink
 .cb-foulword--left { translate: 0 0; }
 .cb-legend .cb-break { position: static; translate: none; }
 .cb-break { position: absolute; translate: -50% -50%; background: var(--glass); color: var(--ink-2); font: var(--fw-bold) var(--fs-base) / 1 var(--font-mono); padding: 0 var(--sp-1); }
+.cb-break--route { color: var(--lit); }   /* on the lined track the break mark is part of the route: the same ink, so the route reads as one line */
 .cb-ringword { position: absolute; color: var(--red-ink); font: var(--fw-bold) var(--fs-base) / 1 var(--font-mono); }
 
 .cb-tlabel { font-size: var(--fs-s); line-height: 1.35; white-space: nowrap; }
@@ -167,9 +168,8 @@ body { font-variant-emoji: text; }   /* ⚡ ▶ ◄ are text glyphs in token ink
 .cb-tl .dusk-count { letter-spacing: 0; }
 
 /* the track bar: true proportion. A thin line is room. The thick part is taken. */
-.cb-pbar { position: relative; display: block; height: 7px; border: 1px solid var(--ink-3); border-radius: 2px; }
-.cb-pbar i { position: absolute; right: -1px; top: -1px; bottom: -1px; height: auto; background: var(--ink-2); border-radius: 0 2px 2px 0; }
-.cb-pbar--lead i { right: auto; left: -1px; border-radius: 2px 0 0 2px; }
+.cb-pbar { position: relative; display: block; height: 7px; border: 1px solid var(--ink-3); border-radius: var(--r-bar); }
+.cb-pbar i { position: absolute; right: -1px; top: -1px; bottom: -1px; height: auto; background: var(--ink-2); border-radius: 0 var(--r-bar) var(--r-bar) 0; }
 
 /* row view (a narrow window): the ladder is one vertical spine and each track is one row */
 .cb-rows-head { position: relative; height: 38px; }
@@ -193,7 +193,7 @@ body { font-variant-emoji: text; }   /* ⚡ ▶ ◄ are text glyphs in token ink
 .cb-legend .cb-lg-unit { display: inline-flex; align-items: center; gap: var(--sp-2); white-space: nowrap; }
 .cb-legend[data-view="wide"] .cb-lg-rows { display: none; }
 .cb-legend .dusk-flag { margin: 0; padding: 0 var(--sp-2); font-size: var(--fs-xs); }
-.cb-lg-line { display: inline-block; width: 30px; border-top: var(--cb-route-w) solid var(--lit); border-radius: 2px; }
+.cb-lg-line { display: inline-block; width: 30px; border-top: var(--cb-route-w) solid var(--lit); }
 .cb-lg-tick { display: inline-block; height: 16px; border-left: 2px solid var(--ink-2); margin: 0 var(--sp-1); }
 .cb-lg-tag { color: var(--cb-ink); font: var(--fw-medium) var(--fs-xs) / 1 var(--font-mono); }
 .cb-legend i.cb-lg-line, .cb-legend i.cb-lg-tick { border-radius: 0; width: auto; height: auto; }
@@ -440,7 +440,9 @@ function landingBlock(l, cls) {
 }
 /* A number that does not fit in its block stands above it. Neighbours then take two heights in turn. */
 function fitNumbers(blocks) {
-  if (!blocks.some((b) => b.firstChild.offsetWidth + 2 > b.clientWidth)) return false;
+  /* true widths, not rounded: the number keeps 1.5 px or more to the fill edge of a solid block, and 3 px or more to the outer edge of a block with an edge line */
+  const room = (b) => { const cs = getComputedStyle(b), edge = parseFloat(cs.borderLeftWidth) > 0 ? 3 : 1.5; return b.getBoundingClientRect().width - Math.max(edge, parseFloat(cs.paddingLeft)) - Math.max(edge, parseFloat(cs.paddingRight)); };
+  if (!blocks.some((b) => b.firstChild.getBoundingClientRect().width > room(b))) return false;
   const step = blocks[0].firstChild.offsetHeight + 2;
   blocks.forEach((b, i) => { b.classList.add('cb-car--out'); b.style.setProperty('--cb-liftpx', (i % 2 ? step : 0) + 'px'); });
   return true;
@@ -558,7 +560,9 @@ function renderWide(host, o) {
   /* 5. the engine and the cut it holds, on the lead */
   const eng = engineBlock();
   eng.style.left = X(S.engine.x0) + 'px'; eng.style.width = (X(S.engine.x1) - X(S.engine.x0)) + 'px'; eng.style.top = (yL - ENGINE_H / 2) + 'px';
-  eng.lastChild.style.left = (X(S.engine.headlight.x) - X(S.engine.x0) - 3) + 'px';
+  const hlLeft = X(S.engine.headlight.x) - X(S.engine.x0) - 3;
+  eng.lastChild.style.left = hlLeft + 'px';
+  eng.style.paddingLeft = (hlLeft + 6 + 3) + 'px';             /* the word stands clear of the headlight dot (6 px) */
   layer.appendChild(eng);
   const hb = held.map((c) => {
     const b = carBlock(c);
@@ -583,7 +587,7 @@ function renderWide(host, o) {
     layer.appendChild(w);
     if (o.ring === n.id) {
       svg.appendChild(sv('circle', 'cb-ring', { cx: n.x, cy: n.y, r: 17 }));
-      const q = h('span', 'cb-ringword', '?'); q.style.left = (n.x + 14) + 'px'; q.style.top = (n.y - 30) + 'px';
+      const q = h('span', 'cb-ringword', '?'); q.style.left = (n.x - 26) + 'px'; q.style.top = (n.y - 33) + 'px';   /* up and left of the ring: no line and no word is there */
       layer.appendChild(q);
     }
     if (o.onToggle) {
@@ -691,7 +695,7 @@ function renderRows(host, o) {
     });
     if (fitNumbers(blocks)) ri.rail.classList.add('cb-row-rail--lift');
     if (Math.abs((occStart - G.CLEAR) * k - (xOcc - xTick)) > 1) {   /* the empty run is not to scale (compressed or stretched): say so with a break mark */
-      const m = h('span', 'cb-break', NEW.brk); m.setAttribute('aria-hidden', 'true');
+      const m = h('span', 'cb-break' + (r.reaches === t.id ? ' cb-break--route' : ''), NEW.brk); m.setAttribute('aria-hidden', 'true');
       m.style.left = ((xTick + xOcc) / 2) + 'px'; m.style.top = LINE_Y + 'px';
       ri.rail.appendChild(m);
     }
@@ -722,7 +726,7 @@ function renderRows(host, o) {
     if (o.ring === n.id) {
       svg.appendChild(sv('circle', 'cb-ring', { cx: n.x, cy: n.y, r: 17 }));
       const q = h('span', 'cb-ringword', '?'); q.setAttribute('aria-hidden', 'true');
-      q.style.left = (SPINE_X + 12) + 'px'; q.style.top = (n.y - 34) + 'px';
+      q.style.left = (SPINE_X - 22) + 'px'; q.style.top = (n.y - 36) + 'px';   /* left of the spine: the row words start at the right of it */
       svgHolder.appendChild(q);
     }
   });

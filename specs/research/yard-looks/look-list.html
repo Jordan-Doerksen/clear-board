@@ -2008,13 +2008,13 @@ html[data-tier="strict"][data-ambient="on"] body::before {
   vertical-align: top;
 }
 .yd-table tr.has-dest { --yd-headroom: 14px; }
-/* every cell keeps a band as high as a car, so the rail passes the centre of its first line */
-.yd-band { display: flex; align-items: center; min-height: var(--yd-car-h); }
+/* a goal tag stands above its tile. When the tiles wrap, the next line keeps the same room, or the tag covers the tile above. */
+.yd-table tr.has-dest .yd-cars { row-gap: calc(var(--yd-headroom) + var(--sp-1)); }
 .yd-table th.yd-h-track  { width: 76px; }
 .yd-table th.yd-h-state  { width: 19%; }
 .yd-table th.yd-h-switch { width: 166px; }
 .yd-table th.yd-h-room   { width: 20%; }
-.yd-foul-mini { display: inline-block; width: 3px; height: 11px; margin-right: var(--sp-2); background: var(--ink-2); vertical-align: -1px; }
+.yd-foul-mini { display: inline-block; width: 0; height: 11px; margin-right: var(--sp-2); border-left: 3px solid var(--ink-2); vertical-align: -1px; }
 .yd-table th small {
   margin-left: var(--sp-3);
   color: var(--ink-3);
@@ -2022,6 +2022,9 @@ html[data-tier="strict"][data-ambient="on"] body::before {
   font-weight: var(--fw-medium);
 }
 .yd-id { color: var(--ink); font-size: var(--fs-base); font-weight: var(--fw-bold); }
+/* the car count stands with the track id. It does not stand in the Room cell: "Room, 0 cars" reads as "no room". */
+.yd-trackcell { display: flex; flex-direction: column; justify-content: center; min-height: var(--yd-car-h); }
+.yd-n { color: var(--ink-2); font-family: var(--font-mono); font-size: var(--fs-s); font-weight: var(--fw-medium); white-space: nowrap; }
 
 /* the State cell: words, never colour alone */
 .yd-states { display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 2px var(--gap); min-height: var(--yd-car-h); font-size: var(--fs-s); }
@@ -2033,6 +2036,7 @@ html[data-tier="strict"][data-ambient="on"] body::before {
   letter-spacing: var(--track-label);
 }
 .yd-build + .dusk-count { margin-left: var(--sp-1); }
+.yd-goal .dusk-count { white-space: nowrap; }   /* the chip never breaks inside: at large text it read "3 /" and "4" on two lines */
 
 /* the Switch cell: the spine and one button */
 .yd-table td.yd-c-sw { padding-left: var(--yd-gutter); }
@@ -2071,10 +2075,10 @@ html[data-tier="strict"][data-ambient="on"] body::before {
 .yd-sp-thru,
 .yd-sp-up {
   left: calc(var(--yd-spine-x) - var(--w) / 2);
-  width: var(--w);
+  width: 0;
   top: 0;
   bottom: 0;
-  background: var(--c);
+  border-left: var(--w) solid var(--c);
 }
 .yd-sp-up { bottom: auto; height: var(--y); }
 .yd-sp-turn {
@@ -2090,8 +2094,8 @@ html[data-tier="strict"][data-ambient="on"] body::before {
   right: -1px;
   width: calc(var(--gap) + 1px);
   top: calc(var(--y) - var(--w) / 2);
-  height: var(--w);
-  background: var(--c);
+  height: 0;
+  border-top: var(--w) solid var(--c);
 }
 .yd-sp-foot {
   left: -1px;
@@ -2131,8 +2135,8 @@ html[data-tier="strict"][data-ambient="on"] body::before {
   left: 0;
   right: 0;
   top: calc(50% - var(--w) / 2);
-  height: var(--w);
-  background: var(--c);
+  height: 0;
+  border-top: var(--w) solid var(--c);
 }
 .yd-rail.is-lit { --w: var(--yd-w-lit); --c: var(--lit); }
 .yd-foul {
@@ -2140,8 +2144,8 @@ html[data-tier="strict"][data-ambient="on"] body::before {
   left: 12px;
   top: 9px;
   bottom: 9px;
-  width: 3px;
-  background: var(--ink-2);
+  width: 0;
+  border-left: 3px solid var(--ink-2);
 }
 .yd-throat {
   margin-left: auto;
@@ -2265,6 +2269,7 @@ html[data-tier="strict"][data-ambient="on"] body::before {
 /* the lead: left of the spine, as in the yard */
 .yd-table td.yd-c-lead { padding-top: var(--yd-pad); padding-right: 0; vertical-align: bottom; white-space: normal; font-weight: inherit; }
 .yd-leadbox { display: flex; flex-direction: column; gap: calc(var(--sp-2) + var(--yd-headroom)); }
+.yd-leadhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--sp-6); }
 .yd-leadlabel {
   color: var(--ink);
   font-family: var(--font-mono);
@@ -2279,6 +2284,7 @@ html[data-tier="strict"][data-ambient="on"] body::before {
 .yd-stub { flex: 0 0 var(--gap); }
 .yd-stub .yd-rail { right: -1px; }
 .yd-cars--lead { flex-wrap: nowrap; }
+.yd-table tr.yd-r-lead td.yd-c-room { vertical-align: bottom; }   /* the bar of the lead is level with the lead */
 
 /* the main line: the spine goes on, off the top */
 .yd-mainwords { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 2px var(--sp-7); font-family: var(--font-mono); font-size: var(--fs-s); }
@@ -2292,20 +2298,11 @@ html[data-tier="strict"][data-ambient="on"] body::before {
   position: relative;
   height: 14px;
   background: var(--well);
+  border: 1px solid var(--ink-3);   /* the length of the track is the reading. --well on the panel measures 1.06 to 1, so the edge carries the length */
   border-radius: var(--r-bar);
-  box-shadow: var(--ring-well);
 }
-.yd-roomtrack .dusk-heat { position: absolute; top: 2px; bottom: 2px; height: auto; }
-.yd-roomfoul { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink-2); }
-.yd-roomfig {
-  flex: none;
-  min-width: 3.6em;
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: var(--fs-s);
-  text-align: right;
-  white-space: nowrap;
-}
+.yd-roomtrack .dusk-heat { position: absolute; top: 1px; bottom: 1px; height: auto; }
+.yd-roomfoul { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px solid var(--ink-2); }
 
 /* the key */
 .yd-key { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: var(--sp-3) var(--sp-8); margin: 0; padding: 0; list-style: none; color: var(--ink-2); font-size: var(--fs-s); }
@@ -2323,6 +2320,9 @@ html[data-tier="strict"][data-ambient="on"] body::before {
 .yd-key-gap { position: relative; flex: none; display: inline-block; width: 14px; height: 18px; }
 .yd-key-gap::after { content: ""; position: absolute; left: 6px; top: 1px; bottom: 1px; border-left: 2px dotted var(--ink-2); }
 .yd-key-slot { flex: none; display: inline-block; width: 30px; height: 18px; border: 2px dashed var(--lit); border-radius: var(--r-chip); }
+.yd-key-room { flex: none; width: 64px; }
+.yd-key-room .dusk-heat { right: 2px; width: 14px; }
+.yd-key-room .yd-roomfoul { left: 5px; }
 .yd-key-next { flex: none; display: inline-block; width: 26px; height: 14px; margin: 0 3px; border: 1px solid var(--grey-ink); border-radius: var(--r-chip); outline: 2px solid var(--lit); outline-offset: 2px; }
 .yd-sme { color: var(--ink-2); font-size: var(--fs-xs); font-style: normal; white-space: nowrap; }
 .yd-sme::before { content: "("; }
@@ -2348,7 +2348,9 @@ html[data-tier="strict"][data-ambient="on"] body::before {
   .yd-table td[data-label],
   .yd-table tr.yd-r-main td { position: static; display: block; padding: 0; }
   .yd-table td[data-label]::before { content: none; }
-  .yd-table td.yd-c-sw    { grid-area: sw; display: flex; align-self: stretch; padding: 0; }
+  /* the Switch cell is as high as line 1, and the button stands at its top: the spine and the drop join at fixed offsets from the top and the bottom.
+     Dusk centres a stacked cell; with a State cell of three lines the join broke. */
+  .yd-table td.yd-c-sw    { grid-area: sw; display: flex; align-self: stretch; align-items: stretch; padding: 0; }
   .yd-swbox { position: relative; flex: 1 1 auto; }
   .yd-table td.yd-c-track { grid-area: track; }
   .yd-table td.yd-c-state { grid-area: state; }
@@ -2359,7 +2361,9 @@ html[data-tier="strict"][data-ambient="on"] body::before {
   .yd-switch { width: 124px; }
   .yd-go { min-width: var(--cb-tap); }
 
-  /* the lit row: one wash and one lit line pair for the block, not for each cell */
+  /* a wash is for the block, not for each cell: Dusk puts the zebra and the hot wash on the cells, which makes patches in a stacked row */
+  .yd-table tbody tr:nth-child(even) { background: var(--zebra); }
+  .yd-table tbody tr:nth-child(even) td { background: none; }
   .yd-table tbody tr.dusk-hot { background: var(--wash-4); box-shadow: var(--neon-row); }
   .yd-table tbody tr.dusk-hot td { background: none; box-shadow: none; }
 
@@ -2399,17 +2403,31 @@ html[data-tier="strict"][data-ambient="on"] body::before {
   .yd-table td.yd-c-lead { grid-area: lead; }
   .yd-table tr.yd-r-lead td.yd-c-sw,
   .yd-table tr.yd-r-lead td.yd-c-cars { grid-area: lead; height: 0; }
-  .yd-leadbox { flex-direction: row-reverse; justify-content: flex-end; align-items: flex-start; gap: var(--gap); }
-  .yd-leadrow { margin-left: calc(5px - var(--yd-gutter)); }
-  .yd-leadtail,
+  .yd-leadbox { flex-direction: column-reverse; align-items: flex-start; gap: 0; }
+  .yd-leadrow { flex-direction: column; align-items: flex-start; margin-left: calc(5px - var(--yd-gutter)); }
   .yd-stub { display: none; }
-  .yd-cars--lead { flex-direction: column-reverse; align-items: flex-start; row-gap: 0; }
+  /* the lead goes on below the engine, to the departure end; the label stands there */
+  .yd-leadtail { order: 2; flex: none; width: 100%; min-width: 0; height: var(--sp-6); }
+  .yd-leadtail .yd-rail { left: calc(var(--yd-spine-x) - 5px - var(--w) / 2); right: auto; top: 0; width: 0; height: 100%; border-top: 0; border-left: var(--w) solid var(--c); }
+  .yd-leadhead { margin-left: calc(5px - var(--yd-gutter)); padding-top: var(--sp-1); }
+  .yd-cars--lead,
+  .yd-table tr.has-dest .yd-cars--lead { flex-direction: column-reverse; align-items: flex-start; row-gap: 0; }   /* in the stem the goal tag stands beside its tile, and the cars of the held cut touch */
   .yd-cars--lead .yd-car { flex-direction: row-reverse; align-items: center; gap: var(--sp-3); }
   .yd-cars--lead .yd-car.is-next { margin: var(--sp-1) 0; }
   .yd-cars--lead .yd-dest { position: static; }
   .yd-engine { flex-direction: column-reverse; justify-content: center; }
-  .yd-sp-foot { left: calc(var(--yd-spine-x) - var(--w) / 2); width: var(--w); top: 0; bottom: auto; height: calc(var(--yd-pad) + 4px); border: 0; border-radius: 0; background: var(--c); }
-  .yd-leadlabel { padding-top: var(--sp-1); }
+  .yd-sp-foot { left: calc(var(--yd-spine-x) - var(--w) / 2); width: 0; top: 0; bottom: auto; height: calc(var(--yd-pad) + 4px); border: 0; border-left: var(--w) solid var(--c); border-radius: 0; }
+}
+
+/* A forced palette (the high contrast mode of an operating system) removes fills and shadows.
+   Lines here are borders, which it keeps. A car and a room bar keep their own inks on their own ground.
+   A lit edge that Dusk draws with a shadow gets an outline in the ink of the control. */
+@media (forced-colors: active) {
+  .yd-tile,
+  .yd-roomtrack,
+  .yd-roomtrack .dusk-heat { forced-color-adjust: none; }
+  .yd-switch,
+  .yd-engine { outline: 1px solid; outline-offset: -1px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4004,8 +4022,7 @@ const SCENE = {
       opts.foul != null ? h('i', { class: 'yd-roomfoul', css: { left: pct(opts.foul, lenUnits) } }) : null);
     const used = segs.reduce((a, s) => a + s.len, 0);
     return h('div', { class: 'yd-room' },
-      h('span', { class: `yd-roomline${opts.lead ? ' yd-roomline--lead' : ''}`, role: 'img', 'aria-label': `${opts.name}: cars stand on ${Math.round(100 * used / lenUnits)} percent of the length` }, track),
-      h('span', { class: 'yd-roomfig', text: plural(opts.count) }));
+      h('span', { class: `yd-roomline${opts.lead ? ' yd-roomline--lead' : ''}`, role: 'img', 'aria-label': `${opts.name}: cars stand on ${Math.round(100 * used / lenUnits)} percent of the length` }, track));
   }
 
   /* ---- the yard --------------------------------------------------------------------------------------- */
@@ -4051,7 +4068,7 @@ const SCENE = {
       const states = h('div', { class: 'yd-states' });
       if (S.state.showSecuredTags && now.cars.length >= 2 && t.securementTag) states.append(h('span', { class: `dusk-state dusk-state--${t.secured ? 'hold' : 'caution'}`, text: t.securementTag }));
       if (t.kickableMark) states.append(h('span', { class: 'yd-kick', text: t.kickableMark }));
-      if (t.isGoalTrack) states.append(h('span', {}, h('span', { class: 'yd-build', text: 'BUILD' }), ' ', h('span', { class: 'dusk-count', text: `${onGoalNow()} / ${goalIds.length}` })));
+      if (t.isGoalTrack) states.append(h('span', { class: 'yd-goal' }, h('span', { class: 'yd-build', text: 'BUILD' }), ' ', h('span', { class: 'dusk-count', text: `${onGoalNow()} / ${goalIds.length}` })));
 
       const segs = now.cuts.map((cut) => {
         const cs = cut.map((id) => now.cars.find((c) => c.id === id));
@@ -4060,7 +4077,7 @@ const SCENE = {
 
       const hasDest = t.id !== S.state.goalTrack && now.cars.some((c) => c.isGoalCar);
       body.append(h('tr', { role: 'row', class: [isRoute ? 'dusk-hot' : '', hasDest ? 'has-dest' : ''].join(' ').trim() || null },
-        h('td', { role: 'rowheader', class: 'yd-c-track', 'data-label': 'Track' }, h('span', { class: 'yd-band yd-id', text: t.id })),
+        h('td', { role: 'rowheader', class: 'yd-c-track', 'data-label': 'Track' }, h('div', { class: 'yd-trackcell' }, h('span', { class: 'yd-id', text: t.id }), h('span', { class: 'yd-n', text: plural(now.cars.length) }))),
         h('td', { role: 'cell', class: 'yd-c-state', 'data-label': 'State' }, states),
         h('td', { role: 'cell', class: 'yd-c-sw', 'data-label': 'Switch' }, spine,
           h('div', { class: 'yd-swbox' }, switchButton(t.id, lined, { refused: V.refused === t.id }), h('i', { class: `yd-drop${lit(isRoute)}`, 'aria-hidden': 'true' }))),
@@ -4068,7 +4085,7 @@ const SCENE = {
           h('div', { class: 'yd-track' },
             h('span', { class: 'yd-leadin', 'aria-hidden': 'true' }, h('i', { class: `yd-rail${lit(isRoute)}` }), h('i', { class: 'yd-foul' }), h('span', { class: 'yd-throat', text: 'throat ▸' })),
             cars)),
-        h('td', { role: 'cell', class: 'yd-c-room', 'data-label': 'Room' }, roomBar(t.derived.trackLength, segs, { foul: S.geometry.CLEAR, name: t.id, count: now.cars.length }))));
+        h('td', { role: 'cell', class: 'yd-c-room', 'data-label': 'Room' }, roomBar(t.derived.trackLength, segs, { foul: S.geometry.CLEAR, name: t.id }))));
     }
 
     // the lead, below AS71
@@ -4080,7 +4097,7 @@ const SCENE = {
     body.append(h('tr', { role: 'row', class: `yd-r-lead${holds.some((c) => c.isGoalCar) ? ' has-dest' : ''}` },
       h('td', { role: 'rowheader', class: 'yd-c-lead', colspan: '2', 'data-label': 'Track' },
         h('div', { class: 'yd-leadbox' },
-          h('span', { class: 'yd-leadlabel', text: lab[0].text }),
+          h('div', { class: 'yd-leadhead' }, h('span', { class: 'yd-leadlabel', text: lab[0].text }), h('span', { class: 'yd-n', text: `Holding ${plural(holds.length)}` })),
           h('div', { class: 'yd-leadrow' },
             h('span', { class: 'yd-leadtail', 'aria-hidden': 'true' }, h('i', { class: 'yd-rail' })),
             leadCars,
@@ -4088,7 +4105,7 @@ const SCENE = {
       h('td', { role: 'cell', class: 'yd-c-sw' }, h('span', { class: 'yd-spine', 'aria-hidden': 'true' }, h('i', { class: `yd-sp-foot${r ? ' is-lit' : ''}` }))),
       h('td', { role: 'cell', class: 'yd-c-cars' }),
       h('td', { role: 'cell', class: 'yd-c-room', 'data-label': 'Room' },
-        roomBar(S.state.engine.leadRoomUnits, held ? [{ from: S.state.engine.leadRoomUnits - held, len: held }] : [], { lead: true, name: 'The lead', count: holds.length }))));
+        roomBar(S.state.engine.leadRoomUnits, held ? [{ from: S.state.engine.leadRoomUnits - held, len: held }] : [], { lead: true, name: 'The lead' }))));
 
     $('route').textContent = `Route: LEAD → ${r || 'no track'}`;
     const total = S.state.tracks.reduce((a, t) => a + t.cars.length, 0) + S.state.engine.holds.length;
@@ -4202,6 +4219,8 @@ const SCENE = {
         pair(line('', h('i', { class: 'yd-foul' })), 'foul point'),
         pair(h('span', { text: 'throat ▸' }), 'the end that a PULL takes'),
         pair(h('span', { class: 'yd-key-gap', 'aria-hidden': 'true' }), 'a gap between two cuts')),
+      row('Room',
+        pair(h('span', { class: 'yd-roomtrack yd-key-room', 'aria-hidden': 'true' }, h('span', { class: 'dusk-heat' }), h('i', { class: 'yd-roomfoul' })), 'the track to one scale: foul point, free track, cars')),
       row('Cut', pair('2 or more cars:'), h('span', { class: 'dusk-state dusk-state--hold', text: 'TIED' }), h('span', { class: 'dusk-state dusk-state--caution', text: 'LOOSE' }),
         S.state.tracks.filter((t) => t.kickableMark).slice(0, 1).map((t) => pair(h('span', { class: 'yd-kick', text: t.kickableMark }), 'a kickable track'))),
       row('Goal',

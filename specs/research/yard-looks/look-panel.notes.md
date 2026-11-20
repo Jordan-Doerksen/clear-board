@@ -2,12 +2,13 @@
 
 Clear Board 2, Wave 1, research. Date: 2026-11-20. Branch `claude/peaceful-mayer-qat99l`, commit `cb51d4b`.
 One of three look sketches for the Yard station. Read-only on code and content.
+A second job, an independent reviewer, checked and repaired the sketch on the same day (tree at commit `069f90e`). Its record is section 14, "Eye review". Sections 1 to 13 are the notes of the designer, corrected where a repair changed a fact.
 
 Files of this job:
 
-- `specs/research/yard-looks/look-panel.src.html` : the source (961 lines; own CSS, markup, script, the scene object).
-- `specs/research/yard-looks/look-panel.html` : the built sketch (146 kB; one file; the six Dusk layers inline).
-- `specs/research/yard-looks/look-panel-1440.png`, `look-panel-390.png` : full-page pictures at scale 2.
+- `specs/research/yard-looks/look-panel.src.html` : the source (964 lines after the repairs of section 14; own CSS, markup, script, the scene object).
+- `specs/research/yard-looks/look-panel.html` : the built sketch (147 kB; one file; the six Dusk layers inline).
+- `specs/research/yard-looks/look-panel-1440.png`, `look-panel-390.png` : full-page pictures at scale 2, taken again after the last repair.
 - `specs/research/yard-looks/look-panel.notes.md` : this file.
 - Scratch folder `/tmp/claude-0/-home-user-clear-board/97369320-fcc4-5a82-bc9f-093035f8cbac/scratchpad/look-panel/` : the template, the build script and the check scripts. Nothing there is in the repository.
 
@@ -62,7 +63,7 @@ Limit: the page needs its script. With no script the diagram, the work order and
 | D18 | Car | A block, 26 px across the track, 4 px corner. Wide view: length = len × ax, at the true position. Row view: length = len × k, in true order. |
 | D19 | Car type colour | A category: box `--tile-grey`, hopper `--tile-teal`, tank `--tile-violet`, centerbeam `--tile-amber`, autorack `--tile-blue`. The matching `--<tone>-ink` is the edge of an empty car and the colour of the tag. |
 | D20 | Load state | Loaded: solid fill, number in `--on-tile`. Empty: `--well` body, 1.5 px edge in the type ink, number in `--ink`. |
-| D21 | Car number | The last word of the mark, 12 px bold mono, in the block. When it does not fit, it stands above the block, and neighbours take two heights in turn. No smaller size. |
+| D21 | Car number | The last word of the mark, 12 px bold mono, in the block. When it does not fit, it stands above the block, and neighbours take two heights in turn. No smaller size. "Fit" is: 3 px or more from the number to the outer edge of a block that has an edge line, 1.5 px or more to the edge of a solid block (section 14, repair 4). |
 | D22 | Type tag | 11 px mono under the block at the throat end. Always on screen. |
 | D23 | Cut and gap | Cars of one cut touch. The 42 unit gap on AS72 shows bare line between 70222 and 8810. No coupler mark. |
 | D24 | Engine | A block on `--head` with the lit edge `--neon-ctl` and the word ENGINE in `--lit`. 30 px across the track. |
@@ -102,7 +103,7 @@ Limit: the page needs its script. With no script the diagram, the work order and
 | A goal mark | Yes: BUILD and the chip "3 / 4" on AS73. |
 | The landing place of the called move | Yes: a dashed block with the number 70110. |
 | A capacity mark for a track | Row view: a bar under each row. Wide view: none (section 6, deviation 1). |
-| A capacity mark for the lead | Row view: a bar beside the engine (42 of 558 units, from `scene.state.engine`). Wide view: none. |
+| A capacity mark for the lead | Row view: a bar beside the engine (42 of 558 units, from `scene.state.engine`). The taken part is at the yard end, the right end, as on a track bar and in the legend (section 14, repair 3). Wide view: none. |
 | A car count on a track or on the engine | No. The brief asks for none. |
 | A text alternative | A hidden list (`#mirror`, class `.dusk-sr`) gives the route, the engine with its cars, and each track with its lining, state words and cars. The visible status bar gives the six linings. |
 
@@ -121,7 +122,7 @@ One rule selects the view. The script draws the wide view first. It uses the row
 - The ladder is one vertical spine at x = 28 px. From the top: the main line stub with its label; the rows AS76 down to AS71; the foot; the lead continues down with the held cars (the far-end car nearest the foot); the engine; the label of the lead and the lead bar.
 - Each track is one row to the right of its switch: the words ("AS73 REVERSE ‖ TIED ⚡ KICKABLE BUILD 3 / 4", they wrap), then the track line with its blocks, then the track bar. **[measured]** The row pitch at 390 is 92 px (110.5 px for AS73, where the words take two lines). The diagram is 366 by 723.5 px.
 - Along a track the map from units to px has three linear pieces: switch to foul point, foul point to the nearest thing (car or landing place), nearest thing to track end. The last piece is at car scale (k = 1.1 px for each unit: a box car is 46.2 px). The map is continuous and monotonic. A motion can run on it.
-- The middle piece is not to scale. The mark "⋯" on the line says so. The legend says "⋯ not to scale".
+- The middle piece is not to scale. The mark "⋯" on the line says so. The legend says "⋯ not to scale". On the lined track the mark has the route ink `--lit`, so the route reads as one line (section 14, repair 2).
 - The track bar is mandatory in this view. It runs from the foul point to the track end in true proportion. The hollow part is room. The solid part, at the car end, is taken (cars and the gaps between cuts).
 - When the cars of a row need more width than the row has, k goes down for that row only.
 - The lit route is one continuous line: up the lead, up the spine, right along the row of AS73.
@@ -165,7 +166,7 @@ Red has one use in the sketch: the refusal example. Gold has these uses: chrome,
 
 **New labels (the present app has none of them).** On the diagram: NORMAL, REVERSE, ENGINE, BUILD, "foul point", "⋯", the chip "3 / 4", the car number in the landing block. In the chrome: "Route" (strip cell, and "Route: LEAD → AS73" or "Route: LEAD → MAIN LINE" in the head bar), "Job" (strip cell), "Yard" (panel name), the tag "S.I." on two chips (the word is from the app's legend line). In the legend: "room", "not to scale", "SME to confirm", the type names box, hopper, tank, centerbeam, autorack (the keys of `geometry.carTypes`), "loaded", "empty" (`loadWord` of the scene), "KICK 1 to AS73" (`nextMove.asSentence`). Sketch only: "SKETCH · look A, panel · p4-peel, 3 of 4", "Refusal example", "SKETCH ONLY", the sub-line "KICK 1 to AS73 · AS72 REVERSE · AS73 NORMAL". Not visible: the names "AS73 switch, lined reverse", "Yard track diagram", "Move builder", "Rules in play", "Switch lining", "Legend", the skip link "Skip to the yard", and the text of the hidden list (for example "ENGINE, LEAD: 70110 BX empty.", "AS71 switch, lined normal. 0 cars.").
 
-**Bridge block (`:root`, comment "bridge").** 12 values. All are lengths or plain numbers. None is a colour: `--cb-rail-w`, `--cb-route-w`, `--cb-route-glow-w`, `--cb-route-glow-a`, `--cb-route-glow-blur`, `--cb-block-h`, `--cb-engine-h`, `--cb-target`, `--cb-ay`, `--cb-k`, `--cb-spine-x`, `--cb-row-indent`. The glow of the route is the route line again in `--lit`, wider, faint and blurred. Dusk has no gold glow token that `drop-shadow()` can take.
+**Bridge block (`:root`, comment "bridge").** 12 values. All are lengths or plain numbers. None is a colour: `--cb-rail-w`, `--cb-route-w`, `--cb-route-glow-w`, `--cb-route-glow-a`, `--cb-route-glow-blur`, `--cb-block-h`, `--cb-engine-h`, `--cb-target`, `--cb-ay`, `--cb-k`, `--cb-spine-x`, `--cb-row-indent`. The glow of the route is the route line again in `--lit`, wider, faint and blurred. Dusk has no gold glow token that `drop-shadow()` can take. The corner of the track bar is the Dusk token `--r-bar` (section 14, repair 6).
 
 **Gaps in Dusk 0.2.0 that the sketch filled with page-local rules.**
 
@@ -251,11 +252,14 @@ Lines and marks, on `--glass`: `--ink-3` 7.11, `--ink-2` 11.54, `--lit` 12.11. E
 | Viewport | View | Result |
 |---|---|---|
 | 320 | rows | no sideways scroll, no overlap; 4 numbers above their blocks on AS73 |
-| 360, 768, 1024 | rows | no sideways scroll, no overlap, all numbers in their blocks |
-| 1280 | wide | no overlap; 7 of the 5-figure numbers (empty box cars, the held car, the landing block) above their blocks, in two heights |
-| 1366 | wide | no overlap, all numbers in their blocks |
+| 360, 768, 1024, 1200 | rows | no sideways scroll, no overlap, all numbers in their blocks |
+| 1210, 1220, 1240 | wide | no overlap; every 5-figure number, the two tank numbers of AS72 and the word ENGINE above their blocks |
+| 1280, 1300, 1340, 1360 | wide | no overlap; 7 numbers above their blocks, in two heights: the 5 standing empty box cars, the held car, the landing block |
+| 1366, 1380, 1440, 1920 | wide | no overlap, all numbers in their blocks |
 
-So the clean wide view needs a viewport of about 1366 px or more with this font. At 1280 it is correct but less calm.
+These rows are the values after the repairs of section 14 **[measured by the reviewer]**. Before repair 4 the numbers were inside the blocks from 1290 px, but they were almost on the edge line (1.0 px of room on each side at 1300 px).
+
+So the clean wide view needs a viewport of 1366 px or more with this font. From 1210 to 1360 px it is correct but less calm. Under 1210 px the page uses the row view.
 
 **Longest cuts [measured, scratch copy only].** `stress.mjs` put the longest standing cut and the longest held cut of the authored lines (from the frozen engine) into a scratch copy. At 390: no overlap, no sideways scroll; diagram 897.5 px high. At 1440: the engine is off the frame at x = −319, the collision rule finds it, and the page uses the row view. The wide view has no answer of its own for a long held cut.
 
@@ -329,6 +333,8 @@ This job proposes no rule wording. Each note is a question about a mark or a wor
 - P6. The "How to play" text says "Rule 112", "Rule 113.5", "Rule 113.2". The chips say "CROR 112", "CROR 113.4 / 113.5", "CROR 113.0 / 113.2". The sketch copies both without change. Is the difference in naming intended?
 - P7. The refusal example rings the AS73 switch, because the app text names AS73. In that state the movement would enter AS72 first. Which switch must the picture mark?
 - P8. The row view shows the lead under the yard and the label "◄ DEPARTURE · LEAD / DRILL" beside it. Is a lead drawn downward a problem for a learner who knows the lead as "left" from the wide view?
+- P9 (reviewer). The tag LOOSE or TIED is one tag for a whole track. In this scene AS72 holds one lone car (70222) and, 42 units from it, a cut of two tank cars. The frozen engine set the whole track to "not secured" when the lone car was spotted there (`model.js:150-155`, decision D-0029). The sketch copies that state: "AS72 ■ LOOSE". A learner cannot see which of the two cuts the word is about. Is one tag for a track correct for the learner?
+- P10 (reviewer). The scene file says that the next authored move wins the job (`nextMove.afterIt.jobWon` is true) while AS72 still reads LOOSE. The sketch shows only the state before that move. Is a won job with a LOOSE track the intended lesson? **[measured]** The reviewer replayed the fourth move with the frozen engine: `checkWin` gives true, and AS72 holds 3 cars with `secured` false. The win check reads the goal track only (`model.js:254`).
 
 ## 13. Notes for the lead
 
@@ -338,3 +344,156 @@ This job proposes no rule wording. Each note is a question about a mark or a wor
 4. The builder controls of the sketch do nothing, except that an action button takes the pressed state. Only the six switches work.
 5. Other agents changed files under `specs/research/` in the same tree during this job. This job wrote only the five files named at the top. `git status` shows no change under `src/` or `public/`. The SHA-256 values of `geometry.js`, `model.js`, `puzzles.js` and `solver.js` are equal to the values in `scene.source.files`.
 6. The helper lines of this file are for an agent. They are not for the owner.
+
+## 14. Eye review
+
+An independent reviewer did this section. The reviewer did not build the sketch. Date: 2026-11-20. Tree at commit `069f90e`, branch `claude/peaceful-mayer-qat99l`. The reviewer wrote the five files of this job only. The scratch folder of the review is `/tmp/claude-0/-home-user-clear-board/97369320-fcc4-5a82-bc9f-093035f8cbac/scratchpad/critic-panel/`. The scripts there are new and do not use the scripts of the designer: `replay.mjs`, `win.mjs`, `m.mjs`, `static.mjs`, `lines.mjs`, `kb.mjs`, `words.mjs`, `forced.mjs`, `fonts.mjs`, `facts.mjs`, `el.mjs`.
+
+Result words: **pass**, **repaired** (what changed), **open** (why). Each number is a result of a script of the review, unless the line says "not verified". Tool: Playwright with Chromium, Linux. UI text drew in Inter and figures in DejaVu Sans Mono (read with `CSS.getPlatformFontsForNode`). No timing was measured. The web was not used.
+
+### 14.1 The repairs
+
+All six repairs are in `look-panel.src.html`. After the last repair the reviewer built `look-panel.html` with `inline-dusk.mjs`, took both pictures with `shot.mjs --scale 2`, and looked at both.
+
+| # | Defect found | Evidence | Repair |
+|---|---|---|---|
+| 1 | Refusal example. The red "?" beside the ring stood on the ladder line in the wide view. In the row view it stood 7.6 px from the word BUILD, and the eye read "? BUILD 3 / 4". | `lines.mjs`; pictures at both widths | The "?" is up and left of the ring. Wide view: on no line, 10.8 px from the words "AS73 NORMAL". Row view: left of the spine, 41.6 px from the nearest word. |
+| 2 | Row view. A plate with a grey "⋯" cut the lit route on the lined track. The brief asks for one continuous lit line. In this look a gap in a line also means an open switch leg. | picture at 390 | On the lined track the break mark has the route ink `--lit`. Other tracks keep the mark in `--ink-2`. |
+| 3 | Row view. The bar of the lead had its taken part at the left. The track bars and the legend ("room", bar, "cars") have it at the right. The held cars are at the yard end of the lead. | picture at 390 | The taken part of the lead bar is at the right, the yard end. |
+| 4 | Number fit. The test used rounded widths. From 1290 to 1360 px it kept a 5-figure number in a block with about 1 px of room on each side (at 1300 px: number 34.9 px, block 38.9 px with its edge line, room 1.0 px on each side). In the picture the number is on the edge line. | `facts.mjs` at 1300; picture | The test uses true widths. A number stays in a block when it has 3 px or more to the outer edge of a block with an edge line, or 1.5 px or more to the edge of a solid block. The result is the same at pixel ratio 1 and 2. Numbers stand above their blocks from 1210 to 1360 px, and inside from 1366 px. At 125 percent text the loaded 5-figure number (70222) also stands above its block; before, in the picture, it filled the block from edge to edge. |
+| 5 | Wide view. The word ENGINE touched the headlight dot at 1280 px (overlap 0.6 px). In the picture of the dyslexia test at 1440 px the two also touch. | `m.mjs` and `facts.mjs` at 1280; pictures | The engine block keeps the left 9 px or more for the dot. The fit test knows this. At 1280 px the gap from the dot to the word went from −0.6 px to 4.7 px. At 1440 px it went from 2.8 px to 8.4 px (the word moved 5.6 px to the right). From 1210 to 1240 px the word stands above the block. |
+| 6 | Own CSS had a raw corner value (2 px) in three places. Dusk has a token for a bar corner. | reading | The track bar uses `--r-bar`. The legend line has no corner. |
+
+The pictures changed only where a repair is: at 1440 the two engine blocks and the "?"; at 390 the break mark, the bars, and the "?" (pixel difference of the old and new pictures, by region).
+
+### 14.2 The ten checks
+
+**Check 1. Truth of the scene: pass.**
+
+- `replay.mjs` built puzzle p4-peel from `puzzles.js:317-334` with the frozen engine, lined the switches, and made the first 3 authored moves. Compared with `scene.json`: moves, joints, the lined map, the secured map, the kickable list, the held car, and for each track the cars, their order, type, load state and position. 0 differences. The landing place of the next move (`spotPlan`) is equal. The refusal text of the engine is equal to `scene.refusalExample.text`.
+- `m.mjs` read the built page at 1440 and 390. Each of the 13 cars (12 standing, 1 held) is drawn one time with the correct tag, tone and load class. The order along each track is correct. Cars of one cut touch. The two cuts of AS72 do not touch. AS71 is the lowest track. The six switch buttons have the pressed state and the name of the scene. 0 differences.
+- `words.mjs`: the work order (4 lines), banner, readout, picker, the 4 actions, "cars", the 6 tracks, the count, the buttons and their titles, the legend line, the 8 chips, the 3 drawing labels and the refusal text are equal to the scene, string for string, at both widths. The note and the "How to play" block are equal to `yardSim.js:183-209`.
+- Controls against `yardSim.js:144-173`. Lost: none. Renamed: none. The action select is four segment buttons (the brief permits it). Reset and the sound button are in the strip (the brief). "Depart ▸" is hidden in the app for this puzzle and is absent here. Added: the six switch buttons (they replace the canvas click), the skip link, and "Look it up →" in the refusal example (the app shows it in a refusal).
+- Open, small: the app sets "special instruction", "this" and "you must know your yard's." in italic or bold (`yardSim.js:176-180`). The sketch does not. The scene file holds the line as plain text. The words are equal.
+- Open, known: the work order says "(now on AS73, AS71)". That is false in this scene (AS71 is empty). It is the text of the app, which does not change during play. The sketch copies it. The owner can read it as an error of the sketch.
+
+**Check 2. The inventory: pass, with the items below.** Each element was looked for in the final pictures.
+
+| Items | Result |
+|---|---|
+| D1, D3 to D9, D11, D12, D14, D15, D17 to D26 | pass. Each one reads at both widths. D14: the tick is `--ink-2`, not red, and only the tick of the lined track has the words (the brief). D22: the tag is under the block (the brief). |
+| D2 | pass. The frame is the lit edge of a Dusk panel with an 8 px corner. The 12 px corner and the drop shadow of the app are gone. |
+| D10 | pass. The label is in the head bar of the Yard panel, not on the drawing. |
+| D13 | not drawn, by the brief. A solid diamond, the word REVERSE and the joined leg carry the state. |
+| D16 | pass. TIED and LOOSE are beside the track id, 12 px. AS71 (no car) has no tag. A track with one car is not in the scene. |
+| D27 to D31 | not drawn. The sketch is a still picture (common rule 7). Section 9 says where each motion has room. "▶ Watch optimal" is there and does nothing. |
+| Pointer | pass. Six real buttons. Checked with a pointer at 3 px inside a corner, with Space and with Enter. |
+| C1 to C4, C6, C9 to C12 | pass. |
+| C5, C7 | not in this puzzle. Not drawn. The notes say where they go. |
+| C8 | pass for the tones ok and bad. The tones none and win are not drawn. |
+| Item 45 | route mark, switch word, engine word, goal mark, landing place, text alternative: all there. Car count: none (the brief asks for none). Capacity mark: row view only. |
+
+Open: the wide view (1440) has no capacity bar. The brief asks for a bar under each track at both widths. The designer removed it because it read as a second track (deviation 1 of section 6). The reviewer agrees: in the wide view the picture is to scale, and the bare line from the tick to the first car is the room. The owner sees a bar in the 390 picture and no bar in the 1440 picture.
+
+**Check 3. The two-second read: pass at 1440, pass with limits at 390.** From the final pictures.
+
+At 1440:
+
+- Each car and its order: reads. 12 px bold figures in blocks, 43.6 px for a box car.
+- Each switch: reads. Word, solid or hollow diamond, and the gap in the open leg.
+- The lit route: the strongest thing in the picture. One gold line from the held car to the dashed block.
+- The engine: reads by its word. It is small and at the far left.
+- Tied against loose: reads in the label column. "‖ TIED" is grey and "■ LOOSE" is amber.
+- The goal: the weakest of the six. "BUILD 3 / 4" is the third line of the AS73 label. A learner finds it in more than two seconds.
+
+At 390:
+
+- Cars, order, switches, route, engine, tied and loose: all read. Each block is 44.9 px or more.
+- The first screen (844 px high) shows the title bar, the strip, and the tracks AS76 to AS73. The strip with the picker takes 201 px. The diagram is 723.5 px high and starts at 355 px. AS72 is cut by the screen edge. AS71, the lead and the engine (at 1017 px) are below the first screen. "Work it ▸" is at 1707 px, 629 px below the end of the diagram.
+
+What a first-time learner can misread:
+
+1. The dashed block "70110" at the end of AS73. A learner can count four cars on AS73, or can see car 70110 in two places. The legend says "KICK 1 to AS73" beside a dashed block. The chip says "3 / 4".
+2. The tick near each switch. It looks like a small cross on the track. Only one tick has the words "foul point". A learner can take it for a second switch or for a signal.
+3. The gold line. A learner can take a lit line for permission to move. The word "Route" is in the head bar and the strip, not on the line.
+4. "AS72 ■ LOOSE" is one tag for a track with two cuts (note P9).
+5. The headlight dot in front of the word ENGINE looks like a list bullet or a status lamp.
+6. The green lamps beside NORMAL in the status bar can read as "safe" (note P2).
+7. Row view: the arrow "◄" of the lead label points left, and the lead runs down (limit 3 of section 4).
+8. Row view: the solid part of a track bar is shorter than the blocks over it, because the blocks are not to scale and the bar is. The mark "⋯" and the legend say so. At 390 the legend starts at 1078 px, 685 px below the first track.
+9. Row view: the bar of the lead has no word beside it. It can read as a progress bar.
+
+None of the nine was repaired. Each one needs a new label or a change of the look, and the brief permits neither to the reviewer.
+
+**Check 4. Self-contained: pass.** `static.mjs`: one file, 2 style blocks, 1 script block. No link, no script source, no import, no remote address. The one "http" string is the SVG namespace name in the script. The page made 0 requests when it loaded. The block marked `data-dusk` holds the six files of `/home/user/clear-board/src/styles/dusk/` byte for byte, in the Dusk load order; the rest of the block is the six marker comments of the helper. The built file is equal to the source with the marker replaced.
+
+**Check 5. No raw colour: pass.** `token-lint.mjs` on the final source: 0 hex, 0 colour functions, 0 colour names. No `style` attribute in the markup. The own CSS and script use 65 token names; each one that is not `--cb-*` is declared in `dusk.tokens.css`. The scene object in the page is equal to `scene.json`.
+
+**Check 6. Dusk laws: pass, with four open items for the lead.**
+
+- Tile colour is a category: pass. The five car tones use the tile tokens, and the tag is always there.
+- Chip and state colours are states: pass. NORMAL green, REVERSE amber, LOOSE amber, TIED grey, each with a word and a glyph or a shape.
+- Red is attention only: pass. Red is in the refusal example only (ring, "?", banner edge, refusal text).
+- No state by colour or glow alone: pass. The route is a thick line and words. A lamp has its word beside it.
+- No pill: pass. No interactive element has a corner over 6 px.
+- Parts as `ARCHITECTURE.md` describes them: title bar, thread, strip with cells and a key cell, strip end with controls, framed panels with head bars, count chips, segment, state words, flags, legend, status bar with lamps beside words, skip link first: pass.
+- Repaired: a raw corner value (repair 6).
+- Open 1: gold is on the route, the engine edge and word, the goal word and the landing block. The brief orders each one. Dusk says gold is chrome and selection, never a state. The decision is with the lead (see the end of section 5).
+- Open 2: "Work it ▸" has a second button weight (`.cb-btn--key`). Dusk has one.
+- Open 3: the head bar of the Yard panel ends with the speed label. Dusk says a head bar ends with a count or a control. The brief asked for a count chip there.
+- Open 4: the page needs its script for all text of the diagram, the work order and the rules. Dusk rule 2 ("no text depends on JavaScript") does not hold. The designer said so in section 2.
+- Seen, not a defect of this sketch: at 390 the strip wraps, and the cell "Route" on the second line keeps the short left rule of Dusk (`dusk.components.css:303`). It is a Dusk behaviour and will show in each look.
+
+**Check 7. Measured at 1440 and 390: pass.** Final build, `m.mjs`, `kb.mjs`, `lines.mjs`.
+
+| Measure | 1440 | 390 |
+|---|---|---|
+| View | wide | rows |
+| Page width against window | 1440 of 1440, no sideways scroll | 390 of 390, no sideways scroll |
+| Interactive elements seen | 20 | 20 |
+| Smallest target | 44 by 44 px | 44 by 44 px |
+| Step between two switch buttons | 72.6 px across, 70.2 px down | 92 px down (110.5 px at AS73) |
+| Smallest text | 11 px (`--fs-xs`) | 11 px |
+| Smallest car number | 12 px | 12 px |
+| Console errors | 0 | 0 |
+| Lowest text contrast | 4.55 to 1 (`--on-tile` on the light end of `--tile-grey`) | 4.55 to 1 |
+| Text under 4.5 to 1 | 0 | 0 |
+| Parts of the diagram that overlap | 0 | 0 |
+| Parts of the diagram outside the frame | 0 | 0 |
+| Words that lie on a line with no plate | 0 | 0 |
+| Tab order of the switches | AS71 to AS76 | AS71 to AS76 |
+| Focus ring on a switch | 2 px, visible in the picture | 2 px, visible in the picture |
+
+The contrast script takes each visible text node, the ink colour, and the ground of the nearest ancestor that holds the text and has a fill, at both ends of a gradient, with `contrast()` of `/home/user/dusk/lib/color.mjs`. It does not see the glyphs that CSS writes before a state word; they have the ink of the word. It does not see a line under a word; `lines.mjs` checks that.
+
+Space on AS73 at both widths: pressed true to false, the name "AS73 switch, lined normal", the word beside the switch, the head bar "Route: LEAD → MAIN LINE", the strip cell, the status bar and the live line all change; the landing block goes; the focus stays. Enter puts it back.
+
+**Check 8. Motion off and text at 125 percent: pass.**
+
+- Motion off: the pictures at 1440 and 390 are equal to the pictures with motion on, pixel for pixel (scale 1).
+- Text at 125 percent (each Dusk type token times 1.25): at 1440 the wide view does not fit and the page uses the row view. At both widths: no sideways scroll, no overlap, no clipped text, nothing blank, targets 44 px. The 5-figure numbers stand above their blocks.
+- A dyslexia-like setting (DejaVu Sans, letter spacing 0.02 em, word spacing 0.08 em, the values of the app): no overlap and no sideways scroll at both widths; wide view at 1440. A real dyslexia typeface: not verified.
+- Open: high contrast. With the forced-colours setting of Playwright the page reports forced colours as active, and 0.7 percent of the pixels change at 1440 (measured on the build before the repairs). Nothing is blank. This is not a test of a real contrast theme, and the high-contrast setting of the app on Dusk tokens does not exist yet. Not verified.
+
+**Check 9. "SME to confirm": pass.** The legend has the flag on five meanings: car type tones, NORMAL and REVERSE, the route, the foul point, TIED and LOOSE. The lamps of the status bar use the two switch colours and have no flag of their own. Rule numbers on the page: "CROR 105" in the copied label, the cites of the 8 chips, "CROR 104" in the copied refusal text, and the numbers in the copied "How to play" block. Each one is text of the app for this puzzle. The sketch adds no rule text and no rule number.
+
+**Check 10. The direction is still itself: pass.** The wide view is a track diagram: thin lines, plain blocks, state in words, one lit route, no pictorial detail. The row view is the re-projection that the brief orders; it keeps the spine and the lit route. The repairs changed no structure.
+
+### 14.3 What the owner must know before the pick
+
+1. The 1440 picture is the best case of this look. The clean wide view needs a window of 1366 px or more with the font of this machine. From 1210 to 1360 px the 5-figure numbers stand above their blocks in two heights. Under 1210 px, and at 125 percent text, the page uses the row view of the 390 picture, drawn wide. The owner sees none of these states in the two pictures.
+2. The fit of a 5-figure number depends on the mono font of the machine. The font of the owner's machine: not verified.
+3. On a phone the diagram is 723.5 px high. The first screen shows four of the six tracks and not the engine. The move builder is below the diagram and its legend. A person must scroll between the switches and "Work it ▸".
+4. The row view does not show car length by block width. Two puzzles teach length. The bar is the only length cue there.
+5. The refusal example is a second small picture with the flag "SKETCH ONLY". It is not a state of the main diagram.
+6. Only the six switches work. The builder does nothing.
+
+### 14.4 Not verified by the reviewer
+
+- The look on the owner's machine and browser.
+- A real high-contrast or forced-colours mode.
+- A real dyslexia typeface.
+- A screen reader and a touch device.
+- A centerbeam car, a track with one car, a long held cut, the arrival, the departure, the switch-list check and the win banner: not in the scene.
+- The stress test of the designer with 8 autoracks (section 7): not run again.
+- Colour-vision deficiency: no new measurement.

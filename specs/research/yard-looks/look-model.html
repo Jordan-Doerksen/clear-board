@@ -1856,7 +1856,8 @@ html[data-tier="strict"][data-ambient="on"] body::before {
 }
 
 /* ---- gaps in Dusk: sizes and two controls ---------------------------------------------------- */
-.yd-main{ grid-column: 1 / -1; }                               /* a window with no sidebar: the content spans both columns */
+.yd-main{ grid-column: 1 / -1; }
+.dusk-skip{ display: inline-flex; align-items: center; min-height: var(--yd-target); }   /* page-local size on a Dusk part: the skip link is 39 px high in Dusk */                               /* a window with no sidebar: the content spans both columns */
 .yd-btn{ min-height: var(--yd-target); min-width: var(--yd-target); justify-content: center; font-size: var(--fs-data); }
 .yd-btn--go{ box-shadow: var(--neon-ctl-on); }
 .yd-select{
@@ -1867,7 +1868,7 @@ html[data-tier="strict"][data-ambient="on"] body::before {
   color: var(--ink); font-size: var(--fs-data);
 }
 .yd-select--mono{ font-family: var(--font-mono); font-weight: var(--fw-medium); }
-.yd-picker{ flex: 1 1 14rem; }
+.yd-picker{ flex: 1 1 14rem; max-width: 30rem; }
 .yd-dim{ color: var(--ink-3); }
 .yd-titlebar-end{ display: flex; align-items: center; gap: var(--gap); flex-wrap: wrap; }
 
@@ -1876,7 +1877,7 @@ html[data-tier="strict"][data-ambient="on"] body::before {
 .yd-view{ position: relative; overflow: hidden; background: var(--glass); max-width: 100%; }
 .yd-view > svg{ position: absolute; left: 0; top: 0; display: block; }
 .yd-layer{ position: absolute; inset: 0; pointer-events: none; }
-.yd-layer > *{ pointer-events: auto; }
+.yd-layer--ctl > *{ pointer-events: auto; }
 
 /* shapes */
 .yd-ballast{ fill: none; stroke: var(--panel-hi); stroke-linejoin: round; }
@@ -1886,7 +1887,6 @@ html[data-tier="strict"][data-ambient="on"] body::before {
 .yd-rail--blade{ stroke: var(--ink); opacity: 1; stroke-width: 1.6; }
 .yd-chev{ fill: none; stroke: var(--lit); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .yd-foul{ stroke: var(--ink-2); stroke-width: 2.5; }
-.yd-foul--attn{ stroke: var(--red-ink); }
 .yd-stop{ stroke: var(--ink-3); stroke-width: 3; stroke-linecap: square; }
 .yd-land{ fill: none; stroke: var(--lit); stroke-width: 1.5; stroke-dasharray: 4 3; }
 .yd-coupler{ stroke: var(--ink-3); stroke-width: 2; }
@@ -1894,12 +1894,8 @@ html[data-tier="strict"][data-ambient="on"] body::before {
 .yd-car{ filter: var(--yd-car-shadow); }
 .yd-body{ stroke-width: 1.5; }
 .is-empty .yd-body{ fill: var(--well); }
-.is-loaded .yd-body{ stroke: none; }
 .yd-detail{ fill: none; stroke-width: 1; }
-.is-loaded .yd-detail{ stroke: var(--on-tile); opacity: .34; }
-.is-loaded .yd-detail--solid{ fill: var(--on-tile); stroke: none; opacity: .3; }
 .is-empty .yd-detail{ opacity: .7; }
-.is-empty .yd-detail--solid{ stroke: none; opacity: .55; }
 .yd-edge{ stroke: var(--on-tile); stroke-width: 1; opacity: .42; }
 .yd-tone-grey   .yd-body, .yd-tone-grey   .yd-detail{ stroke: var(--grey-ink); }
 .yd-tone-teal   .yd-body, .yd-tone-teal   .yd-detail{ stroke: var(--teal-ink); }
@@ -1911,9 +1907,10 @@ html[data-tier="strict"][data-ambient="on"] body::before {
 .is-empty.yd-tone-violet .yd-detail--solid{ fill: var(--violet-ink); }
 .is-empty.yd-tone-amber  .yd-detail--solid{ fill: var(--amber-ink); }
 .is-empty.yd-tone-blue   .yd-detail--solid{ fill: var(--blue-ink); }
-.is-loaded .yd-body, .is-loaded .yd-detail{ stroke: none; }
-.is-loaded .yd-detail{ stroke: var(--on-tile); }
-.is-loaded .yd-detail--solid{ stroke: none; }
+.yd-car .yd-detail--solid{ stroke: none; opacity: .55; }
+.is-loaded .yd-body{ stroke: none; }
+.is-loaded .yd-detail{ stroke: var(--on-tile); opacity: .34; }
+.is-loaded .yd-detail--solid{ fill: var(--on-tile); stroke: none; opacity: .3; }
 
 .yd-s-grey-hi{ stop-color: var(--tile-grey-hi); }     .yd-s-grey-lo{ stop-color: var(--tile-grey-lo); }
 .yd-s-teal-hi{ stop-color: var(--tile-teal-hi); }     .yd-s-teal-lo{ stop-color: var(--tile-teal-lo); }
@@ -1956,7 +1953,7 @@ html[data-tier="strict"][data-ambient="on"] body::before {
 .yd-a-l { transform: translateY(-50%); }
 .yd-a-r { transform: translate(-100%, -50%); }
 .yd-label{ font-size: var(--fs-s); }
-.yd-num{ padding: 0 1.5px; box-shadow: none; border-radius: 2px; color: var(--ink); font-size: var(--fs-s); font-weight: var(--fw-bold); line-height: 1.2; }
+.yd-num{ padding: 0 1px; box-shadow: none; border-radius: 2px; color: var(--ink); font-size: var(--fs-s); font-weight: var(--fw-bold); line-height: 1.2; }
 .yd-num--land{ background: none; color: var(--lit); outline: 1px dashed var(--lit); outline-offset: -1px; }
 .yd-tag{ position: absolute; transform: translate(0, -50%); padding: 0 1px; border-radius: 2px; font: var(--fw-bold) var(--fs-xs)/1.15 var(--font-mono); white-space: nowrap; }
 .yd-tag--on{ color: var(--on-tile); background: var(--tile-glyph); }
@@ -1992,7 +1989,7 @@ html[data-tier="strict"][data-ambient="on"] body::before {
 
 /* the legend */
 .yd-legend{ padding: var(--sp-3) var(--sp-4); background: var(--panel-lo); border-radius: var(--r-control); box-shadow: var(--ring-well); color: var(--ink-2); font-size: var(--fs-xs); }
-.yd-legend--corner{ position: absolute; left: var(--sp-4); top: var(--sp-4); }
+.yd-legend--corner{ position: absolute; left: var(--sp-4); top: var(--sp-4); max-width: 304px; }
 .yd-legend--below{ margin: var(--sp-3); }
 .yd-legend h3{ margin: 0 0 var(--sp-1); color: var(--ink-3); font-size: var(--fs-xs); font-weight: var(--fw-medium); letter-spacing: var(--track-label); text-transform: uppercase; }
 .yd-legend h3 + .yd-lrow{ margin-top: 0; }
@@ -2011,7 +2008,9 @@ details.yd-legend-fold .yd-legend--below{ margin-top: 0; }
 .yd-cams{ display: flex; flex-direction: column; }
 .yd-cam{ border-top: 1px solid var(--hair); }
 .yd-cam:first-child{ border-top: 0; }
-.yd-cam--map{ display: flex; justify-content: center; }
+.yd-cam--map{ display: flex; justify-content: center; border-top: 0; }
+.yd-mapcap{ display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-1) var(--sp-3); padding: var(--sp-2) var(--sp-2) 0; }
+.yd-mapcap .yd-plate{ position: static; font-size: var(--fs-xs); }
 .yd-seg{ display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: var(--sp-2) 0; border-radius: 0; }
 .yd-seg button{ min-height: var(--yd-target); min-width: 0; padding: 2px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font-family: var(--font-mono); overflow: hidden; }
 .yd-seg button b{ font-size: var(--fs-s); }
@@ -2022,7 +2021,7 @@ details.yd-legend-fold .yd-legend--below{ margin-top: 0; }
 .yd-cap{ display: flex; align-items: center; gap: var(--sp-3); min-height: 30px; padding: var(--sp-1) var(--sp-3); }
 .yd-cap .yd-plate{ position: static; background: none; box-shadow: none; padding: 0; }
 .yd-strip{ display: flex; align-items: stretch; }
-.yd-break{ flex: none; display: flex; align-items: center; justify-content: center; color: var(--ink-3); font-size: var(--fs-base); background: var(--panel-lo); border-left: 1px dashed var(--hair-2); border-right: 1px dashed var(--hair-2); }
+.yd-break{ flex: none; display: flex; align-items: center; justify-content: center; color: var(--ink-2); font-size: var(--fs-l); font-weight: var(--fw-bold); background: var(--panel-lo); border-left: 1px dashed var(--hair-2); border-right: 1px dashed var(--hair-2); }
 .yd-pan{ display: inline-flex; gap: var(--sp-2); margin-left: auto; }
 
 /* ---- the chrome around the model ------------------------------------------------------------- */
@@ -2044,9 +2043,10 @@ details.yd-legend-fold .yd-legend--below{ margin-top: 0; }
 .yd-chip--si{ border-style: dashed; }
 .yd-chip b{ color: var(--ink); font-family: var(--font-mono); font-size: var(--fs-s); }
 .yd-chip i{ margin-right: var(--sp-2); padding: 0 var(--sp-1); border: 1px solid var(--hair-2); border-radius: var(--r-chip); color: var(--ink); font-style: normal; font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: var(--fw-bold); }
-.yd-prose{ color: var(--ink-2); max-width: var(--measure); }
+.yd-prose{ color: var(--ink-2); }
+.yd-prose > p, .yd-prose details > *{ max-width: var(--measure); }
 .yd-prose strong{ color: var(--ink); }
-.yd-prose p, .yd-prose ul{ margin: var(--sp-3) 0 0; }
+.yd-prose details p, .yd-prose ul{ margin: var(--sp-3) 0 0; }
 .yd-prose code{ padding: 0 var(--sp-1); background: var(--well); border-radius: var(--r-chip); font-family: var(--font-mono); font-size: var(--fs-s); }
 details.yd-how > summary{ min-height: var(--yd-target); display: flex; align-items: center; color: var(--ink); font-weight: var(--fw-medium); cursor: pointer; }
 .yd-w-reverse{ color: var(--amber-ink); font-weight: var(--fw-medium); }
@@ -2118,11 +2118,12 @@ details.yd-how > summary{ min-height: var(--yd-target); display: flex; align-ite
         <ul class="yd-chips" id="rules"></ul>
       </section>
 
-      <section class="dusk-panel yd-prose" aria-label="What this trainer builds">
+      <div class="dusk-panels">
+        <section class="dusk-panel yd-prose" aria-label="What this trainer builds">
 <p><strong>What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span class="yd-dim">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span></p>
-      </section>
-      <section class="dusk-panel yd-prose" aria-label="How to play">
-        <details class="yd-how">
+        </section>
+        <section class="dusk-panel yd-prose" aria-label="How to play">
+          <details class="yd-how">
 <summary>How to play & why these rules</summary>
       <p><strong>You are the conductor, not the engineer.</strong> Click a switch target to line it
       (<span class="yd-w-reverse">yellow</span> = lined into the track / diverging,
@@ -2144,8 +2145,9 @@ details.yd-how > summary{ min-height: var(--yd-target); display: flex; align-ite
       A <strong>KICK</strong> (Rule 113.5) needs a <em>secured</em> cut of at least two cars as a <em>backstop</em> to
       catch the rolling car — and a tank, autorack or centrebeam is never kicked. After coupling, the engineer
       <em>stretches</em> the joint to confirm the knuckles are locked before moving (<strong>Rule 113.2</strong>).</p>
-        </details>
-      </section>
+          </details>
+        </section>
+      </div>
 
       <section class="dusk-panel dusk-panel--framed" aria-labelledby="ref-h">
         <header class="dusk-panel-head"><h2 class="dusk-panel-name" id="ref-h">Refusal example</h2><span class="dusk-panel-sub">not the scene: the same yard before the switches are relined</span></header>
@@ -2157,7 +2159,7 @@ details.yd-how > summary{ min-height: var(--yd-target); display: flex; align-ite
     </main>
 
     <footer class="dusk-status">
-      <span><i class="dusk-led dusk-led--caution" aria-hidden="true"></i>Sketch: the switches work, the other controls do nothing</span>
+      <span><i class="dusk-led dusk-led--caution" aria-hidden="true"></i>Sketch: the switches and the track selector work. The other controls do nothing.</span>
       <span id="st-lined"></span>
       <span class="dusk-spacer"></span>
       <span id="st-mode"></span>
@@ -2318,7 +2320,7 @@ function paint(host, o) {
   const svg = S('svg', { width: o.wpx, height: o.hpx, viewBox: '0 0 ' + o.wpx + ' ' + o.hpx, 'aria-hidden': 'true', focusable: 'false' }, null);
   view.appendChild(svg);
   const plates = H('div', { class: 'yd-layer', 'aria-hidden': 'true' });
-  const controls = H('div', { class: 'yd-layer' });
+  const controls = H('div', { class: 'yd-layer yd-layer--ctl' });
   view.appendChild(plates); view.appendChild(controls);
   host.appendChild(view);
 
@@ -2366,7 +2368,7 @@ function paint(host, o) {
   /* 3. foul point bars and end stops */
   const half = G.presentStrokeWidths.clearanceTickHalfHeight;
   ST.tracks.forEach((t) => {
-    S('line', { class: 'yd-foul' + (o.ring === t.id ? ' yd-foul--attn' : ''), x1: f1(X(t.clearanceX)), y1: f1(Y(t.y - half)), x2: f1(X(t.clearanceX)), y2: f1(Y(t.y + half)) }, svg);
+    S('line', { class: 'yd-foul', x1: f1(X(t.clearanceX)), y1: f1(Y(t.y - half)), x2: f1(X(t.clearanceX)), y2: f1(Y(t.y + half)) }, svg);
     S('line', { class: 'yd-stop', x1: f1(X(t.trackEndX + 2.5)), y1: f1(Y(t.y - 5.5)), x2: f1(X(t.trackEndX + 2.5)), y2: f1(Y(t.y + 5.5)) }, svg);
   });
 
@@ -2390,11 +2392,11 @@ function paint(host, o) {
   })();
 
   /* 5. where the called move lands: a dashed outline, and its number on a dashed plate */
-  const landOn = o.landing && o.route.reaches === NEXT.track;
+  const landOn = o.landing && o.route.reaches === NEXT.track && (!o.onlyCars || o.onlyCars === NEXT.track);
   if (landOn) NEXT.landing.forEach((l) => {
     S('rect', { class: 'yd-land', x: f1(X(l.x0) + 1.2 * s), y: f1(Y(l.centre.y - G.carHeight / 2)), width: f1((l.x1 - l.x0 - 2.4) * s), height: f1(G.carHeight * s), rx: 1.5 }, svg);
     const px = X(l.centre.x), py = Y(l.centre.y + G.carHeight / 2) + 3;
-    if (show.nums && inside(px, py)) plate('yd-num yd-num--land', esc(l.number), px, py, 'tc');
+    if (show.nums && inside(px, Y(l.centre.y))) plate('yd-num yd-num--land', esc(l.number), px, py, 'tc');
   });
 
   /* 6. cars, couplers, the engine */
@@ -2404,14 +2406,14 @@ function paint(host, o) {
   const carPlates = (c) => {
     const tone = TONE[c.type], cx = X(c.centre.x), cy = Y(c.centre.y);
     if (show.tags && inside(X(c.x0) + 4, cy)) {
-      const tg = H('span', { class: 'yd-tag ' + (c.loaded ? 'yd-tag--on' : 'yd-tag--' + tone) }, esc(c.typeTag));
+      const tg = H('span', { class: 'yd-tag ' + (c.loaded ? 'yd-tag--on' : 'yd-tag--' + tone), 'data-tone': tone }, esc(c.typeTag));
       tg.style.left = f1(X(c.x0) + 1.2 * s + (c.type === 'tank' ? 5 : 2.5)) + 'px'; tg.style.top = f1(cy) + 'px';
       plates.appendChild(tg);
     }
     if (show.nums && inside(cx, cy)) plate('yd-num', esc(c.number), cx, Y(c.centre.y + c.height / 2) + 3, 'tc');
   };
   const tagZone = show.tags ? tagW + 3 : 0;
-  ST.tracks.forEach((t) => t.cars.forEach((c, i) => {
+  ST.tracks.forEach((t) => (o.onlyCars && o.onlyCars !== t.id ? [] : t.cars).forEach((c, i) => {
     drawCar(svg, c, X, Y, s, { tagZone: tagZone + (c.type === 'tank' ? 3 : 0) });
     const nxt = t.cars[i + 1];
     if (nxt && cutOf[nxt.id] === cutOf[c.id]) S('line', { class: 'yd-coupler', x1: f1(X(c.x1) - 1.6 * s), y1: f1(Y(c.centre.y)), x2: f1(X(c.x1) + 1.6 * s), y2: f1(Y(c.centre.y)) }, svg);
@@ -2448,7 +2450,7 @@ function paint(host, o) {
 
   /* 8. the foul point plate, at the lined track only */
   if (show.foul && o.route.reaches) {
-    const t = track(o.route.reaches), fx = X(t.clearanceX), fy = Y(t.y + half) + 3;
+    const t = track(o.route.reaches), fx = X(t.clearanceX), fy = Y(t.y + half) + 6;
     if (inside(fx, fy)) plate('yd-foulplate', 'foul point', fx, fy, 'tc');
   }
 
@@ -2457,7 +2459,7 @@ function paint(host, o) {
   if (show.labels) WD.canvasLabels.forEach((lb) => {
     const ly = Y(lb.y);
     if (lb.align === 'right') { if (o.labelRight != null) plate('yd-label', esc(lb.text), o.labelRight, ly, 'r'); else if (inside(X(lb.x), ly)) plate('yd-label', esc(lb.text), X(lb.x), ly, 'r'); }
-    else if (inside(X(lb.x) + 20, ly)) plate('yd-label', esc(lb.text), Math.max(4, X(lb.x)), ly, 'l');
+    else if (ly > 8 && ly < o.hpx - 8 && X(lb.x) < o.wpx - 60 && (X(lb.x) > -20 || lb.y > G.LEAD_Y - 60)) plate('yd-label', esc(lb.text), Math.max(4, X(lb.x)), ly, 'l');
   });
   return view;
 }
@@ -2466,12 +2468,12 @@ function paint(host, o) {
 function endHTML(t, flat) {
   const gp = ST.goalProgress;
   let a = '<span class="yd-tid">' + esc(t.id) + '</span>';
-  if (t.isGoalTrack) a += '<span class="yd-goal">BUILD</span><span class="dusk-count">' + gp.onGoalTrackNow.length + ' / ' + gp.wanted.length + '</span>';
-  let b = '';
-  if (t.securementTag === 'TIED') b += '<span class="dusk-state dusk-state--hold">' + esc(t.securementTag) + '</span>';
-  if (t.securementTag === 'LOOSE') b += '<span class="dusk-state dusk-state--caution">' + esc(t.securementTag) + '</span>';
-  if (t.kickableMark) b += '<span class="yd-kick">' + esc(t.kickableMark) + '</span>';
-  return flat ? a + b : '<div>' + a + '</div>' + (b ? '<div>' + b + '</div>' : '');
+  if (t.securementTag === 'TIED') a += '<span class="dusk-state dusk-state--hold">' + esc(t.securementTag) + '</span>';
+  if (t.securementTag === 'LOOSE') a += '<span class="dusk-state dusk-state--caution">' + esc(t.securementTag) + '</span>';
+  const b = t.isGoalTrack ? '<span class="yd-goal">BUILD</span><span class="dusk-count">' + gp.onGoalTrackNow.length + ' / ' + gp.wanted.length + '</span>' : '';
+  const c = t.kickableMark ? '<span class="yd-kick">' + esc(t.kickableMark) + '</span>' : '';
+  if (flat) return a.replace('</span>', '</span>' + b) + c;      /* one row: id, goal, securement, kickable */
+  return '<div>' + a + '</div>' + (b ? '<div>' + b + '</div>' : '') + (c ? '<div>' + c + '</div>' : '');
 }
 
 /* ---- the legend -------------------------------------------------------------------------------- */
@@ -2487,7 +2489,7 @@ function legendNode(s, cams) {
     const c = { x0: 0, x1: ct.len, centre: { x: ct.len / 2, y: 0 }, height: G.carHeight, type: type, loaded: loaded };
     const X = (x) => x * s + 1, Y = (y) => y * s + h / 2 - 1;
     drawCar(svg, c, X, Y, s, { tagZone: tagW + 3 + (type === 'tank' ? 3 : 0) });
-    const tg = H('span', { class: 'yd-tag ' + (loaded ? 'yd-tag--on' : 'yd-tag--' + TONE[type]) }, esc(ct.tag));
+    const tg = H('span', { class: 'yd-tag ' + (loaded ? 'yd-tag--on' : 'yd-tag--' + TONE[type]), 'data-tone': TONE[type] }, esc(ct.tag));
     tg.style.left = f1(X(0) + 1.2 * s + (type === 'tank' ? 5 : 2.5)) + 'px'; tg.style.top = f1(Y(0)) + 'px';
     wrap.appendChild(tg);
     return wrap;
@@ -2543,11 +2545,12 @@ function render() {
   const route = routeFor(live.lined);
   const numW = measure('<div class="yd-plate yd-num">00000</div>').w;
   const minLen = Math.min.apply(null, Object.keys(G.carTypes).map((k) => G.carTypes[k].len));
-  const colW = Math.max.apply(null, ST.tracks.map((t) => measure('<div class="yd-plate yd-end">' + endHTML(t) + '</div>').w)) + 11 + 6;
+  const colW = Math.max.apply(null, ST.tracks.map((t) => measure('<div class="yd-plate yd-end">' + endHTML(t) + '</div>').w)) + 11 + 4;
   const unitsW = G.TRACK_RIGHT + 4 - VIEW.x0;
   const sFit = (Wp - colW) / unitsW;
-  const sMin = Math.max(0.9, (numW + 1) / minLen);      /* two number plates of the shortest car must not touch */
+  const sMin = Math.max(0.9, (numW + 0.5) / minLen);      /* two number plates of the shortest car must not touch */
   const full = sFit >= sMin;
+  host.setAttribute('data-fit', [numW.toFixed(1), colW.toFixed(1), sFit.toFixed(3), sMin.toFixed(3)].join(' '));
   if (full) renderFull(Wp, Math.min(sFit, 1.3), route);
   else renderCams(Wp, route);
   document.documentElement.setAttribute('data-yard-mode', full ? 'model' : 'cameras');
@@ -2598,28 +2601,39 @@ function renderCams(Wp, route) {
 
   /* the windows of camera 2 and camera 3 are computed first: the map shows them as frames */
   const two = Wp >= 700, gapPx = two ? 12 : 0, camW = Math.floor((Wp - gapPx) / (two ? 2 : 1));
-  const t = track(live.sel), sp = sw(live.sel), onRoute = route.reaches === t.id;
   const wordW = measure('<div class="yd-plate"><span class="yd-lin">REVERSE</span></div>').w;
   const foulW = measure('<div class="yd-plate">foul point</div>').w;
   const breakPx = 18;
-  const landHere = onRoute && NEXT.track === t.id ? NEXT.landing : [];
-  const dx0 = Math.min.apply(null, [t.trackEndX - 64].concat(t.cars.map((c) => c.x0), landHere.map((l) => l.x0))) - 6;
-  const dx1 = t.trackEndX + 6;
-  const throatU = (s2) => ({ a: sp.x - 12 - (wordW / 2) / s2 - 3, b: t.clearanceX + Math.max(9, onRoute ? (foulW / 2) / s2 + 3 : 9) });
-  let s2 = 1.1;
-  for (let k = 0; k < 4; k++) { const th = throatU(s2); s2 = Math.max(1.1, Math.min(1.5, (camW - breakPx) / ((th.b - th.a) + (dx1 - dx0)))); }
-  const th = throatU(s2);
+  /* the two pieces of a track at scale s: the throat (stand, points, foul point) and the deep end (landing place, cars, end stop) */
+  const pieces = (id, s) => {
+    const tk = track(id), sp = sw(id), onRoute = route.reaches === id;
+    const land = onRoute && NEXT.track === id ? NEXT.landing : [];
+    return {
+      a: sp.x - 12 - (wordW / 2) / s - 3, b: tk.clearanceX + Math.max(9, onRoute ? (foulW / 2) / s + 3 : 9),
+      d0: Math.min.apply(null, [tk.trackEndX - 64].concat(tk.cars.map((c) => c.x0), land.map((l) => l.x0))) - 6, d1: tk.trackEndX + 6
+    };
+  };
+  /* one scale for the six tracks: the largest that shows every track with no pan, from 1.1 to 1.5 */
+  const numW = measure('<div class="yd-plate yd-num">00000</div>').w;
+  const minLen = Math.min.apply(null, Object.keys(G.carTypes).map((k) => G.carTypes[k].len));
+  const sLow = Math.max(1.1, (numW + 0.5) / minLen), sHigh = Math.max(1.5, sLow);     /* two number plates of the shortest car must not touch */
+  let s2 = sHigh;
+  for (let k = 0; k < 4; k++) s2 = Math.max(sLow, Math.min(sHigh, Math.min.apply(null, IDS.map((id) => { const q = pieces(id, s2); return (camW - breakPx) / ((q.b - q.a) + (q.d1 - q.d0)); }))));
+  const t = track(live.sel), sp = sw(live.sel), th = pieces(live.sel, s2);
   const throatPx = Math.round((th.b - th.a) * s2);
-  const availPx = camW - throatPx - breakPx;
-  const needPan = (dx1 - dx0) * s2 > availPx + 0.5;
-  const availU = availPx / s2, maxPan = Math.max(0, (dx1 - dx0) - availU);
+  const availPx = camW - throatPx - breakPx, availU = availPx / s2;
+  const needPan = (th.d1 - th.d0) * s2 > availPx + 0.5;
+  const maxPan = Math.max(0, (th.d1 - th.d0) - availU);
   live.pan = Math.max(0, Math.min(live.pan, maxPan));
-  const deepA = dx0 + (needPan ? live.pan : 0), deepPx = needPan ? availPx : Math.round((dx1 - dx0) * s2);
+  const deepA = needPan ? th.d0 + live.pan : th.d1 - availU, deepPx = availPx;
   const y2 = sp.y - 42, hu = 76, h2 = Math.round(hu * s2);
   const xr3 = G.FOOT.x + 34, xl3 = xr3 - camW / s2, y3 = G.LEAD_Y - 42;
 
   /* camera 1: the map. Shapes only. */
   const sMap = Math.min(0.8, Wp / G.W);
+  /* the two labels of the top edge of the present drawing stand above the map: the map itself holds no text */
+  const top = WD.canvasLabels.filter((lb) => lb.y < G.switches[G.switches.length - 1].y);
+  if (top.length) cams.appendChild(H('div', { class: 'yd-mapcap' }, top.map((lb) => '<span class="yd-plate yd-label">' + esc(lb.text) + '</span>').join('')));
   const mapBox = H('div', { class: 'yd-cam yd-cam--map', role: 'img', 'aria-label': 'Map of the whole yard. Route: ' + routeWords(route) + '. The frames show the track view and the lead view.' });
   cams.appendChild(mapBox);
   paint(mapBox, {
@@ -2636,7 +2650,7 @@ function renderCams(Wp, route) {
     seg.appendChild(b);
   });
   cams.appendChild(seg);
-  if (Array.prototype.some.call(seg.querySelectorAll('button'), (b) => b.scrollWidth > b.clientWidth + 0.5)) seg.classList.add('yd-seg--short');
+  if (Array.prototype.some.call(seg.querySelectorAll('button'), (b) => b.querySelector('small').scrollWidth > b.clientWidth - 8)) seg.classList.add('yd-seg--short');
 
   const grid = H('div', { class: 'yd-camgrid' });
   grid.style.gridTemplateColumns = two ? camW + 'px ' + camW + 'px' : '1fr';
@@ -2656,11 +2670,11 @@ function renderCams(Wp, route) {
   const strip = H('div', { class: 'yd-strip' });
   c2.appendChild(strip);
   paint(strip, { x0: th.a, y0: y2, wpx: throatPx, hpx: h2, s: s2, lined: live.lined, route: route, landing: true,
-    show: { stand: 'above', foul: true, nums: true, tags: true }, buttons: [t.id] });
+    show: { stand: 'above', foul: true, nums: true, tags: true }, buttons: [t.id], onlyCars: t.id });
   const br = H('div', { class: 'yd-break', 'aria-hidden': 'true' }, '⋯'); br.style.width = breakPx + 'px';
   strip.appendChild(br);
   paint(strip, { x0: deepA, y0: y2, wpx: deepPx, hpx: h2, s: s2, lined: live.lined, route: route, landing: true,
-    show: { nums: true, tags: true }, buttons: [] });
+    show: { nums: true, tags: true }, buttons: [], onlyCars: t.id });
 
   /* camera 3: the lead, with the engine and the cut that it holds */
   const c3 = H('div', { class: 'yd-cam yd-cam--lead' });
