@@ -56,6 +56,42 @@
     </div>
   </section>
 
+  <section class="hx-sec" id="g7">
+    <h2 class="dusk-panel-title">G7. A Dusk row and a Dusk tile that are buttons</h2>
+    <div class="dusk-rows hx-narrow">
+      <button class="dusk-row" type="button"><span class="dusk-ico" aria-hidden="true">A</span><span><b>A row, plain</b></span></button>
+      <button class="dusk-row dusk-row--on" type="button"><span class="dusk-ico" aria-hidden="true">B</span><span><b>A row, lit</b><small>The current row</small></span></button>
+      <button class="dusk-row" type="button"><span class="dusk-ico dusk-ico--teal" aria-hidden="true">C</span><span><b>A row with a sub-line</b><span class="cb-sub">The sub-line has the class cb-sub</span></span></button>
+      <button class="dusk-row" type="button" disabled><span class="dusk-ico" aria-hidden="true">D</span><span><b>A row, disabled</b><small>Not ready</small></span></button>
+    </div>
+    <div class="dusk-grid hx-sec">
+      <button class="dusk-tile dusk-tile--teal" type="button" aria-label="Sample tile one">
+        <span class="dusk-tile-cap"><span class="dusk-ico" aria-hidden="true">1</span><span class="dusk-tile-lab">Sample tile</span></span>
+        <span class="dusk-tile-body"><span class="dusk-tile-num">12<small>of 40</small></span><span class="dusk-tile-sub">A tile that is a button</span></span>
+      </button>
+      <button class="dusk-tile dusk-tile--grey" type="button" aria-label="Sample tile two">
+        <span class="dusk-tile-cap"><span class="dusk-ico" aria-hidden="true">2</span><span class="dusk-tile-lab">Sample tile, grey</span></span>
+        <span class="dusk-tile-body"><span class="dusk-tile-num">0<small>of 40</small></span><span class="dusk-tile-sub">A second tile</span></span>
+      </button>
+    </div>
+    <div class="hx-row hx-sec">
+      <span class="dusk-ico" aria-hidden="true">A</span>
+      <span class="dusk-ico dusk-ico--amber" aria-hidden="true">B</span>
+      <span class="dusk-ico dusk-ico--teal" aria-hidden="true">C</span>
+      <span class="dusk-ico dusk-ico--green dusk-ico--solid" aria-hidden="true">D</span>
+      <span class="dusk-note">Four icon squares: grey, amber, teal, and one solid.</span>
+    </div>
+  </section>
+
+  <section class="hx-sec" id="g2">
+    <h2 class="dusk-panel-title">G2. The Dusk bar with an edge</h2>
+    <div class="dusk-panel hx-stack">
+      <div class="dusk-bar" role="progressbar" aria-label="Sample bar, empty" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i class="dusk-fill dusk-fill--green" style="width: 0%"></i></div>
+      <div class="dusk-bar" role="progressbar" aria-label="Sample bar, part" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40"><i class="dusk-fill dusk-fill--green" style="width: 40%"></i></div>
+      <div class="dusk-bar" role="progressbar" aria-label="Sample bar, full" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i class="dusk-fill dusk-fill--teal" style="width: 100%"></i></div>
+    </div>
+  </section>
+
   <section class="hx-sec" id="win">
     <h2 class="dusk-panel-title">The app window: section.dusk-win.cb-win with .dusk-main and no sidebar</h2>
     <section class="dusk-win cb-win" aria-label="Sample window">

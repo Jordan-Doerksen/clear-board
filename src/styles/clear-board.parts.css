@@ -23,3 +23,30 @@
   justify-content: center;
   font-size: var(--fs-base);
 }
+
+/* ---- G7: a Dusk tile or a Dusk row that is a button -----------------------------------------
+   Dusk writes the tile and the row for a link and for a block. On a button the border, the
+   padding, the centred text and the grey fill of the browser stay. This reset has no weight
+   (it is inside :where), so each Dusk rule wins and a lit row keeps its wash. */
+:where(.cb-app button.dusk-tile, .cb-app button.dusk-row) {
+  border: 0;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+:where(.cb-app button.dusk-row) {
+  background: none;
+  padding: var(--sp-1) var(--sp-3);
+}
+
+/* a disabled row: the name is one level lower, no hover wash. The words carry the state. */
+.cb-app button.dusk-row[disabled] { cursor: not-allowed; }
+.cb-app button.dusk-row[disabled]:hover { background: none; }
+.cb-app button.dusk-row[disabled] b { color: var(--ink-2); }
+
+/* ---- G2: the edge of a bar track -------------------------------------------------------------
+   An empty Dusk bar is a well on a panel, and a learner at 0 % sees no bar. The track gets the
+   edge of a control. The fill has no width transition. */
+.cb-app .dusk-bar { border: 1px solid var(--cb-edge); }
