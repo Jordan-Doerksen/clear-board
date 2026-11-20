@@ -1,13 +1,4 @@
 /* ---- Clear Board: calm, high-contrast dark study tool. Lifted verbatim from the vanilla build. ---- */
-:root{
-  --bg:#0e1116; --surface:#161b22; --surface-2:#1c232c; --line:#2a3340;
-  --ink:#e6edf3; --muted:#9aa7b4;
-  --clear:#3fb950; --caution:#d29922; --stop:#f85149; --focus:#58a6ff;
-  --r:14px; --maxw:920px; --fs:16px; --space:1.5;
-  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-}
-html[data-dys="1"]{ --font:"Atkinson Hyperlegible","Comic Sans MS",Verdana,sans-serif; --space:1.8; letter-spacing:.02em; word-spacing:.08em; }
-html[data-contrast="1"]{ --ink:#ffffff; --muted:#d6e0ea; --line:#5b6a79; --surface:#1a212b; --surface-2:#222b37; }
 
 *{ box-sizing:border-box }
 html,body{ margin:0 }
