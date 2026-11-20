@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" data-tier="strict">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clear Board: the parts harness</title>
+  <!-- A static page. No build step, no script, no app code. It shows each cb- part of
+       src/styles/clear-board.parts.css in each state, and the Dusk parts that a gap rule changes.
+       The sheets and their order are those of src/main.tsx. Each sample word is a placeholder.
+       A picture script can set data-dys, data-contrast, data-reduce and the text scale property
+       on the html element to show a reading mode. -->
+  <link rel="stylesheet" href="../../src/styles/dusk/dusk.tokens.css" />
+  <link rel="stylesheet" href="../../src/styles/dusk/dusk.base.css" />
+  <link rel="stylesheet" href="../../src/styles/dusk/dusk.components.css" />
+  <link rel="stylesheet" href="../../src/styles/dusk/dusk.compose.css" />
+  <link rel="stylesheet" href="../../src/styles/dusk/dusk.motion.css" />
+  <link rel="stylesheet" href="../../src/styles/clear-board.tokens.css" />
+  <link rel="stylesheet" href="../../src/styles/clear-board.parts.css" />
+  <link rel="stylesheet" href="../../src/index.css" />
+  <link rel="stylesheet" href="../../src/styles/surfaces/shell.css" />
+  <link rel="stylesheet" href="../../src/styles/surfaces/home.css" />
+  <link rel="stylesheet" href="../../src/styles/surfaces/settings.css" />
+  <link rel="stylesheet" href="../../src/styles/surfaces/reference.css" />
+  <link rel="stylesheet" href="../../src/styles/surfaces/drill.css" />
+  <link rel="stylesheet" href="../../src/styles/surfaces/radio.css" />
+  <style>
+    /* Layout of this page only. The prefix hx- is used on no other page. */
+    .hx-page { max-width: 920px; margin: 0 auto; padding: 20px 16px 64px; }
+    .hx-sec { margin-top: 28px; }
+    .hx-sec > h2 { margin-bottom: 10px; }
+    .hx-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+    .hx-stack { display: grid; gap: 10px; }
+    .hx-narrow { max-width: 440px; }
+  </style>
+</head>
+<body class="cb-app">
+<main class="hx-page">
+  <h1 class="dusk-title">Parts harness</h1>
+  <p class="dusk-note">Each sample word is a placeholder. This page is not a screen of the app.</p>
+
+  <section class="hx-sec" id="g20">
+    <h2 class="dusk-panel-title">G20. The 44 px floor on three Dusk controls</h2>
+    <div class="hx-row">
+      <button class="dusk-btn" type="button">Sample</button>
+      <button class="dusk-btn" type="button">Go</button>
+      <button class="dusk-btn" type="button" disabled>Sample, disabled</button>
+      <div class="dusk-seg" role="group" aria-label="Sample choice">
+        <button type="button" aria-pressed="true">One</button>
+        <button type="button" aria-pressed="false">Two</button>
+        <button type="button" aria-pressed="false">Three</button>
+      </div>
+    </div>
+    <div class="dusk-rows hx-sec hx-narrow">
+      <a class="dusk-row" href="#g20"><span class="dusk-ico" aria-hidden="true">A</span><span><b>A row that is a link</b></span></a>
+      <a class="dusk-row dusk-row--on" href="#g20"><span class="dusk-ico" aria-hidden="true">B</span><span><b>A lit row that is a link</b></span></a>
+    </div>
+  </section>
+
+  <section class="hx-sec" id="win">
+    <h2 class="dusk-panel-title">The app window: section.dusk-win.cb-win with .dusk-main and no sidebar</h2>
+    <section class="dusk-win cb-win" aria-label="Sample window">
+      <header class="dusk-titlebar"><span class="dusk-brand">Sample window</span><span class="dusk-spacer"></span><button class="dusk-btn" type="button">Sample</button></header>
+      <div class="dusk-thread" aria-hidden="true"></div>
+      <div class="dusk-main">
+        <p class="dusk-lede">The content takes the whole width of the window.</p>
+      </div>
+    </section>
+  </section>
+<!-- more sections go above this line -->
+</main>
+</body>
+</html>

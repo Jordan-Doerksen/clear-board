@@ -3,3 +3,23 @@
    Each part has the prefix cb-. Each rule reads Dusk tokens and --cb- names only.
    A rule that names a Dusk class has the app class .cb-app or .cb-win in front.
    The file declares no custom property that Dusk declares. */
+
+/* ---- the app root ---------------------------------------------------------------------------
+   body has the class cb-app. The app window has the class cb-win.
+   A Dusk window has a sidebar column. The app has no sidebar, so the content takes each column. */
+.cb-win > .dusk-main { grid-column: 1 / -1; }
+
+/* ---- G20: the 44 px floor -------------------------------------------------------------------
+   Each Dusk control is lower than 44 px. Three selectors, each with the app class in front. */
+.cb-app .dusk-btn,
+.cb-app .dusk-seg button,
+.cb-app .dusk-row { min-height: var(--cb-target); }
+
+.cb-app .dusk-btn,
+.cb-app .dusk-seg button { min-width: var(--cb-target); }
+
+/* the word of a button rises to the base size, and stays in the middle of a wide button */
+.cb-app .dusk-btn {
+  justify-content: center;
+  font-size: var(--fs-base);
+}
