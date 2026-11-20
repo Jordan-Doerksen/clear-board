@@ -137,3 +137,22 @@ html[data-reduce="1"] .sw i, html[data-reduce="1"] .sw i::after{ transition:none
     scroll-behavior:auto !important;
   }
 }
+
+/* s1-floor:start */
+/* Job S1 wrote this block. It keeps the shapes of today under the Dusk element rules, until each
+   surface is on Dusk parts. A rule here reads Dusk tokens and --cb- names only.
+   Job B1 deletes the body rule in the commit that adds the Dusk app window. The sweep of job U1
+   deletes each other rule of the block. */
+/* Dusk gives the body a gutter. The page column of today has its own padding. */
+body{ padding:0 }
+/* Dusk sets the margin of each paragraph to 0. These paragraphs have no margin rule of their own
+   and get the browser default again. The rules have the weight of one element name, so each class
+   rule of this sheet wins. They do not match a paragraph of a Dusk part or of a cb- part. */
+:where(.lede, footer, .yard-wrap, .radio-wrap) p:where(:not([class])){ margin-block:1em }
+p:where(.muted, .plain):where(:not([class*="dusk-"], [class*="cb-"])){ margin-block:1em }
+p:where(.badge):where(:not([class*="dusk-"], [class*="cb-"])){ margin-top:1em }
+/* The placeholder of the search field gets a token colour in place of the browser grey. */
+.search::placeholder{ color:var(--ink-3); opacity:1 }
+/* The edge of a field, of a toggle track and of a bar track is the edge of a control. */
+.search, .sw i, .bar, .mini{ border-color:var(--cb-edge) }
+/* s1-floor:end */
