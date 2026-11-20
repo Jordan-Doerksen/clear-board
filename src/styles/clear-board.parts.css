@@ -503,3 +503,23 @@
   height: 14px;
   margin: 0;
 }
+
+/* ---- the marks of G1, G9 and G14 -----------------------------------------------------------------
+   A mark is CSS content with an empty spoken form, as Dusk writes its own glyphs. It is a second
+   carrier of the state beside the colour. One deletion of this block removes each mark, and no
+   other rule changes. */
+/* css-mark:start */
+.cb-opt--right::before,
+.cb-result--ok::before {
+  content: "✔\00a0";
+  content: "✔\00a0" / "";
+  color: var(--cb-ok-ink);
+}
+.cb-opt--wrong::before,
+.cb-banner--bad::before,
+.cb-result--no::before {
+  content: "✕\00a0";
+  content: "✕\00a0" / "";
+  color: var(--cb-attn-ink);
+}
+/* css-mark:end */
