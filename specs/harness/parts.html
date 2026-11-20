@@ -31,6 +31,8 @@
     .hx-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
     .hx-stack { display: grid; gap: 10px; }
     .hx-narrow { max-width: 440px; }
+    /* An open dialog that is not modal: put it in the flow of the page. */
+    .hx-open { position: static; margin: 12px 0 0; }
   </style>
 </head>
 <body class="cb-app">
@@ -218,6 +220,46 @@
   <section class="hx-sec" id="g18">
     <h2 class="dusk-panel-title">G18. Code</h2>
     <p class="cb-prose">A sample sentence with <code class="cb-code">sample-code 123</code> in it.</p>
+  </section>
+
+  <section class="hx-sec" id="g3">
+    <h2 class="dusk-panel-title">G3. The dialog and its rows</h2>
+    <p class="dusk-note">The first dialog is closed and must not show. The second dialog is open and not modal, so its backdrop does not show here.</p>
+    <dialog class="cb-dialog" id="hx-closed" aria-label="Sample dialog, closed"><p class="cb-prose">A closed dialog. This text must not show.</p></dialog>
+    <dialog class="cb-dialog hx-open" id="hx-open" aria-label="Sample dialog, open" open>
+      <header class="dusk-panel-head"><h2 class="dusk-panel-name">Sample dialog</h2><span class="dusk-spacer"></span><button class="dusk-btn" type="button">Done</button></header>
+      <div class="dusk-panel-body">
+        <div class="cb-setrow">
+          <div><label for="hx-s1">Sample setting one</label><small>A sample sub-line</small></div>
+          <span class="cb-toggle"><input type="checkbox" id="hx-s1" /><i></i></span>
+        </div>
+        <div class="cb-setrow">
+          <div><label for="hx-s2">Sample setting two</label><small>A sample sub-line</small></div>
+          <span class="cb-toggle"><input type="checkbox" id="hx-s2" checked /><i></i></span>
+        </div>
+        <div class="cb-setrow">
+          <div><span>Sample action</span><small>A sample sub-line</small></div>
+          <button class="cb-btn--attn" type="button">Sample</button>
+        </div>
+        <p class="dusk-note">A sample note at the end of the dialog.</p>
+      </div>
+    </dialog>
+  </section>
+
+  <section class="hx-sec" id="g8">
+    <h2 class="dusk-panel-title">G8. The signal frame, with a placeholder box in place of a drawing</h2>
+    <div class="hx-row">
+      <span class="cb-signal"><svg viewBox="0 0 40 80" width="40" height="80" role="img" aria-label="Placeholder box"><rect x="1" y="1" width="38" height="78" fill="none" stroke="currentColor" stroke-dasharray="4 4" /></svg></span>
+      <div class="dusk-panel"><span class="cb-signal"><svg viewBox="0 0 40 80" width="40" height="80" role="img" aria-label="Placeholder box on a panel"><rect x="1" y="1" width="38" height="78" fill="none" stroke="currentColor" stroke-dasharray="4 4" /></svg></span></div>
+    </div>
+  </section>
+
+  <section class="hx-sec" id="g19">
+    <h2 class="dusk-panel-title">G19. The home mark</h2>
+    <div class="hx-row">
+      <button class="cb-mark" type="button" aria-label="Sample mark"><i class="dusk-led dusk-led--ok"></i></button>
+      <b>Sample name beside the mark</b>
+    </div>
   </section>
 
   <section class="hx-sec" id="win">

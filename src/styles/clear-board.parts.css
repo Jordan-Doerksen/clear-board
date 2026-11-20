@@ -435,3 +435,71 @@
   color: var(--ink);
   font-family: var(--font-mono);
 }
+
+/* ---- G3: the dialog and its rows ---------------------------------------------------------------
+   A native dialog element. The rule sets no display value, so a closed dialog stays closed.
+   Never put the Dusk window class on a dialog: it shows the closed dialog.
+   A floating surface has a lit edge. The head is a Dusk panel head. */
+.cb-dialog {
+  width: min(92%, 440px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-window);
+  background: var(--glass);
+  box-shadow: var(--neon);
+  color: var(--ink);
+}
+.cb-dialog::backdrop { background: var(--cb-scrim); }
+.cb-setrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-6);
+  min-height: var(--cb-target);
+  padding: var(--sp-3) 0;
+}
+.cb-setrow + .cb-setrow { border-top: 1px solid var(--hair); }
+.cb-setrow small {
+  display: block;
+  color: var(--ink-2);
+  font-size: var(--fs-s);
+}
+
+/* ---- G8: the signal frame -----------------------------------------------------------------------
+   A sunk frame with no glow, no gold and no tone: no light and no colour beside a lamp of the
+   drawing. The frame does not touch the drawing inside it. */
+.cb-signal {
+  display: inline-flex;
+  align-items: flex-end;
+  padding: var(--sp-6);
+  border-radius: var(--r-tile);
+  background: var(--well);
+  box-shadow: var(--ring-well);
+}
+
+/* ---- G19: the home mark -------------------------------------------------------------------------
+   A button of 44 by 44 px with a Dusk lamp inside: i.dusk-led.dusk-led--ok. The lamp is the mark
+   of the app here, not a state. The name of the app is beside it. */
+.cb-mark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--cb-target);
+  height: var(--cb-target);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-control);
+  background-color: var(--well);
+  box-shadow: var(--ring-well);
+  cursor: pointer;
+  transition: box-shadow var(--m-confirm) var(--ease);
+}
+.cb-mark:hover {
+  background-image: linear-gradient(var(--wash-1), var(--wash-1));
+  box-shadow: var(--neon-ctl);
+}
+.cb-mark .dusk-led {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
