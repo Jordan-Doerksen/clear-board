@@ -70,6 +70,22 @@ keeps the behaviour of today for that row.
 | `ARCH-UPDATE` | (a) The lead at each wave merge, and D1 for the last pass. | The contract gives the file to the lead in 2a and 2b. |
 | `ARCH-GATE` | (a) No new gate. | Each seam rule has a pass check in the Y1 brief. |
 
+### 2.1 Defaults that the papers set, confirmed by the lead
+
+The job that applied the rulings set a default where a ruling gave no name. The lead confirms each one.
+
+| Item | Confirmed |
+|---|---|
+| Type names | `StationCtx` in `imperativeStation.ts`, `YardView` in `view.ts`, `YardDrawing` in `draw.ts`. |
+| Tool names of G1 | `tools/dusk-lock-check.mjs`, `tools/colour-lint.mjs`, `tools/look/look.mjs`. The baseline keeps the name `tools/token-lint.baseline.json`. |
+| The icon files and the colour lint | G1 gives the two icon files an allowed place in the lint now (row U-45). |
+| Rows U-01 (the report of shared signal drawings), U-43 and U-44 | G1-2 builds them in Wave 2c. The fix of row U-01 in the Drill is U1 work in Wave 2c. |
+| The tape of Y1 | The compact form is committed. Full tapes stay in the scratch folder. |
+| Pictures of S1 | S1 also takes the Yard at 1280. |
+| The two forms of `look:baseline`, the rules of the colour lint and of the lock check | As the check wrote them in the G1 brief (R6, R8, R25). |
+| The items of contract E.5 | Each one stands as written. |
+| A control that is 1 px smaller at the merge check of S1 | The lead rules when S1 reports it. |
+
 ## 3. Open: the owner rules
 
 Each row keeps the behaviour of today until the owner answers. Wave 2a can start without each one.

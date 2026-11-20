@@ -1,14 +1,14 @@
-# ARCHITECTURE.md — Clear Board (draft)
+# ARCHITECTURE.md — Clear Board
 
 The map. What each file owns today, what each file will own after Wave 2, and what a file must not hold.
 
-**Draft.** Written 2026-11-20. Paper only: no code and no content changed. The lead moves this file to the repository root after Gate A is closed.
-Sources: [`00-contracts.md`](00-contracts.md) (names, paths, owners), [`../clear-board-2-plan.md`](../clear-board-2-plan.md) (the fence, section 4), [`../gate-a-answers.md`](../gate-a-answers.md), `specs/research/R1` to `R7`.
+Written 2026-11-20, after Gate A closed. Paper only: no code and no content changed. The lead updates this file at each wave merge, and job D1 makes the last pass (`ARCH-UPDATE`).
+Sources: [`specs/briefs/00-contracts.md`](specs/briefs/00-contracts.md) (names, paths, owners; "the contract" below), [`specs/briefs/lead-rulings.md`](specs/briefs/lead-rulings.md) (the rulings), [`specs/clear-board-2-plan.md`](specs/clear-board-2-plan.md) (the fence, section 4), [`specs/gate-a-answers.md`](specs/gate-a-answers.md), [`DECISIONS.md`](DECISIONS.md) (D-0030 to D-0037), and the reports `R1` to `R7` in `specs/research/`.
 
-- **Today** means: read from the code on 2026-11-20. Outside `specs/`, the tree is equal to commit `86cfef2` (`git diff --stat`, empty). Each line number is a line of that tree.
-- **Planned** means: Wave 2, not built. Each planned statement comes from `00-contracts.md`. **[P]** means: proposed there, the lead rules (`FILES`).
-- **PENDING RULING `NAME`** means: the owner or the lead has not ruled. Section 10 lists each one that changes this map. **Not verified** means: no check was made (section 11).
-- State: Wave 1 is complete. Gate A questions 1 to 3 have an answer. Question 4 (the upgrade list) is open. Wave 2 has not started.
+- **Today** means: read from the code on 2026-11-20. Outside `specs/`, `DECISIONS.md` and this file, the tree is equal to commit `86cfef2` (`git diff --stat`). Each line number is a line of that tree.
+- **Planned** means: Wave 2, not built. Each planned statement comes from the contract. The lead accepted each file row of it (`FILES`).
+- **PENDING RULING `NAME`** means: the owner or the SME has not answered. Until an answer, each job keeps the behaviour of today. Section 10 lists each one that changes this map. **Not verified** means: no check was made (section 11).
+- State: Wave 1 is complete. Gate A is closed: the owner answered the four questions (D-0031 to D-0035) and the lead ruled (D-0037). Wave 2 has not started.
 
 ## 1. What the app is
 1. Clear Board is a free trainer for the conductor qualification under the Canadian Rail Operating Rules (CROR).
@@ -17,7 +17,9 @@ Sources: [`00-contracts.md`](00-contracts.md) (names, paths, owners), [`../clear
 4. It has no server, no account and no analytics. Content is five JSON files. Progress is one profile in `localStorage` on the device.
 5. The content is safety-critical. A wrong rule taught as correct is the worst failure. The rulebook is not in the repository. No agent writes, corrects or cites a rule.
 
-**The page-law tier line is not written in this draft: PENDING RULING `TIER`.** The owner has not ruled. The recommended option is STRICT with one written exception for travel of equipment in the Yard drawing. With no tier line a page is STRICT (Dusk `README.md`, step 3, checked). No `Page law tier:` line is in `DECISIONS.md` today (checked by `grep`). When the owner has ruled, the lead writes the line here, with the value that the owner picked, and removes this paragraph.
+Page law tier: STRICT
+
+The line above is also line 5 of `DECISIONS.md` (D-0030). The owner has not picked OPEN. One question is open: a written exception, that the Yard drawing can show travel of equipment after a learner action (PENDING RULING `TIER`). Until an answer the page has no exception. Planned: S1 writes `data-tier="strict"` on `html`. With no attribute a page is also STRICT (Dusk `README.md`, step 3, checked).
 
 ## 2. The file map, today
 ```
@@ -25,7 +27,7 @@ index.html                       the one page: the root element, the theme colou
 vite.config.ts                   the build: relative base, the React plugin, the PWA plugin and its manifest
 package.json                     6 scripts, 3 run-time packages, 9 development packages
 public/data/*.json               FROZEN. The five content files.
-public/favicon.svg               the tab icon and the manifest icon. A template file today. Planned [P]: S1 replaces it with the monogram (Gate A, question 3); the PNG set waits (ICON-PNG).
+public/favicon.svg               the tab icon and the manifest icon. A template file today (D-0034). Planned: S1 replaces it with the 16 px drawing of the monogram and adds public/icon.svg, the master drawing, for the manifest (ICON-SVG). B1 makes the PNG set in 2b (ICON-PNG).
 public/icons.svg                 dead. Shipped and cached (vite.config.ts:17).
 src/main.tsx                     the entry. One style import (line 3). Renders App.
 src/App.tsx                      the shell: skip link, header, hash routes, focus move on navigation, the Settings dialog
@@ -44,6 +46,7 @@ tools/*.mjs                      the four gate scripts of npm run check
 src-tauri/                       the desktop shell
 .github/workflows/deploy.yml     check, build and deploy on a push to main
 dist/, .gate/, node_modules/     build output and scratch. Not committed (.gitignore:10-13).
+DECISIONS.md, ARCHITECTURE.md    the decisions and this map. The lead writes both (DOCS-WRITER).
 ```
 
 ### 2.1 `src/core` and `src/state`
@@ -81,7 +84,7 @@ An island is a plain JavaScript module that draws its own DOM inside one host el
 | Teardown | React sets `host.innerHTML = ''`. The module gets no call. | `imperativeStation.ts:37` |
 | What an island reads | The Yard: `ctx.go`, `ctx.settings.reduce` (one time, at mount), `ctx.profile.yard`, `ctx.save`, `ctx.recordYardWin`, `ctx.settings.audio`. It does not call `ctx.speak`. The Radio: `ctx.go`, `ctx.settings.audio`, `ctx.speak`. It writes nothing to the profile. | `yardSim.js:225`, `:228`, `:452-484`, `:715`; `radioSim.js:136`, `:178` |
 
-The comments that call an island "byte-for-byte" are not true today (`Yard.tsx:1-2`, `imperativeStation.ts:1`, `Radio.tsx:2`; `yardSim.js:3-7` says so itself; R6 section 11, row 20).
+The comments that call an island "byte-for-byte" are not true today (`Yard.tsx:1-2`, `imperativeStation.ts:1`, `Radio.tsx:2`; `yardSim.js:3-7` says so itself; R6 section 11, row 20). Planned: Y1 corrects the first two in 2a, and B3 corrects the third in 2b (`ISLAND-COMMENT`).
 
 ### 2.4 `src/stations/yard`: the engine modules
 | File | Owns | Imported by |
@@ -127,11 +130,11 @@ The trust rule:
 |---|---|---|
 | Desktop shell | `src-tauri/tauri.conf.json` | Product name `Clear Board`, version `0.1.0`, the identifier, one window 1040 by 840 (minimum 600 by 600), front end `../dist` built by `npm run build`, bundle target NSIS, no content security policy. The identifier must not change: the profile of a desktop learner is stored under it (upgrade list P-24; not verified here). |
 | Desktop shell | `src-tauri/src/`, `Cargo.toml`, `capabilities/`, `icons/` | The shell holds no app logic: `lib.rs` adds a log plugin in debug builds only. The capability is `core:default`. The 16 icon files are the default mark of the framework (plan T6). |
-| PWA | `vite.config.ts:14-42` | `registerType: 'autoUpdate'`, `injectRegister: 'auto'`. The cache pattern `**/*.{js,css,html,svg,json,woff2}` includes `.json` on purpose: the content files are the app (`:19-21`). The manifest has a name, a short name, a description, `display: standalone`, a relative `start_url` and `scope`, two colour values and one SVG icon (`:24-40`). |
+| PWA | `vite.config.ts:14-41` | `registerType: 'autoUpdate'`, `injectRegister: 'auto'`. The cache pattern `**/*.{js,css,html,svg,json,woff2}` includes `.json` on purpose: the content files are the app (`:19-21`). The manifest has a name, a short name, a description, `display: standalone`, a relative `start_url` and `scope`, two colour values and one SVG icon (`:24-40`). |
 | PWA | `dist/sw.js` | The worker caches 14 files, 609,219 bytes, against a budget of 5 MB (R6 4.2, checked there; `SPEC.md:187`). It has no run-time cache rule (R6 section 8). |
 | Build | `package.json:8`; `vite.config.ts:9` | `npm run build` runs `tsc -b`, then `vite build`. `base: './'` gives relative addresses, so one build runs under a sub-path and inside the desktop shell. |
-| Build output | `dist/` | 16 files, 626,140 bytes on disk (checked with `wc -c`; equal to R6 4.1; this job ran no build): `index.html`; `assets/index-*.js` and `assets/index-*.css` (the main chunk and the one sheet); `assets/yardSim-*.js` and `assets/radioSim-*.js` (the two lazy island chunks); `data/*.json`, `favicon.svg`, `icons.svg` (copies of `public/`); `manifest.webmanifest`, `registerSW.js`, `sw.js`, `workbox-*.js` (the PWA plugin). |
-| Deploy | `.github/workflows/deploy.yml` | On a push to `main`: `npm ci`, `npm run check`, `npm run build`, then the Pages steps. The last steps fail, and the live copy is served from the owner's site repository (plan T13; the run history was not read in this job: not verified). |
+| Build output | `dist/` | 16 files, 626,140 bytes on disk (checked with `wc -c`; equal to R6 4.1; no build was run for this file): `index.html`; `assets/index-*.js` and `assets/index-*.css` (the main chunk and the one sheet); `assets/yardSim-*.js` and `assets/radioSim-*.js` (the two lazy island chunks); `data/*.json`, `favicon.svg`, `icons.svg` (copies of `public/`); `manifest.webmanifest`, `registerSW.js`, `sw.js`, `workbox-*.js` (the PWA plugin). |
+| Deploy | `.github/workflows/deploy.yml` | On a push to `main`: `npm ci`, `npm run check`, `npm run build`, then the Pages steps. The last steps fail, and the live copy is served from the owner's site repository (plan T13; the run history was not read for this file: not verified). |
 
 ## 3. The data flow
 ```
@@ -158,10 +161,10 @@ The Yard ──── changes profile.yard in place, then ctx.save() ─► pers
 | Signals cap | `store.ts:76`, `:86-88` | The signals mastery stays at 0.33 or less until one signal aspect has a correct answer. |
 | Drill filter | `Drill.tsx:88`, `:92` | The Drill draws no radio item and no signal item with an empty aspect list. |
 | Yard map | `yardSim.js:25-38` | A win grades only the content items that `RULE_ITEMS` names for the rule chips of the job. |
-| Watched line | `yardSim.js:425`, `:484` | A watched optimal line writes no best record and no mastery. It still adds the job to `completed` (`:463-464`). Row U-04 waits for the owner's yes. |
+| Watched line | `yardSim.js:425`, `:484` | A watched optimal line writes no best record and no mastery. It still adds the job to `completed` (`:463-464`). Row U-04 has the owner's yes: the old marks stay, and U1 changes the write in 2c. |
 | No "test-ready" claim | `store.ts:94-102` | The stage names make no such claim (D-0013). |
 
-These upgrade rows wait for the owner's yes and change sections 2 and 3: U-04, U-05, U-07, U-10, U-13, U-34, U-44, U-50. None is in a brief.
+These upgrade rows have the owner's yes (D-0035) and change sections 2 and 3 when they are built: U-04, U-05, U-07, U-10, U-13, U-34, U-44. U1 and G1-2 carry them in Wave 2c. Row U-50 has a no. None is in a Wave 2a brief.
 
 ## 4. The frozen set
 No edit, no reformat, no move (fence rule 1). No job owns a frozen file in any wave.
@@ -176,10 +179,10 @@ No edit, no reformat, no move (fence rule 1). No job owns a frozen file in any w
 | `src/stations/yard/geometry.js` | It looks like layout, but `model.js` reads its lengths and clearances (`model.js:9`). A changed number changes what the game allows. |
 | `src/stations/radioSim.js`, lines 84 to 123 (`STEPS`) | The call wording of 14 steps, tuned by the SME (`:81-83`). The other lines of the file are not frozen; fence rule 3 covers their words. |
 
-- Checked in this job: the ten whole files are equal to commit `94a41c5` (`git diff --stat`, empty), each SHA-256 is equal to the table of R6 5.1, and the text hash of the `STEPS` region is equal to R6 5.1.
+- Checked on 2026-11-20: the ten whole files are equal to commit `94a41c5` (`git diff --stat`, empty), each SHA-256 is equal to the table of R6 5.1, and the text hash of the `STEPS` region is equal to R6 5.1.
 - Today no gate proves the set. Planned: `check:frozen` is step 1 of `npm run check` (section 7).
 - Frozen does not mean correct. Open items for the SME stay open (plan T11). A finding about content is a note for the SME, never an edit.
-- Locked, and not part of the frozen set: the six files in `src/styles/dusk/` and `src/styles/dusk.lock.json`. No job edits them. In this job each file hash was equal to the lock.
+- Locked, and not part of the frozen set: the six files in `src/styles/dusk/` and `src/styles/dusk.lock.json`. No job edits them. On 2026-11-20 each file hash was equal to the lock.
 
 ## 5. The style layers (planned)
 Today there is one sheet (`src/index.css`) and two `<style>` elements that the islands add. Each statement below is planned.
@@ -205,13 +208,13 @@ import './styles/surfaces/shell.css'        // 9 · then home, settings, referen
 | File | Owns | Must not contain | Writer in 2a / 2b / 2c |
 |---|---|---|---|
 | `src/styles/dusk/*.css` (six), `dusk.lock.json` | Dusk 0.2.0, as its own `ARCHITECTURE.md` says. Each class has the prefix `dusk-`; the one exception is `is-in`. | An edit. | never |
-| `src/styles/clear-board.tokens.css`, the bridge | Six blocks, in order: (1) the old shell names on Dusk tokens; (2) the seven Dusk type sizes in `rem` and `--lh-base`; (3) the eight `--cb-*` names; (4) the dyslexia block; (5) the high-contrast block; (6) the Yard block, `--yard-*`, between `/* yard:start */` and `/* yard:end */`. It is the only file with a raw colour outside the frozen files (fence rule 4). | A rule that styles a part: the file declares custom properties, and the two spacing declarations of block 4. A declaration of `--lanes`. A map of the old island names. A new name with no `--cb-` or `--yard-` prefix. | S1 / Y2 [P], the Yard block only / U1 [P], not the Yard block (the Yard block in 2c: PENDING RULING `YARD-BLOCK-2C`) |
-| `src/styles/clear-board.parts.css` | Each `cb-` part of the gap register (G1 to G20), the 44 px floor, the three reduced-motion rules, the mark rules in one block. A rule that names a Dusk class has `.cb-app` in front. | A raw colour. A declaration of a custom property that Dusk declares (`--led-size` is one). A rule that only one surface needs. A bare `is-` state class: a state is a `data-` or an ARIA attribute. | S1 / closed / U1 [P] |
-| `src/index.css`, the app sheet | The old shell and station rules, until the sweep. `html { font-size: var(--fs) }`. The reduced-motion block for the device flag. | A raw colour. A declaration of `--ink` or `--focus`. After 2a, a new rule: a new rule goes in a surface sheet (contract C.2). | S1 / B1, the rules of the B1 list only / U1 [P], the sweep |
+| `src/styles/clear-board.tokens.css`, the bridge | Six blocks, in order: (1) the old shell names on Dusk tokens; (2) the seven Dusk type sizes in `rem` and `--lh-base`; (3) the eight `--cb-*` names; (4) the dyslexia block; (5) the high-contrast block; (6) the Yard block, `--yard-*`, between `/* yard:start */` and `/* yard:end */`. It is the only file that fence rule 4 allows a raw colour in, outside the frozen files. A recorded exception: the icon files and the desktop window colour (row U-45; D-0036). The selector of block 6 is `:root` (`YARD-BLOCK`). | A rule that styles a part: the file declares custom properties, and the two spacing declarations of block 4. A declaration of `--lanes`. A map of the old island names. A new name with no `--cb-` or `--yard-` prefix. | S1 / Y2, the Yard block only / U1, not the Yard block; Y4 owns the Yard block (`YARD-BLOCK-2C`) |
+| `src/styles/clear-board.parts.css` | Each `cb-` part of the gap register (G1 to G20), the 44 px floor, the three reduced-motion rules, the mark rules in one block. A rule that names a Dusk class has `.cb-app` in front. | A raw colour. A declaration of a custom property that Dusk declares (`--led-size` is one). A rule that only one surface needs. A bare `is-` state class: a state is a `data-` or an ARIA attribute. | S1 / closed / U1 |
+| `src/index.css`, the app sheet | The old shell and station rules, until the sweep. `html { font-size: var(--fs) }`. The reduced-motion block for the device flag. | A raw colour. A declaration of `--ink` or `--focus`. After 2a, a new rule: a new rule goes in a surface sheet (contract C.2). | S1 / B1, the rules of the B1 list only / U1, the sweep (`SWEEP`) |
 | `src/styles/surfaces/*.css` (six) | The rules that one surface needs. A class has the prefix of its surface (`cb-shell-`, `cb-home-`, `cb-settings-`, `cb-reference-`, `cb-drill-`, `cb-radio-`). An override of a Dusk class or a `cb-` part is under the scope class of the surface. | A raw colour. A class of another surface. An edit of a shared part. | S1 makes each one / B1, B2, B3 / U1 |
 | `src/stations/yard/yard.css` | The Yard chrome. Each selector starts with `.yard-wrap`. Each class is `yd-`. | A raw colour, after step 2 of Y1. A selector under `.yd-view` or `.yd-legend`. | Y1 / Y3 / Y4 |
 | `src/stations/yard/drawing/drawing.css` | The Yard drawing. Each selector starts with `.yard-wrap .yd-view` or `.yard-wrap .yd-legend`. Colour comes only from `--yard-*` names. | A raw colour. A chrome class. | Y1 (the one canvas rule) / Y2 / Y4 |
-| The style rules in `radioSim.js` (lines 5 to 33) | The guided Radio, under `.radio-wrap`. | A raw colour, after B3 (PENDING RULING `B3-LINE`). A changed word. | — / B3 / U1 |
+| The style rules in `radioSim.js` (lines 5 to 33) | The guided Radio, under `.radio-wrap`. | A raw colour, after B3. A changed word. `B3-LINE`: B3 can edit each colour and each style value of the file, in a style rule, in markup and in script, and no word. | — / B3 / U1 |
 
 Rules for each app sheet: no raw colour; a new custom property has the prefix `--cb-` or `--yard-`; only the bridge declares a name that Dusk declares (contract B.1, the five rules).
 
@@ -222,7 +225,7 @@ Rules for each app sheet: no raw colour; a new custom property has the prefix `-
 | `html` | `data-contrast` | `"1"`, `"0"` | `AppContext.tsx:58` | Block 5 of the bridge |
 | `html` | `data-reduce` | `"1"`, `"0"` | `AppContext.tsx:59` | The three rules in the parts file (P-14) |
 | `html` | `style="--fs: …"` | `16px`, `18.5px` | `AppContext.tsx:60` | `html { font-size: var(--fs) }` |
-| `html` | `data-tier` | `"strict"` | S1, static, in `index.html` | `dusk.motion.css`. PENDING RULING `TIER`. |
+| `html` | `data-tier` | `"strict"` | S1, static, in `index.html` | `dusk.motion.css`. The tier is STRICT (section 1). |
 | `body` | `class="cb-app"` | — | S1, static, in `index.html` | Each rule that names a Dusk class |
 
 - The "Set by" column of the first four rows is true today. The last two rows and the "Read by" column are planned. `AppContext.tsx` does not change in 2a or 2b.
@@ -231,9 +234,9 @@ Rules for each app sheet: no raw colour; a new custom property has the prefix `-
 
 ## 6. The Yard (planned)
 ```
-Yard.tsx ─► yardSim.js  THE CONTROLLER ─► yard/view.js    THE VIEW (2a) ─► yard/yard.css
-                                       ─► yard/draw.js    THE DRAWING ADAPTER (2a) ─► yard/drawing/layout.js, bodies.js, svg.js (2b), drawing.css
-                                       ─► yard/access.js  THE ACCESS LAYER (2c)
+Yard.tsx ─► yardSim.js  THE CONTROLLER ─► yard/view.ts    THE VIEW (2a) ─► yard/yard.css
+                                       ─► yard/draw.ts    THE DRAWING ADAPTER (2a) ─► yard/drawing/layout.ts, bodies.ts, svg.ts (2b), drawing.css
+                                       ─► yard/access.ts  THE ACCESS LAYER (2c)
                                        ─► yard/anim.js, yard/sound.js
                                        ─► yard/model.js, puzzles.js, geometry.js    THE ENGINE, FROZEN (solver.js: tools only)
 ```
@@ -241,11 +244,11 @@ Yard.tsx ─► yardSim.js  THE CONTROLLER ─► yard/view.js    THE VIEW (2a) 
 |---|---|---|---|---|
 | Engine | `model.js`, `solver.js`, `puzzles.js`, `geometry.js` | Section 2.4. | A change. | frozen |
 | Controller | `yardSim.js` | The game state, the move logic, the records, `RULE_ITEMS`, the sound calls, the event wiring. It exports `mount(root, ctx)` and nothing else. It reaches an element by an id or through a view function. | A class name. A markup string. An inline style. An import of `render.js`. | Y1 / closed / Y4 |
-| View | `yard/view.js` | `createView(root)`: each markup string, each class name, the functions of contract C.4 (`setReadout`, `setBanner`, `setRefusal`, and the others). It sets `data-cb="yard-drawing"` on the frame of the drawing. | Game state. An import of a function of `model.js`. | Y1 / Y3 / Y4 |
-| Drawing adapter | `yard/draw.js` | `createDrawing(host, { onPick })` gives `paint(state, puzzle, { anim, cine })`, `switchBoxes()`, `onLayout(fn)`, `destroy()`. In 2a it holds the canvas (`canvas#yard.yd-view`) and calls `render.js`. In 2b Y2 replaces the inside. | A colour in script. A change of a number of `geometry.js`. | Y1 / Y2 / Y4 |
-| Drawing | `yard/drawing/layout.js`, `bodies.js`, `svg.js` | The SVG drawing of look C2: the view transform and the rule that selects the form; one pure function from the state, `anim` and `cine` to a list of bodies; the one inline SVG with one group for each body. | A canvas. A raw colour. A typed fallback for a missing custom property. | — / Y2 / Y4 |
-| Access layer | `yard/access.js` | The switch buttons, the text mirror, the status region (below). | A rule text. A changed message of the model. | — / — / Y4 |
-| Motion, sound | `yard/anim.js`, `yard/sound.js` | The three exports and the four exports of today keep their signatures in 2b. | — | — / Y2 (`anim.js`) / Y4 |
+| View | `yard/view.ts` | `createView(root)`: each markup string, each class name, the functions of contract C.4 (`setReadout`, `setBanner`, `setRefusal`, and the others). It sets `data-cb="yard-drawing"` on the frame of the drawing. | Game state. An import of a function of `model.js`. | Y1 / Y3 / Y4 |
+| Drawing adapter | `yard/draw.ts` | `createDrawing(host, { onPick })` gives `paint(state, puzzle, { anim, cine })`, `switchBoxes()`, `onLayout(fn)`, `destroy()`. In 2a it holds the canvas (`canvas#yard.yd-view`) and calls `render.js`. In 2b Y2 replaces the inside. | A colour in script. A change of a number of `geometry.js`. | Y1 / Y2 / Y4 |
+| Drawing | `yard/drawing/layout.ts`, `bodies.ts`, `svg.ts` | The SVG drawing of look C2: the view transform and the rule that selects the form; one pure function from the state, `anim` and `cine` to a list of bodies; the one inline SVG with one group for each body. | A canvas. A raw colour. A typed fallback for a missing custom property. | — / Y2 / Y4 |
+| Access layer | `yard/access.ts` | The switch buttons, the text mirror, the status region (below). | A rule text. A changed message of the model. | — / — / Y4 |
+| Motion, sound | `yard/anim.js`, `yard/sound.js` | The three exports and the four exports of today keep their signatures in 2b. | — | — / Y2 (`anim.js`) / Y4 (`SOUND-OWNER`) |
 | Old drawing | `yard/render.js` | Y2 deletes it, or keeps it with no raw colour. The claim in its comment on line 2 does not move into a new file (plan T12). | — | — / Y2 / Y4 |
 
 **The drawing: look C2 on a view transform.** Gate A, question 1: the look is C2 (`specs/research/yard-looks/look-model2.*`). R2: one inline SVG, no canvas.
@@ -254,16 +257,17 @@ Yard.tsx ─► yardSim.js  THE CONTROLLER ─► yard/view.js    THE VIEW (2a) 
 - One picture, two forms: the wide form (the true geometry) and the tall form (one row for each track). Empty track can shrink, with a break mark. A bar carries the room on a track. The drawing measures its own host and selects its form. PENDING RULING `FORM-CHANGE` sets the rule for a change of form during a job.
 - Colour is only in CSS, on the `--yard-*` names of the bridge. The drawing does not read the colours of `TYPES` in `geometry.js`. A script reads a custom property only for a size or a time.
 - A state is a word and a shape, never a colour alone. Red is only the ring at the cause of a refusal. Gold for the route, the engine and the goal waits for PENDING RULING `GOLD`.
-- Test hooks [P]: `data-car`, `data-track`, `data-lined`.
+- Test hooks, proposed in the contract (C.5; E.5): `data-car`, `data-track`, `data-lined`.
+- In 2b Y2 keeps a pointer path to each switch and leaves a place for each switch button in the view transform (`SWITCH-BUTTONS`). The room bar of a track has a class with the prefix `yd-view-`; the toolbar row of the chrome keeps `yd-bar` (`YD-BAR`).
 
 **The access layer (Y4, 2c).** Gate A, question 2: a learner can finish each of the 19 jobs on a phone 390 px wide.
-- Six native `<button>` elements over the SVG, in track order, placed with `switchBoxes()` and moved on `onLayout`. Each holds the switch name and the state word. Each is 44 px or more; that holds down to a window of about 378 px (Gate A, question 2). Reserved [P]: `data-sw`, `aria-pressed`.
-- A text mirror of the yard state (`#yard-mirror` [P]) and one status region (`#yard-live` [P]). The wording waits for PENDING RULING `MIRROR-WORDS`.
-- Motion that stops with "Reduce motion" on (P-01). The owner of this work: PENDING RULING `MOTION-STOP-OWNER` (recommended: Y4). A teardown call from React to the island: PENDING RULING `UNMOUNT`.
+- Six native `<button>` elements over the SVG, in track order, placed with `switchBoxes()` and moved on `onLayout`. Each holds the switch name and the state word. Each is 44 px or more; that holds down to a window of about 378 px (Gate A, question 2). Reserved in the contract (B.6): `data-sw`, `aria-pressed`.
+- A text mirror of the yard state (`#yard-mirror`) and one status region (`#yard-live`). Y4 builds the mirror from state words that the app has today, and the SME reads it before the change reaches `main` (PENDING RULING `MIRROR-WORDS`).
+- Motion that stops with "Reduce motion" on (P-01): Y4 (`MOTION-STOP-OWNER`). A teardown call from React to the island: Y4, in a commit of its own (`UNMOUNT`). The sound module: Y4 (`SOUND-OWNER`).
 
 **What stays.** The entry path `./yardSim.js`, the export `mount(root, ctx)`, the six fields of `ctx` and the teardown do not change in 2a or 2b. The classes `yard-host` and `yard-wrap` stay. The ids `picker`, `readout`, `workorder`, `act`, `count`, `track`, `work`, `optimal`, `depart`, `reset`, `mute`, `msg`, `rules`, `certify` stay through 2c. The id `yard` goes with the canvas.
 
-**File type.** PENDING RULING `U-46`: with a yes, `view`, `draw` and `access` are `.ts` files and `imperativeStation.ts` exports a named type for `ctx`. `yardSim.js` stays a `.js` file at its path in each case.
+**File type (row U-46, approved).** `view`, `draw` and `access` are TypeScript files, and the three drawing files of Y2 follow the same row. `yardSim.js` stays a `.js` file at its path and imports `./yard/view.ts` and `./yard/draw.ts` by the full path. `imperativeStation.ts` exports a named type for the bridge object, `StationCtx`; the view object and the drawing object have the types `YardView` and `YardDrawing` (the three names are set in the contract, C.4, and the lead can change them). `tools/solve.mjs` and `tools/securement-check.mjs` import frozen `.js` modules only, so they run unchanged.
 
 ## 7. The gates (planned)
 After G1, `npm run check` is `node tools/check.mjs`. It runs each offline step in order, prints PASS or FAIL for each step, runs the remaining steps after a failure, and exits non-zero if one step failed. It needs no network, no `dist/` and no browser (contract B.4; R6 section 5).
@@ -279,10 +283,11 @@ After G1, `npm run check` is `node tools/check.mjs`. It runs each offline step i
 | 7 | `test:unit` | Unit tests for `sr`, `store` and `severity`. |
 | 8 to 11 | (the four scripts of today) | Section 2.6. |
 
-- On request, with a build and Chromium, and not part of `npm run check`: `test:browser` (the smoke test; it selects by an id or by a `data-cb` hook) and `look:baseline`, `look:compare` (pictures at 1440 and 390, and the Yard at 1280 [P]).
-- Three steps start loose and get tighter at each wave merge: the colour baseline, the name allow list and the warning limit (G1-close, PENDING RULING `G1-STEPS`).
-- `.github/workflows/check.yml` runs the check on each branch and each pull request. In `deploy.yml` only line 26 changes.
-- The file names behind steps 2 and 3 wait for PENDING RULING `TOOLS`. The script names are the same in each case. `tools/**`, `tests/**`, `package.json` and the lock file have one line of ownership: G1, G1-close, G1-2.
+- On request, with a build and Chromium, and not part of `npm run check`: `test:browser` (the smoke test; it selects by an id or by a `data-cb` hook) and `look:baseline`, `look:compare` (pictures at 1440 and 390, and the Yard at 1280; a job commits its pictures in `specs/pictures/<wave>-<job>/` at device scale factor 1: `PICTURES`).
+- Three steps start loose and get tighter at each wave merge: the colour baseline, the name allow list and the warning limit (G1-close; `G1-STEPS`).
+- `.github/workflows/check.yml` runs the check on each branch and each pull request. In `deploy.yml` only line 26 changes: it moves to the Node line of `.nvmrc`, which holds `22.23.5` (`NODE`). The last step of `deploy.yml` stays as it is.
+- The tools behind steps 2 and 3 are `tools/dusk-lock-check.mjs` and `tools/colour-lint.mjs`, and the look harness is `tools/look/look.mjs`. G1 writes the three as small equivalents of the reskin tools and copies no code from them (`TOOLS`, option c). The one new package is `playwright` 1.63.0, exact (`DEV-DEP`). `tools/**`, `tests/**`, `package.json` and the lock file have one line of ownership: G1, G1-close, G1-2.
+- `check:colour` does not fail on the two icon files (row U-45; D-0036).
 - A gate proves structure. No gate proves that a rule text is correct.
 
 ## 8. The rules a change must keep
@@ -290,15 +295,15 @@ The full text is the fence: `specs/clear-board-2-plan.md`, section 4, rules 1 to
 - **Content (1, 2, 15).** A frozen file gets no edit, no reformat and no move. No agent writes, corrects or cites a rule: a finding about rule content is a note for the SME. Show nothing rather than something false, and mark a claim that has no check as not verified.
 - **A reskin (3, 4).** It changes no behaviour, no number, no word and no control. No raw colour is outside the bridge file and the frozen files.
 - **Meaning and access (5, 6, 7, 8).** Red is attention only, and words carry a state, never a colour or a glow alone. Reduced motion stops each effect and nothing goes blank. The four reading modes survive. Contrast is WCAG AA or better, a target is 44 px or more, no page scrolls sideways at 390 or 1440 px, a table reflows, and no button is a pill.
-- **Work (9, 10).** One session, one branch, its own files; `package.json` and the lock file belong to the G1 line. `npm run check` and `npm run build` are green before a session reports done. Install with `npm ci`.
+- **Work (9, 10).** One session, one branch, its own files; `package.json` and the lock file belong to the G1 line. Each wave has one wave branch, and each job has one local branch in its own worktree. A build agent commits and does not push. The lead merges and pushes (`BRANCH`; D-0037). `npm run check` and `npm run build` are green before a session reports done. Install with `npm ci`.
 - **The repository (11, 12).** No secret, no timer or scheduled job, no account, server or analytics. No push to `main` and no merge into `main`. The last step of the deploy workflow stays as it is.
 - **People (13, 14).** The owner runs no command. No file holds a job title or personal history.
-- **This map (`00-contracts.md`).** A file has one owner in one wave, and a new file that is not in the matrix needs the lead. A Dusk class is always under an app class (`.cb-app`, `.yard-wrap`, `.radio-wrap`). A build agent that finds a name of the contract wrong stops and reports to the lead.
+- **This map (the contract).** A file has one owner in one wave, and a new file that is not in the matrix needs the lead. A Dusk class is always under an app class (`.cb-app`, `.yard-wrap`, `.radio-wrap`). A build agent that finds a name of the contract wrong stops and reports to the lead.
 
 ## 9. What cannot be proved in the cloud
 | Item | Why | State |
 |---|---|---|
-| The Windows desktop build | The target is an NSIS installer and the shell uses WebView2. No Rust command was run. The sizes, the window, the icon in the task bar and the service worker inside the shell have no check (R6 9.2). | Not verified. No Wave 2 job writes `src-tauri/**` (PENDING RULING `TAURI`). |
+| The Windows desktop build | The target is an NSIS installer and the shell uses WebView2. No Rust command was run. The sizes, the window, the icon in the task bar and the service worker inside the shell have no check (R6 9.2). | Not verified. No Wave 2 job writes `src-tauri/**`: it waits for a session that can make the Windows build (`TAURI`). |
 | A real phone | Each result comes from headless Chromium with an emulated phone. No touch screen, no phone launcher, no Safari and no Firefox was tested (upgrade list, section 8; Gate A, questions 2 and 3). | Not verified. |
 | A screen reader | No screen reader was run. Each statement about what a screen reader says has no check (R5). | Not verified. |
 | The owner's look at each surface, before and after, at 1440 and 390 | It is the owner's (plan section 7). | Open. |
@@ -306,53 +311,64 @@ The full text is the fence: `specs/clear-board-2-plan.md`, section 4, rules 1 to
 | The push to `main` and the update of the live copy | `main` moves only on the owner's typed word (fence rule 12). | Open. |
 | The page law | The law text is in no repository that a session can read (R3 section 6). | Not verified. |
 
-## 10. Open rulings that change this map
-`00-contracts.md`, Part E, has the options and the reason for each. This table says what changes here.
+## 10. The rulings that shape this map
+The contract, Part E, has the state of each ruling, with the options and the reason. `specs/briefs/lead-rulings.md` is the source.
 
-| Name | Who | Recommended | What changes in this file |
+**Ruled.** Each one is applied in the sections named.
+
+| Name | The ruling | Section |
+|---|---|---|
+| `UPGRADE-LIST` (the owner) | Rows U-01 to U-46: yes. Rows U-47 to U-51: no. U1 and the named jobs of 2b and 2c carry them. | 3 |
+| `U-46`, `U-45` (the owner) | The new Yard files are TypeScript, with a named type for the bridge object. The icon files and the desktop window colour can keep a raw colour. | 5.2, 6, 7 |
+| `FILES`, `BRANCH`, `G1-STEPS`, `Y1-STEPS` | Each proposed file row is accepted. One wave branch and one local branch for each job. G1 closes at each wave merge. Y1 has two steps. | 5, 6, 7, 8 |
+| `TOOLS`, `NODE`, `DEV-DEP`, `LOOK-IDS`, `PICTURES` | G1 writes its own three tools. Node `22.23.5`. `playwright` 1.63.0. The ids `yard-style` (2a) and `yard` (2b) can go. Pictures are committed at scale 1. | 7 |
+| `B3-LINE`, `YARD-BLOCK`, `YARD-BLOCK-2C`, `SWEEP` | B3 can edit each colour of `radioSim.js`. Block 6 is on `:root`. Y4 owns the Yard block in 2c. U1 makes the sweep in 2c. | 5.2 |
+| `ICON-SVG`, `ICON-PNG` | Two SVG files by S1 in 2a. The PNG set by B1 in 2b. | 2 |
+| `YD-LEGEND`, `YD-BAR`, `ISLAND-COMMENT` | `yd-rules-legend` for the rules legend of the chrome. `yd-bar` stays a chrome class. Y1 and B3 correct the island comments. | 2.3, 6 |
+| `MOTION-STOP-OWNER`, `SOUND-OWNER`, `UNMOUNT`, `SWITCH-BUTTONS` | Y4. Y2 keeps a pointer path in 2b. | 6 |
+| `TAURI`, `DOCS-WRITER`, `ARCH-UPDATE`, `ARCH-GATE` | `src-tauri/**` waits. D1 writes the root documents; the lead writes `DECISIONS.md` and this file at each wave merge. No new gate for the "must not contain" columns. | 5.2, 6, 9 |
+
+**Open: each row is a PENDING RULING.** Until an answer, each job keeps the behaviour of today.
+
+| Name | Who | Recommended | What changes in this file after an answer |
 |---|---|---|---|
-| `UPGRADE-LIST` | the owner | As the list recommends | Section 3 (the rows named there). No U-row is in this file as planned work. |
-| `TIER` | the owner | STRICT, with one written exception for travel in the Yard drawing | The tier line of section 1; `data-tier` in 5.3. |
-| `U-46` | the owner | Yes | The file type of `view`, `draw`, `access` in section 6. |
+| `TIER`, the exception only | the owner | One written exception for travel of equipment in the Yard drawing | Section 1; the motion form of section 6. |
 | `PAGE-WIDTH` | the owner | One window that fills the browser | The width that the Yard drawing gets; `--maxw` in block 1 of the bridge. |
-| `FORM-CHANGE`, `MIRROR-WORDS` (the owner); `GOLD` (the lead) | — | Contract Part E | Section 6. |
-| `FILES` | the lead | Accept | Each [P] in sections 5 and 6. |
-| `TOOLS` | the lead, with the owner's word | Vendor the two tools | The file names behind steps 2 and 3 of section 7. |
-| `B3-LINE`; `YARD-BLOCK` (S1 brief) | the lead | Widen; `:root` | The last row of 5.2; the selector of block 6 of the bridge. |
-| `YD-LEGEND` (Y1 brief); `LOOK-IDS` (the check of the briefs) | the lead | `yd-rules-legend`; a key `idsMayGo` | The class names of section 6; the look harness of section 7. The ids `yard-style` (2a) and `yard` (2b) go by the contract. |
-| `MOTION-STOP-OWNER`, `SOUND-OWNER`, `UNMOUNT`, `SWITCH-BUTTONS` | the lead | Y4 | Section 6. |
-| `G1-STEPS`, `TAURI` | the lead | Accept; it waits | Sections 7 and 9. |
-| `YARD-BLOCK-2C` (from this draft; now in contract E.4) | the lead | Y4 | The Yard block of the bridge has no owner in 2c: contract A.3.2 gives 2c to "U1, not the Yard block". Options: Y4; U1; closed. |
-| `ISLAND-COMMENT` (from this draft; now in contract E.4) | the lead | Y1, lines 1 to 4 only, in each case | The comment of `imperativeStation.ts:1-4` is not true today (section 2.3) and is less true after Y1. The file has an owner in 2a only with a yes to U-46. Options: Y1; Y4 in 2c; D1. Until the ruling Y1 does not edit the file (the Y1 brief). |
-| `ARCH-UPDATE` (from this draft; now in contract E.4) | the lead | The lead, at each wave merge | Who changes "today" and "planned" in this file after a wave is merged. Contract A.3.8 gives the file to the lead in 2a and 2b and to D1 in 2c. Options: the lead at each merge, and D1 for the last pass; D1 one time in 2c. |
-| `ARCH-GATE` (from this draft; now in contract E.4) | the lead | No new gate | The "must not contain" columns of 5.2 and 6 are proved only in part (steps 1 to 4 of section 7). Options: no new gate; G1-2 adds a layer check in 2c. |
+| `GOLD`, `FORM-CHANGE`, `C2-WORDS` | the owner | Gold for the route, the engine and the goal; the form is kept for a job; the words as written | Section 6, the drawing. |
+| `TEXT-SIZE`, `TILE-TONE`, `VERSION` | the owner | The app sizes stay; one tone for each live domain; `2.0.0` | No section of this file. |
+| The R7 picks `R7-P2`, `R7-P4`, `R7-P5`, `R7-P8` to `R7-P12` and `R7-P14` to `R7-P16` (R7-P3 is the pick of row U-13, which is ruled) | the owner | The contract, E.1 | Section 6: motion, sound and the controls during motion. |
+| `MIRROR-WORDS`, `YELLOW-WORD`, `FLASH`, `R7-P6`, `R7-P7`, `R7-P13` | the SME | — | Section 6. The lamp flash of `signal.ts` stays as today. |
 
-## 11. Not verified, and evidence
-Not verified:
-1. Each planned statement. Nothing of Wave 2 is built. The marks of `00-contracts.md`, Part F, stay in force.
-2. The run history of the deploy workflow and the place of the live copy (plan T13). This job did not read them.
-3. That `dist/` on disk is the build of the present tree. Its 16 file names and sizes are equal to R6 4.1. This job ran no build.
+## 11. Not verified
+1. Each planned statement. Nothing of Wave 2 is built. The marks of `specs/briefs/00-contracts.md`, Part F, stay in force.
+2. The run history of the deploy workflow and the place of the live copy (plan T13). They were not read for this file.
+3. That `dist/` on disk is the build of the present tree. Its 16 file names and sizes are equal to R6 4.1. No build was run for this file.
 4. Each number that this file takes from a report and marks "checked there": the gate counts of 2.6, the cache size of 2.7.
 5. That the desktop profile is stored under the identifier (upgrade list P-24).
 6. Each item of section 9.
+7. That `tsc -b` and Vite accept the planned file type of section 6 for the full files of Y1: a `.js` controller that imports two `.ts` files, and the type `StationCtx` on the module type of the two `.js` islands. A small form was tried in a scratch copy by the check after the rulings: `tsc -b` exits 0 and `vite build` passes (the Y1 brief, requirement 36). No job has built the full files.
+8. That the three tools that G1 writes give the same result as the reskin tools on each case (section 7).
 
 Opened and read for this file: `package.json`, `vite.config.ts`, `index.html`, `.gitignore`, `.oxlintrc.json`, the three `tsconfig` files, `.github/workflows/deploy.yml`, each file in `src/core` and `src/state` in full, each file in `src/stations` (in full, except `Drill.tsx`, `RadioTest.tsx`, `yardSim.js` and `radioSim.js`: those four in the parts cited), the head, the imports and the exports of each file in `src/stations/yard`, the four files in `tools/` (`content-check.mjs`: lines 1 to 70 and each check heading), `src-tauri/tauri.conf.json`, `Cargo.toml`, `src/lib.rs`, `src/main.rs`, `capabilities/default.json`, `src/styles/dusk.lock.json`, the listing of `dist/`, and the Dusk files `ARCHITECTURE.md` and `README.md`.
 
-Checks made, all read-only: the item and trust counts of the five content files (a Node one-line script); `sha256sum` of the ten frozen files and of the six Dusk files; the text hash and the call count of the `STEPS` region; `git diff --stat` against `86cfef2` and `94a41c5`; `grep` for each "no file imports" statement. No git command that changes something was run. No `npm install`, `npm ci` or `npm run build` was run in the repository. This job wrote this file only.
+Checks made, all read-only: the item and trust counts of the five content files (a Node one-line script); `sha256sum` of the ten frozen files and of the six Dusk files; the text hash and the call count of the `STEPS` region; `git diff --stat` against `86cfef2` and `94a41c5`; `grep` for each "no file imports" statement. No git command that changes something was run. No `npm install`, `npm ci` or `npm run build` was run in the repository.
 
-## 12. Check record
-Check of the Wave 2a paper, 2026-11-20, on the tree of commit `fc49394`. The checker assumed each statement wrong until it opened the file or ran the script. Read-only runs in the repository only. The scripts of the check are in the scratch folder `…/scratchpad/brief-check/` (`00-contracts.md`, Check record). Result words: **pass**, **repaired** (the row says what changed), **open** (the row says why). The lead removes this section when the file moves to the repository root.
+Checked again when the rulings were applied (2026-11-20, commit `9e5dd24`): `DECISIONS.md:5` (the tier line); `imperativeStation.ts:1-4`, `:9`, `:17-24`; `Yard.tsx:1-3`, `:7`; `tsconfig.app.json:9`, `:13`; `tools/solve.mjs:16-17` and `tools/securement-check.mjs:16-17` (frozen `.js` imports only); `deploy.yml:26`; `git diff --stat 86cfef2 HEAD` outside `specs/` names `DECISIONS.md` only.
+
+## 12. Check record, after the rulings
+Check of this file after the rulings were applied, 2026-11-20, on the tree of commit `9e5dd24`. The checker changed no code and no content. The full record, with the scripts and the scratch trials, is at the end of `specs/briefs/00-contracts.md`. Result words: **pass**, **repaired** (the row says what changed), **open** (the row says why).
 
 | # | Check | Result | What |
 |---|---|---|---|
-| 1 | Form | pass | This file is not a brief. It needs no six lines. Section 8 gives the fence in a short form and names the full text: plan section 4. Each of the 15 rule numbers is in the short form. |
-| 2 | Ownership | repaired | Each "Writer" cell of sections 5.2 and 6 is equal to contract A.3.2 to A.3.4. Repaired in 5.2: the bridge row now names `YARD-BLOCK-2C` (the Yard block has no owner in 2c). The four rulings that this draft added are now rows of contract E.4. |
-| 3 | Parallel safety | repaired | Each script name of section 7, each class prefix, each attribute of 5.3 and each member name of section 6 has the spelling of the contract and of the three briefs (`grep`). Repaired in 5.2: the parts file must not declare a custom property that Dusk declares (`--led-size`). Repaired in sections 6 and 7: the class `yd-view` on the canvas in 2a, the Yard picture at 1280. Added to section 10: `YD-LEGEND` and `LOOK-IDS`. |
-| 4 | The fence | pass | The file states no rule and cites no rule number. It names the rulebook by its title in section 1, and it describes what a gate script checks. No U-row is planned work here: section 3 lists eight rows as "wait". |
-| 5 | Truth | pass | Opened and equal, more than 45 line citations of sections 2 to 4: `types.ts:3`, `:10`, `:34`; `Reference.tsx:8-12`; `AppContext.tsx:9`, `:12`, `:19-30`, `:46`, `:57-60`, `:73`, `:79`, `:83`, `:101`, `:102`, `:109`, `:125`; `store.ts:6-14`, `:16-19`, `:21`, `:30`, `:46`, `:49`, `:53`, `:64-72`, `:76`, `:86`, `:95-102`; `sr.ts:18`, `:24`, `:37`; `Drill.tsx:86-88`, `:92`, `:219`; `RadioTest.tsx:65`, `:95`, `:150`; `radioSim.js:81`, `:84`, `:133`, `:136`, `:178`, `:184`; `signal.ts:1`, `:35`; `model.js:9`; `puzzles.js:9-20`, `:25-33`; `geometry.js:5`, `:17`, `:35-56`; `imperativeStation.ts:9`, `:17-29`, `:37`; `Yard.tsx:1-3`, `:7-8`; `package.json:8`, `:12`, `:14-28`; `vite.config.ts:9`, `:14-42`; `tauri.conf.json:8`; `SPEC.md:187`. Counted again and equal: the items and the trust values of the five content files (63; 42 with 38 and 4; 100; 14 with 8 and 6; 226), the 19 jobs, `dist/` with 16 files and 626,140 bytes, the ten frozen hashes and the `STEPS` text hash. No `Page law tier:` line is in `DECISIONS.md`. No citation was wrong. |
-| 6 | Completeness | pass | Plan section 6 asks for `ARCHITECTURE.md` and the tier line. The draft holds the map of today, the planned layers, the frozen set, the gates and the rules. Nothing of contract Parts A to C that changes the map is missing after the repairs of checks 2 and 3. |
-| 7 | Buildability | pass | The file is a map and builds nothing. Each "planned" statement is marked and section 11 says that none is verified. |
-| 8 | Gate answers | repaired | Look C2 (section 6), full play on a phone (section 6, the access layer), the monogram (section 2, `public/favicon.svg`) are as the owner answered. Repaired in section 1: the draft held the line `Page law tier: STRICT` with a pending mark beside it. The owner has not ruled on `TIER`, so the draft now holds no tier line, only the statement that the line is not written. Not decided here: `FORM-CHANGE`, `GOLD`, `MIRROR-WORDS`, `U-46`, `PAGE-WIDTH`, and each U-row. |
-| 9 | Voice | pass | No name of a person, no job title for the owner, no personal history, no contraction, no exclamation mark (`grep`). Section 1 names the qualification that the product trains for. That is the product, not a person. |
+| 1 | The rulings of `lead-rulings.md`, sections 1 and 2 | repaired | Each ruling that this map names is given as ruled, in sections 2, 5, 6, 7, 8 and 10. Repaired: section 10 put `R7-P3` with the open picks. It is the pick of row U-13, which is ruled. |
+| 2 | Open names | pass | The mark PENDING RULING stands only at open names: `TIER` (the exception), `FORM-CHANGE`, `GOLD`, `MIRROR-WORDS`, and the table of section 10. Each one says that the behaviour of today stays. |
+| 3 | Form | pass | This file is not a brief. Section 8 gives the fence by rule number and names its source. |
+| 4 | Ownership | pass | The writer columns of sections 5.2 and 6 are equal to the contract, A.3.2 to A.3.5. |
+| 5 | Names | pass | Each path, class, attribute, id, npm script, tool name and type name of this file has the spelling of the contract (script `paths.mjs`). The new Yard files end in `.ts`. |
+| 6 | Parallel safety | pass | This file orders no job. |
+| 7 | The gate at the end of 2a | pass | Section 7 names the 11 steps of the contract, B.4. |
+| 8 | The fence | pass | This file holds no rule text and no rule number, no name of a person and no job title for the owner (`grep`). |
+| 9 | Truth | repaired | Opened and equal: each cited line of sections 2.1 to 2.7 and 3 that was opened (more than 50 lines), the item and trust counts of the five content files, and the 16 files and 626,140 bytes of `dist/`. Repaired: section 2.7 cited `vite.config.ts:14-42` and the block ends on line 41; the "Today" line now names this file as new at the root. |
+| 10 | This file | repaired | The tier line stands alone on line 20 and is equal to line 5 of `DECISIONS.md`. The file does not name an earlier form of itself. The five links of the head resolve from the repository root. "Today" is true against the code where it was opened. "Planned" is equal to the contract. Repaired: the list "Not verified" now has the heading of section 11, which the head of the file names. |
 
-Open after this check, for the lead: each row of section 10.
+Open, for the lead: this file is not committed yet. It is a new file in the working tree.
