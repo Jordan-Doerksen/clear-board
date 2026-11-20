@@ -50,4 +50,16 @@ is not an answer.
 
 ## Question 4 — the upgrade list (MEDIUM)
 
-Open. The table is `specs/research/upgrade-list.md`.
+**Answer: yes to each recommended row.** The owner's word: "yes to all recommended".
+
+- The table is `specs/research/upgrade-list.md`, section 2. Rows U-01 to U-46 have a yes. Rows U-47
+  to U-51 have a no (the recommended answer for each of the five was no).
+- The owner was told with the question: a yes takes the recommended side of the pick inside a row.
+  - U-13: motion is reduced when the learner's choice or the device asks for it.
+  - U-17: the look-up opens on top of the station.
+  - U-30: the dyslexia face ships as a font file only if its licence allows it. The licence is not
+    verified.
+  - U-42: the tip link stays, although its address holds an account name.
+- Rows with new words (U-11, U-24, U-25, U-27, U-33, U-37, U-40) come back to the owner for the
+  exact words before they ship.
+- The 28 notes for the SME are in section 10 of the same file. Nothing in them is fixed.
