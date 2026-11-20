@@ -14,8 +14,9 @@
 // an element by its id or through a view function. This file draws only through the drawing
 // object: it does not import render.js.
 //
-// This file does nothing when it is imported. One module that it imports does: sound.js reads
-// the stored mute value.
+// This file runs no statement of its own when it is imported. Its imports have two effects:
+// the two style files go into the page (yard.css, and drawing/drawing.css through draw.ts),
+// and sound.js reads the stored mute value.
 
 import { TRACK_IDS, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
 import { freshState, lineSwitch, canPull, canSpot, canKick, canSecure, spotPlan, pull, spot, kick, secure, checkWin, unsecuredGoal, grade } from './yard/model.js';
