@@ -234,7 +234,7 @@ export function mount(root, ctx) {
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   canvas.width = W * dpr; canvas.height = H * dpr; cctx.scale(dpr, dpr);
 
-  let puzzle, state, anim = null, busy = false, watching = false, fromDemo = false;
+  let puzzle, state, anim = null, busy = false, fromDemo = false;
   let gen = 0, stopAnim = null;       // gen invalidates in-flight loops on (re)load; stopAnim aborts the live tween
   let ordered = true;                 // is the switch list verified? (true when there's no list to check)
   const flagged = new Set();          // indices the player has flagged as wrong
@@ -253,7 +253,7 @@ export function mount(root, ctx) {
     if (stopAnim) stopAnim();          // abort the live tween (mid-move, depart, etc.)
     stopAnim = null;
     cancelCine();
-    puzzle = p; state = freshState(p); anim = null; busy = false; watching = false; setSpeed(fast());
+    puzzle = p; state = freshState(p); anim = null; busy = false; setSpeed(fast());
     ordered = !p.listed; flagged.clear();
     const dep = $('depart'); dep.style.display = p.goal.depart ? '' : 'none'; dep.disabled = true;
     renderRules(); renderOrder(); syncBuilder(); paint(); banner('', '');
@@ -407,7 +407,7 @@ export function mount(root, ctx) {
       puzzle.listed.forEach((e, i) => { if (e.error) flagged.add(i); });
       ordered = true; renderOrder();
     }
-    busy = true; watching = true; setSpeed(reduce ? 6 : 1.7);
+    busy = true; setSpeed(reduce ? 6 : 1.7);
     banner(`▶ Watching the optimal line — par ${puzzle.par} move${puzzle.par === 1 ? '' : 's'}`, 'ok');
     for (const [act, trk, n] of puzzle.opt) {
       if (gen !== myGen) return;
@@ -421,7 +421,7 @@ export function mount(root, ctx) {
       await sleep(320);
     }
     if (gen !== myGen) return;
-    setSpeed(fast()); busy = false; watching = false;
+    setSpeed(fast()); busy = false;
     fromDemo = true;                                                  // a watched line is not the player's win — don't grade mastery
     afterMove();
     if (puzzle.goal.depart && checkWin(state, puzzle)) departOut();   // finish the demo by departing
@@ -575,7 +575,9 @@ export function mount(root, ctx) {
       + `<button class="go" id="certify">Certify order ▸</button>`
       + `<div class="wo-meta"><span class="wo-tip">${puzzle.hint}</span></div>`;
     $('workorder').querySelectorAll('.ord-row').forEach((row) => row.addEventListener('click', () => {
-      const i = +row.dataset.i; flagged.has(i) ? flagged.delete(i) : flagged.add(i); sfx.points(); renderOrder();
+      const i = +row.dataset.i;
+      if (flagged.has(i)) flagged.delete(i); else flagged.add(i);
+      sfx.points(); renderOrder();
     }));
     $('certify').addEventListener('click', certify);
   }
