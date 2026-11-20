@@ -65,10 +65,9 @@ export default defineConfig({
         background_color: glass,
         theme_color: glass,
         icons: [
-          // The app's existing mark. Deliberately NOT a generated PNG set — the icon itself is
-          // an open taste call for the owner (D-0028); inventing one would be a silent design
-          // decision on a surface that carries the project's identity.
-          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          // The picked icon, the monogram (DECISIONS.md, D-0034): the master drawing, one SVG file.
+          // The tab icon is the 16 px drawing, public/favicon.svg. The PNG set is not made yet.
+          { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
         ],
       },
     }),
