@@ -9,7 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "tauri": "tauri",
-    "check": "node tools/sr-vectors.mjs && node tools/solve.mjs && node tools/content-check.mjs && node tools/securement-check.mjs"
+    "check": "node tools/check.mjs"
   },
   "dependencies": {
     "react": "^19.2.7",
