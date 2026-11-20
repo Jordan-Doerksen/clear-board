@@ -17,6 +17,7 @@ import { render } from './yard/render.js';
 import { play, setSpeed } from './yard/anim.js';
 import { sfx, resume, toggleMute, isMuted } from './yard/sound.js';
 import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
+import { createView } from './yard/view.ts';
 import './yard/yard.css';
 
 // --- Clear Board: map the engine's rule chips → the content-library items a puzzle
@@ -38,92 +39,19 @@ function masteryItemsFor(puzzle) {
   return [...ids];
 }
 
-// The .wrap body contents from switch-list/index.html (header dropped — Clear
-// Board has its own), with a Back button prepended, wrapped in .yard-wrap.
-const YARD_HTML = `
-  <div class="yard-wrap">
-    <button class="back" data-go="">← Home</button>
-
-    <div class="bar">
-      <select id="picker" title="Pick a job"></select>
-      <span class="spacer"></span>
-      <div class="readout" id="readout">Moves 0 / par 0 · Joints 0</div>
-    </div>
-
-    <div class="workorder" id="workorder"></div>
-
-    <div class="yardframe"><canvas id="yard"></canvas></div>
-
-    <div class="bar">
-      <select id="act" title="Action">
-        <option value="pull">PULL</option>
-        <option value="spot">SPOT</option>
-        <option value="kick">KICK</option>
-        <option value="secure">SECURE</option>
-      </select>
-      <select id="count" title="How many cars"></select>
-      <span style="color:var(--dim)">cars</span>
-      <select id="track" title="Which track"></select>
-      <button class="go" id="work">Work it ▸</button>
-      <button id="optimal" title="Auto-line and play the fewest-moves line in slow motion">▶ Watch optimal</button>
-      <button id="depart" title="Depart the assembled outbound out the lead" style="display:none">Depart ▸</button>
-      <span class="spacer"></span>
-      <button id="reset">Reset</button>
-      <button id="mute" title="Sound">🔊</button>
-    </div>
-
-    <div class="banner" id="msg"></div>
-
-    <div class="legend">
-      Rules in play —
-      <span class="k">CROR</span> = the national rulebook (applies everywhere) ·
-      <span class="s">S.I.</span> = a <em>special instruction</em>, specific to <em>this</em> yard — <strong>you must know your yard's.</strong>
-    </div>
-    <div class="rules" id="rules"></div>
-
-    <div style="margin:10px 0 4px; padding:10px 13px; border-left:3px solid var(--si); background:var(--sibg); border-radius:6px; font-size:13px;">
-      <strong style="color:var(--si)">What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span style="color:var(--dim)">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span>
-    </div>
-
-    <details>
-      <summary>How to play & why these rules</summary>
-      <p><strong>You are the conductor, not the engineer.</strong> Click a switch target to line it
-      (<span style="color:var(--si)">yellow</span> = lined into the track / diverging,
-      <span style="color:var(--good)">green</span> = normal, straight up the ladder). Then call a move:</p>
-      <ul>
-        <li><strong>PULL n from a track</strong> — back in, couple the near (throat) cut, pull <code>n</code> cars onto the lead.</li>
-        <li><strong>SPOT n to a track</strong> — shove <code>n</code> cars in and leave them.</li>
-        <li><strong>KICK n to a track</strong> — shove and cut away; the cars coast in on their own with no coupling. Only where a special instruction allows it (<span style="color:var(--si)">⚡</span>), only onto a secured 2+ car cut, and only car types that can be kicked.</li>
-      </ul>
-      <p><strong>Score = fewest engine MOVES</strong> — beat or match <em>par</em>. A move is one run of the
-      engine in one direction, so every change of direction counts: a <strong>PULL = 2</strong> (back in, pull
-      out) and a <strong>SPOT = 2</strong> (shove in, pull out) — <em>except the spot that finishes the job is 1</em>,
-      because the engine just leaves the cars and is done (no pull-out). A <strong>KICK = 1</strong> (one shove,
-      the cars coast in by themselves). So <em>pull, pull, spot</em> = 5 moves, and kicking saves the pull-out.
-      <strong>Joints</strong> (couplings) is a second, "also good" stat: lower is cleaner. To reach a
-      track, line <em>its</em> switch reverse and the ones below it normal, or the engineer refuses
-      (<strong>CROR 104</strong>).</p>
-      <p><strong>Securing &amp; kicking.</strong> <strong>Rule 112</strong> — any car left unattended gets a hand brake.
-      A <strong>KICK</strong> (Rule 113.5) needs a <em>secured</em> cut of at least two cars as a <em>backstop</em> to
-      catch the rolling car — and a tank, autorack or centrebeam is never kicked. After coupling, the engineer
-      <em>stretches</em> the joint to confirm the knuckles are locked before moving (<strong>Rule 113.2</strong>).</p>
-    </details>
-  </div>
-`;
-
 export function mount(root, ctx) {
-  // Inject the scoped markup into the container Clear Board gave us.
-  root.innerHTML = YARD_HTML;
+  // The view puts the scoped markup into the container Clear Board gave us.
+  const view = createView(root);
 
   // Back button → Clear Board home.
-  root.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => ctx.go(b.dataset.go)));
+  view.onGo((route) => ctx.go(route));
 
   // reduced motion: animations near-instant when the user's setting asks for it.
   const reduce = !!(ctx.settings && ctx.settings.reduce);
   const fast = () => reduce ? 6 : 1;          // setSpeed(6) ≈ instant; setSpeed(1) = normal
 
   // --- everything below is switch-list/src/main.js, scoped to `root` ----------
-  const canvas = root.querySelector('#yard');
+  const canvas = view.el('yard');
   const cctx = canvas.getContext('2d');
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   canvas.width = W * dpr; canvas.height = H * dpr; cctx.scale(dpr, dpr);
@@ -134,7 +62,7 @@ export function mount(root, ctx) {
   const flagged = new Set();          // indices the player has flagged as wrong
   let cine = null, cineCancel = null, cineTimer = null;   // inbound-arrival cinematic state
 
-  const $ = (id) => root.querySelector('#' + id);
+  const $ = (id) => view.el(id);
 
   function cancelCine() {
     if (cineCancel) cineCancel();
@@ -149,9 +77,9 @@ export function mount(root, ctx) {
     cancelCine();
     puzzle = p; state = freshState(p); anim = null; busy = false; setSpeed(fast());
     ordered = !p.listed; flagged.clear();
-    const dep = $('depart'); dep.style.display = p.goal.depart ? '' : 'none'; dep.disabled = true;
+    view.setDepart({ shown: !!p.goal.depart, enabled: false });
     renderRules(); renderOrder(); syncBuilder(); paint(); banner('', '');
-    $('readout').textContent = `Moves 0 / par ${p.par} · Joints 0`;
+    view.setReadout({ moves: 0, par: p.par, joints: 0 });
     arrivalCinematic();
   }
 
@@ -198,7 +126,7 @@ export function mount(root, ctx) {
   $('optimal').addEventListener('click', () => { resume(); watchOptimal(); });
   $('depart').addEventListener('click', () => { resume(); departOut(); });
   $('reset').addEventListener('click', () => { if (!busy) load(puzzle); });
-  $('mute').addEventListener('click', () => { $('mute').textContent = toggleMute() ? '🔇' : '🔊'; });
+  $('mute').addEventListener('click', () => { view.setMuted(toggleMute()); });
 
   // Full validation up front (lining + count + foul/clearance) so a fouling move is
   // refused before the engine ever moves.
@@ -311,7 +239,7 @@ export function mount(root, ctx) {
       if (act === 'secure') { secure(state, trk); banner(state.msg, 'ok'); paint(); await sleep(420); }
       else await animateMove(act, trk, n);
       if (gen !== myGen) return;
-      $('readout').textContent = `Moves ${state.moves} / par ${puzzle.par} · Joints ${state.joints}`;
+      view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
       await sleep(320);
     }
     if (gen !== myGen) return;
@@ -323,15 +251,15 @@ export function mount(root, ctx) {
   }
 
   function afterMove() {
-    $('readout').textContent = `Moves ${state.moves} / par ${puzzle.par} · Joints ${state.joints}`;
+    view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
     banner(state.msg, 'ok');
     syncBuilder(); paint();
     const done = checkWin(state, puzzle);
     if (done && puzzle.goal.depart) {
-      $('depart').disabled = false;                    // built in order — let them depart
+      view.setDepart({ shown: true, enabled: true });   // built in order — let them depart
       banner(`✓ Outbound built${puzzle.goal.ordered ? ' in order' : ''} — call Depart ▸ to leave.`, 'win');
     } else {
-      $('depart').disabled = true;
+      view.setDepart({ shown: !!puzzle.goal.depart, enabled: false });
       if (done) winBanner();
       else {
         // Built right but left loose. This is the one refusal that isn't a mistake in the work —
@@ -407,7 +335,7 @@ export function mount(root, ctx) {
     const clean = state.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
     banner(`✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev)}`, g.beatPar ? 'win' : 'ok');   // win registered now
     recordWin();
-    $('depart').disabled = true;
+    view.setDepart({ shown: true, enabled: false });
     // flavor: pull the whole train out the lead, off-frame left
     busy = true;
     const cutLen = state.engine.reduce((a, c) => a + carLen(state.type[c]), 0);
@@ -426,29 +354,20 @@ export function mount(root, ctx) {
   function syncBuilder() {
     // keep the count cap sensible for the chosen action
     const kind = $('act').value, id = $('track').value;
-    const cntSel = $('count');
-    // SECURE acts on the whole standing cut — a car count would be meaningless.
-    cntSel.disabled = kind === 'secure';
-    cntSel.style.opacity = kind === 'secure' ? '.45' : '';
+    const cur = +$('count').value;
     const max = kind === 'pull' ? (state.tracks[id]?.length || 1) : Math.max(1, state.engine.length);
-    const cnt = cntSel; const cur = +cnt.value;
-    cnt.innerHTML = '';
-    for (let k = 1; k <= Math.max(1, max); k++) {
-      const o = document.createElement('option'); o.value = k; o.textContent = k; cnt.appendChild(o);
-    }
-    cnt.value = Math.min(cur || 1, Math.max(1, max));
+    // SECURE acts on the whole standing cut — a car count would be meaningless.
+    view.setCount({ max: Math.max(1, max), value: Math.min(cur || 1, Math.max(1, max)), disabled: kind === 'secure' });
   }
   ['act', 'track'].forEach((id) => $(id).addEventListener('change', syncBuilder));
 
   function renderRules() {
-    const box = $('rules'); box.innerHTML = '';
+    const list = [];
     for (const key of puzzle.rules) {
       const r = RULES[key]; if (!r) continue;
-      const chip = document.createElement('div');
-      chip.className = `chip ${r.kind}`;
-      chip.innerHTML = `<b>${r.cite}</b><span>${r.label}</span>`;
-      box.appendChild(chip);
+      list.push({ kind: r.kind, cite: r.cite, label: r.label });
     }
+    view.renderRules(list);
   }
 
   // Route the work-order panel: a normal order, the interactive switch-list check
@@ -457,23 +376,16 @@ export function mount(root, ctx) {
     if (!puzzle.listed) { renderWorkOrder(); return; }
     if (ordered) { renderVerifiedOrder(); return; }
 
-    const rows = puzzle.listed.map((e, i) =>
-      `<div class="ord-row${flagged.has(i) ? ' flagged' : ''}" data-i="${i}">`
-      + `<span class="ord-flag">${flagged.has(i) ? '⚑' : '▢'}</span>`
-      + `<span class="ord-mark">${e.listedMark}</span><span class="ord-arrow">→</span><span class="ord-trk">${e.listedTrack}</span>`
-      + `</div>`).join('');
-    $('workorder').innerHTML =
-      `<div class="wo-top"><span class="wo-tag si">SWITCH LIST</span> <span class="wo-id">${puzzle.id.toUpperCase()}</span> · the list can be wrong</div>`
-      + `<div class="wo-job">Build <b>${puzzle.goal.track}</b> from these cars. Check each line against the yard — tap any that <b>don't match</b>, then certify.</div>`
-      + `<div class="ord-list">${rows}</div>`
-      + `<button class="go" id="certify">Certify order ▸</button>`
-      + `<div class="wo-meta"><span class="wo-tip">${puzzle.hint}</span></div>`;
-    $('workorder').querySelectorAll('.ord-row').forEach((row) => row.addEventListener('click', () => {
-      const i = +row.dataset.i;
-      if (flagged.has(i)) flagged.delete(i); else flagged.add(i);
-      sfx.points(); renderOrder();
-    }));
-    $('certify').addEventListener('click', certify);
+    view.renderSwitchList({
+      id: puzzle.id, goalTrack: puzzle.goal.track, hint: puzzle.hint,
+      lines: puzzle.listed.map((e, i) => ({ mark: e.listedMark, track: e.listedTrack, flagged: flagged.has(i) })),
+    }, {
+      onFlag: (i) => {
+        if (flagged.has(i)) flagged.delete(i); else flagged.add(i);
+        sfx.points(); renderOrder();
+      },
+      onCertify: certify,
+    });
   }
 
   function certify() {
@@ -503,14 +415,10 @@ export function mount(root, ctx) {
   }
 
   function renderVerifiedOrder() {
-    const g = puzzle.goal;
-    const lines = puzzle.listed
-      .map((e) => `<b>${e.trueMark}</b> → ${e.trueTrack}${e.error ? ' <span class="ord-fix">(list was wrong)</span>' : ''}`)
-      .join(' · ');
-    $('workorder').innerHTML =
-      `<div class="wo-top"><span class="wo-tag">WORK ORDER ✓</span> <span class="wo-id">${g.track}</span> · verified</div>`
-      + `<div class="wo-job">Build <b>${g.track}</b>: ${lines}.</div>`
-      + `<div class="wo-meta">Target <b>${puzzle.par} move${puzzle.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.</div>`;
+    view.renderVerifiedOrder({
+      goalTrack: puzzle.goal.track, par: puzzle.par,
+      lines: puzzle.listed.map((e) => ({ mark: e.trueMark, track: e.trueTrack, corrected: !!e.error })),
+    });
   }
 
   // The job, stated like a switch list — derived from the puzzle goal.
@@ -520,34 +428,19 @@ export function mount(root, ctx) {
     for (const [trk, entries] of Object.entries(puzzle.start || {}))
       for (const e of entries) { const m = Array.isArray(e) ? e[0] : e; if (typeof m === 'string') src[m] = trk; }
     const from = [...new Set(g.cars.map((c) => src[c]).filter(Boolean))];
-    const nums = g.cars.map((c) => c.split(' ').pop());
-    const head = `<div class="wo-top"><span class="wo-tag">WORK ORDER</span> <span class="wo-id">${puzzle.id.toUpperCase()}</span> · ${puzzle.title}</div>`;
-    const meta = `<div class="wo-meta">Target <b>${puzzle.par} move${puzzle.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.<span class="wo-tip">${puzzle.hint}</span></div>`;
-    const job = g.depart
-      ? `<div class="wo-job">Build the outbound${g.ordered ? ' in order' : ''} — gather <b>${nums.join(' · ')}</b> onto your train${from.length ? ` <span class="wo-from">(set out on ${from.join(', ')})</span>` : ''}, then <b>Depart ▸</b>.</div>`
-      : `<div class="wo-job">Build <b>${g.track}</b> — gather <b>${nums.join(' · ')}</b> onto it${from.length ? ` <span class="wo-from">(now on ${from.join(', ')})</span>` : ''}.</div>`;
-    $('workorder').innerHTML = head + job + meta;
+    view.renderWorkOrder({
+      id: puzzle.id, title: puzzle.title, hint: puzzle.hint, par: puzzle.par,
+      depart: !!g.depart, ordered: !!g.ordered, goalTrack: g.track, cars: g.cars, from,
+    });
   }
 
-  function banner(text, tone) {
-    const el = $('msg');
-    el.textContent = text || '';
-    el.className = `banner ${tone || ''}`;
-  }
+  function banner(text, tone) { view.setBanner(text, tone); }
 
   // A refused move is a teaching moment: keep the cited rule, add a one-tap link to its
   // plain-language Reference entry (cause → rule → correct action; REVAMP §6).
   function refusalBanner(msg) {
-    const el = $('msg');
-    el.className = 'banner bad';
-    el.textContent = msg || '';
     const id = ruleItemFromMsg(msg);
-    if (id && ctx && typeof ctx.go === 'function') {
-      const b = document.createElement('button');
-      b.className = 'lookup'; b.textContent = 'Look it up →';
-      b.addEventListener('click', () => ctx.go(`reference?focus=${id}`));
-      el.appendChild(b);
-    }
+    view.setRefusal(msg, id && ctx && typeof ctx.go === 'function' ? () => ctx.go(`reference?focus=${id}`) : null);
   }
   // "…(CROR 113.4/113.5(a)(v))" → rule.113.4; special-instruction-only refusals have no CROR item.
   function ruleItemFromMsg(msg) {
@@ -562,8 +455,7 @@ export function mount(root, ctx) {
   }
 
   // --- track dropdown (kept in sync with geometry) -------------------------
-  const trackSel = $('track');
-  TRACK_IDS.forEach((id) => { const o = document.createElement('option'); o.value = id; o.textContent = id; trackSel.appendChild(o); });
+  view.setTracks(TRACK_IDS);
 
   // --- puzzle picker -------------------------------------------------------
   // Grouped by tier so the authored ramp is visible. It used to be a flat list of all 19, which
@@ -584,24 +476,23 @@ export function mount(root, ctx) {
       .filter((e) => e.p.tier === t.tier));
     const next = ordered.find((e) => !completed.includes(e.p.id));
 
-    picker.innerHTML = '';
+    const groups = [];
     for (const t of TIERS) {
       const inTier = ordered.filter((e) => e.p.tier === t.tier);
       if (!inTier.length) continue;                       // never render an empty group
-      const g = document.createElement('optgroup');
-      g.label = t.label;
-      for (const { p, k } of inTier) {
-        const mark = completed.includes(p.id) ? '✓ ' : (next && next.p.id === p.id ? '→ ' : '');
-        const b = best[p.id];
-        const yours = b ? ` · your best ${b.moves}m` : '';   // blank, never a guess, if unrecorded
-        const o = document.createElement('option');
-        o.value = k;
-        o.textContent = `${mark}${p.title} · par ${p.par}${yours}`;
-        g.appendChild(o);
-      }
-      picker.appendChild(g);
+      groups.push({
+        label: t.label,
+        options: inTier.map(({ p, k }) => {
+          const b = best[p.id];
+          return {
+            value: k, title: p.title, par: p.par,
+            state: completed.includes(p.id) ? 'done' : (next && next.p.id === p.id ? 'next' : ''),
+            best: b ? { moves: b.moves } : null,                // blank, never a guess, if unrecorded
+          };
+        }),
+      });
     }
-    if (keep !== '') picker.value = keep;                 // a rebuild must not change the selection
+    view.renderPicker(groups, keep);                      // a rebuild must not change the selection
   }
 
   buildPicker();
@@ -609,6 +500,6 @@ export function mount(root, ctx) {
 
   // sound default: start muted if Clear Board's audio setting is off.
   if (ctx.settings && !ctx.settings.audio && !isMuted()) toggleMute();
-  $('mute').textContent = isMuted() ? '🔇' : '🔊';
+  view.setMuted(isMuted());
   load(PUZZLES[0]);
 }
