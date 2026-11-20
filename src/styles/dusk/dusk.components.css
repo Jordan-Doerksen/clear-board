@@ -1,0 +1,639 @@
+/* dusk.components.css - layer 3 of 5. The parts, and their Tier 1 states (hover, focus, press).
+   Owns colour, fill, border, corner, shadow and type of each part. Does not own where a part sits:
+   display, grid, gap, padding and margin are dusk.compose.css. Reads tokens only.
+
+   0.2.0, the lit panel. Three rules run through every part below:
+     1. A container has a lit edge, not a border: one shadow token (--neon, --neon-<tone>).
+        Gold light is chrome and selection. A tile is lit in its own colour.
+     2. A part that takes a tone sets local names (--tile-*, --row-*, --ico-*) from the tone's
+        tokens, and the part's rules read the local names. A local name is never a raw value.
+     3. Every status or market state carries a glyph or a word as well as a colour (SKIN-05).
+        A glow is never the only carrier either. */
+
+/* ---- window, title bar, sidebar, status bar --------------------------------------------------- */
+
+.dusk-win {
+  background: var(--glass);
+  border-radius: var(--r-window);
+  box-shadow: var(--shadow-win);
+  overflow: hidden;
+}
+/* one window that is the whole page: no corner, no float */
+.dusk-stage--app > .dusk-win {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.dusk-titlebar { background: var(--bar); }
+.dusk-thread {
+  background: var(--thread);
+  box-shadow: var(--glow-thread);
+}
+.dusk-brand { font-weight: var(--fw-medium); }
+.dusk-crumb { color: var(--ink-3); }
+.dusk-crumb b { color: var(--ink); font-weight: var(--fw-medium); }
+.dusk-crumb i { font-style: normal; }
+.dusk-clock {
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-s);
+}
+
+.dusk-side {
+  background: var(--glass-side);
+  border-right: 1px solid var(--lit-rule);
+}
+.dusk-side-foot {
+  border-top: 1px solid var(--lit-rule);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+.dusk-side-foot b { color: var(--ink-2); font-size: var(--fs-s); font-weight: var(--fw-medium); }
+
+.dusk-status {
+  background: var(--glass-side);
+  border-top: 1px solid var(--lit-rule);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+}
+.dusk-status > span + span { border-left: 1px solid var(--hair); }
+.dusk-status > .dusk-spacer + span { border-left: 0; }
+/* a lamp. It is always beside its word; the colour is never the only carrier. */
+.dusk-led {
+  background: var(--ink-3);
+  border-radius: var(--r-circle);
+}
+.dusk-led--ok      { background: var(--green); box-shadow: var(--glow-green); }
+.dusk-led--caution { background: var(--amber); box-shadow: var(--glow-amber); }
+.dusk-led--attn    { background: var(--red);   box-shadow: var(--glow-red); }
+
+.dusk-dots i {
+  background: var(--dot);
+  border-radius: var(--r-circle);
+}
+
+.dusk-disc {
+  background: var(--disc);
+  border-radius: var(--r-circle);
+  box-shadow: var(--shadow-disc);
+  color: var(--disc-ink);
+  font-weight: var(--fw-bold);
+}
+
+.dusk-who { text-align: center; }
+.dusk-who span { color: var(--ink-3); font-size: var(--fs-s); }
+
+.dusk-grp {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+}
+
+/* ---- row and icon square ------------------------------------------------------------------------
+   A row is unlit until it is the current one. Then it is lit: in gold, or in its own tone when the
+   row carries one (.dusk-row--teal). The icon square inside is a dark slot edged in its tone, and
+   it fills when its row is lit. A square outside a row fills with .dusk-ico--solid. The square reads
+   --ico-edge and --ico-ink from its row or from its own tone class, and falls back to grey; it
+   declares neither itself, or it would hide the row's. */
+
+.dusk-row {
+  --row-neon: var(--neon-ctl);
+  --row-wash: var(--wash-2);
+  color: var(--ink-2);
+  border-radius: var(--r-control);
+  text-decoration: none;
+  transition: background-color var(--m-confirm) var(--ease), box-shadow var(--m-confirm) var(--ease);
+}
+.dusk-row b { color: var(--ink); font-weight: var(--fw-medium); line-height: 1.2; }
+.dusk-row small {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  line-height: 1.25;
+}
+.dusk-row:hover { background: var(--wash-1); }
+.dusk-row--on,
+.dusk-row--on:hover,
+.dusk-row[aria-current="page"],
+.dusk-row[aria-current="page"]:hover {
+  background: var(--row-wash);
+  color: var(--ink);
+  box-shadow: var(--row-neon);
+}
+/* ink-3 is not measured on a lit row, ink-2 is */
+.dusk-row--on small,
+.dusk-row[aria-current="page"] small { color: var(--ink-2); }
+
+.dusk-ico {
+  background: var(--well);
+  border: 1px solid var(--ico-edge, var(--tile-grey-hi));
+  border-radius: var(--r-icon);
+  color: var(--ico-ink, var(--grey-ink));
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-s);
+  line-height: 1;
+}
+.dusk-ico svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dusk-ico--red,
+.dusk-row--red { --ico-edge: var(--tile-red-hi); --ico-ink: var(--red-ink); }
+.dusk-ico--amber,
+.dusk-row--amber { --ico-edge: var(--tile-amber-hi); --ico-ink: var(--amber-ink); }
+.dusk-ico--green,
+.dusk-row--green { --ico-edge: var(--tile-green-hi); --ico-ink: var(--green-ink); }
+.dusk-ico--down,
+.dusk-row--down { --ico-edge: var(--tile-down-hi); --ico-ink: var(--down-ink); }
+.dusk-ico--teal,
+.dusk-row--teal { --ico-edge: var(--tile-teal-hi); --ico-ink: var(--teal-ink); }
+.dusk-ico--blue,
+.dusk-row--blue { --ico-edge: var(--tile-blue-hi); --ico-ink: var(--blue-ink); }
+.dusk-ico--violet,
+.dusk-row--violet { --ico-edge: var(--tile-violet-hi); --ico-ink: var(--violet-ink); }
+.dusk-ico--grey,
+.dusk-row--grey { --ico-edge: var(--tile-grey-hi); --ico-ink: var(--grey-ink); }
+.dusk-row--red { --row-neon: var(--rowneon-red); --row-wash: var(--rowwash-red); }
+.dusk-row--amber { --row-neon: var(--rowneon-amber); --row-wash: var(--rowwash-amber); }
+.dusk-row--green { --row-neon: var(--rowneon-green); --row-wash: var(--rowwash-green); }
+.dusk-row--down { --row-neon: var(--rowneon-down); --row-wash: var(--rowwash-down); }
+.dusk-row--teal { --row-neon: var(--rowneon-teal); --row-wash: var(--rowwash-teal); }
+.dusk-row--blue { --row-neon: var(--rowneon-blue); --row-wash: var(--rowwash-blue); }
+.dusk-row--violet { --row-neon: var(--rowneon-violet); --row-wash: var(--rowwash-violet); }
+.dusk-row--grey { --row-neon: var(--rowneon-grey); --row-wash: var(--rowwash-grey); }
+/* filled: the white glyph on a cap's light end reads at 4.5 or more */
+.dusk-ico--solid,
+.dusk-row--on .dusk-ico,
+.dusk-row[aria-current="page"] .dusk-ico {
+  background: var(--ico-edge, var(--tile-grey-hi));
+  color: var(--on-tile);
+}
+
+.dusk-chev { color: var(--ink-3); font-size: var(--fs-data); }
+
+/* ---- header, button, segments, badge, flag ---------------------------------------------------- */
+
+.dusk-title {
+  font-size: var(--fs-title);
+  letter-spacing: var(--track-title);
+}
+.dusk-lede { color: var(--ink-2); }
+
+.dusk-btn {
+  border: 0;
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+  border-radius: var(--r-control);
+  box-shadow: var(--neon-ctl);
+  font-size: var(--fs-s);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--m-confirm) var(--ease), box-shadow var(--m-confirm) var(--ease);
+}
+.dusk-btn:hover { background: var(--btn-bg-hover); box-shadow: var(--neon-ctl-on); }
+.dusk-btn:active { background: var(--btn-bg-press); }
+.dusk-btn[disabled],
+.dusk-btn[aria-disabled="true"] {
+  background: var(--wash-1);
+  box-shadow: var(--ring-well);
+  color: var(--ink-2);
+  cursor: not-allowed;
+}
+.dusk-btn svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* a segmented choice: a sunk track, and the pressed segment is lit */
+.dusk-seg {
+  background: var(--well);
+  border-radius: var(--r-control);
+  box-shadow: var(--ring-well);
+}
+.dusk-seg button {
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  border-radius: var(--r-chip);
+  font-size: var(--fs-s);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: background-color var(--m-confirm) var(--ease), box-shadow var(--m-confirm) var(--ease);
+}
+.dusk-seg button:hover { background: var(--wash-1); }
+.dusk-seg button[aria-pressed="true"] {
+  background: var(--wash-2);
+  color: var(--lit);
+  box-shadow: var(--neon-ctl);
+}
+
+.dusk-badge {
+  background: var(--wash-2);
+  color: var(--lit);
+  border-radius: var(--r-control);
+  box-shadow: var(--neon-ctl);
+  font-size: var(--fs-s);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+}
+.dusk-badge svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dusk-eye {
+  background: var(--lit);
+  border-radius: var(--r-circle);
+}
+
+.dusk-flag {
+  border: 1px dashed var(--amber-ink);
+  border-radius: var(--r-control);
+  color: var(--amber-ink);
+  font-size: var(--fs-s);
+}
+.dusk-flag::before { content: "■\00a0"; content: "■\00a0" / ""; }
+
+.dusk-note { color: var(--ink-3); font-size: var(--fs-xs); }
+
+/* a count beside a title: a sunk chip with a lit figure */
+.dusk-count {
+  background: var(--well);
+  border: 1px solid var(--lit-rule);
+  border-radius: var(--r-chip);
+  color: var(--lit);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+}
+
+/* a rule with a name on it: the name, a line of text, and a lit line that fades */
+.dusk-rule { color: var(--ink-2); font-size: var(--fs-s); }
+.dusk-rule b {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+}
+.dusk-rule::after {
+  content: "";
+  background: var(--rule-fade);
+}
+
+/* ---- the strip: a row of labelled readings ---------------------------------------------------- */
+
+.dusk-strip {
+  background: var(--panel-fill);
+  border-radius: var(--r-tile);
+  box-shadow: var(--neon);
+}
+.dusk-cell + .dusk-cell { border-left: 1px solid var(--lit-rule); }
+.dusk-cell small {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+}
+.dusk-cell { color: var(--ink); }
+.dusk-cell b {
+  font-family: var(--font-mono);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  line-height: 1.2;
+}
+.dusk-cell--key {
+  background: var(--wash-2);
+  border-top-left-radius: var(--r-tile);
+  border-bottom-left-radius: var(--r-tile);
+}
+.dusk-cell--key b {
+  color: var(--lit);
+  font-family: var(--font-ui);
+  font-size: var(--fs-l);
+  font-weight: var(--fw-bold);
+}
+
+/* ---- bar and legend --------------------------------------------------------------------------- */
+
+.dusk-bar {
+  background: var(--well);
+  border-radius: var(--r-bar);
+  box-shadow: var(--ring-well);
+  overflow: hidden;
+}
+.dusk-fill--red   { background: var(--red); }
+.dusk-fill--amber   { background: var(--amber); }
+.dusk-fill--green   { background: var(--green); }
+.dusk-fill--down   { background: var(--down); }
+.dusk-fill--teal   { background: var(--teal); }
+.dusk-fill--blue   { background: var(--blue); }
+.dusk-fill--violet   { background: var(--violet); }
+.dusk-fill--grey   { background: var(--grey); }
+.dusk-fill--idle   { background: var(--idle); }
+
+.dusk-legend { color: var(--ink-2); font-size: var(--fs-s); }
+.dusk-legend i { border-radius: var(--r-circle); }
+.dusk-legend b {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-weight: var(--fw-medium);
+}
+
+/* ---- tile ----------------------------------------------------------------------------------------
+   A dark body under a coloured cap, lit in the tile's own colour. Static state first: on hover and
+   focus the edge brightens from --neon-<tone> to --neon-<tone>-on. The lift is added on top of it,
+   so under reduced motion the hover is still visible with no movement. */
+
+.dusk-tile {
+  --tile-neon: var(--neon);
+  --tile-neon-on: var(--neon-on);
+  --tile-cap: var(--tile-grey);
+  --tile-cap-edge: var(--cap-grey);
+  --tile-tint: var(--tint-grey);
+  --tile-fill: var(--grey);
+  --tile-ink: var(--grey-ink);
+  --tile-glow: var(--glow-grey);
+  --tile-halo: var(--halo-grey);
+  color: var(--ink);
+  background-color: var(--panel-hi);
+  background-image: var(--tile-tint), var(--panel-fill);
+  border-radius: var(--r-tile);
+  box-shadow: var(--tile-neon);
+  text-decoration: none;
+  overflow: hidden;
+  transition: transform var(--m-confirm) var(--ease), box-shadow var(--m-confirm) var(--ease);
+}
+.dusk-tile:hover,
+.dusk-tile:focus-within {
+  box-shadow: var(--tile-neon-on);
+  transform: translateY(var(--lift));
+}
+.dusk-tile--red {
+  --tile-neon: var(--neon-red); --tile-neon-on: var(--neon-red-on);
+  --tile-cap: var(--tile-red); --tile-cap-edge: var(--cap-red); --tile-tint: var(--tint-red);
+  --tile-fill: var(--red); --tile-ink: var(--red-ink); --tile-glow: var(--glow-red); --tile-halo: var(--halo-red);
+}
+.dusk-tile--amber {
+  --tile-neon: var(--neon-amber); --tile-neon-on: var(--neon-amber-on);
+  --tile-cap: var(--tile-amber); --tile-cap-edge: var(--cap-amber); --tile-tint: var(--tint-amber);
+  --tile-fill: var(--amber); --tile-ink: var(--amber-ink); --tile-glow: var(--glow-amber); --tile-halo: var(--halo-amber);
+}
+.dusk-tile--green {
+  --tile-neon: var(--neon-green); --tile-neon-on: var(--neon-green-on);
+  --tile-cap: var(--tile-green); --tile-cap-edge: var(--cap-green); --tile-tint: var(--tint-green);
+  --tile-fill: var(--green); --tile-ink: var(--green-ink); --tile-glow: var(--glow-green); --tile-halo: var(--halo-green);
+}
+.dusk-tile--down {
+  --tile-neon: var(--neon-down); --tile-neon-on: var(--neon-down-on);
+  --tile-cap: var(--tile-down); --tile-cap-edge: var(--cap-down); --tile-tint: var(--tint-down);
+  --tile-fill: var(--down); --tile-ink: var(--down-ink); --tile-glow: var(--glow-down); --tile-halo: var(--halo-down);
+}
+.dusk-tile--teal {
+  --tile-neon: var(--neon-teal); --tile-neon-on: var(--neon-teal-on);
+  --tile-cap: var(--tile-teal); --tile-cap-edge: var(--cap-teal); --tile-tint: var(--tint-teal);
+  --tile-fill: var(--teal); --tile-ink: var(--teal-ink); --tile-glow: var(--glow-teal); --tile-halo: var(--halo-teal);
+}
+.dusk-tile--blue {
+  --tile-neon: var(--neon-blue); --tile-neon-on: var(--neon-blue-on);
+  --tile-cap: var(--tile-blue); --tile-cap-edge: var(--cap-blue); --tile-tint: var(--tint-blue);
+  --tile-fill: var(--blue); --tile-ink: var(--blue-ink); --tile-glow: var(--glow-blue); --tile-halo: var(--halo-blue);
+}
+.dusk-tile--violet {
+  --tile-neon: var(--neon-violet); --tile-neon-on: var(--neon-violet-on);
+  --tile-cap: var(--tile-violet); --tile-cap-edge: var(--cap-violet); --tile-tint: var(--tint-violet);
+  --tile-fill: var(--violet); --tile-ink: var(--violet-ink); --tile-glow: var(--glow-violet); --tile-halo: var(--halo-violet);
+}
+.dusk-tile--grey {
+  --tile-neon: var(--neon-grey); --tile-neon-on: var(--neon-grey-on);
+  --tile-cap: var(--tile-grey); --tile-cap-edge: var(--cap-grey); --tile-tint: var(--tint-grey);
+  --tile-fill: var(--grey); --tile-ink: var(--grey-ink); --tile-glow: var(--glow-grey); --tile-halo: var(--halo-grey);
+}
+
+.dusk-tile-cap {
+  background: var(--tile-cap);
+  border-bottom: 1px solid var(--tile-ink);
+  box-shadow: var(--tile-cap-edge);
+  color: var(--on-tile);
+}
+/* the icon square on a cap is a sunk dark square: tests/skin05-contrast.mjs measures the white glyph on it over both cap ends */
+.dusk-tile-cap .dusk-ico {
+  background: var(--tile-glyph);
+  border: 0;
+  color: var(--on-tile);
+}
+.dusk-tile-lab {
+  font-size: var(--fs-s);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dusk-tile-chev { color: var(--on-tile); }
+.dusk-tile-num {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-num);
+  line-height: var(--lh-tight);
+  text-shadow: var(--tile-halo);
+}
+.dusk-tile-num small {
+  color: var(--ink-3);
+  font-size: var(--fs-data);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0;
+  text-shadow: none;
+}
+.dusk-tile-tag {
+  background: var(--well);
+  border: 1px solid var(--hair-2);
+  border-radius: var(--r-chip);
+  color: var(--tile-ink);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  text-shadow: none;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.dusk-tile-sub { color: var(--ink-2); font-size: var(--fs-s); line-height: 1.35; }
+.dusk-tile-sub i { color: var(--tile-ink); font-style: normal; }
+/* the sparkline: an area in the tile's fill, and a lit line over it */
+.dusk-spark path { fill: var(--tile-fill); fill-opacity: var(--tile-spark); stroke: none; }
+.dusk-spark .dusk-spark-line {
+  fill: none;
+  stroke: var(--tile-ink);
+  stroke-width: var(--spark-w);
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(var(--tile-glow));
+}
+
+/* ---- panel, table, feed ----------------------------------------------------------------------- */
+
+.dusk-panel {
+  background: var(--panel-fill);
+  border-radius: var(--r-tile);
+  box-shadow: var(--neon);
+}
+.dusk-panel-head {
+  background: var(--head);
+  border-bottom: 1px solid var(--lit-rule);
+  border-top-left-radius: var(--r-tile);
+  border-top-right-radius: var(--r-tile);
+}
+.dusk-panel-name {
+  color: var(--ink);
+  font-size: var(--fs-data);
+  font-weight: var(--fw-medium);
+}
+.dusk-panel-sub { color: var(--ink-3); font-size: var(--fs-s); }
+/* the title of a panel that has no head bar */
+.dusk-panel-title {
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+}
+
+.dusk-table {
+  border-collapse: collapse;
+  font-size: var(--fs-data);
+}
+.dusk-table th,
+.dusk-table td { overflow-wrap: anywhere; }
+/* a column head and a figure stay on one line; only a cell of words may wrap */
+.dusk-table th,
+.dusk-table .dusk-r,
+.dusk-table td:first-child { white-space: nowrap; overflow-wrap: normal; }
+.dusk-table th {
+  background: var(--thead);
+  border-bottom: 1px solid var(--lit-rule);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+}
+.dusk-table td { border-top: 1px solid var(--hair); color: var(--ink-2); }
+.dusk-table tbody tr:first-child td { border-top: 0; }
+.dusk-table th + th,
+.dusk-table td + td { border-left: 1px solid var(--hair); }
+.dusk-table tbody tr:nth-child(even) td { background: var(--zebra); }
+.dusk-table .dusk-r { text-align: right; font-family: var(--font-mono); }
+.dusk-table td:first-child { font-family: var(--font-mono); font-weight: var(--fw-medium); }
+.dusk-table .dusk-ask td:first-child { color: var(--down-ink); }
+.dusk-table .dusk-bid td:first-child { color: var(--up-ink); }
+.dusk-table tbody tr.dusk-hot td {
+  background: var(--wash-4);
+  box-shadow: var(--neon-row);
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+.dusk-table .dusk-mid td { border-top: 2px solid var(--hair-2); }
+/* a measure drawn in a cell, beside its number */
+.dusk-heat { border-radius: var(--r-bar); background: var(--grey); }
+.dusk-ask .dusk-heat { background: var(--down); box-shadow: var(--glow-down); }
+.dusk-bid .dusk-heat { background: var(--up); box-shadow: var(--glow-green); }
+
+.dusk-feed li { border-top: 1px solid var(--hair); color: var(--ink-2); font-size: var(--fs-data); }
+.dusk-feed li:first-child { border-top: 0; }
+.dusk-feed time { color: var(--ink-3); font-family: var(--font-mono); font-size: var(--fs-s); }
+.dusk-feed em {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-weight: var(--fw-medium);
+}
+
+/* ---- state words and direction ink ------------------------------------------------------------
+   `.dusk-state` writes its own glyph, so the markup carries the word only. `.dusk-up` and `.dusk-down`
+   are colour only: the sign and the arrow stay in the text (Dyad rule, kept). */
+
+.dusk-state { font-weight: var(--fw-medium); }
+.dusk-state--ok::before      { content: "✔\00a0"; content: "✔\00a0" / ""; }
+.dusk-state--up::before      { content: "▲\00a0"; content: "▲\00a0" / ""; }
+.dusk-state--down::before    { content: "▼\00a0"; content: "▼\00a0" / ""; }
+.dusk-state--caution::before { content: "■\00a0"; content: "■\00a0" / ""; }
+.dusk-state--attn::before    { content: "?\00a0"; content: "?\00a0" / ""; }
+.dusk-state--hold::before    { content: "‖\00a0"; content: "‖\00a0" / ""; }
+.dusk-state--info::before    { content: "●\00a0"; content: "●\00a0" / ""; }
+.dusk-state--ok,
+.dusk-state--up,
+.dusk-up      { color: var(--up-ink); }
+.dusk-state--down,
+.dusk-down    { color: var(--down-ink); }
+.dusk-state--caution { color: var(--amber-ink); }
+.dusk-state--attn    { color: var(--attn-ink); }
+.dusk-state--info    { color: var(--teal-ink); }
+.dusk-state--hold    { color: var(--ink-2); }
+
+/* ---- breakpoint: the sidebar becomes a strip above the content -------------------------------- */
+
+@media (max-width: 760px) {
+  .dusk-side {
+    border-right: 0;
+    border-bottom: 1px solid var(--lit-rule);
+  }
+
+  /* WEB-14: the stacked table (layout in dusk.compose.css). The row is the separator now, not the cell,
+     and each labelled cell writes its column label from data-label. */
+  .dusk-table td,
+  .dusk-table .dusk-mid td { border-top: 0; }
+  .dusk-table td + td { border-left: 0; }
+  .dusk-table tbody tr { border-top: 1px solid var(--hair); }
+  .dusk-table tbody tr:first-child { border-top: 0; }
+  .dusk-table tbody tr.dusk-mid { border-top: 2px solid var(--hair-2); }
+  /* a stacked value reads from the label, left; a right-aligned number would sit apart from it */
+  .dusk-table .dusk-r { text-align: left; }
+  .dusk-table td[data-label]::before {
+    content: attr(data-label);
+    color: var(--ink-3);
+    font-family: var(--font-ui);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-medium);
+  }
+}
+
+/* ---- process parts: Tier 1 states (CR-2026-10-22-LIVING, B2) ------------------------------------
+   The station the prompt has reached brightens its lit edge and stays so (.dusk-station--done); the
+   one it is at now also wears a ring on its disc (.dusk-station--here). It is its own
+   reduced-motion form: with motion off the transition is cut and the held state is simply there.
+   The parts themselves live in dusk.process.css (W-029); their motion lives here, like every
+   Tier 1 state. */
+.dusk-station > .dusk-panel { transition: box-shadow var(--m-confirm) var(--ease); }
+.dusk-station--done > .dusk-panel,
+.dusk-station--here > .dusk-panel { box-shadow: var(--neon-on); }
+.dusk-station > .dusk-disc { transition: box-shadow var(--m-confirm) var(--ease); }
+.dusk-station--here > .dusk-disc { box-shadow: var(--shadow-disc-ring); }
+
+/* ---- reduced motion: Tier 1 -------------------------------------------------------------------
+   Every transition stops and the lift stops. The brighter edge, the washes and the focus ring
+   stay, so every state is still distinguishable with no movement. A glow is a still shadow. */
+
+@media (prefers-reduced-motion: reduce) {
+  .dusk-tile,
+  .dusk-btn,
+  .dusk-seg button,
+  .dusk-row,
+  .dusk-station > .dusk-panel,
+  .dusk-station > .dusk-disc { transition: none; }
+  .dusk-tile:hover,
+  .dusk-tile:focus-within { transform: none; }
+}

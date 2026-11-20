@@ -1,0 +1,166 @@
+/* dusk.process.css — layer 6, the process parts (CR-2026-10-22-PROCESS, chunk 1).
+   Six parts and nothing else: track, station, exit, lanes, lane, lanes-list. This layer owns both
+   the skin and the layout of these six, so a page copies one file for a process and the split
+   between components and compose stays intact for every other part (W-029). No transition, no
+   transform, no keyframes: a process is read, not watched. Every value is a token. */
+
+/* ---- track and station ------------------------------------------------------------------------
+   A vertical spine with a disc per station. The station body is a .dusk-panel the page supplies. */
+.dusk-track {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dusk-station {
+  display: grid;
+  grid-template-columns: var(--disc-size-sm) 1fr;
+  gap: var(--gap);
+  position: relative;
+  padding-bottom: var(--gap);
+  min-width: 0;
+}
+.dusk-station::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--disc-size-sm) / 2 - var(--track-w) / 2);
+  top: var(--disc-size-sm);
+  bottom: 0;
+  width: var(--track-w);
+  background: var(--hair-2);
+}
+.dusk-station:last-child::before { display: none; }
+.dusk-station > .dusk-disc {
+  width: var(--disc-size-sm);
+  height: var(--disc-size-sm);
+  font-size: var(--fs-base);
+  line-height: var(--disc-size-sm);
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.dusk-station > .dusk-panel { min-width: 0; }
+.dusk-station > .dusk-panel > .dusk-note { margin: var(--sp-2) 0 0; }
+.dusk-station-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+  align-items: baseline;
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-l);
+  font-weight: var(--fw-medium);
+}
+.dusk-station-title .dusk-who {
+  color: var(--amber-ink);
+  font-size: var(--fs-s);
+  font-weight: inherit;
+}
+
+/* ---- exits: where a station can send the prompt --------------------------------------------
+   A chip with a state fill on its left edge. The direction is text, so colour is never the only
+   carrier (SKIN-05). */
+.dusk-exits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin: var(--sp-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.dusk-exit {
+  display: inline-block;
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--hair);
+  border-left: 3px solid var(--grey);
+  border-radius: var(--r-control);
+  background: var(--wash-1);
+  color: var(--ink-2);
+  font-size: var(--fs-s);
+  min-width: 0;
+}
+.dusk-exit b { color: var(--ink); font-weight: var(--fw-medium); }
+.dusk-exit--refuse  { border-left-color: var(--red); }
+.dusk-exit--ask     { border-left-color: var(--amber); }
+.dusk-exit--owner   { border-left-color: var(--down); }
+.dusk-exit--ok      { border-left-color: var(--green); }
+.dusk-exit--press   { border-left-color: var(--wall-4); }
+.dusk-exit--words   { border-left-color: var(--grey); }
+
+/* ---- lanes: rows are loops, columns are stations ----------------------------------------------
+   The page sets --lanes to the station count. A bar spans the columns its loop crosses with
+   grid-column on the element. Below the breakpoint the grid hides and the list shows (WEB-14). */
+.dusk-lanes {
+  display: grid;
+  grid-template-columns: var(--label-w-lanes) repeat(var(--lanes), 1fr);
+  gap: var(--sp-2) var(--sp-1);
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-data);
+}
+.dusk-lanes-head {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-label);
+  text-align: center;
+}
+.dusk-lanes-head:first-child { text-align: left; }
+.dusk-lanes-label { color: var(--ink-2); padding-right: var(--sp-2); min-width: 0; }
+.dusk-lanes-label b { display: block; color: var(--ink); font-weight: var(--fw-medium); }
+.dusk-lane {
+  height: var(--lane-h);
+  border-radius: var(--r-bar);
+  background: var(--grey);
+  position: relative;
+  min-width: 0;
+}
+.dusk-lane::after {
+  content: "◀";
+  position: absolute;
+  left: var(--sp-1);
+  top: 0;
+  line-height: var(--lane-h);
+  font-size: var(--fs-xs);
+  color: var(--on-tile);
+}
+.dusk-lane--fwd::after { content: "▶"; left: auto; right: var(--sp-1); }
+.dusk-lane--refuse { background: var(--red); }
+.dusk-lane--ask    { background: var(--amber); }
+.dusk-lane--owner  { background: var(--down); }
+.dusk-lane--ok     { background: var(--green); }
+.dusk-lane--press  { background: var(--wall-4); }
+.dusk-lane--press::after { color: var(--disc-ink); }
+.dusk-lanes-list { display: none; margin: 0; padding-left: var(--sp-7); color: var(--ink-3); font-size: var(--fs-data); }
+.dusk-lanes-list li { margin: var(--sp-1) 0; }
+.dusk-lanes-list b { color: var(--ink); font-weight: var(--fw-medium); }
+
+@media (max-width: 760px) {
+  .dusk-lanes { display: none; }
+  .dusk-lanes-list { display: block; }
+}
+
+/* ---- the traveller's mark (CR-2026-10-22-LIVING, A1) ------------------------------------------
+   Sits on the first disc; dusk.motion.css rides it down the track on the OPEN tier. Here only its
+   skin and place. Under reduced motion the mark is hidden: the current station's ring (.dusk-station--here,
+   dusk.components.css) is the static state, and a mark that cannot move would point at the wrong
+   station. */
+.dusk-track { position: relative; }
+.dusk-track > .dusk-traveller {
+  position: absolute;
+  z-index: 2;
+  left: calc(var(--disc-size-sm) / 2 - var(--traveller-size) / 2);
+  top: calc(var(--disc-size-sm) / 2 - var(--traveller-size) / 2);
+  width: var(--traveller-size);
+  height: var(--traveller-size);
+  border-radius: var(--r-circle);
+  background: var(--amber-ink);
+  box-shadow: var(--shadow-disc);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dusk-track > .dusk-traveller { visibility: hidden; }
+}

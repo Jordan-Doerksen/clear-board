@@ -1,0 +1,20 @@
+{
+  "skin": "dusk",
+  "version": "0.2.0",
+  "name": "the lit panel",
+  "first_line_of_tokens": "/* dusk 0.2.0 — the control panel */",
+  "source": "the owner's dusk repository, branch main, folder styles/",
+  "commit": "1f7f971",
+  "commit_full": "1f7f9716320a33f71aa38da660155343515a92a9",
+  "copied": "2026-11-20",
+  "copy_is": "styles/dusk/ beside this file: the whole folder, never edited (Dusk D-007). This lock sits beside the folder, not in it, so the folder holds exactly the six files of the source.",
+  "hashed": "sha256 over the bytes on disk (the files are LF)",
+  "files": {
+    "dusk.base.css": "2db13944d0268888b0362a4c42c79c30a27918edfbd4615eb84f22a96ccaa4d6",
+    "dusk.components.css": "885291e1c06ce89407aa00b15e3174e2b3a99062ead6bf1f1da32838d7269ea5",
+    "dusk.compose.css": "9cd84e12068b195503d68841c66ec870ec266ea0036ac10a32149db5b01e6bde",
+    "dusk.motion.css": "5e381e8e9e084b3b74e90bea504bdc62de04c8e217373d27f412c66350a5ee58",
+    "dusk.process.css": "f09bd19d58cc2f7af02014b64b50e368d8f3dfa661db38a6c0bc16cfe5c0be0f",
+    "dusk.tokens.css": "bffdea6c48e5c8f983498c2e8c724ca2eff7c87c93f3db4b492118812971fe6c"
+  }
+}

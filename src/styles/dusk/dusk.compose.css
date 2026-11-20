@@ -1,0 +1,426 @@
+/* dusk.compose.css - layer 4 of 5. Where the parts sit.
+   Owns display, grid, flex, gap, padding, margin, size, position and the breakpoint.
+   Does not own colour, background, border, corner, shadow or type: those are dusk.components.css.
+   The one raw length that cannot be a token is the width in a media query (a custom property cannot
+   be read there). It is written once, here. */
+
+/* WEB-14. The page gutter is the one margin: --gutter on all four window edges, and nothing else.
+   The stage has no max-width and no auto margins, so it spans the window minus the gutter at every
+   width. A text measure caps a text column below (--measure, in ch), never the page.
+   A page that is one whole window puts .dusk-stage--app on its stage: the stage takes the gutter
+   back, and the window fills the viewport edge to edge, like an application. */
+body { padding: var(--gutter); }
+
+.dusk-stage { margin: 0; }
+.dusk-stage--app { margin: calc(-1 * var(--gutter)); }
+.dusk-stage--app > .dusk-win { min-height: 100vh; }
+
+.dusk-lede,
+.dusk-note,
+.dusk-measure { max-width: var(--measure); }
+
+.dusk-pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--pair-min)), 1fr));
+  gap: var(--sp-7);
+}
+
+/* ---- window ---------------------------------------------------------------------------------
+   Two columns: the sidebar and the content. A title bar, its thread and a status bar span both.
+   The content row takes the spare height, so the status bar sits on the window's bottom edge. */
+
+.dusk-win {
+  display: grid;
+  grid-template-columns: var(--side-w) minmax(0, 1fr);
+  grid-auto-rows: auto;
+  align-content: start;
+  min-width: 0;
+}
+.dusk-titlebar,
+.dusk-thread,
+.dusk-status { grid-column: 1 / -1; }
+.dusk-stage--app > .dusk-win { grid-template-rows: auto auto 1fr auto; }
+
+.dusk-titlebar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--gap);
+  min-height: var(--bar-h-title);
+  padding: var(--sp-2) var(--gap);
+}
+.dusk-titlebar .dusk-dots { margin: 0; }
+.dusk-titlebar .dusk-disc {
+  width: var(--disc-size-xs);
+  height: var(--disc-size-xs);
+  margin: 0;
+}
+.dusk-titlebar .dusk-flag { margin-top: 0; }
+.dusk-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.dusk-crumb i { margin: 0 var(--sp-1); }
+.dusk-spacer { flex: 1 1 0; }
+.dusk-thread { height: var(--thread-h); }
+
+.dusk-side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--gap) var(--sp-3);
+}
+.dusk-side-foot {
+  display: grid;
+  gap: 2px;
+  margin-top: auto;
+  padding: var(--sp-4) var(--sp-3) 0;
+}
+
+.dusk-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: var(--status-h);
+}
+.dusk-status > span { padding: var(--sp-1) var(--gap); }
+.dusk-status > .dusk-spacer { padding: 0; }
+.dusk-led {
+  display: inline-block;
+  width: var(--led-size);
+  height: var(--led-size);
+  margin-right: var(--sp-2);
+}
+
+.dusk-dots {
+  display: flex;
+  gap: var(--sp-2);
+  margin: 0 0 var(--gap) var(--sp-1);
+}
+.dusk-dots i {
+  display: block;
+  width: var(--dot-size);
+  height: var(--dot-size);
+}
+
+.dusk-disc {
+  display: grid;
+  place-items: center;
+  width: var(--disc-size);
+  height: var(--disc-size);
+  margin: var(--sp-1) auto var(--sp-3);
+}
+.dusk-who { margin-bottom: var(--gap); }
+.dusk-who b,
+.dusk-row b,
+.dusk-row small { display: block; }
+.dusk-grp { margin: var(--sp-5) var(--sp-3) var(--sp-1); }
+
+.dusk-rows {
+  display: grid;
+  gap: 2px;
+}
+.dusk-row {
+  display: grid;
+  grid-template-columns: var(--ico-size) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: var(--head-h);
+  padding: var(--sp-1) var(--sp-3);
+}
+.dusk-ico {
+  display: grid;
+  place-items: center;
+  width: var(--ico-size);
+  height: var(--ico-size);
+}
+.dusk-ico svg {
+  width: var(--gap);
+  height: var(--gap);
+}
+
+.dusk-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+  padding: var(--gap);
+}
+
+.dusk-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--sp-5);
+}
+.dusk-lede { margin-top: 2px; }
+
+.dusk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--row-h);
+  padding: var(--sp-2) var(--gap);
+}
+.dusk-btn svg {
+  width: var(--gap);
+  height: var(--gap);
+}
+.dusk-seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+}
+.dusk-seg button {
+  min-height: var(--ico-size);
+  padding: 0 var(--sp-4);
+}
+.dusk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--ico-size);
+  padding: var(--sp-1) var(--sp-4);
+}
+.dusk-badge svg {
+  width: var(--gap);
+  height: var(--gap);
+}
+.dusk-eye {
+  display: inline-block;
+  width: var(--legend-dot);
+  height: var(--legend-dot);
+}
+.dusk-flag {
+  display: inline-block;
+  margin-top: var(--sp-2);
+  padding: 3px var(--sp-3);
+}
+.dusk-note { display: inline-block; }
+.dusk-count { padding: 1px var(--sp-2); }
+
+.dusk-rule {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--gap);
+  margin: 0;
+}
+.dusk-rule::after {
+  flex: 1 1 var(--sp-8);
+  height: 1px;
+}
+
+/* ---- the strip -------------------------------------------------------------------------------- */
+
+.dusk-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  min-width: 0;
+}
+.dusk-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  padding: var(--sp-2) var(--gap);
+}
+.dusk-strip-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-left: auto;
+  padding: var(--sp-2) var(--sp-4);
+}
+
+/* ---- bar and legend --------------------------------------------------------------------------- */
+
+.dusk-bar {
+  display: flex;
+  height: var(--bar-h);
+}
+.dusk-bar > .dusk-fill {
+  display: block;
+  height: 100%;
+}
+
+.dusk-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-7);
+  margin-top: var(--sp-3);
+}
+.dusk-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.dusk-legend i {
+  display: inline-block;
+  width: var(--legend-dot);
+  height: var(--legend-dot);
+}
+.dusk-legend b { margin-left: var(--sp-1); }
+
+/* ---- tiles ------------------------------------------------------------------------------------
+   One tile is a column: the cap, then the body. The body is the figure row (the figure, its unit,
+   and a tag pushed to the right), the line under it, and the sparkline held to the bottom edge. */
+
+.dusk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--tile-min)), 1fr));
+  gap: var(--sp-4);
+}
+
+.dusk-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: var(--tile-h);
+}
+.dusk-tile-cap {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: var(--cap-h);
+  padding: var(--sp-1) var(--sp-3) var(--sp-1) var(--sp-2);
+}
+.dusk-tile-cap .dusk-ico {
+  flex: none;
+  width: var(--ico-size-sm);
+  height: var(--ico-size-sm);
+}
+.dusk-tile-lab {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.dusk-tile-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  gap: 3px;
+  padding: var(--sp-3) var(--sp-4) 0;
+}
+.dusk-tile-num {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.dusk-tile-num small { margin-left: 3px; }
+.dusk-tile-tag {
+  align-self: center;
+  margin-left: auto;
+  padding: 1px var(--sp-2);
+}
+.dusk-tile-sub { min-height: var(--spark-h); }
+.dusk-spark {
+  display: block;
+  width: 100%;
+  height: var(--spark-h);
+  margin-top: auto;
+}
+
+/* ---- panel, table, feed ----------------------------------------------------------------------- */
+
+.dusk-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--panel-min)), 1fr));
+  gap: var(--gap);
+  align-items: start;
+}
+.dusk-stack {
+  display: grid;
+  gap: var(--gap);
+  min-width: 0;
+}
+.dusk-panel {
+  min-width: 0;
+  padding: var(--sp-5) var(--gap);
+}
+/* a panel with a head bar: the head and the body carry the padding, the panel carries none */
+.dusk-panel--framed { padding: 0; }
+.dusk-panel-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-4);
+  min-height: var(--head-h);
+  padding: var(--sp-1) var(--sp-3) var(--sp-1) var(--gap);
+}
+.dusk-panel-name { margin: 0; }
+.dusk-panel-body { padding: var(--gap); }
+.dusk-panel-body--flush { padding: 0; }
+.dusk-panel-title { margin: 0 0 var(--sp-3); }
+
+.dusk-table { width: 100%; }
+.dusk-table th { padding: var(--sp-2) var(--gap); }
+.dusk-table td {
+  height: var(--row-h);
+  padding: var(--sp-1) var(--gap);
+}
+/* the column that holds a drawn measure takes a fixed share, so the bars have room */
+.dusk-table .dusk-col--bar { width: var(--bar-col); }
+.dusk-heat {
+  display: block;
+  height: var(--heat-h);
+  min-width: 2px;
+}
+
+.dusk-feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dusk-feed li {
+  display: grid;
+  grid-template-columns: 4.25rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--gap);
+  padding: var(--sp-2) var(--gap);
+}
+.dusk-panel:not(.dusk-panel--framed) .dusk-feed li { padding: var(--sp-2) 0; }
+
+/* ---- breakpoint ------------------------------------------------------------------------------- */
+
+@media (max-width: 760px) {
+  .dusk-win { grid-template-columns: minmax(0, 1fr); }
+  .dusk-stage--app > .dusk-win { grid-template-rows: none; }
+  .dusk-disc,
+  .dusk-who,
+  .dusk-grp,
+  .dusk-side-foot { display: none; }
+  .dusk-titlebar .dusk-disc { display: grid; }
+  .dusk-rows {
+    grid-template-columns: repeat(auto-fill, minmax(var(--chip-min), 1fr));
+  }
+  .dusk-strip-end { margin-left: 0; }
+  /* WEB-14: a table reflows. Each row becomes a stacked block; a cell with data-label shows its
+     column label (written by dusk.components.css) beside the value, and the header row steps aside.
+     The label text stays in the markup, in data-label. */
+  .dusk-table,
+  .dusk-table tbody,
+  .dusk-table tr,
+  .dusk-table th,
+  .dusk-table td,
+  .dusk-table caption { display: block; }
+  .dusk-table thead { display: none; }
+  .dusk-table tbody tr { padding: var(--sp-2) 0; }
+  .dusk-table td { height: auto; }
+  .dusk-table .dusk-col--bar { width: auto; }
+  .dusk-table td[data-label] {
+    display: grid;
+    grid-template-columns: var(--label-w) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  /* .dusk-opt still drops its column at this width; it needs the same weight as the rule above,
+     or the grid rule would bring the column back. */
+  .dusk-table td.dusk-opt,
+  .dusk-table th.dusk-opt { display: none; }
+}
