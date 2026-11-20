@@ -14,7 +14,11 @@
     "check:dusk": "node tools/dusk-lock-check.mjs --copy src/styles/dusk --expect 0.2.0 --app src",
     "check:colour": "node tools/colour-lint.mjs src index.html vite.config.ts public --tokens src/styles/dusk --tokens src/styles/clear-board.tokens.css --exclude src/core/signal.ts --exclude src/stations/yard/geometry.js --exclude src/stations/yard/model.js --exclude src/stations/yard/solver.js --exclude src/stations/yard/puzzles.js --exclude public/data --baseline tools/token-lint.baseline.json",
     "check:names": "node tools/name-check.mjs",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "test:unit": "node --import ./tests/ts-resolve.mjs --test \"tests/unit/**/*.test.ts\""
+  },
+  "engines": {
+    "node": ">=22.18 <23"
   },
   "dependencies": {
     "react": "^19.2.7",

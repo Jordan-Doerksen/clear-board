@@ -31,6 +31,7 @@ const STEPS = [
   { n: 4, name: 'check:names', script: 'check:names' },
   { n: 5, name: 'lint', script: 'lint', extra: `--max-warnings ${LINT_WARNING_LIMIT}` },
   { n: 6, name: 'typecheck', script: 'typecheck' },
+  { n: 7, name: 'test:unit', script: 'test:unit' },
   { n: 8, name: 'sr-vectors', command: 'node tools/sr-vectors.mjs' },
   { n: 9, name: 'solve', command: 'node tools/solve.mjs' },
   { n: 10, name: 'content-check', command: 'node tools/content-check.mjs' },
