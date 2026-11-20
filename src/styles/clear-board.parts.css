@@ -80,13 +80,13 @@
   background-image: linear-gradient(var(--wash-1), var(--wash-1));
   box-shadow: var(--neon-ctl);
 }
+.cb-opt[aria-pressed="true"]:not(:disabled) {
+  background-image: linear-gradient(var(--wash-2), var(--wash-2));
+  box-shadow: var(--neon-ctl);
+}
 .cb-opt:active:not(:disabled) {
   background-image: linear-gradient(var(--wash-2), var(--wash-2));
   box-shadow: var(--neon-ctl-on);
-}
-.cb-opt[aria-pressed="true"] {
-  background-image: linear-gradient(var(--wash-2), var(--wash-2));
-  box-shadow: var(--neon-ctl);
 }
 .cb-opt:disabled {
   background-color: var(--well);
@@ -498,6 +498,7 @@
   background-image: linear-gradient(var(--wash-1), var(--wash-1));
   box-shadow: var(--neon-ctl);
 }
+.cb-mark:active { background-image: linear-gradient(var(--wash-2), var(--wash-2)); }
 .cb-mark .dusk-led {
   width: 14px;
   height: 14px;
