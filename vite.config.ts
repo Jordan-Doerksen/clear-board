@@ -14,7 +14,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.svg', 'icons.svg'],
+      // The cache list comes from globPatterns alone. Without this option the plugin adds the
+      // manifest icon a second time.
+      includeManifestIcons: false,
       workbox: {
         // The four content files ARE the app. Workbox's default glob does NOT include .json,
         // which would have shipped a "works offline" app whose rulebook 404s offline.
