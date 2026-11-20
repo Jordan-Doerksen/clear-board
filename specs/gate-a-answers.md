@@ -23,7 +23,14 @@ is not an answer.
 
 ## Question 2 — phone (HIGH)
 
-Open.
+**Answer: full play on a phone.** The owner's word: "1" (option 1 of two).
+
+- The build is held to this: a learner can finish each of the 19 jobs on a phone 390 px wide.
+- What it adds, as the owner was told: the move controls stay in reach with no long scroll; a long
+  cut that goes on in a second line carries a clear mark; a browser test plays a job to a win at
+  phone width.
+- The owner was told before the pick: no real phone was tested, only an emulated phone; the 44 px
+  switch buttons hold down to a window of about 378 px, and a narrower phone needs a tighter layout.
 
 ## Question 3 — the app icon and the favicon's origin (MEDIUM)
 
