@@ -34,7 +34,19 @@ is not an answer.
 
 ## Question 3 — the app icon and the favicon's origin (MEDIUM)
 
-Open. Fact, checked: the present favicon is the Vite template logo, byte for byte.
+**Answer: icon C, the monogram.** The owner's word: "c".
+
+- The icon is the letter C drawn as a track line, holding one lit board. The files are
+  `specs/research/icon/icon-mark.svg` (the master) and `icon-mark-small.svg` (the 16 px form).
+- The favicon's origin is settled. Fact, checked: the present `public/favicon.svg` is the Vite
+  template logo, byte for byte (create-vite 9.3.4, `template-react-ts/public/favicon.svg`). It
+  leaves the app.
+- The owner was told before the pick: the icon uses a green light, marked "SME to confirm"; its
+  colours are copied Dusk token values, because an icon file cannot read a style sheet; only
+  Chromium rendered it; no phone launcher and no desktop taskbar was tested; no search for similar
+  marks was made.
+- Open, follows from this pick: the PNG set for the manifest and the desktop icon set. The desktop
+  set cannot be proved here, because the Windows build does not run here.
 
 ## Question 4 — the upgrade list (MEDIUM)
 
