@@ -43,6 +43,14 @@ html[data-contrast="1"] .yt-yard {
   --yt-car: var(--ground-0); --yt-car-edge: var(--ink);
   --yt-normal: var(--ink); --yt-tied: var(--ink); --yt-label: var(--ink);
 }
+/* forced colours (a Windows contrast theme): the palette points at system colours */
+@media (forced-colors: active) {
+  .yt-yard {
+    --yt-floor: Canvas; --yt-rail: CanvasText; --yt-rail-dim: GrayText; --yt-tick: CanvasText;
+    --yt-car: Canvas; --yt-car-edge: CanvasText; --yt-car-ink: CanvasText; --yt-eng: Canvas; --yt-eng-edge: Highlight;
+    --yt-normal: CanvasText; --yt-reverse: Highlight; --yt-tied: CanvasText; --yt-loose: CanvasText; --yt-label: CanvasText; --yt-focus: Highlight;
+  }
+}
 html[data-dys="1"] .yt-yard { --yt-font: "Atkinson Hyperlegible", Verdana, sans-serif; letter-spacing: 0.02em; }
 .yt-probe { position: absolute; visibility: hidden; pointer-events: none; width: 1rem; height: 1rem; left: 0; top: 0; }
 .yt-mirror { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; font-size: 0.8125rem; color: var(--ink-2); }
@@ -55,7 +63,7 @@ html[data-dys="1"] .yt-yard { --yt-font: "Atkinson Hyperlegible", Verdana, sans-
 .yt-rail { stroke: var(--yt-rail); stroke-width: 4; stroke-linecap: round; }
 .yt-rail--dim { stroke: var(--yt-rail-dim); stroke-width: 3; }
 .yt-tick { stroke: var(--yt-tick); stroke-width: 2; stroke-linecap: round; }
-.yt-sw { cursor: pointer; }
+.yt-sw[role="button"] { cursor: pointer; }
 .yt-hit { fill: none; pointer-events: all; stroke-width: 2; }
 .yt-sw:focus-visible { outline: none; }               /* the ring below replaces it: an outline on an SVG group follows its ink, not its target */
 .yt-sw:focus-visible .yt-hit { stroke: var(--yt-focus); }
@@ -71,6 +79,14 @@ html[data-dys="1"] .yt-yard { --yt-font: "Atkinson Hyperlegible", Verdana, sans-
 .yt-car--empty rect { fill: var(--yt-floor); }
 .yt-car--eng rect { fill: var(--yt-eng); stroke: var(--yt-eng-edge); stroke-width: 2; }
 .yt-svg .yt-car text { fill: var(--yt-car-ink); text-anchor: middle; }
+/* only with ?controls=html: the six native buttons over the SVG */
+.yt-over { position: absolute; inset: 0; pointer-events: none; }
+.yt-swb { position: absolute; pointer-events: auto; margin: 0; border: 0; padding: 0; background: none; border-radius: var(--r-control); cursor: pointer;
+  color: var(--yt-label); font: inherit; letter-spacing: inherit; display: flex; flex-direction: column; }
+.yt-swb--wide { align-items: flex-end; justify-content: center; padding-right: 38px; }
+.yt-swb--tall { align-items: center; justify-content: flex-start; padding-top: 4px; }
+.yt-swb .yt-swst { color: var(--yt-normal); }
+.yt-swb[data-state="reverse"] .yt-swst { color: var(--yt-reverse); }
 
 </style>
 </head>
@@ -278,11 +294,14 @@ const R = (() => {
   const el = (name, attrs, parent, textContent) => { const e = document.createElementNS(NS, name);
     for (const k in attrs) e.setAttribute(k, attrs[k]); if (textContent != null) e.textContent = textContent; if (parent) parent.appendChild(e); return e; };
   const n = (v) => +v.toFixed(2);
-  let svg, gStock, S, sw = [], tags = [];
+  // measurement switch: ?controls=html puts the six switch controls in HTML buttons laid over the SVG
+  const HTMLCTL = new URLSearchParams(location.search).get('controls') === 'html';
+  let svg, over, gStock, S, sw = [], tags = [];
   const pool = new Map();
 
   function init() {
-    svg = el('svg', { class: 'yt-svg', role: 'group', 'aria-label': 'Yard diagram' }, host);
+    svg = el('svg', HTMLCTL ? { class: 'yt-svg', 'aria-hidden': 'true' } : { class: 'yt-svg', role: 'group', 'aria-label': 'Yard diagram' }, host);
+    if (HTMLCTL) { over = document.createElement('div'); over.className = 'yt-over'; host.appendChild(over); }
     layout();
   }
   // static scenery: built once for a view, then left to the browser
@@ -298,17 +317,26 @@ const R = (() => {
       tags.push(el('text', { x: n(l.x), y: n(l.tagY), 'text-anchor': l.anchor }, back, ''));
     }
     gStock = el('g', { 'aria-hidden': 'true' }, svg);
+    if (over) over.textContent = '';
     S.switches.forEach((s, i) => {
-      const g = el('g', { class: 'yt-sw', role: 'button', tabindex: '0' }, svg);
-      el('rect', { class: 'yt-hit', x: n(s.box.x), y: n(s.box.y), width: n(s.box.w), height: n(s.box.h), rx: 6 }, g);
+      const g = el('g', HTMLCTL ? { class: 'yt-sw' } : { class: 'yt-sw', role: 'button', tabindex: '0' }, svg);
+      if (!HTMLCTL) el('rect', { class: 'yt-hit', x: n(s.box.x), y: n(s.box.y), width: n(s.box.w), height: n(s.box.h), rx: 6 }, g);
       const points = el('line', { class: 'yt-points', x1: n(s.c.x), y1: n(s.c.y) }, g);
       el('rect', { class: 'yt-dia', x: n(s.c.x - 6), y: n(s.c.y - 6), width: 12, height: 12, transform: 'rotate(45 ' + n(s.c.x) + ' ' + n(s.c.y) + ')' }, g);
-      const t = el('text', { x: n(s.words.x), y: n(s.words.y), 'text-anchor': s.words.anchor }, g);
-      el('tspan', { x: n(s.words.x), dy: '-0.6em' }, t, s.id);
-      const word = el('tspan', { class: 'yt-swst', x: n(s.words.x), dy: '1.2em' }, t, '');
-      g.addEventListener('click', () => line(i));
-      g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); line(i); } });
-      sw.push({ g, points, word, s });
+      let word, b = null;
+      if (HTMLCTL) {                            // a native button: the name, the word, the target and the focus ring are HTML
+        b = document.createElement('button'); b.type = 'button'; b.className = 'yt-swb yt-swb--' + V.mode;
+        Object.assign(b.style, { left: s.box.x.toFixed(1) + 'px', top: s.box.y.toFixed(1) + 'px', width: s.box.w.toFixed(1) + 'px', height: s.box.h.toFixed(1) + 'px' });
+        b.innerHTML = '<span>' + s.id + '</span><span class="dusk-sr"> switch, lined </span><span class="yt-swst"></span>';
+        b.addEventListener('click', () => line(i)); over.appendChild(b); word = b.lastChild;
+      } else {
+        const t = el('text', { x: n(s.words.x), y: n(s.words.y), 'text-anchor': s.words.anchor }, g);
+        el('tspan', { x: n(s.words.x), dy: '-0.6em' }, t, s.id);
+        word = el('tspan', { class: 'yt-swst', x: n(s.words.x), dy: '1.2em' }, t, '');
+        g.addEventListener('click', () => line(i));
+        g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); line(i); } });
+      }
+      sw.push({ g, b, points, word, s });
     });
   }
   // state that changes on an action, not on a frame
@@ -316,7 +344,7 @@ const R = (() => {
     for (const o of sw) {
       const rev = cur.lined[o.s.id] === 'reverse', to = rev ? o.s.reverseTo : o.s.normalTo;
       o.g.dataset.state = rev ? 'reverse' : 'normal';
-      o.g.setAttribute('aria-label', o.s.id + ' switch, lined ' + (rev ? 'reverse' : 'normal'));
+      if (o.b) o.b.dataset.state = o.g.dataset.state; else o.g.setAttribute('aria-label', o.s.id + ' switch, lined ' + (rev ? 'reverse' : 'normal'));
       o.points.setAttribute('x2', n(to.x)); o.points.setAttribute('y2', n(to.y));
       o.word.textContent = rev ? 'REVERSE' : 'NORMAL';
     }

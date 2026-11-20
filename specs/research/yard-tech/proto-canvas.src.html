@@ -43,6 +43,14 @@ html[data-contrast="1"] .yt-yard {
   --yt-car: var(--ground-0); --yt-car-edge: var(--ink);
   --yt-normal: var(--ink); --yt-tied: var(--ink); --yt-label: var(--ink);
 }
+/* forced colours (a Windows contrast theme): the palette points at system colours */
+@media (forced-colors: active) {
+  .yt-yard {
+    --yt-floor: Canvas; --yt-rail: CanvasText; --yt-rail-dim: GrayText; --yt-tick: CanvasText;
+    --yt-car: Canvas; --yt-car-edge: CanvasText; --yt-car-ink: CanvasText; --yt-eng: Canvas; --yt-eng-edge: Highlight;
+    --yt-normal: CanvasText; --yt-reverse: Highlight; --yt-tied: CanvasText; --yt-loose: CanvasText; --yt-label: CanvasText; --yt-focus: Highlight;
+  }
+}
 html[data-dys="1"] .yt-yard { --yt-font: "Atkinson Hyperlegible", Verdana, sans-serif; letter-spacing: 0.02em; }
 .yt-probe { position: absolute; visibility: hidden; pointer-events: none; width: 1rem; height: 1rem; left: 0; top: 0; }
 .yt-mirror { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; font-size: 0.8125rem; color: var(--ink-2); }
