@@ -22,6 +22,7 @@ const scripts = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).scr
 // command of the script.
 const STEPS = [
   { n: 1, name: 'check:frozen', script: 'check:frozen' },
+  { n: 4, name: 'check:names', script: 'check:names' },
   { n: 8, name: 'sr-vectors', command: 'node tools/sr-vectors.mjs' },
   { n: 9, name: 'solve', command: 'node tools/solve.mjs' },
   { n: 10, name: 'content-check', command: 'node tools/content-check.mjs' },

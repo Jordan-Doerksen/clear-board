@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "check": "node tools/check.mjs",
-    "check:frozen": "node tools/frozen-check.mjs"
+    "check:frozen": "node tools/frozen-check.mjs",
+    "check:names": "node tools/name-check.mjs"
   },
   "dependencies": {
     "react": "^19.2.7",

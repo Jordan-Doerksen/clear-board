@@ -1,0 +1,14 @@
+{
+  "note": "The allow file of the name check (tools/name-check.mjs). A build job does not edit this file. The closing commit of the G1 line removes each entry that no file needs. No entry is added to turn the gate green.",
+  "collisions": [
+    { "file": "src/index.css", "name": "--ink" },
+    { "file": "src/index.css", "name": "--focus" },
+    { "file": "src/stations/yardSim.js", "name": "--ink" }
+  ],
+  "legacy": {
+    "src/index.css": ["--bg", "--surface", "--surface-2", "--line", "--muted", "--clear", "--caution", "--stop", "--r", "--maxw", "--fs", "--space", "--font"],
+    "src/styles/clear-board.tokens.css": ["--bg", "--surface", "--surface-2", "--line", "--muted", "--clear", "--caution", "--stop", "--r", "--maxw", "--fs", "--space", "--font"],
+    "src/stations/yardSim.js": ["--bg", "--panel", "--panel2", "--line", "--dim", "--steel", "--cror", "--crorbg", "--si", "--sibg", "--good", "--bad"],
+    "src/stations/radioSim.js": ["--rbg", "--rcard", "--rcard2", "--rline", "--rink", "--rmuted", "--ryellow", "--rblue", "--rgreen", "--rorange"]
+  }
+}
