@@ -7,13 +7,13 @@
 // at its next view call with a TypeError, as it did before the split. A test for a missing
 // element would let that move run on. Do not add one.
 
-/** The tone of the banner. It is also the name of the class that the view adds. */
+/** The tone of the banner. The view adds the class `yd-` and the tone. */
 export type BannerTone = '' | 'ok' | 'bad' | 'win';
 
 /** The three numbers of the readout. */
 export interface ReadoutData { moves: number; par: number; joints: number }
 
-/** One rule chip. `kind` is `cror` or `si`: it comes from the puzzle data. */
+/** One rule chip. `kind` is `cror` or `si`: it comes from the puzzle data. The view adds the class `yd-` and the kind. */
 export interface RuleChip { kind: string; cite: string; label: string }
 
 /** One line of a switch list that is not verified yet. */
@@ -84,19 +84,19 @@ export interface YardView {
 // The body of the Yard page. The app has its own header, so this markup starts with a back button.
 const YARD_HTML = `
   <div class="yard-wrap">
-    <button class="back" data-go="">← Home</button>
+    <button class="yd-back" data-go="">← Home</button>
 
-    <div class="bar">
+    <div class="yd-bar">
       <select id="picker" title="Pick a job"></select>
-      <span class="spacer"></span>
-      <div class="readout" id="readout">Moves 0 / par 0 · Joints 0</div>
+      <span class="yd-spacer"></span>
+      <div class="yd-readout" id="readout">Moves 0 / par 0 · Joints 0</div>
     </div>
 
-    <div class="workorder" id="workorder"></div>
+    <div class="yd-workorder" id="workorder"></div>
 
-    <div class="yardframe" data-cb="yard-drawing"></div>
+    <div class="yd-yardframe" data-cb="yard-drawing"></div>
 
-    <div class="bar">
+    <div class="yd-bar">
       <select id="act" title="Action">
         <option value="pull">PULL</option>
         <option value="spot">SPOT</option>
@@ -104,38 +104,38 @@ const YARD_HTML = `
         <option value="secure">SECURE</option>
       </select>
       <select id="count" title="How many cars"></select>
-      <span style="color:var(--dim)">cars</span>
+      <span class="yd-unit">cars</span>
       <select id="track" title="Which track"></select>
-      <button class="go" id="work">Work it ▸</button>
+      <button class="yd-go" id="work">Work it ▸</button>
       <button id="optimal" title="Auto-line and play the fewest-moves line in slow motion">▶ Watch optimal</button>
       <button id="depart" title="Depart the assembled outbound out the lead" style="display:none">Depart ▸</button>
-      <span class="spacer"></span>
+      <span class="yd-spacer"></span>
       <button id="reset">Reset</button>
       <button id="mute" title="Sound">🔊</button>
     </div>
 
-    <div class="banner" id="msg"></div>
+    <div class="yd-banner" id="msg"></div>
 
-    <div class="legend">
+    <div class="yd-rules-legend">
       Rules in play —
-      <span class="k">CROR</span> = the national rulebook (applies everywhere) ·
-      <span class="s">S.I.</span> = a <em>special instruction</em>, specific to <em>this</em> yard — <strong>you must know your yard's.</strong>
+      <span class="yd-k">CROR</span> = the national rulebook (applies everywhere) ·
+      <span class="yd-s">S.I.</span> = a <em>special instruction</em>, specific to <em>this</em> yard — <strong>you must know your yard's.</strong>
     </div>
-    <div class="rules" id="rules"></div>
+    <div class="yd-rules" id="rules"></div>
 
-    <div style="margin:10px 0 4px; padding:10px 13px; border-left:3px solid var(--si); background:var(--sibg); border-radius:6px; font-size:13px;">
-      <strong style="color:var(--si)">What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span style="color:var(--dim)">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span>
+    <div class="yd-note">
+      <strong class="yd-note-head">What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span class="yd-note-more">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span>
     </div>
 
     <details>
       <summary>How to play & why these rules</summary>
       <p><strong>You are the conductor, not the engineer.</strong> Click a switch target to line it
-      (<span style="color:var(--si)">yellow</span> = lined into the track / diverging,
-      <span style="color:var(--good)">green</span> = normal, straight up the ladder). Then call a move:</p>
+      (<span class="yd-key-reverse">yellow</span> = lined into the track / diverging,
+      <span class="yd-key-normal">green</span> = normal, straight up the ladder). Then call a move:</p>
       <ul>
         <li><strong>PULL n from a track</strong> — back in, couple the near (throat) cut, pull <code>n</code> cars onto the lead.</li>
         <li><strong>SPOT n to a track</strong> — shove <code>n</code> cars in and leave them.</li>
-        <li><strong>KICK n to a track</strong> — shove and cut away; the cars coast in on their own with no coupling. Only where a special instruction allows it (<span style="color:var(--si)">⚡</span>), only onto a secured 2+ car cut, and only car types that can be kicked.</li>
+        <li><strong>KICK n to a track</strong> — shove and cut away; the cars coast in on their own with no coupling. Only where a special instruction allows it (<span class="yd-key-kick">⚡</span>), only onto a secured 2+ car cut, and only car types that can be kicked.</li>
       </ul>
       <p><strong>Score = fewest engine MOVES</strong> — beat or match <em>par</em>. A move is one run of the
       engine in one direction, so every change of direction counts: a <strong>PULL = 2</strong> (back in, pull
@@ -161,7 +161,7 @@ export function createView(root: HTMLElement): YardView {
   // null and the caller stops with a TypeError at its first write.
   const at = <T extends HTMLElement = HTMLElement>(id: string): T => root.querySelector('#' + id) as T;
 
-  const drawHost = root.querySelector('.yardframe') as HTMLElement;
+  const drawHost = root.querySelector('.yd-yardframe') as HTMLElement;
   // The picker element is kept between calls, as it was before the split.
   const picker = at<HTMLSelectElement>('picker');
 
@@ -176,16 +176,16 @@ export function createView(root: HTMLElement): YardView {
     setBanner(text, tone) {
       const msg = at('msg');
       msg.textContent = text || '';
-      msg.className = `banner ${tone || ''}`;
+      msg.className = `yd-banner ${tone ? 'yd-' + tone : ''}`;
     },
 
     setRefusal(text, onLookup) {
       const msg = at('msg');
-      msg.className = 'banner bad';
+      msg.className = 'yd-banner yd-bad';
       msg.textContent = text || '';
       if (onLookup) {
         const b = document.createElement('button');
-        b.className = 'lookup'; b.textContent = 'Look it up →';
+        b.className = 'yd-lookup'; b.textContent = 'Look it up →';
         b.addEventListener('click', onLookup);
         msg.appendChild(b);
       }
@@ -195,7 +195,7 @@ export function createView(root: HTMLElement): YardView {
       const box = at('rules'); box.innerHTML = '';
       for (const r of list) {
         const chip = document.createElement('div');
-        chip.className = `chip ${r.kind}`;
+        chip.className = `yd-chip yd-${r.kind}`;
         chip.innerHTML = `<b>${r.cite}</b><span>${r.label}</span>`;
         box.appendChild(chip);
       }
@@ -203,17 +203,17 @@ export function createView(root: HTMLElement): YardView {
 
     renderSwitchList(data, { onFlag, onCertify }) {
       const rows = data.lines.map((e, i) =>
-        `<div class="ord-row${e.flagged ? ' flagged' : ''}" data-i="${i}">`
-        + `<span class="ord-flag">${e.flagged ? '⚑' : '▢'}</span>`
-        + `<span class="ord-mark">${e.mark}</span><span class="ord-arrow">→</span><span class="ord-trk">${e.track}</span>`
+        `<div class="yd-ord-row${e.flagged ? ' yd-flagged' : ''}" data-i="${i}">`
+        + `<span class="yd-ord-flag">${e.flagged ? '⚑' : '▢'}</span>`
+        + `<span class="yd-ord-mark">${e.mark}</span><span class="yd-ord-arrow">→</span><span class="yd-ord-trk">${e.track}</span>`
         + `</div>`).join('');
       at('workorder').innerHTML =
-        `<div class="wo-top"><span class="wo-tag si">SWITCH LIST</span> <span class="wo-id">${data.id.toUpperCase()}</span> · the list can be wrong</div>`
-        + `<div class="wo-job">Build <b>${data.goalTrack}</b> from these cars. Check each line against the yard — tap any that <b>don't match</b>, then certify.</div>`
-        + `<div class="ord-list">${rows}</div>`
-        + `<button class="go" id="certify">Certify order ▸</button>`
-        + `<div class="wo-meta"><span class="wo-tip">${data.hint}</span></div>`;
-      at('workorder').querySelectorAll<HTMLElement>('.ord-row').forEach((row) => row.addEventListener('click', () => {
+        `<div class="yd-wo-top"><span class="yd-wo-tag yd-si">SWITCH LIST</span> <span class="yd-wo-id">${data.id.toUpperCase()}</span> · the list can be wrong</div>`
+        + `<div class="yd-wo-job">Build <b>${data.goalTrack}</b> from these cars. Check each line against the yard — tap any that <b>don't match</b>, then certify.</div>`
+        + `<div class="yd-ord-list">${rows}</div>`
+        + `<button class="yd-go" id="certify">Certify order ▸</button>`
+        + `<div class="yd-wo-meta"><span class="yd-wo-tip">${data.hint}</span></div>`;
+      at('workorder').querySelectorAll<HTMLElement>('.yd-ord-row').forEach((row) => row.addEventListener('click', () => {
         onFlag(+(row.dataset.i as string));
       }));
       at('certify').addEventListener('click', onCertify);
@@ -221,21 +221,21 @@ export function createView(root: HTMLElement): YardView {
 
     renderVerifiedOrder(data) {
       const lines = data.lines
-        .map((e) => `<b>${e.mark}</b> → ${e.track}${e.corrected ? ' <span class="ord-fix">(list was wrong)</span>' : ''}`)
+        .map((e) => `<b>${e.mark}</b> → ${e.track}${e.corrected ? ' <span class="yd-ord-fix">(list was wrong)</span>' : ''}`)
         .join(' · ');
       at('workorder').innerHTML =
-        `<div class="wo-top"><span class="wo-tag">WORK ORDER ✓</span> <span class="wo-id">${data.goalTrack}</span> · verified</div>`
-        + `<div class="wo-job">Build <b>${data.goalTrack}</b>: ${lines}.</div>`
-        + `<div class="wo-meta">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.</div>`;
+        `<div class="yd-wo-top"><span class="yd-wo-tag">WORK ORDER ✓</span> <span class="yd-wo-id">${data.goalTrack}</span> · verified</div>`
+        + `<div class="yd-wo-job">Build <b>${data.goalTrack}</b>: ${lines}.</div>`
+        + `<div class="yd-wo-meta">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.</div>`;
     },
 
     renderWorkOrder(data) {
       const nums = data.cars.map((c) => c.split(' ').pop());
-      const head = `<div class="wo-top"><span class="wo-tag">WORK ORDER</span> <span class="wo-id">${data.id.toUpperCase()}</span> · ${data.title}</div>`;
-      const meta = `<div class="wo-meta">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.<span class="wo-tip">${data.hint}</span></div>`;
+      const head = `<div class="yd-wo-top"><span class="yd-wo-tag">WORK ORDER</span> <span class="yd-wo-id">${data.id.toUpperCase()}</span> · ${data.title}</div>`;
+      const meta = `<div class="yd-wo-meta">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.<span class="yd-wo-tip">${data.hint}</span></div>`;
       const job = data.depart
-        ? `<div class="wo-job">Build the outbound${data.ordered ? ' in order' : ''} — gather <b>${nums.join(' · ')}</b> onto your train${data.from.length ? ` <span class="wo-from">(set out on ${data.from.join(', ')})</span>` : ''}, then <b>Depart ▸</b>.</div>`
-        : `<div class="wo-job">Build <b>${data.goalTrack}</b> — gather <b>${nums.join(' · ')}</b> onto it${data.from.length ? ` <span class="wo-from">(now on ${data.from.join(', ')})</span>` : ''}.</div>`;
+        ? `<div class="yd-wo-job">Build the outbound${data.ordered ? ' in order' : ''} — gather <b>${nums.join(' · ')}</b> onto your train${data.from.length ? ` <span class="yd-wo-from">(set out on ${data.from.join(', ')})</span>` : ''}, then <b>Depart ▸</b>.</div>`
+        : `<div class="yd-wo-job">Build <b>${data.goalTrack}</b> — gather <b>${nums.join(' · ')}</b> onto it${data.from.length ? ` <span class="yd-wo-from">(now on ${data.from.join(', ')})</span>` : ''}.</div>`;
       at('workorder').innerHTML = head + job + meta;
     },
 
