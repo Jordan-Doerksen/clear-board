@@ -1,6 +1,8 @@
 # Clear Board — DECISIONS
 
-*ADR-style. Each real call: what was chosen, what else was weighed, why. Last updated 2026-06-23.*
+*ADR-style. Each real call: what was chosen, what else was weighed, why. Last updated 2026-11-20.*
+
+Page law tier: STRICT
 
 ---
 
@@ -452,6 +454,127 @@ confirmation in front of every SPOT and KICK, i.e. on the primary verb, several 
 a game-feel call about the moment-to-moment rhythm of the core loop, and it belongs to the owner with
 hands on the controls — not to a silent judgment here. Securement was separable and is done; this half
 is not started.
+
+### D-0030 — Clear Board 2: one change request, in waves, behind a fence
+**Chosen:** Clear Board takes the skin Dusk 0.2.0, the Yard gets a new drawing, and each safe upgrade
+is found, ranked and built. The work is one change request on this repository, in waves: research,
+Gate A, foundation (2a), surfaces (2b), integration (2c). The plan is `specs/clear-board-2-plan.md`.
+Its section 4 is the fence. Each brief carries the fence in full.
+**Dusk:** the six layer files in `src/styles/dusk/` are a locked copy (`src/styles/dusk.lock.json`).
+No job edits the copy. App token names map to Dusk tokens in one bridge file,
+`src/styles/clear-board.tokens.css`.
+**Page law tier:** STRICT. The line is at the top of this file. The owner has not picked OPEN. One
+question is open: an exception for travel of equipment in the Yard drawing
+(`specs/briefs/lead-rulings.md`, section 3, `TIER`). Until an answer, the page has no exception.
+**Frozen:** `public/data/*.json`, `src/core/signal.ts`, `src/stations/yard/model.js`, `solver.js`,
+`puzzles.js`, `geometry.js`, and the `STEPS` wording in `src/stations/radioSim.js`. The baseline is
+commit `94a41c5`.
+**Step zero, 2026-11-20:** `npm ci`, `npm run check` and `npm run build` were green on a clean clone
+of `86cfef2`. The Dusk copy matched its lock.
+**Research:** seven reports, `specs/research/R1` to `R7`. A second job checked R2 to R7 against the
+code and the running app. Not verified in any report: a real phone, Safari, the Windows desktop
+build, a real screen reader.
+
+### D-0031 — The Yard look is C2: the pictorial model, with a view that can shrink empty track
+**Chosen (the owner, Gate A, question 1):** look C2. The yard is drawn as a model seen from above:
+rails, ties, a car shape for each type, an engine. Empty track can shrink, with a break mark, so the
+yard stays one picture. A phone and a narrow window get the same drawing as one row for each track.
+The sketch and its review are `specs/research/yard-looks/look-model2.*`.
+**Weighed:** look A, a dispatcher track diagram (calmer, the least work); look B, a switch list (best
+for a phone and a screen reader, and it does not look like a yard); look C with one uniform scale
+(it needs a window of 1335 px and splits into three views below that).
+**Why:** the learners of this product learn by doing. A yard that looks like a yard, and a car type
+that reads by shape, serve them. Look C2 keeps that and removes the split of look C.
+**Known cost, told to the owner before the pick:** the wide form holds in each of 84 authored states
+from a window of 1366 px. Under that width the form can change with the state of the game. Room on a
+track is carried by a bar and not by eye. Look C2 is the most drawing work of the options.
+**Open:** the rule for the change of form during a job, the new words of the legend, and gold for
+the route, the engine and the goal (`specs/briefs/lead-rulings.md`, section 3).
+**Colour:** each colour meaning that a reader can take for a rail convention carries the mark "SME
+to confirm". The claim in `yard/render.js` line 2, that yellow is a convention for a diverging
+switch, is not verified (plan fact T12).
+
+### D-0032 — The Yard is drawn in SVG, with native buttons and a text list
+**Chosen (the lead, from report R2):** one inline SVG for the drawing, native HTML buttons for the
+six switches, and a text list of the yard state. No canvas. The drawing stands on a view transform
+over `geometry.js`. No number in `geometry.js` changes.
+**Weighed:** a canvas (the present form), and a canvas with an SVG layer. R2 built and measured a
+prototype of each (`specs/research/yard-tech/`).
+**Why:** text in SVG is real text. It follows the text scale, the dyslexia type and a token change
+with no code, and a test can read it. With a slowed processor at phone width the SVG drew 74 to 75
+of 75 frames and the canvas drew 47 to 58.
+**Not verified:** each timing is from a headless browser with no graphics card. The order of the
+options on a real phone is not verified.
+
+### D-0033 — Full play on a phone
+**Chosen (the owner, Gate A, question 2):** a learner can finish each of the 19 Yard jobs on a phone
+390 px wide. The build is held to that: the move controls stay in reach, a long cut that goes on in
+a second line carries a mark, and a browser test plays a job to a win at phone width.
+**Weighed:** desktop first, with a phone view that can be read.
+**Why:** `SPEC.md` says the app is used on the train, and it ships as an offline app for a phone.
+Today a car number draws at 2.4 px on a phone and a switch has a hit radius of about 5 px.
+**Not verified:** a real phone. Each test used an emulated phone.
+
+### D-0034 — The app icon is the monogram; the favicon origin is settled (closes D-0028)
+**The origin:** `public/favicon.svg` is the logo of the Vite project template, byte for byte
+(create-vite 9.3.4, `template-react-ts/public/favicon.svg`; SHA-256 compared on 2026-11-20).
+`public/icons.svg` and the files of plan fact T5 come from the same template. The mark leaves the app.
+**Chosen (the owner, Gate A, question 3):** icon C, the monogram: the letter C drawn as a track
+line, which holds one lit board. The files are `specs/research/icon/icon-mark.svg` and
+`icon-mark-small.svg` (the 16 px drawing).
+**Weighed:** a lit lamp (the header mark of today, a common form); a yard ladder (it can read as a
+chart at small sizes).
+**Colour:** an icon file cannot read a style sheet. Its colours are copied values of Dusk tokens,
+and the notes name the token for each. This is an allowed place for a raw colour (D-0035, row U-45).
+**Open:** the PNG set for the manifest (job B1). The desktop icon set waits for a session that can
+make the Windows build. The green light carries the mark "SME to confirm".
+**Not verified:** only Chromium rendered the icon. No phone launcher and no desktop taskbar was
+tested. No search for similar marks was made.
+
+### D-0035 — The upgrade list: 46 rows have a yes, 5 rows have a no
+**Chosen (the owner, Gate A, question 4):** yes to each recommended row of
+`specs/research/upgrade-list.md`. Rows U-01 to U-46 have a yes. Rows U-47 to U-51 have a no.
+**What a row is:** a change of a behaviour, a word or a control that three audits found (R4 learning
+and UX, R5 accessibility, R6 engineering). A reskin job makes no such change. Each row has a job.
+**The picks inside rows:** U-13: motion is reduced when the learner's choice or the device asks for
+it. U-17: the look-up opens on top of the station. U-30: the dyslexia face ships as a font file only
+if its licence allows it. U-42: the tip link stays. U-45: the icon files and the desktop window
+colour can keep a raw colour.
+**New words:** rows U-11, U-24, U-25, U-27, U-33, U-37 and U-40 come back to the owner for the exact
+words before they ship.
+**The five rows with a no:** a dependency update (U-47), a fixed starter list (U-48), a content
+security policy (U-49), a settings module for the numbers of the learning model (U-50), the desktop
+set-up (U-51). Each one has its reason in the table.
+**Not fixed, on purpose:** 28 notes for the SME are in section 10 of that file. No job edits rule
+content, signal aspects, puzzle layouts, pars or the solver.
+
+### D-0036 — Facts that Wave 1 corrected, and two recorded exceptions
+**Reduced motion in the Yard is slower today, not faster.** The plan said "6 times faster" (fact
+T4). `yard/anim.js` line 17 multiplies each duration by the factor that `yardSim.js` line 228 sets
+to 6. Measured: about 9.0 s against 1.6 s for one move. Three reports agree. Motion does not stop.
+Job Y4 makes it stop.
+**The Signals drill can mark a correct name as wrong.** In `public/data/signals.json` one drawing
+(one red lamp on a mast) belongs to `sig.437` and to `sig.439`, and one drawing (one green lamp on a
+dwarf) belongs to `sig.405` and to `sig.431`. Each of the four items is `verified`. The audit saw the
+drill show the red lamp, offer the two names, and mark "439 STOP" as wrong. The data is frozen and
+is not changed. Row U-01 stops the drill from asking such a question. Whether each drawing is right
+for the two items is a note for the SME (S-01).
+**Exception to fence rule 5:** a red lamp in the frozen signal drawing is content. It is not an
+attention colour of the skin. No file changes.
+**Exception to fence rule 4:** the icon files and the desktop window colour can keep a raw colour
+(row U-45). Each value is a copied Dusk token value.
+
+### D-0037 — The lead's rulings for Wave 2
+**Chosen:** the file `specs/briefs/lead-rulings.md` holds each ruling of the lead and each question
+that is still open for the owner or for the SME. `specs/briefs/00-contracts.md` holds the agreement
+between the parallel jobs: the owner of each file in each wave, the names, the file layout and the
+merge order.
+**Main rulings:** one wave branch and one local branch for each job; a build agent commits and the
+lead pushes. Job G1 writes small equivalents of the reskin tools and copies no code from them,
+because that repository is private and this one is public. The Files line of B3 is wider than the
+plan: B3 can change each colour in `radioSim.js` and no word. `src-tauri/**` waits for a session
+that can make the Windows build. Pictures of a job are committed at scale 1.
+**Until the owner answers an open question,** each job keeps the behaviour of today for it.
 
 ---
 *V1. Edit as decisions are made or reversed.*

@@ -1,0 +1,1300 @@
+<!doctype html>
+<html lang="en" data-tier="strict">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clear Board · The Yard · look C2, model with a compressing view (sketch)</title>
+<meta name="description" content="Look sketch C2: the pictorial model of look C with a compressing view. One picture at every width. Dusk 0.2.0. One real scene. Not the app.">
+<!--DUSK-LAYERS-->
+<style data-own="look-model2">
+/* ============================================================================================
+   Look C2, "model" with a compressing view. Page-local rules, prefix yd-. Colour comes from Dusk tokens only.
+   ============================================================================================ */
+
+/* bridge: values that Dusk 0.2.0 does not have. Each one is built from Dusk tokens. No raw colour. */
+:root{
+  --yd-target:      44px;                                      /* the pointer target floor. Dusk: .dusk-btn 29px, .dusk-seg button 24px */
+  --yd-car-shadow:  drop-shadow(0 2px 2px var(--ground-0));    /* the still shadow under a car */
+  --yd-lit-glow:    drop-shadow(0 0 3px var(--lit));           /* --neon-ctl is a box-shadow; an SVG shape needs a filter */
+  --yd-red-glow:    drop-shadow(0 0 4px var(--red));           /* the ring of a refused switch */
+}
+
+/* ---- gaps in Dusk: sizes and two controls ---------------------------------------------------- */
+.yd-main{ grid-column: 1 / -1; }
+.dusk-skip{ display: inline-flex; align-items: center; min-height: var(--yd-target); }   /* page-local size on a Dusk part: the skip link is 39 px high in Dusk */                               /* a window with no sidebar: the content spans both columns */
+.yd-btn{ min-height: var(--yd-target); min-width: var(--yd-target); justify-content: center; font-size: var(--fs-data); }
+.yd-btn--go{ box-shadow: var(--neon-ctl-on); }
+.yd-select{
+  min-height: var(--yd-target); min-width: 0; max-width: 100%;
+  padding: 0 var(--sp-4);
+  border: 0; border-radius: var(--r-control);
+  background: var(--well); box-shadow: var(--ring-well);
+  color: var(--ink); font-size: var(--fs-data);
+}
+.yd-select--mono{ font-family: var(--font-mono); font-weight: var(--fw-medium); }
+.yd-picker{ flex: 1 1 14rem; max-width: 30rem; }
+.yd-dim{ color: var(--ink-3); }
+#route-cell{ display: inline-block; }
+.yd-titlebar-end{ display: flex; align-items: center; gap: var(--gap); flex-wrap: wrap; }
+
+/* ---- the model: one view = one SVG of shapes, DOM plates over it, DOM buttons over those ------ */
+.yd-host{ background: var(--glass); border-bottom-left-radius: var(--r-tile); border-bottom-right-radius: var(--r-tile); overflow: hidden; }
+.yd-view{ position: relative; overflow: hidden; background: var(--glass); max-width: 100%; }
+.yd-view > svg{ position: absolute; left: 0; top: 0; display: block; }
+.yd-layer{ position: absolute; inset: 0; pointer-events: none; }
+.yd-layer--ctl > *{ pointer-events: auto; }
+
+/* shapes */
+.yd-ballast{ fill: none; stroke: var(--panel-hi); stroke-linejoin: round; }
+.yd-tie{ fill: none; stroke: var(--hair-2); }
+.yd-rail{ fill: none; stroke: var(--ink-3); stroke-width: 1.5; opacity: .62; }
+.yd-rail--lined{ stroke: var(--ink); opacity: 1; stroke-width: 1.6; }
+.yd-rail--blade{ stroke: var(--ink); opacity: 1; stroke-width: 1.6; }
+.yd-chev{ fill: none; stroke: var(--lit); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.yd-foul{ stroke: var(--ink-2); stroke-width: 2.5; }
+.yd-stop{ stroke: var(--ink-3); stroke-width: 3; stroke-linecap: square; }
+.yd-land{ fill: none; stroke: var(--lit); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.yd-coupler{ stroke: var(--ink-3); stroke-width: 2; }
+
+.yd-car{ filter: var(--yd-car-shadow); }
+.yd-body{ stroke-width: 1.5; }
+.is-empty .yd-body{ fill: var(--well); }
+.yd-detail{ fill: none; stroke-width: 1; }
+.is-empty .yd-detail{ opacity: .7; }
+.yd-edge{ stroke: var(--on-tile); stroke-width: 1; opacity: .42; }
+.yd-tone-grey   .yd-body, .yd-tone-grey   .yd-detail{ stroke: var(--grey-ink); }
+.yd-tone-teal   .yd-body, .yd-tone-teal   .yd-detail{ stroke: var(--teal-ink); }
+.yd-tone-violet .yd-body, .yd-tone-violet .yd-detail{ stroke: var(--violet-ink); }
+.yd-tone-amber  .yd-body, .yd-tone-amber  .yd-detail{ stroke: var(--amber-ink); }
+.yd-tone-blue   .yd-body, .yd-tone-blue   .yd-detail{ stroke: var(--blue-ink); }
+.is-empty.yd-tone-grey   .yd-detail--solid{ fill: var(--grey-ink); }
+.is-empty.yd-tone-teal   .yd-detail--solid{ fill: var(--teal-ink); }
+.is-empty.yd-tone-violet .yd-detail--solid{ fill: var(--violet-ink); }
+.is-empty.yd-tone-amber  .yd-detail--solid{ fill: var(--amber-ink); }
+.is-empty.yd-tone-blue   .yd-detail--solid{ fill: var(--blue-ink); }
+.yd-car .yd-detail--solid{ stroke: none; opacity: .55; }
+.is-loaded .yd-body{ stroke: none; }
+.is-loaded .yd-detail{ stroke: var(--on-tile); opacity: .34; }
+.is-loaded .yd-detail--solid{ fill: var(--on-tile); stroke: none; opacity: .3; }
+
+.yd-s-grey-hi{ stop-color: var(--tile-grey-hi); }     .yd-s-grey-lo{ stop-color: var(--tile-grey-lo); }
+.yd-s-teal-hi{ stop-color: var(--tile-teal-hi); }     .yd-s-teal-lo{ stop-color: var(--tile-teal-lo); }
+.yd-s-violet-hi{ stop-color: var(--tile-violet-hi); } .yd-s-violet-lo{ stop-color: var(--tile-violet-lo); }
+.yd-s-amber-hi{ stop-color: var(--tile-amber-hi); }   .yd-s-amber-lo{ stop-color: var(--tile-amber-lo); }
+.yd-s-blue-hi{ stop-color: var(--tile-blue-hi); }     .yd-s-blue-lo{ stop-color: var(--tile-blue-lo); }
+.yd-s-beam0{ stop-color: var(--lit); stop-opacity: .5; }
+.yd-s-beam1{ stop-color: var(--lit); stop-opacity: 0; }
+
+.yd-eng-body{ fill: var(--head); stroke: var(--lit); stroke-width: 1.4; filter: var(--yd-lit-glow); }
+.yd-eng-walk{ fill: none; stroke: var(--hair-2); stroke-width: 1; }
+.yd-eng-hood{ fill: var(--panel-hi); stroke: var(--ink-3); stroke-width: 1; }
+.yd-eng-cab{ fill: var(--wash-2); stroke: var(--lit); stroke-width: 1; }
+.yd-eng-fan{ fill: none; stroke: var(--ink-3); stroke-width: 1; }
+.yd-eng-lamp{ fill: var(--disc-hi); filter: var(--yd-lit-glow); }
+
+.yd-rod{ stroke: var(--ink-3); stroke-width: 1.5; }
+.yd-stand{ stroke-width: 1.75; stroke-linejoin: round; }
+.yd-stand--normal{ fill: var(--well); stroke: var(--green-ink); }
+.yd-stand--reverse{ fill: var(--amber); stroke: var(--amber-ink); }
+.yd-ring{ fill: none; stroke: var(--red-ink); stroke-width: 2; filter: var(--yd-red-glow); }
+
+/* marks of the compressing view */
+.yd-cutline{ stroke: var(--hair-2); stroke-width: 1; stroke-dasharray: 2 4; }
+.yd-cont{ fill: none; stroke: var(--ink-2); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* plates: every word of the model is DOM text on a dark plate */
+.yd-plate{
+  position: absolute; white-space: nowrap;
+  padding: 1px var(--sp-1);
+  background: var(--well); border-radius: var(--r-chip); box-shadow: var(--ring-well);
+  color: var(--ink-2); font-family: var(--font-mono); font-size: var(--fs-xs); line-height: 1.3;
+}
+.yd-a-c { transform: translate(-50%, -50%); }
+.yd-a-tc{ transform: translateX(-50%); }
+.yd-a-bc{ transform: translate(-50%, -100%); }
+.yd-a-l { transform: translateY(-50%); }
+.yd-a-r { transform: translate(-100%, -50%); }
+.yd-label{ font-size: var(--fs-s); }
+.yd-wrap{ box-sizing: border-box; white-space: normal; }
+.yd-num{ padding: 0 1px; box-shadow: none; border-radius: var(--r-chip); color: var(--ink); font-size: var(--fs-s); font-weight: var(--fw-bold); line-height: 1.2; }
+.yd-num--land{ background: none; color: var(--lit); outline: 1px dashed var(--lit); outline-offset: -1px; }
+.yd-tag{ position: absolute; transform: translate(0, -50%); padding: 0 1px; border-radius: var(--r-chip); font: var(--fw-bold) var(--fs-xs)/1.15 var(--font-mono); white-space: nowrap; }
+.yd-tag--on{ color: var(--on-tile); background: var(--tile-glyph); }
+.yd-tag--grey{ color: var(--grey-ink); }
+.yd-tag--teal{ color: var(--teal-ink); }
+.yd-tag--violet{ color: var(--violet-ink); }
+.yd-tag--amber{ color: var(--amber-ink); }
+.yd-tag--blue{ color: var(--blue-ink); }
+.yd-lin{ font-weight: var(--fw-bold); letter-spacing: .02em; }
+.yd-lin--normal{ color: var(--green-ink); }
+.yd-lin--reverse{ color: var(--amber-ink); }
+.yd-eng-word{ color: var(--lit); font-weight: var(--fw-bold); letter-spacing: var(--track-label); }
+.yd-attn{ color: var(--red-ink); font-weight: var(--fw-bold); }
+
+/* the plates at the deep end of a track */
+.yd-end{ box-sizing: border-box; display: flex; flex-direction: column; gap: 0; padding: 1px var(--sp-2) 2px; font-size: var(--fs-s); line-height: 1.25; }
+.yd-end .dusk-count{ padding-top: 0; padding-bottom: 0; line-height: 1.2; }
+.yd-end > div{ display: flex; align-items: center; gap: var(--sp-2); }
+.yd-tid{ color: var(--ink); font-size: var(--fs-data); font-weight: var(--fw-bold); }
+.yd-goal{ color: var(--lit); font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: var(--fw-bold); letter-spacing: var(--track-label); }
+.yd-kick{ color: var(--ink-2); font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: var(--fw-medium); }
+.yd-end .dusk-state{ font-family: var(--font-ui); font-size: var(--fs-s); }
+
+/* the switch stand button: 44 by 44 px over the stand and the points */
+.yd-sw{
+  position: absolute; width: var(--yd-target); height: var(--yd-target); padding: 0;
+  transform: translate(-50%, -50%);
+  border: 0; border-radius: var(--r-control);
+  background: none; box-shadow: var(--ring-well);
+  cursor: pointer;
+}
+.yd-sw:hover{ background: var(--wash-1); box-shadow: var(--neon-ctl); }
+
+/* the legend */
+.yd-legend{ padding: var(--sp-3) var(--sp-4); background: var(--panel-lo); border-radius: var(--r-control); box-shadow: var(--ring-well); color: var(--ink-2); font-size: var(--fs-xs); }
+.yd-legend--corner{ position: absolute; left: var(--sp-4); top: var(--sp-4); max-width: 304px; }
+.yd-legend--below{ margin: var(--sp-3); }
+.yd-legend--below, .yd-legend--side{ display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--sp-3) var(--sp-8); }
+.yd-lgroup{ flex: 1 1 250px; min-width: 0; }
+.yd-legend--corner .yd-lgroup + .yd-lgroup{ margin-top: var(--sp-3); }
+.yd-legend h3{ margin: 0 0 var(--sp-1); color: var(--ink-3); font-size: var(--fs-xs); font-weight: var(--fw-medium); letter-spacing: var(--track-label); text-transform: uppercase; }
+.yd-legend h3 + .yd-lrow{ margin-top: 0; }
+.yd-legend h3 em{ color: var(--amber-ink); font-style: normal; text-transform: none; letter-spacing: 0; }
+.yd-lrow{ display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-5); margin-top: var(--sp-2); }
+.yd-lrow > span{ display: inline-flex; align-items: center; gap: var(--sp-1); max-width: 100%; }
+.yd-lrow svg{ display: block; flex: none; }
+.yd-lcar{ position: relative; display: inline-block; flex: none; }
+.yd-lrow .dusk-state{ font-size: var(--fs-xs); }
+.yd-lrow .yd-plate{ position: static; }
+details.yd-legend-fold > summary{ min-height: var(--yd-target); display: flex; align-items: center; padding: 0 var(--gap); color: var(--ink); font-weight: var(--fw-medium); cursor: pointer; }
+details.yd-legend-fold .yd-legend--below{ margin-top: 0; }
+
+/* the break mark: track left out here */
+.yd-brk{ box-sizing: border-box; width: 1.5em; padding: 0; overflow: hidden; background: var(--glass); box-shadow: none; border-radius: 0; border-left: 1px dashed var(--ink-3); border-right: 1px dashed var(--ink-3); color: var(--ink-2); font-family: var(--font-mono); font-size: var(--fs-data); font-weight: var(--fw-bold); text-align: center; }
+.yd-brk--v{ border-left: 0; border-right: 0; border-top: 1px dashed var(--ink-3); border-bottom: 1px dashed var(--ink-3); }
+.yd-brk--lit{ color: var(--lit); }
+.yd-brk--key{ display: inline-block; line-height: 1.3; }
+
+/* the room bar: from the foul point to the end of the track, in true proportion. One scale for all bars. */
+.yd-bar{ position: relative; display: inline-block; flex: none; box-sizing: border-box; height: 8px; border: 1px solid var(--ink-3); border-radius: var(--r-bar); vertical-align: middle; }
+.yd-bar i{ position: absolute; right: -1px; top: -1px; bottom: -1px; background: var(--ink-2); border-radius: 0 var(--r-bar) var(--r-bar) 0; }
+.yd-bar u{ position: absolute; top: -3px; bottom: -3px; box-sizing: border-box; border: 1px dashed var(--lit); }
+.yd-barline{ display: flex; justify-content: flex-end; align-items: center; }
+.yd-end .yd-barline{ padding: 1px 0; }
+.yd-barplate{ display: inline-flex; align-items: center; padding: var(--sp-1); }
+
+/* the tall form: the words of a track stand over its row */
+.yd-rowcap{ position: absolute; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 1px var(--sp-3); white-space: nowrap; color: var(--ink-2); font-family: var(--font-mono); font-size: var(--fs-s); line-height: 1.35; }
+.yd-rowcap .dusk-state{ font-family: var(--font-ui); font-size: var(--fs-s); }
+.yd-rowcap .yd-barline{ margin-left: auto; }
+.yd-goalpair{ display: inline-flex; align-items: center; gap: var(--sp-2); }
+.yd-probe .yd-rowcap{ position: static; }
+.yd-legend--side{ position: absolute; box-sizing: border-box; }
+.yd-tag--v{ transform: translate(-50%, -50%); }
+
+/* ---- the chrome around the model ------------------------------------------------------------- */
+.yd-wo-top{ display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-1) var(--sp-3); }
+.yd-wo-tag{ color: var(--ink-3); font-size: var(--fs-xs); font-weight: var(--fw-medium); letter-spacing: var(--track-label); }
+.yd-wo-id{ color: var(--lit); font-family: var(--font-mono); font-weight: var(--fw-bold); }
+.yd-wo p{ margin: 0 0 var(--sp-3); max-width: var(--measure); }
+.yd-wo p:last-child{ margin-bottom: 0; }
+.yd-wo .yd-job{ font-size: var(--fs-l); }
+.yd-wo .yd-job b{ font-family: var(--font-mono); }
+.yd-wo .yd-tip{ color: var(--ink-2); }
+.yd-builder{ display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+.yd-banner{ display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--gap); min-height: var(--yd-target); margin-top: var(--gap); padding: var(--sp-2) var(--gap); background: var(--well); border-radius: var(--r-control); box-shadow: var(--ring-well); font-size: var(--fs-base); }
+.yd-banner--attn{ box-shadow: var(--rowneon-red); }
+.yd-rules-legend{ margin: 0 0 var(--sp-4); color: var(--ink-2); max-width: var(--measure); }
+.yd-rules-legend b, .yd-rules-legend strong{ color: var(--ink); }
+.yd-chips{ display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.yd-chip{ padding: var(--sp-2) var(--sp-4); background: var(--well); border-radius: var(--r-control); border: 1px solid var(--hair-2); color: var(--ink-2); font-size: var(--fs-s); }
+.yd-chip--si{ border-style: dashed; }
+.yd-chip b{ color: var(--ink); font-family: var(--font-mono); font-size: var(--fs-s); }
+.yd-chip i{ margin-right: var(--sp-2); padding: 0 var(--sp-1); border: 1px solid var(--hair-2); border-radius: var(--r-chip); color: var(--ink); font-style: normal; font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: var(--fw-bold); }
+.yd-prose{ color: var(--ink-2); }
+.yd-prose > p, .yd-prose details > *{ max-width: var(--measure); }
+.yd-prose strong{ color: var(--ink); }
+.yd-prose details p, .yd-prose ul{ margin: var(--sp-3) 0 0; }
+.yd-prose code{ padding: 0 var(--sp-1); background: var(--well); border-radius: var(--r-chip); font-family: var(--font-mono); font-size: var(--fs-s); }
+details.yd-how > summary{ min-height: var(--yd-target); display: flex; align-items: center; color: var(--ink); font-weight: var(--fw-medium); cursor: pointer; }
+.yd-w-reverse{ color: var(--amber-ink); font-weight: var(--fw-medium); }
+.yd-w-normal{ color: var(--green-ink); font-weight: var(--fw-medium); }
+.yd-refusal{ display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: var(--gap); align-items: start; }
+.yd-refusal .yd-banner{ margin-top: 0; }
+.yd-refusal-view{ justify-self: start; max-width: 100%; border-radius: var(--r-control); overflow: hidden; box-shadow: var(--ring-well); }
+.yd-probe{ position: absolute; left: -9999px; top: 0; visibility: hidden; white-space: nowrap; }
+.yd-probe .yd-plate, .yd-probe .yd-tag{ position: static; transform: none; display: inline-block; }
+.yd-defs{ position: absolute; width: 0; height: 0; }
+</style>
+</head>
+<body>
+<a class="dusk-skip" href="#yard-h">Skip to the yard</a>
+
+<svg class="yd-defs" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="yd-g-grey" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="yd-s-grey-hi"/><stop offset="1" class="yd-s-grey-lo"/></linearGradient>
+    <linearGradient id="yd-g-teal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="yd-s-teal-hi"/><stop offset="1" class="yd-s-teal-lo"/></linearGradient>
+    <linearGradient id="yd-g-violet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="yd-s-violet-hi"/><stop offset="1" class="yd-s-violet-lo"/></linearGradient>
+    <linearGradient id="yd-g-amber" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="yd-s-amber-hi"/><stop offset="1" class="yd-s-amber-lo"/></linearGradient>
+    <linearGradient id="yd-g-blue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="yd-s-blue-hi"/><stop offset="1" class="yd-s-blue-lo"/></linearGradient>
+    <linearGradient id="yd-beam-l" x1="1" y1="0" x2="0" y2="0"><stop offset="0" class="yd-s-beam0"/><stop offset="1" class="yd-s-beam1"/></linearGradient>
+    <linearGradient id="yd-beam-r" x1="0" y1="0" x2="1" y2="0"><stop offset="0" class="yd-s-beam0"/><stop offset="1" class="yd-s-beam1"/></linearGradient>
+  </defs>
+</svg>
+
+<div class="dusk-stage dusk-stage--app">
+  <section class="dusk-win" aria-label="Clear Board, The Yard">
+    <header class="dusk-titlebar">
+      <span class="dusk-brand"><span class="dusk-disc" aria-hidden="true"></span>Clear Board</span>
+      <span class="dusk-crumb"><b>The Yard</b></span>
+      <span class="dusk-spacer"></span>
+      <span class="yd-titlebar-end">
+        <span class="dusk-flag">SKETCH · look C2, model</span>
+        <button class="dusk-btn yd-btn" type="button" id="back"></button>
+      </span>
+    </header>
+    <div class="dusk-thread" aria-hidden="true"></div>
+
+    <main class="dusk-main yd-main">
+      <div class="dusk-strip" id="strip"></div>
+
+      <section class="dusk-panel dusk-panel--framed" aria-labelledby="yard-h">
+        <header class="dusk-panel-head">
+          <h2 class="dusk-panel-name" id="yard-h">The Yard</h2>
+          <span class="dusk-panel-sub" id="route-sub"></span>
+          <span class="dusk-spacer"></span>
+          <span class="yd-goal" id="goal-word"></span>
+          <span class="dusk-count" id="goal-count"></span>
+        </header>
+        <div class="dusk-panel-body dusk-panel-body--flush yd-host" id="yard"></div>
+        <div class="dusk-sr" id="mirror"></div>
+        <div class="dusk-sr" id="live" aria-live="polite"></div>
+      </section>
+
+      <div class="dusk-panels">
+        <section class="dusk-panel dusk-panel--framed" aria-labelledby="wo-h">
+          <header class="dusk-panel-head"><h2 class="dusk-panel-name yd-wo-top" id="wo-h"></h2></header>
+          <div class="dusk-panel-body yd-wo" id="wo"></div>
+        </section>
+        <section class="dusk-panel" aria-label="Move builder">
+          <div class="yd-builder" id="builder"></div>
+          <div class="yd-banner" id="msg" role="status"></div>
+        </section>
+      </div>
+
+      <section class="dusk-panel" aria-label="Rules in play">
+        <p class="yd-rules-legend" id="rules-legend"></p>
+        <ul class="yd-chips" id="rules"></ul>
+      </section>
+
+      <div class="dusk-panels">
+        <section class="dusk-panel yd-prose" aria-label="What this trainer builds">
+<p><strong>What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span class="yd-dim">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span></p>
+        </section>
+        <section class="dusk-panel yd-prose" aria-label="How to play">
+          <details class="yd-how">
+<summary>How to play & why these rules</summary>
+      <p><strong>You are the conductor, not the engineer.</strong> Click a switch target to line it
+      (<span class="yd-w-reverse">yellow</span> = lined into the track / diverging,
+      <span class="yd-w-normal">green</span> = normal, straight up the ladder). Then call a move:</p>
+      <ul>
+        <li><strong>PULL n from a track</strong> — back in, couple the near (throat) cut, pull <code>n</code> cars onto the lead.</li>
+        <li><strong>SPOT n to a track</strong> — shove <code>n</code> cars in and leave them.</li>
+        <li><strong>KICK n to a track</strong> — shove and cut away; the cars coast in on their own with no coupling. Only where a special instruction allows it (<span>⚡</span>), only onto a secured 2+ car cut, and only car types that can be kicked.</li>
+      </ul>
+      <p><strong>Score = fewest engine MOVES</strong> — beat or match <em>par</em>. A move is one run of the
+      engine in one direction, so every change of direction counts: a <strong>PULL = 2</strong> (back in, pull
+      out) and a <strong>SPOT = 2</strong> (shove in, pull out) — <em>except the spot that finishes the job is 1</em>,
+      because the engine just leaves the cars and is done (no pull-out). A <strong>KICK = 1</strong> (one shove,
+      the cars coast in by themselves). So <em>pull, pull, spot</em> = 5 moves, and kicking saves the pull-out.
+      <strong>Joints</strong> (couplings) is a second, "also good" stat: lower is cleaner. To reach a
+      track, line <em>its</em> switch reverse and the ones below it normal, or the engineer refuses
+      (<strong>CROR 104</strong>).</p>
+      <p><strong>Securing &amp; kicking.</strong> <strong>Rule 112</strong> — any car left unattended gets a hand brake.
+      A <strong>KICK</strong> (Rule 113.5) needs a <em>secured</em> cut of at least two cars as a <em>backstop</em> to
+      catch the rolling car — and a tank, autorack or centrebeam is never kicked. After coupling, the engineer
+      <em>stretches</em> the joint to confirm the knuckles are locked before moving (<strong>Rule 113.2</strong>).</p>
+          </details>
+        </section>
+      </div>
+
+      <section class="dusk-panel dusk-panel--framed" aria-labelledby="ref-h" id="ref-panel">
+        <header class="dusk-panel-head"><h2 class="dusk-panel-name" id="ref-h">Refusal example</h2><span class="dusk-panel-sub">not the scene: the same yard before the switches are relined</span></header>
+        <div class="dusk-panel-body yd-refusal">
+          <div class="yd-banner yd-banner--attn" id="ref-msg"></div>
+          <div class="yd-refusal-view" id="ref-view"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="dusk-status">
+      <span><i class="dusk-led dusk-led--caution" aria-hidden="true"></i>Sketch: only the switches work.</span>
+      <span id="st-lined"></span>
+      <span class="dusk-spacer"></span>
+      <span id="st-mode"></span>
+      <span>Dusk 0.2.0</span>
+    </footer>
+  </section>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+/* The scene: scene.json, copied whole by the build script. The page draws from this object only. */
+const SCENE = {"schema":"clear-board-yard-scene/1","purpose":"One real mid-game Yard state for the three look sketches. Every state value is output of the frozen engine. Draw from this file alone.","producedBy":"R1 scratch script make-scene.mjs (read-only on the repository)","source":{"files":{"src/stations/yard/geometry.js":"49bc3f5e0703d8dbde31219ce95e86525f8e7fbbf0f027689eef15a9077c13d5","src/stations/yard/model.js":"144ec68621795ff6c4186335c2129dabcbde41fe12cfae800034563f65ba0ceb","src/stations/yard/puzzles.js":"633cc6056cdca7df5249508c566ac0891aedbf03ee7b9189d2617b913869bb9b","src/stations/yard/solver.js":"e547180bca95f723c30e16b89e7af0b4d0595d73764bd8dac1119a38a5bc2215"},"crossCheck":"solver.js replay() of the full opt line: ok=true, moves=6, joints=2; par=6, optJoints=2"},"puzzle":{"id":"p4-peel","title":"Don’t slam a load into empties","tier":4,"tierLabel":"Tier 4 — loads & empties","par":6,"optJoints":2,"hint":"AS73 is a tied, kickable cut of EMPTIES (⚡). Two empty box cars for it sit on AS71 — but a LOADED car is coupled between them, and you must never kick a load onto empties (it damages the light cars). Pull all three, KICK the empties on, and SPOT the loaded car clear in between.","rules":["loads","kickable","secure","kick","line","speed","couple","shove"],"kickable":["AS73"],"kickLimit":{"total":5,"loaded":3},"goal":{"track":"AS73","cars":["CN 70010","CN 70028","CN 70110","CN 70134"],"ordered":false,"depart":false},"optLine":[{"act":"pull","track":"AS71","n":3},{"act":"kick","track":"AS73","n":1},{"act":"spot","track":"AS72","n":1},{"act":"kick","track":"AS73","n":1}],"inbound":null,"listed":null},"replay":{"k":3,"ofMoves":4,"movesReplayed":[{"act":"pull","track":"AS71","n":3},{"act":"kick","track":"AS73","n":1},{"act":"spot","track":"AS72","n":1}],"steps":[{"op":"lineSwitch","track":"AS71","result":"reverse"},{"op":"pull","track":"AS71","n":3,"engineSays":"Pulled 3 from AS71.","movesAfter":2,"jointsAfter":1},{"op":"lineSwitch","track":"AS71","result":"normal"},{"op":"lineSwitch","track":"AS73","result":"reverse"},{"op":"kick","track":"AS73","n":1,"engineSays":"Kicked 1 to AS73.","movesAfter":3,"jointsAfter":1},{"op":"lineSwitch","track":"AS72","result":"reverse"},{"op":"lineSwitch","track":"AS73","result":"normal"},{"op":"spot","track":"AS72","n":1,"engineSays":"Spotted 1 to AS72.","movesAfter":4,"jointsAfter":2},{"op":"lineSwitch","track":"AS72","result":"normal"},{"op":"lineSwitch","track":"AS73","result":"reverse"}],"then":"After move 3 the player lines the route for the next move with lineSwitch(): AS72 to normal, AS73 to reverse. These are the last two steps. They cost no move."},"state":{"moves":4,"joints":2,"par":6,"engineOut":false,"engineOutNote":"model.js keeps \"out\" for move cost only. The present drawing always shows the engine at rest on the lead between moves (render.js:47-49).","lined":{"AS71":"normal","AS72":"normal","AS73":"reverse","AS74":"normal","AS75":"normal","AS76":"normal"},"secured":{"AS71":false,"AS72":false,"AS73":true,"AS74":true,"AS75":true,"AS76":true},"kickable":["AS73"],"goalTrack":"AS73","showSecuredTags":true,"tracks":[{"id":"AS71","index":0,"switch":{"x":370,"y":320},"y":320,"trackEndX":1292,"clearanceX":400,"lined":"normal","secured":false,"securementTag":null,"kickable":false,"kickableMark":null,"isGoalTrack":false,"cars":[],"cuts":[],"gaps":[],"derived":{"note":"Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.","trackLength":922,"carLengthTotal":0,"throatGap":922,"roomBeforeFoul":892,"roomInBoxCars":21}},{"id":"AS72","index":1,"switch":{"x":440,"y":268},"y":268,"trackEndX":1292,"clearanceX":470,"lined":"normal","secured":false,"securementTag":"LOOSE","kickable":false,"kickableMark":null,"isGoalTrack":false,"cars":[{"id":"CN 70222","number":"70222","type":"box","typeTag":"BX","loaded":true,"loadWord":"loaded","len":42,"kickableType":true,"isGoalCar":false,"order":1,"nearEdgeFromSwitch":668,"x0":1108,"x1":1150,"centre":{"x":1129,"y":268},"height":20},{"id":"GATX 8810","number":"8810","type":"tank","typeTag":"TK","loaded":true,"loadWord":"loaded","len":50,"kickableType":false,"isGoalCar":false,"order":2,"nearEdgeFromSwitch":752,"x0":1192,"x1":1242,"centre":{"x":1217,"y":268},"height":20},{"id":"GATX 8828","number":"8828","type":"tank","typeTag":"TK","loaded":true,"loadWord":"loaded","len":50,"kickableType":false,"isGoalCar":false,"order":3,"nearEdgeFromSwitch":802,"x0":1242,"x1":1292,"centre":{"x":1267,"y":268},"height":20}],"cuts":[["CN 70222"],["GATX 8810","GATX 8828"]],"gaps":[{"after":"CN 70222","before":"GATX 8810","x0":1150,"x1":1192,"len":42}],"derived":{"note":"Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.","trackLength":852,"carLengthTotal":142,"throatGap":668,"roomBeforeFoul":638,"roomInBoxCars":15}},{"id":"AS73","index":2,"switch":{"x":510,"y":216},"y":216,"trackEndX":1292,"clearanceX":540,"lined":"reverse","secured":true,"securementTag":"TIED","kickable":true,"kickableMark":"⚡ KICKABLE","isGoalTrack":true,"cars":[{"id":"CN 70134","number":"70134","type":"box","typeTag":"BX","loaded":false,"loadWord":"empty","len":42,"kickableType":true,"isGoalCar":true,"order":1,"nearEdgeFromSwitch":656,"x0":1166,"x1":1208,"centre":{"x":1187,"y":216},"height":20},{"id":"CN 70010","number":"70010","type":"box","typeTag":"BX","loaded":false,"loadWord":"empty","len":42,"kickableType":true,"isGoalCar":true,"order":2,"nearEdgeFromSwitch":698,"x0":1208,"x1":1250,"centre":{"x":1229,"y":216},"height":20},{"id":"CN 70028","number":"70028","type":"box","typeTag":"BX","loaded":false,"loadWord":"empty","len":42,"kickableType":true,"isGoalCar":true,"order":3,"nearEdgeFromSwitch":740,"x0":1250,"x1":1292,"centre":{"x":1271,"y":216},"height":20}],"cuts":[["CN 70134","CN 70010","CN 70028"]],"gaps":[],"derived":{"note":"Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.","trackLength":782,"carLengthTotal":126,"throatGap":656,"roomBeforeFoul":626,"roomInBoxCars":14}},{"id":"AS74","index":3,"switch":{"x":580,"y":164},"y":164,"trackEndX":1292,"clearanceX":610,"lined":"normal","secured":true,"securementTag":"TIED","kickable":false,"kickableMark":null,"isGoalTrack":false,"cars":[{"id":"SHPX 6610","number":"6610","type":"hopper","typeTag":"HP","loaded":true,"loadWord":"loaded","len":47,"kickableType":true,"isGoalCar":false,"order":1,"nearEdgeFromSwitch":618,"x0":1198,"x1":1245,"centre":{"x":1221.5,"y":164},"height":20},{"id":"SHPX 6628","number":"6628","type":"hopper","typeTag":"HP","loaded":true,"loadWord":"loaded","len":47,"kickableType":true,"isGoalCar":false,"order":2,"nearEdgeFromSwitch":665,"x0":1245,"x1":1292,"centre":{"x":1268.5,"y":164},"height":20}],"cuts":[["SHPX 6610","SHPX 6628"]],"gaps":[],"derived":{"note":"Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.","trackLength":712,"carLengthTotal":94,"throatGap":618,"roomBeforeFoul":588,"roomInBoxCars":14}},{"id":"AS75","index":4,"switch":{"x":650,"y":112},"y":112,"trackEndX":1292,"clearanceX":680,"lined":"normal","secured":true,"securementTag":"TIED","kickable":false,"kickableMark":null,"isGoalTrack":false,"cars":[{"id":"ETTX 9001","number":"9001","type":"autorack","typeTag":"AR","loaded":true,"loadWord":"loaded","len":75,"kickableType":false,"isGoalCar":false,"order":1,"nearEdgeFromSwitch":492,"x0":1142,"x1":1217,"centre":{"x":1179.5,"y":112},"height":20},{"id":"ETTX 9020","number":"9020","type":"autorack","typeTag":"AR","loaded":true,"loadWord":"loaded","len":75,"kickableType":false,"isGoalCar":false,"order":2,"nearEdgeFromSwitch":567,"x0":1217,"x1":1292,"centre":{"x":1254.5,"y":112},"height":20}],"cuts":[["ETTX 9001","ETTX 9020"]],"gaps":[],"derived":{"note":"Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.","trackLength":642,"carLengthTotal":150,"throatGap":492,"roomBeforeFoul":462,"roomInBoxCars":11}},{"id":"AS76","index":5,"switch":{"x":720,"y":60},"y":60,"trackEndX":1292,"clearanceX":750,"lined":"normal","secured":true,"securementTag":"TIED","kickable":false,"kickableMark":null,"isGoalTrack":false,"cars":[{"id":"CN 81002","number":"81002","type":"box","typeTag":"BX","loaded":false,"loadWord":"empty","len":42,"kickableType":true,"isGoalCar":false,"order":1,"nearEdgeFromSwitch":488,"x0":1208,"x1":1250,"centre":{"x":1229,"y":60},"height":20},{"id":"CN 81044","number":"81044","type":"box","typeTag":"BX","loaded":false,"loadWord":"empty","len":42,"kickableType":true,"isGoalCar":false,"order":2,"nearEdgeFromSwitch":530,"x0":1250,"x1":1292,"centre":{"x":1271,"y":60},"height":20}],"cuts":[["CN 81002","CN 81044"]],"gaps":[],"derived":{"note":"Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.","trackLength":572,"carLengthTotal":84,"throatGap":488,"roomBeforeFoul":458,"roomInBoxCars":10}}],"engine":{"centre":{"x":120,"y":372},"angle":0,"len":64,"height":24,"x0":88,"x1":152,"restArclength":440,"headlight":{"x":93,"y":372,"radius":2.6,"note":"At the end away from the cars, toward the departure end of the lead (render.js:161-162)."},"holds":[{"id":"CN 70110","number":"70110","type":"box","typeTag":"BX","loaded":false,"loadWord":"empty","len":42,"kickableType":true,"isGoalCar":true,"order":1,"nearestLoco":true,"x0":152,"x1":194,"centre":{"x":173,"y":372},"angle":0,"height":20}],"holdsNote":"holds[0] is the car nearest the engine. A SPOT or KICK takes cars from the far end. A PULL adds cars at the far end.","leadRoomUnits":558,"heldLengthUnits":42},"linedRoute":{"note":"Derived by R1 from the lined map with the logic of model.js:66-75: from the far end of the held cut, along the lead, up the ladder, into the first track whose switch is reverse, to the near edge of its first standing car.","points":[{"x":194,"y":372},{"x":300,"y":372},{"x":370,"y":320},{"x":440,"y":268},{"x":510,"y":216},{"x":1166,"y":216}],"reachesTrack":"AS73"},"goalProgress":{"track":"AS73","wanted":["CN 70010","CN 70028","CN 70110","CN 70134"],"onGoalTrackNow":["CN 70134","CN 70010","CN 70028"],"stillToCome":["CN 70110"],"note":"Derived. The present drawing has no goal mark on the canvas; the goal is in the work order words only."}},"words":{"note":"Text as the app shows it. Built here with the same templates as yardSim.js:621-634 and checked against the running app (see the report). Do not change a word.","workOrder":{"top":"WORK ORDER P4-PEEL · Don’t slam a load into empties","topParts":{"tag":"WORK ORDER","id":"P4-PEEL","title":"Don’t slam a load into empties"},"job":"Build AS73 — gather 70010 · 70028 · 70110 · 70134 onto it (now on AS73, AS71).","jobBoldParts":["AS73","70010 · 70028 · 70110 · 70134"],"jobDimPart":"(now on AS73, AS71)","meta":"Target 6 moves (par) — fewest moves wins.","metaBoldPart":"6 moves","tip":"AS73 is a tied, kickable cut of EMPTIES (⚡). Two empty box cars for it sit on AS71 — but a LOADED car is coupled between them, and you must never kick a load onto empties (it damages the light cars). Pull all three, KICK the empties on, and SPOT the loaded car clear in between.","staticNote":"The work order is built from puzzle.start and does not change during play. \"(now on AS73, AS71)\" stays on screen in this mid-game scene."},"picker":{"groupLabel":"Tier 4 — loads & empties","optionLabel":"Don’t slam a load into empties · par 6","marks":"\"✓ \" before a completed job, \"→ \" before the recommended next job, \" · your best <n>m\" after a job with a record (yardSim.js:698-703)"},"readout":"Moves 4 / par 6 · Joints 2","banner":{"text":"Spotted 1 to AS72.","tone":"ok"},"builder":{"actions":["PULL","SPOT","KICK","SECURE"],"countUnitWord":"cars","tracks":["AS71","AS72","AS73","AS74","AS75","AS76"],"buttons":["Work it ▸","▶ Watch optimal","Reset","🔊"],"hiddenForThisPuzzle":["Depart ▸"],"muteButtonNote":"The sound button shows 🔊 when sound is on and 🔇 when it is off (yardSim.js:307, 716). In a fresh profile the app shows 🔇.","selectTitles":{"picker":"Pick a job","action":"Action","count":"How many cars","track":"Which track","watchOptimal":"Auto-line and play the fewest-moves line in slow motion","mute":"Sound"},"backButton":"← Home","selectedForScene":{"action":"KICK","count":1,"track":"AS73"},"countOptionsForScene":[1]},"legend":"Rules in play — CROR = the national rulebook (applies everywhere) · S.I. = a special instruction, specific to this yard — you must know your yard's.","canvasLabels":[{"text":"◄ DEPARTURE · LEAD / DRILL","x":10,"y":348,"align":"left","where":"render.js:92"},{"text":"MAIN LINE → the road","x":840,"y":18,"align":"left","where":"render.js:93"},{"text":"15 MPH · REDUCED (CROR 105)","x":1330,"y":18,"align":"right","where":"render.js:94"}],"trackLabelPlacement":"Track id at x = TRACK_RIGHT + 10, y = track y (render.js:139). TIED or LOOSE under it at y + 16 (render.js:146). ⚡ KICKABLE under that (render.js:150)."},"ruleChips":[{"key":"loads","kind":"si","kindWord":"S.I.","cite":"Loads & empties","label":"Solid = loaded, hollow = empty. Don’t kick a load into empties; kick ≤5 (≤3 loaded)"},{"key":"kickable","kind":"si","kindWord":"S.I.","cite":"Kickable tracks","label":"Kick only where the special instruction allows (⚡)"},{"key":"secure","kind":"cror","kindWord":"CROR","cite":"CROR 112","label":"Unattended equipment gets a hand brake (secured)"},{"key":"kick","kind":"cror","kindWord":"CROR","cite":"CROR 113.4 / 113.5","label":"Kick only onto a secured 2+ car backstop; tanks/autoracks aren’t kicked"},{"key":"line","kind":"cror","kindWord":"CROR","cite":"CROR 104","label":"Line & examine the switch for your route"},{"key":"speed","kind":"cror","kindWord":"CROR","cite":"CROR 105","label":"Yard speed — REDUCED (stop within ½ range of vision); transfers ≤ 15 MPH"},{"key":"couple","kind":"cror","kindWord":"CROR","cite":"CROR 113.0 / 113.2","label":"Couple, then stretch to verify the joint"},{"key":"shove","kind":"cror","kindWord":"CROR","cite":"CROR 115","label":"Shove only with the route lined & protected"}],"nextMove":{"act":"kick","actWord":"KICK","track":"AS73","n":1,"cars":["CN 70110"],"legalInScene":true,"landing":[{"id":"CN 70110","number":"70110","x0":1124,"x1":1166,"centre":{"x":1145,"y":216}}],"landingNote":"From spotPlan() of model.js. The kicked car couples onto the standing cut.","asSentence":"KICK 1 to AS73","afterIt":{"engineSays":"Kicked 1 to AS73.","moves":6,"joints":2,"jobWon":true,"winBanner":"✓ Par! 6 moves — 2 couplings, clean","readout":"Moves 6 / par 6 · Joints 2"}},"wordsThatBindTheDrawing":[{"rule":"Loaded is solid. Empty is hollow.","because":"The rule chip says \"Solid = loaded, hollow = empty.\" (puzzles.js:18, frozen). The hint of p4-loads says \"Solid cars are loaded, hollow are empty.\" (puzzles.js:281, frozen)."},{"rule":"The glyph ⚡ marks a kickable track.","because":"The rule chip says \"(⚡)\" (puzzles.js:17, frozen). Six hints say \"(⚡)\". The canvas tag is \"⚡ KICKABLE\" (render.js:150)."},{"rule":"The words TIED and LOOSE name the securement state of a standing cut of 2 or more cars.","because":"render.js:146. Hints say \"tied\" and \"tied-down\" (puzzles.js, frozen). model.js says \"tied down\" and \"standing loose\"."},{"rule":"The app text says: yellow = lined into the track / diverging, green = normal.","because":"yardSim.js:190-191 (How to play). If a look changes these two colours, that sentence becomes false. The owner decides. render.js:2 calls yellow a rule convention; that claim is not verified (T12)."},{"rule":"A track nearer the lead is drawn below a track farther from the lead. AS71 is the lowest track. The ladder runs up.","because":"The app text says \"line its switch reverse and the ones below it normal\" (yardSim.js:203) and \"green = normal, straight up the ladder\" (yardSim.js:191)."},{"rule":"The app text says \"Click a switch target to line it\".","because":"yardSim.js:189. Each switch needs a visible target that a pointer can press."},{"rule":"A car is called by its number: the last word of its mark.","because":"render.js:169. The work order lists numbers only (yardSim.js:627)."}],"inventoryNotInThisScene":["Car type centerbeam (tag CB, length 61). It is in geometry.carTypes. Only puzzle p2-types has one.","A track that holds one car. It shows no TIED or LOOSE tag (render.js:144).","The arrival cinematic (puzzle p6-road only) and the departure run (depart goals only).","The switch-list check (puzzle p2-list only).","A long held cut. The engine backs off the frame to the left: with a cut of 252 units its centre is at x = -14; at the lead limit (558 units) it is at x = -320 (geometry.js:60-62)."],"refusalExample":{"note":"What the app says if the player calls the next move before relining (AS72 still reverse, AS73 normal). Verbatim output of model.js. Shown in the banner with tone \"bad\" and a \"Look it up →\" button (yardSim.js:644-655). Use it only to show the refusal state. Do not reword it.","linedThen":{"AS72":"reverse","AS73":"normal"},"ok":false,"text":"AS73 is lined normal — line its switch reverse for the track (CROR 104).","lookupButton":"Look it up →"},"geometry":{"note":"Logical units of geometry.js. The present canvas is W x H units, scaled by CSS. x grows right, y grows down. Do not change a number: model.js reads the lengths and clearances.","W":1340,"H":460,"LEAD_Y":372,"LEAD_LEFT":-320,"FOOT":{"x":300,"y":372},"ladderStep":{"x":70,"y":-52},"NTRACK":6,"TRACK_IDS":["AS71","AS72","AS73","AS74","AS75","AS76"],"TRACK_RIGHT":1292,"MAIN_OUT":{"x":930,"y":-96},"switches":[{"id":"AS71","x":370,"y":320},{"id":"AS72","x":440,"y":268},{"id":"AS73","x":510,"y":216},{"id":"AS74","x":580,"y":164},{"id":"AS75","x":650,"y":112},{"id":"AS76","x":720,"y":60}],"trackY":{"AS71":320,"AS72":268,"AS73":216,"AS74":164,"AS75":112,"AS76":60},"trackLength":{"AS71":922,"AS72":852,"AS73":782,"AS74":712,"AS75":642,"AS76":572},"clearanceX":{"AS71":400,"AS72":470,"AS73":540,"AS74":610,"AS75":680,"AS76":750},"CLEAR":30,"SPOT_CLEAR":120,"TRACK_HEAD":120,"LEAD_REST":120,"S_FOOT":620,"REST_DEFAULT":440,"LEAD_CLEAR":558,"ENGLEN":64,"CARLEN":42,"carHeight":20,"locoHeight":24,"carTypes":{"box":{"len":42,"tag":"BX","kick":true},"hopper":{"len":47,"tag":"HP","kick":true},"tank":{"len":50,"tag":"TK","kick":false},"centerbeam":{"len":61,"tag":"CB","kick":false},"autorack":{"len":75,"tag":"AR","kick":false}},"carTypesNote":"geometry.js also holds a fill and an edge colour for each type. They are the old palette. A new drawing takes its colours from Dusk tokens, not from there.","polylines":{"lead":[{"x":-320,"y":372},{"x":300,"y":372}],"leadVisible":[{"x":0,"y":372},{"x":300,"y":372}],"ladder":[{"x":300,"y":372},{"x":370,"y":320},{"x":440,"y":268},{"x":510,"y":216},{"x":580,"y":164},{"x":650,"y":112},{"x":720,"y":60}],"mainLine":[{"x":720,"y":60},{"x":930,"y":-96}],"bodyTracks":{"AS71":[{"x":370,"y":320},{"x":1292,"y":320}],"AS72":[{"x":440,"y":268},{"x":1292,"y":268}],"AS73":[{"x":510,"y":216},{"x":1292,"y":216}],"AS74":[{"x":580,"y":164},{"x":1292,"y":164}],"AS75":[{"x":650,"y":112},{"x":1292,"y":112}],"AS76":[{"x":720,"y":60},{"x":1292,"y":60}]},"engineRoute":{"AS71":[{"x":-320,"y":372},{"x":300,"y":372},{"x":370,"y":320},{"x":1292,"y":320}],"AS72":[{"x":-320,"y":372},{"x":300,"y":372},{"x":440,"y":268},{"x":1292,"y":268}],"AS73":[{"x":-320,"y":372},{"x":300,"y":372},{"x":510,"y":216},{"x":1292,"y":216}],"AS74":[{"x":-320,"y":372},{"x":300,"y":372},{"x":580,"y":164},{"x":1292,"y":164}],"AS75":[{"x":-320,"y":372},{"x":300,"y":372},{"x":650,"y":112},{"x":1292,"y":112}],"AS76":[{"x":-320,"y":372},{"x":300,"y":372},{"x":720,"y":60},{"x":1292,"y":60}]},"leadRestRoute":[{"x":-320,"y":372},{"x":340,"y":372}],"throughRoute":[{"x":930,"y":-96},{"x":720,"y":60},{"x":650,"y":112},{"x":580,"y":164},{"x":510,"y":216},{"x":440,"y":268},{"x":370,"y":320},{"x":300,"y":372},{"x":-320,"y":372}]},"ladderAngleDeg":-36.61,"presentStrokeWidths":{"leadAndBodyTracks":4,"ladderAndMainLine":3,"clearanceTick":2,"clearanceTickHalfHeight":9,"switchDiamondHalfSide":7,"switchGlowRadius":13,"headlightRadius":2.6},"presentSwitchHitRadius":18}};
+
+const G = SCENE.geometry, ST = SCENE.state, WD = SCENE.words, NEXT = SCENE.nextMove;
+const IDS = G.TRACK_IDS;
+const NS = 'http://www.w3.org/2000/svg';
+const TONE = { box: 'grey', hopper: 'teal', tank: 'violet', centerbeam: 'amber', autorack: 'blue' };  /* token names, not colours */
+const GAUGE = 3;        /* half of the rail spacing, in units (two rails 6 units apart) */
+const TIE_STEP = 10;    /* a tie every 10 units */
+const VIEW = { x0: 0, y0: -6, y1: 412 };   /* the window of the whole yard, in units */
+const TARGET = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--yd-target')) || 44;   /* the side of a switch button, in px */
+const MIN_W = 240;      /* under this panel width no view is drawn: the last picture stays */
+
+const live = { lined: Object.assign({}, ST.lined) };
+
+const $ = (q, el) => (el || document).querySelector(q);
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function H(tag, attrs, html) {
+  const e = document.createElement(tag);
+  for (const k in (attrs || {})) e.setAttribute(k, attrs[k]);
+  if (html != null) e.innerHTML = html;
+  return e;
+}
+function S(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in (attrs || {})) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const f1 = (n) => (Math.round(n * 10) / 10);
+const track = (id) => ST.tracks.find((t) => t.id === id);
+const sw = (id) => G.switches.find((s) => s.id === id);
+
+/* ---- measure text with the real fonts, so the layout holds when the text grows ---------------- */
+const probe = H('div', { class: 'yd-probe', 'aria-hidden': 'true' });
+document.body.appendChild(probe);
+function measure(html) {
+  probe.innerHTML = html;
+  Array.prototype.forEach.call(probe.querySelectorAll('.yd-bar'), (b) => { b.style.width = b.getAttribute('data-w') + 'px'; });
+  const r = probe.firstElementChild.getBoundingClientRect();
+  return { w: r.width, h: r.height };
+}
+
+/* ---- the lined route, with the logic of model.js:66-75 --------------------------------------- */
+function routeFor(lined) {
+  const e = ST.engine;
+  const start = e.holds.length ? e.holds[e.holds.length - 1].x1 : e.x1;
+  const pts = [{ x: start, y: G.LEAD_Y }, { x: G.FOOT.x, y: G.FOOT.y }];
+  for (const s of G.switches) {
+    pts.push({ x: s.x, y: s.y });
+    if (lined[s.id] === 'reverse') {
+      const t = track(s.id);
+      pts.push({ x: t.cars.length ? t.cars[0].x0 : t.trackEndX, y: s.y });
+      return { points: pts, reaches: s.id };
+    }
+  }
+  pts.push({ x: G.MAIN_OUT.x, y: G.MAIN_OUT.y });
+  return { points: pts, reaches: null };
+}
+const routeWords = (r) => 'LEAD → ' + (r.reaches || 'MAIN LINE');
+(function checkRoute() {
+  const r = routeFor(ST.lined);
+  const same = JSON.stringify(r.points) === JSON.stringify(ST.linedRoute.points) && r.reaches === ST.linedRoute.reachesTrack;
+  document.documentElement.setAttribute('data-route-check', same ? 'ok' : 'differs');
+})();
+
+/* ---- geometry helpers (px) -------------------------------------------------------------------- */
+function offsetPoly(pts, d) {
+  const out = [];
+  const nrm = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [dy / l, -dx / l]; };
+  for (let i = 0; i < pts.length; i++) {
+    let n1 = i > 0 ? nrm(pts[i - 1], pts[i]) : null;
+    let n2 = i < pts.length - 1 ? nrm(pts[i], pts[i + 1]) : null;
+    if (!n1) n1 = n2; if (!n2) n2 = n1;
+    let mx = n1[0] + n2[0], my = n1[1] + n2[1];
+    const l = Math.hypot(mx, my) || 1; mx /= l; my /= l;
+    const k = d / ((mx * n1[0] + my * n1[1]) || 1);
+    out.push([pts[i][0] + mx * k, pts[i][1] + my * k]);
+  }
+  return out;
+}
+const ptsAttr = (pts) => pts.map((p) => f1(p[0]) + ',' + f1(p[1])).join(' ');
+function along(a, b, dist) { const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [a[0] + (b[0] - a[0]) * dist / l, a[1] + (b[1] - a[1]) * dist / l]; }
+
+/* ---- view constants. None of them is a number of the game: they belong to the picture only. --- */
+const K_BAR = 0.1;      /* px for each unit in every room bar: one scale for the six tracks and the lead */
+const BMIN = 26;        /* px: the least width of a stretch of track that was left out (the break mark and a piece of rail) */
+const STUB = 44;        /* units of bare track that an empty track keeps before its end stop */
+const S_MAX_WIDE = 1.3, S_MAX_TALL = 1.1, S_MIN = 0.8;     /* the limits of the car scale. Under 0.8 the type tag does not fit on a car. */
+
+/* the landing place of the move in the builder, on the track that the route reaches */
+function landingFor(t, route) {
+  if (!NEXT || !NEXT.landing || route.reaches !== NEXT.track || NEXT.track !== t.id) return [];
+  return NEXT.landing.map((l) => ({ ref: l, x0: Math.max(l.x0, t.switch.x), x1: l.x1 })).filter((l) => l.x1 > l.x0 + 1);
+}
+
+/* A landing place whose near edge is inside the foul point does not fit: this is the test of model.js (nearEdge < CLEAR).
+   It takes no part in the layout. Its outlines run from the first car back toward the switch and are cut there. */
+function landingPlan(t, route) {
+  const land = landingFor(t, route);
+  const over = land.length > 0 && NEXT.landing[0].x0 < t.clearanceX;
+  return { fit: over ? [] : land, over: over ? NEXT.landing : [] };
+}
+function placeOver(L, t, over, fromPx, limitPx, y) {
+  let x1 = fromPx;
+  for (let i = over.length - 1; i >= 0 && x1 > limitPx; i--) {
+    const len = (over[i].x1 - over[i].x0) * L.s, x0 = Math.max(limitPx, x1 - len);
+    if (x1 - x0 > 2) L.items.push({ kind: 'land', c: over[i], track: t.id, cx: (x0 + x1) / 2, cy: y, len: x1 - x0, rot: 0, cutAt: x1 - x0 < len - 0.5 });
+    x1 -= len;
+  }
+}
+
+/* ---- one car, top-down, drawn in its own frame: x along the car, the throat end at the left --- */
+function drawCar(g, c, box, s, o) {
+  const tone = TONE[c.type];
+  const L = (c.x1 - c.x0) * s - 2.4 * s, Hh = c.height * s;
+  const x0 = -L / 2, x1 = L / 2, y0 = -Hh / 2, cy = 0;
+  const grp = S('g', { class: 'yd-car yd-tone-' + tone + (c.loaded ? ' is-loaded' : ' is-empty'), transform: 'translate(' + f1(box.cx) + ' ' + f1(box.cy) + ')' + (box.rot ? ' rotate(' + box.rot + ')' : '') }, g);
+  let body;
+  if (c.type === 'tank') {
+    const hh = Hh * 0.86;
+    body = S('rect', { class: 'yd-body', x: f1(x0), y: f1(cy - hh / 2), width: f1(L), height: f1(hh), rx: f1(hh / 2) }, grp);
+  } else {
+    body = S('rect', { class: 'yd-body', x: f1(x0), y: f1(y0), width: f1(L), height: f1(Hh), rx: 1.5 }, grp);
+  }
+  if (c.loaded) body.setAttribute('fill', 'url(#yd-g-' + tone + ')');
+  const tz = o.tagZone || 0;
+  const d0 = x0 + tz + (c.type === 'tank' ? 2 : 1.5), d1 = x1 - (c.type === 'tank' ? Hh * 0.3 : 3);
+  const line = (xa, ya, xb, yb, extra) => S('line', { class: 'yd-detail' + (extra || ''), x1: f1(xa), y1: f1(ya), x2: f1(xb), y2: f1(yb) }, grp);
+  if (c.type === 'box') {
+    for (let k = 1; k <= 3; k++) { const x = d0 + (d1 - d0) * (k - 0.5) / 3; line(x, y0 + 2.5, x, y0 + Hh - 2.5); }
+  } else if (c.type === 'hopper') {
+    const n = 4, pitch = (d1 - d0) / n, w = Math.max(2.5, pitch - 2.5), hh = Hh * 0.46;
+    for (let k = 0; k < n; k++) S('rect', { class: 'yd-detail', x: f1(d0 + k * pitch + (pitch - w) / 2), y: f1(cy - hh / 2), width: f1(w), height: f1(hh), rx: 1 }, grp);
+  } else if (c.type === 'tank') {
+    const mx = (d0 + d1) / 2;
+    line(d0 + 1, cy, mx - 4.5 * s, cy); line(mx + 4.5 * s, cy, d1, cy);
+    S('circle', { class: 'yd-detail yd-detail--solid', cx: f1(mx), cy: f1(cy), r: f1(Math.max(2, 2.6 * s)) }, grp);
+    S('circle', { class: 'yd-detail', cx: f1(mx), cy: f1(cy), r: f1(Math.max(3.4, 4.4 * s)) }, grp);
+  } else if (c.type === 'centerbeam') {
+    S('rect', { class: 'yd-detail yd-detail--solid', x: f1(d0), y: f1(cy - 1.2), width: f1(d1 - d0), height: 2.4 }, grp);
+    S('rect', { class: 'yd-detail yd-detail--solid', x: f1(d0), y: f1(y0 + 2), width: 2.6, height: f1(Hh - 4) }, grp);
+    S('rect', { class: 'yd-detail yd-detail--solid', x: f1(d1 - 2.6), y: f1(y0 + 2), width: 2.6, height: f1(Hh - 4) }, grp);
+  } else if (c.type === 'autorack') {
+    const n = Math.max(4, Math.round((d1 - d0) / (3.6 * s)));
+    for (let k = 0; k <= n; k++) { const x = d0 + (d1 - d0) * k / n; line(x, y0 + 2.5, x, y0 + Hh - 2.5); }
+  }
+  if (c.loaded && c.type !== 'tank') S('line', { class: 'yd-edge', x1: f1(x0 + 1.5), y1: f1(y0 + 0.5), x2: f1(x1 - 1.5), y2: f1(y0 + 0.5) }, grp);
+  return grp;
+}
+
+/* ---- the engine, top-down, in its own frame ---------------------------------------------------- */
+function drawEngine(g, e, box, s) {
+  const grp = S('g', { transform: 'translate(' + f1(box.cx) + ' ' + f1(box.cy) + ')' + (box.rot ? ' rotate(' + box.rot + ')' : '') }, g);
+  const x0 = -e.len / 2 * s + 0.6 * s, x1 = e.len / 2 * s - 1.2 * s, cy = 0, Hh = e.height * s;
+  const headLeft = e.headlight.x < e.centre.x;
+  const hx = (e.headlight.x - e.centre.x) * s, hy = (e.headlight.y - e.centre.y) * s, dir = headLeft ? -1 : 1;
+  S('polygon', { fill: 'url(#' + (headLeft ? 'yd-beam-l' : 'yd-beam-r') + ')', points: ptsAttr([[hx, hy - 1.5 * s], [hx + dir * 36 * s, hy - 9 * s], [hx + dir * 36 * s, hy + 9 * s], [hx, hy + 1.5 * s]]) }, grp);
+  S('rect', { class: 'yd-eng-body', x: f1(x0), y: f1(cy - Hh / 2), width: f1(x1 - x0), height: f1(Hh), rx: 2.5 }, grp);
+  S('rect', { class: 'yd-eng-walk', x: f1(x0 + 2.4 * s), y: f1(cy - Hh / 2 + 2.4 * s), width: f1(x1 - x0 - 4.8 * s), height: f1(Hh - 4.8 * s), rx: 1 }, grp);
+  const head = headLeft ? x0 : x1, tail = headLeft ? x1 : x0, t = headLeft ? 1 : -1;   /* t points from the head to the tail */
+  const hoodA = head + t * 8 * s, cabA = tail - t * 21 * s, cabB = tail - t * 8 * s, noseB = tail - t * 3 * s;
+  const rect = (cls, a, b, hh) => S('rect', { class: cls, x: f1(Math.min(a, b)), y: f1(cy - hh / 2), width: f1(Math.abs(b - a)), height: f1(hh), rx: 1.5 }, grp);
+  rect('yd-eng-hood', hoodA, cabA, 13 * s);
+  rect('yd-eng-hood', cabB, noseB, 11 * s);
+  rect('yd-eng-cab', cabA, cabB, 19 * s);
+  for (let k = 0; k < 3; k++) S('circle', { class: 'yd-eng-fan', cx: f1(hoodA + t * (6 + k * 9) * s), cy: f1(cy), r: f1(3.1 * s) }, grp);
+  S('circle', { class: 'yd-eng-lamp', cx: f1(hx), cy: f1(hy), r: f1(Math.max(2.2, e.headlight.radius * s)) }, grp);
+}
+
+/* ---- the words of a track: id, lining (tall form), securement, goal, kickable, the room bar ---- */
+function barHTML(lenU, takenU, landU) {
+  return '<span class="yd-bar" aria-hidden="true" data-w="' + Math.round(lenU * K_BAR) + '"><i data-w="' + Math.round(takenU * K_BAR) + '"></i>' +
+    (landU ? '<u data-w="' + Math.max(3, Math.round(landU * K_BAR)) + '" data-r="' + Math.round(takenU * K_BAR) + '"></u>' : '') + '</span>';
+}
+function setBars(root) {
+  Array.prototype.forEach.call(root.querySelectorAll('.yd-bar, .yd-bar i, .yd-bar u'), (b) => {
+    b.style.width = b.getAttribute('data-w') + 'px';
+    if (b.hasAttribute('data-r')) b.style.right = (+b.getAttribute('data-r') - 1) + 'px';
+  });
+}
+function trackBar(t, route) {
+  const d = t.derived, land = landingFor(t, route).reduce((a, l) => a + (l.x1 - l.x0), 0);
+  return barHTML(d.trackLength - G.CLEAR, d.trackLength - d.throatGap, land);
+}
+const leadBar = () => barHTML(ST.engine.leadRoomUnits, ST.engine.heldLengthUnits, 0);
+function endParts(t) {
+  const gp = ST.goalProgress;
+  let sec = '';
+  if (t.securementTag === 'TIED') sec = '<span class="dusk-state dusk-state--hold">' + esc(t.securementTag) + '</span>';
+  if (t.securementTag === 'LOOSE') sec = '<span class="dusk-state dusk-state--caution">' + esc(t.securementTag) + '</span>';
+  return {
+    id: '<span class="yd-tid">' + esc(t.id) + '</span>', sec: sec,
+    goal: t.isGoalTrack ? '<span class="yd-goalpair"><span class="yd-goal">BUILD</span><span class="dusk-count">' + gp.onGoalTrackNow.length + ' / ' + gp.wanted.length + '</span></span>' : '',
+    kick: t.kickableMark ? '<span class="yd-kick">' + esc(t.kickableMark) + '</span>' : ''
+  };
+}
+/* wide form: a plate past the end stop. compact = the kickable mark shares a line. */
+function endHTML(t, route, compact) {
+  const p = endParts(t);
+  const l1 = p.id + p.sec, l2 = p.goal, l3 = p.kick;
+  const rows = compact ? [l1 + (l2 ? '' : l3), l2 + (l2 ? l3 : '')] : [l1, l2, l3];
+  return rows.filter(Boolean).map((r) => '<div>' + r + '</div>').join('') + '<div class="yd-barline">' + trackBar(t, route) + '</div>';
+}
+/* tall form: one caption over the row. The lining word stands here: the stand is at the left end of the row. */
+function capHTML(t, lin, route) {
+  const p = endParts(t);
+  return p.id + '<span class="yd-lin yd-lin--' + lin + '">' + lin.toUpperCase() + '</span>' + p.sec + p.goal + p.kick + '<span class="yd-barline">' + trackBar(t, route) + '</span>';
+}
+
+/* ---- measured text. Every layout number that depends on a word comes from here. ---------------- */
+function measureAll(route) {
+  const M = { num: {} };
+  const numOf = (n) => (M.num[n] || (M.num[n] = measure('<div class="yd-plate yd-num">' + esc(n) + '</div>').w));
+  M.numOf = numOf;
+  M.numH = measure('<div class="yd-plate yd-num">00000</div>').h;
+  const tg = measure('<span class="yd-tag">BX</span>'); M.tagW = tg.w; M.tagH = tg.h;
+  const fp = measure('<div class="yd-plate">foul point</div>'); M.foulW = fp.w; M.plateH = fp.h;
+  M.engW = measure('<div class="yd-plate yd-eng-word">ENGINE</div>').w;
+  M.labels = WD.canvasLabels.map((lb) => measure('<div class="yd-plate yd-label">' + esc(lb.text) + '</div>'));
+  /* the least car scale at which two neighbouring number plates do not touch */
+  const pairs = (items) => { let need = 0; for (let i = 0; i + 1 < items.length; i++) need = Math.max(need, ((items[i].w + items[i + 1].w) / 2 + 1.5) / (items[i + 1].c - items[i].c)); return need; };
+  let onTracks = 0;
+  ST.tracks.forEach((t) => {
+    const items = landingFor(t, route).map((l) => ({ c: (l.ref.x0 + l.ref.x1) / 2, w: numOf(l.ref.number) })).concat(t.cars.map((c) => ({ c: c.centre.x, w: numOf(c.number) })));
+    onTracks = Math.max(onTracks, pairs(items));
+  });
+  const e = ST.engine;
+  const onLead = pairs([{ c: e.centre.x, w: M.engW }].concat(e.holds.map((c) => ({ c: c.centre.x, w: numOf(c.number) }))));
+  /* the type tag must stay inside its car: its height on a car that lies along a track, its width on a held car that stands upright (tall form) */
+  const bodyH = (c) => c.height * (c.type === 'tank' ? 0.86 : 1);
+  let tagFlat = 0, tagUp = 0;
+  ST.tracks.forEach((t) => t.cars.forEach((c) => { tagFlat = Math.max(tagFlat, (M.tagH + 1) / bodyH(c)); }));
+  e.holds.forEach((c) => { tagFlat = Math.max(tagFlat, (M.tagH + 1) / bodyH(c)); tagUp = Math.max(tagUp, M.tagW / bodyH(c)); });
+  const lbp = measure('<div class="yd-plate yd-barplate">' + leadBar() + '</div>'); M.leadBarW = lbp.w; M.leadBarH = lbp.h;
+  M.sMinWide = Math.max(S_MIN, onTracks, onLead, tagFlat);
+  M.sMinTall = Math.max(S_MIN, onTracks, tagFlat, tagUp);
+  return M;
+}
+function probeBox(html, widthPx) {      /* the size of a wrapping block at a given width */
+  probe.innerHTML = html;
+  const el = probe.firstElementChild;
+  el.style.width = widthPx + 'px';
+  setBars(el);
+  const r = el.getBoundingClientRect();
+  return { w: r.width, h: r.height };
+}
+
+/* ---- the wide form ------------------------------------------------------------------------------
+   The true geometry at one scale s. When the window is too narrow, the same length D (px) of empty
+   track is left out of each of the six tracks, between its foul point and its first car (or the
+   landing place). The lead, the ladder, the main line, each car and each gap between cuts keep s. */
+function wideZones(route, s, M) {
+  return ST.tracks.map((t) => {
+    const lined = route.reaches === t.id, land = landingPlan(t, route).fit;
+    const a = t.clearanceX + (lined ? (M.foulW / 2) / s + 3 : 9);
+    const first = Math.min.apply(null, [t.trackEndX - STUB].concat(t.cars.map((c) => c.x0), land.map((l) => l.x0)));
+    const c = Math.max(a, first - 6);
+    return { t: t, a: a, c: c, B: c - a };
+  });
+}
+function planWide(o) {
+  /* o: { x0u, y0u, y1u, s, D, zones, M, route, wpx, crop } */
+  const s = o.s, D = o.D || 0;
+  const XL = (x) => (x - o.x0u) * s, Y = (y) => (y - o.y0u) * s;
+  const xEnd = XL(G.TRACK_RIGHT) - D;
+  const L = { form: 'wide', s: s, D: D, w: o.wpx, h: Math.round((o.y1u - o.y0u) * s), tr: {}, swp: {}, items: [], brks: [], conts: [], cutline: null };
+  L.leadStart = [XL(G.LEAD_LEFT), Y(G.LEAD_Y)];
+  L.foot = [XL(G.FOOT.x), Y(G.FOOT.y)];
+  G.switches.forEach((sp) => { L.swp[sp.id] = [XL(sp.x), Y(sp.y)]; });
+  L.mainEnd = [XL(G.MAIN_OUT.x), Y(G.MAIN_OUT.y)];
+  L.leadPos = (x) => [XL(x), Y(G.LEAD_Y)];
+  L.xEnd = xEnd;
+  let lo = -Infinity, hi = Infinity;
+  o.zones.forEach((z) => { lo = Math.max(lo, XL(z.a)); hi = Math.min(hi, xEnd - (G.TRACK_RIGHT - z.c) * s); });
+  const common = D > 0.5 && hi - lo >= 18;
+  o.zones.forEach((z) => {
+    const t = z.t, y = Y(t.y), pa = XL(z.a), pc = xEnd - (G.TRACK_RIGHT - z.c) * s;
+    const map = (x) => (x <= z.a ? XL(x) : x >= z.c ? xEnd - (G.TRACK_RIGHT - x) * s : pa + (x - z.a) / ((z.c - z.a) || 1) * (pc - pa));
+    const tr = { y: y, map: map, lines: [{ y: y, pts: [L.swp[t.id], [xEnd, y]] }], foul: [XL(t.clearanceX), y], stop: [xEnd + 2.5 * s, y], endX: xEnd, pa: pa, pc: pc };
+    if (D > 0.5) { const b = [common ? (lo + hi) / 2 : (pa + pc) / 2, y]; tr.brk = b; L.brks.push({ x: b[0], y: b[1], id: t.id }); }
+    const lp = landingPlan(t, o.route);
+    lp.fit.forEach((l) => L.items.push({ kind: 'land', c: l.ref, track: t.id, cx: (map(l.x0) + map(l.x1)) / 2, cy: y, len: map(l.x1) - map(l.x0), rot: 0 }));
+    t.cars.forEach((c) => L.items.push({ kind: 'car', c: c, track: t.id, line: 0, cx: (map(c.x0) + map(c.x1)) / 2, cy: y, rot: 0 }));
+    tr.routeEnd = [t.cars.length ? map(t.cars[0].x0) : xEnd, y];
+    placeOver(L, t, lp.over, tr.routeEnd[0], XL(t.switch.x), y);
+    L.tr[t.id] = tr;
+  });
+  if (common) L.cutline = { x: (lo + hi) / 2, y0: Y(o.zones[o.zones.length - 1].t.y) - 14 * s, y1: Y(o.zones[0].t.y) + 14 * s };
+  /* at a small scale the "foul point" plate of the lined track reaches the track under it: the break mark of that track moves out from under the plate */
+  if (o.route.reaches && !o.crop && !common) {
+    const ri = IDS.indexOf(o.route.reaches), under = ri > 0 ? L.tr[IDS[ri - 1]] : null;
+    const plateBottom = Math.max(G.presentStrokeWidths.clearanceTickHalfHeight * s + 6, TARGET / 2 - 8 * s + 3) + o.M.plateH, markTop = Math.abs(G.ladderStep.y) * s - Math.round(15 * s + 4) / 2;
+    if (under && under.brk && plateBottom + 2 > markTop) {
+      const fx = XL(track(o.route.reaches).clearanceX), half = o.M.foulW / 2 + 13;
+      if (Math.abs(under.brk[0] - fx) < half) {
+        const nx = fx + half <= under.pc - 13 ? fx + half : (fx - half >= under.pa + 13 ? fx - half : under.brk[0]);
+        under.brk[0] = nx; L.brks.find((k) => k.id === IDS[ri - 1]).x = nx;
+      }
+    }
+  }
+  const e = ST.engine;
+  L.engine = { cx: XL(e.centre.x), cy: Y(e.centre.y), rot: 0 };
+  e.holds.forEach((c) => L.items.push({ kind: 'held', c: c, cx: XL(c.centre.x), cy: Y(c.centre.y), rot: 0 }));
+  /* the plates: track ends, the three labels of the present drawing, the lead bar */
+  L.ends = o.crop ? [] : ST.tracks.map((t) => ({ t: t, x: xEnd + 2.5 * s + 9, y: Y(t.y) }));
+  L.labels = [];
+  if (!o.crop) {
+    const M = o.M, lab = WD.canvasLabels, right = lab.map((lb, i) => i).filter((i) => lab[i].align === 'right');
+    let rightLeft = o.wpx;
+    right.forEach((i) => { L.labels.push({ text: lab[i].text, x: o.wpx - 8, y: Y(lab[i].y), a: 'r' }); rightLeft = Math.min(rightLeft, o.wpx - 8 - M.labels[i].w); });
+    lab.forEach((lb, i) => {
+      if (lb.align === 'right') return;
+      const ly = Y(lb.y);
+      if (lb.y > G.LEAD_Y - 60) {            /* the label of the lead: at the left edge, with the lead bar after it */
+        /* large text at a small scale: the label stays over the engine, and the bar goes over the label when the place at its right belongs to the AS71 switch */
+        const lw = M.labels[i].w, lh = M.labels[i].h, yLab = Math.min(ly, Y(G.LEAD_Y) - e.height * s / 2 - lh / 2 - 3);
+        const sp0 = G.switches[0], limitX = Math.min(XL(sp0.x) - 6 * s - TARGET / 2, XL(sp0.x + G.CLEAR) - M.foulW / 2) - 4;
+        L.labels.push({ text: lb.text, x: 4, y: yLab, a: 'l' });
+        L.leadBar = 4 + lw + 6 + M.leadBarW <= limitX ? { x: 4 + lw + 6, y: yLab, a: 'l' } : { x: 4, y: yLab - lh / 2 - 2 - M.leadBarH / 2, a: 'l' };
+      } else if (XL(lb.x) + M.labels[i].w + 8 <= rightLeft) L.labels.push({ text: lb.text, x: XL(lb.x), y: ly, a: 'l' });
+      else {                                 /* no room at the right of the main line: the label stands at its left */
+        const xl = G.switches[G.switches.length - 1], xLine = xl.x + (xl.y - lb.y) * (G.MAIN_OUT.x - xl.x) / (xl.y - G.MAIN_OUT.y);
+        L.labels.push({ text: lb.text, x: Math.min(XL(xLine) - 26 * s, XL(xl.x) - 6 * s - TARGET / 2 - 4), y: ly, a: 'r' });
+      }
+    });
+  }
+  return L;
+}
+
+/* ---- the tall form ------------------------------------------------------------------------------
+   The same rails, cars and stands at one scale s. The ladder is a vertical spine at the left. Each
+   track is a row to the right of its switch, AS76 at the top and AS71 at the bottom. The lead runs
+   down from the foot. Empty track shrinks as in the wide form. A row of cars that is longer than the
+   row goes on in the next line. */
+function planTall(Wp, route, M) {
+  const routeNow = route, xs = 34, dz = 14, diag = dz * Math.SQRT2, xEnd = Wp - 12, contW = 20, xLine = xs + dz + contW + 6;
+  const capX = xs + 24, capW = Wp - capX - 8;
+  const TR = G.TRACK_RIGHT;
+  const zonesAt = (s, rt) => ST.tracks.map((t) => {
+    const route = rt || routeNow;
+    const lined = route.reaches === t.id;
+    const Xa = (x) => xs + dz + ((x - t.switch.x) * s - diag);
+    const xF = Xa(t.clearanceX);
+    let xA = xF + 10, foulL = null;
+    if (lined) { foulL = Math.max(xF - M.foulW / 2, xs + 19); xA = Math.max(xA, foulL + M.foulW + 4); }
+    const toks = landingPlan(t, route).fit.map((l) => ({ kind: 'land', c: l.ref, x0: l.x0, x1: l.x1 })).concat(t.cars.map((c) => ({ kind: 'car', c: c, x0: c.x0, x1: c.x1 })));
+    const first = toks.length ? toks[0].x0 : t.trackEndX - STUB;
+    const aU = t.switch.x + (xA - xs - dz + diag) / s, cU = first - 6;
+    const trueFits = Xa(TR) + 2.5 * s <= xEnd + 0.01;
+    const oneLine = trueFits || (cU >= aU && (TR - cU) * s + 2.5 * s + Math.min(BMIN, (cU - aU) * s) <= xEnd - xA + 0.01);
+    return { t: t, lined: lined, Xa: Xa, xF: xF, xA: xA, foulL: foulL, toks: toks, aU: aU, cU: cU, trueFits: trueFits, oneLine: oneLine };
+  });
+  /* one car scale for the picture: the largest that keeps each track in one line; the least scale when none does.
+     The test runs over every route that the six switches can line, so that the scale does not change when a switch is lined. */
+  let s = M.sMinTall, zones = null;
+  const every = M.routes || [route];
+  for (let k = S_MAX_TALL; k >= M.sMinTall - 1e-9; k -= 0.01) { if (every.every((r) => zonesAt(k, r).every((q) => q.oneLine))) { s = k; zones = zonesAt(k); break; } }
+  if (!zones) zones = zonesAt(s);
+  const L = { form: 'tall', s: s, D: 0, w: Wp, tr: {}, swp: {}, items: [], brks: [], conts: [], cutline: null, caps: [], labels: [], folds: 0 };
+  const lineH = 20 * s + 3 + M.numH + 9;
+
+  /* the top: the main line and its two labels */
+  const lab = WD.canvasLabels, tops = lab.map((lb, i) => i).filter((i) => lab[i].y < G.switches[G.switches.length - 1].y);
+  let y = 6, labX = xs + 12;
+  let topH = 0;
+  tops.forEach((i, k) => {
+    /* a label that is wider than the picture (large text on a narrow window) wraps: it is never cut by the frame */
+    const maxW = Wp - (xs + 12) - 8;
+    let w = M.labels[i].w, h = M.labels[i].h, wrapW = 0;
+    if (w > maxW) { wrapW = maxW; w = maxW; h = probeBox('<div class="yd-plate yd-label yd-wrap">' + esc(lab[i].text) + '</div>', maxW).h; }
+    if (k === 0) { L.labels.push({ text: lab[i].text, x: labX, y: y + h / 2, a: 'l', wrapW: wrapW }); labX += w + 8; topH = h; }
+    else if (!wrapW && labX + w <= Wp - 8) { L.labels.push({ text: lab[i].text, x: Wp - 8, y: y + h / 2, a: 'r' }); topH = Math.max(topH, h); }
+    else { y += topH + 4; L.labels.push({ text: lab[i].text, x: xs + 12, y: y + h / 2, a: 'l', wrapW: wrapW }); topH = h; }
+    if (k === tops.length - 1) y += topH + 4;
+  });
+  L.mainEnd = [xs, -4];
+
+  /* the rows, AS76 first */
+  zones.slice().reverse().forEach((z) => {
+    const t = z.t, lin = live.lined[t.id];
+    /* the height of the caption does not follow the lining word: a row must not move when its switch is lined */
+    const capH = Math.max(probeBox('<div class="yd-rowcap">' + capHTML(t, 'normal', route) + '</div>', capW).h, probeBox('<div class="yd-rowcap">' + capHTML(t, 'reverse', route) + '</div>', capW).h);
+    L.caps.push({ t: t, x: capX, y: y + 4, w: capW });
+    const y0 = y + 4 + capH + 5 + 10 * s;
+    const P = [xs, y0 + dz];
+    L.swp[t.id] = P;
+    const tr = { y: y0, lines: [], foul: [z.xF, y0], foulL: z.foulL };
+    const put = (tk, px0, yy, line) => L.items.push({ kind: tk.kind, c: tk.c, track: t.id, line: line, cx: px0 + (tk.x1 - tk.x0) * s / 2, cy: yy, len: (tk.x1 - tk.x0) * s, rot: 0 });
+    if (z.oneLine) {
+      const map = z.trueFits ? z.Xa : (x) => xEnd - 2.5 * s - (TR - x) * s;
+      const endPx = map(TR);
+      tr.lines.push({ y: y0, pts: [P, [xs + dz, y0], [endPx, y0]] });
+      tr.stop = [endPx + 2.5 * s, y0];
+      z.toks.forEach((tk) => put(tk, map(tk.x0), y0, 0));
+      if (!z.trueFits && (z.cU - z.aU) * s - (map(z.cU) - z.xA) > 1) { tr.brk = [(z.xA + map(z.cU)) / 2, y0]; L.brks.push({ x: tr.brk[0], y: y0, id: t.id }); }
+      tr.routeEnd = [t.cars.length ? map(t.cars[0].x0) : endPx, y0];
+    } else {
+      L.folds += 1;
+      const shrunk = z.cU >= z.aU && (z.cU - z.aU) * s > BMIN;
+      let cur = { startPx: z.cU >= z.aU ? z.xA + Math.min(BMIN, (z.cU - z.aU) * s) : z.Xa(z.cU), u0: z.cU, toks: [], y: y0 };
+      const lines = [];
+      z.toks.forEach((tk) => {
+        if (cur.startPx + (tk.x1 - cur.u0) * s > xEnd - contW && cur.toks.length) { lines.push(cur); cur = { startPx: xLine, u0: tk.x0, toks: [], y: y0 + lines.length * lineH }; }
+        cur.toks.push(tk);
+      });
+      lines.push(cur);
+      lines.forEach((ln, k) => {
+        const last = k === lines.length - 1;
+        const px = (x) => ln.startPx + (x - ln.u0) * s;
+        const endPx = last ? px(TR) : px(ln.toks[ln.toks.length - 1].x1) + 8;
+        tr.lines.push({ y: ln.y, pts: k === 0 ? [P, [xs + dz, y0], [endPx, ln.y]] : [[xLine - 6, ln.y], [endPx, ln.y]] });
+        ln.toks.forEach((tk) => put(tk, px(tk.x0), ln.y, k));
+        if (last) tr.stop = [endPx + 2.5 * s, ln.y];
+        else L.conts.push({ from: [endPx, ln.y], to: [xLine - 6, ln.y + lineH] });
+        if (k === 0) tr.routeEnd = [t.cars.length && ln.toks.some((q) => q.c === t.cars[0]) ? px(t.cars[0].x0) : endPx, y0];
+      });
+      if (shrunk) { tr.brk = [z.xA + BMIN / 2, y0]; L.brks.push({ x: tr.brk[0], y: y0, id: t.id }); }
+    }
+    placeOver(L, t, landingPlan(t, route).over, tr.routeEnd[0], xs + dz, y0);
+    L.tr[t.id] = tr;
+    y = tr.lines[tr.lines.length - 1].y + 10 * s + 3 + M.numH + 8;
+  });
+
+  (function alignMarks() {
+    const one = zones.filter((z) => z.oneLine && !z.trueFits && L.tr[z.t.id].brk);
+    if (one.length < 2) return;
+    const lo = Math.max.apply(null, one.map((z) => z.xA)) + 9, hi = Math.min.apply(null, one.map((z) => xEnd - 2.5 * s - (TR - z.cU) * s)) - 9;
+    if (hi < lo) return;
+    one.forEach((z) => { const b = L.brks.find((k) => k.id === z.t.id); b.x = (lo + hi) / 2; L.tr[z.t.id].brk[0] = b.x; });
+  })();
+
+  /* the foot and the lead: down from the foot. The 30 units next to the foot keep s; more empty lead shrinks. */
+  const e = ST.engine, cutEnd = e.holds.length ? e.holds[e.holds.length - 1].x1 : e.x1;
+  const yF = y + 6;
+  L.foot = [xs, yF];
+  const dTrue = (G.FOOT.x - cutEnd) * s, dShown = Math.min(dTrue, G.CLEAR * s + BMIN);
+  if (dTrue - dShown > 1) L.brks.push({ x: xs, y: yF + G.CLEAR * s + BMIN / 2, v: true, lead: true });
+  const yCut = yF + dShown;
+  L.leadPos = (x) => [xs, yCut + (cutEnd - x) * s];
+  L.engine = { cx: xs, cy: L.leadPos(e.centre.x)[1], rot: -90 };
+  e.holds.forEach((c) => L.items.push({ kind: 'held', c: c, cx: xs, cy: L.leadPos(c.centre.x)[1], rot: -90 }));
+  const yBot = L.leadPos(e.x0)[1] + 40 * s;
+  L.leadStart = [xs, yBot];
+  L.leadTop = yF; L.leadBot = yBot;
+  const li = lab.map((lb, i) => i).filter((i) => lab[i].y > G.LEAD_Y - 60)[0];
+  let yy = yBot + 6;
+  if (li != null) {
+    const w = M.labels[li].w, h = M.labels[li].h;
+    L.labels.push({ text: lab[li].text, x: 8, y: yy + h / 2, a: 'l' });
+    L.sideMin = 8 + w + 14;                 /* the legend at the side starts at the right of this label */
+    yy += h + 4; L.leadBar = { x: 8, y: yy + h / 2, a: 'l' };      /* under the label: the place at its right belongs to the legend */
+    yy += h + 6;
+  }
+  L.h = Math.round(yy + 2);
+  L.xEnd = xEnd;
+  L.ends = [];
+  return L;
+}
+
+/* the lined route in px, on a layout */
+function routePx(L, route) {
+  const e = ST.engine, start = e.holds.length ? e.holds[e.holds.length - 1].x1 : e.x1;
+  const pts = [L.leadPos(start), L.foot];
+  for (const sp of G.switches) {
+    pts.push(L.swp[sp.id]);
+    if (route.reaches === sp.id) {
+      const l0 = L.tr[sp.id].lines[0].pts;
+      for (let k = 1; k < l0.length - 1; k++) pts.push(l0[k]);
+      pts.push(L.tr[sp.id].routeEnd);
+      return pts;
+    }
+  }
+  pts.push(L.mainEnd);
+  return pts;
+}
+
+/* ---- paint one layout: an SVG of shapes, DOM plates over it, DOM buttons over those ------------ */
+function paint(host, L, o) {
+  const s = L.s, M = o.M, tall = L.form === 'tall';
+  const view = H('div', { class: 'yd-view yd-view--' + L.form });
+  view.style.width = L.w + 'px'; view.style.height = L.h + 'px';
+  const svg = S('svg', { width: L.w, height: L.h, viewBox: '0 0 ' + L.w + ' ' + L.h, 'aria-hidden': 'true', focusable: 'false' }, null);
+  view.appendChild(svg);
+  const plates = H('div', { class: 'yd-layer', 'aria-hidden': 'true' });
+  const controls = H('div', { class: 'yd-layer yd-layer--ctl' });
+  view.appendChild(plates); view.appendChild(controls);
+  host.appendChild(view);
+
+  const inside = (x, y, m) => x >= -(m || 0) && x <= L.w + (m || 0) && y >= -(m || 0) && y <= L.h + (m || 0);
+  const plate = (cls, html, x, y, anchor) => {
+    const d = H('div', { class: 'yd-plate ' + cls + ' yd-a-' + anchor }, html);
+    d.style.left = f1(x) + 'px'; d.style.top = f1(y) + 'px';
+    plates.appendChild(d); return d;
+  };
+  const show = o.show || {};
+  const swPts = G.switches.map((sp) => L.swp[sp.id]);
+  const spine = [L.leadStart, L.foot].concat(swPts, [L.mainEnd]);
+  const lines = [];
+  IDS.forEach((id) => L.tr[id].lines.forEach((ln) => lines.push(ln.pts)));
+  const route = routePx(L, o.route);
+
+  /* 1. ballast, then ties: one wide dashed stroke gives a cross stroke every 10 units */
+  const ballastW = 15 * s, tieW = 11.5 * s, tieDash = '1.7 ' + f1(TIE_STEP * s - 1.7);
+  [spine].concat(lines).forEach((pl) => S('polyline', { class: 'yd-ballast', points: ptsAttr(pl), 'stroke-width': f1(ballastW) }, svg));
+  [spine].concat(lines).forEach((pl) => S('polyline', { class: 'yd-tie', points: ptsAttr(pl), 'stroke-width': f1(tieW), 'stroke-dasharray': tieDash }, svg));
+  if (L.cutline) S('line', { class: 'yd-cutline', x1: f1(L.cutline.x), y1: f1(L.cutline.y0), x2: f1(L.cutline.x), y2: f1(L.cutline.y1) }, svg);
+
+  /* 2. rails. The leg that a switch is not lined for starts after a gap: the open point. */
+  const rails = (pl, cls) => { [-1, 1].forEach((k) => S('polyline', { class: 'yd-rail' + (cls || ''), points: ptsAttr(offsetPoly(pl, k * GAUGE * s)) }, svg)); };
+  const gap = 9 * s, blade = 15 * s;
+  rails([L.leadStart, L.foot, swPts[0]]);
+  G.switches.forEach((sp, i) => {
+    const p = swPts[i], up = i < swPts.length - 1 ? swPts[i + 1] : L.mainEnd, body = L.tr[sp.id].lines[0].pts;
+    const rev = o.lined[sp.id] === 'reverse';
+    rails([rev ? along(p, up, gap) : p, up]);
+    rails([rev ? p : along(p, body[1], gap)].concat(body.slice(1)));
+    rails([p, along(p, rev ? body[1] : up, blade)], ' yd-rail--blade');
+    L.tr[sp.id].lines.slice(1).forEach((ln) => rails(ln.pts));
+  });
+
+  /* 3. foul point bars and end stops */
+  const half = G.presentStrokeWidths.clearanceTickHalfHeight;
+  ST.tracks.forEach((t) => {
+    const tr = L.tr[t.id];
+    S('line', { class: 'yd-foul', x1: f1(tr.foul[0]), y1: f1(tr.foul[1] - half * s), x2: f1(tr.foul[0]), y2: f1(tr.foul[1] + half * s) }, svg);
+    S('line', { class: 'yd-stop', x1: f1(tr.stop[0]), y1: f1(tr.stop[1] - 5.5 * s), x2: f1(tr.stop[0]), y2: f1(tr.stop[1] + 5.5 * s) }, svg);
+  });
+  /* a row that goes on in the next line: a hook out at the right, an arrow in at the left */
+  L.conts.forEach((c) => {
+    const a = c.from, b = c.to;
+    S('polyline', { class: 'yd-cont', points: ptsAttr([[a[0] + 2, a[1]], [a[0] + 9, a[1]], [a[0] + 9, a[1] + 11]]) }, svg);
+    S('polyline', { class: 'yd-cont', points: ptsAttr([[a[0] + 5.5, a[1] + 7], [a[0] + 9, a[1] + 11.5], [a[0] + 12.5, a[1] + 7]]) }, svg);
+    S('polyline', { class: 'yd-cont', points: ptsAttr([[b[0] - 12, b[1] - 11], [b[0] - 12, b[1]], [b[0] - 4, b[1]]]) }, svg);
+    S('polyline', { class: 'yd-cont', points: ptsAttr([[b[0] - 8, b[1] - 3.5], [b[0] - 3.5, b[1]], [b[0] - 8, b[1] + 3.5]]) }, svg);
+  });
+
+  /* 4. the lined route: bright rails and chevrons that point from the engine to the track */
+  rails(route, ' yd-rail--lined');
+  (function chevrons() {
+    const step = 32 * s, a = 4.6 * s, b = 3.2 * s, keep = 8 * s;
+    const avoid = [];
+    if (o.route.reaches) { const tr = L.tr[o.route.reaches]; avoid.push([tr.foul[0], tr.foul[1], keep]); }
+    L.brks.forEach((k) => avoid.push([k.x, k.y, 13]));
+    let acc = 16 * s;
+    for (let i = 0; i < route.length - 1; i++) {
+      const p = route[i], q = route[i + 1], len = Math.hypot(q[0] - p[0], q[1] - p[1]);
+      const ux = (q[0] - p[0]) / (len || 1), uy = (q[1] - p[1]) / (len || 1);
+      const lastSeg = i === route.length - 2;
+      while (acc <= len - (lastSeg ? 10 * s : 0)) {
+        const cx = p[0] + ux * acc, cy = p[1] + uy * acc;
+        const onBend = (i > 0 && acc < keep) || (!lastSeg && len - acc < keep);
+        const onMark = avoid.some((v) => Math.hypot(cx - v[0], cy - v[1]) < v[2]);
+        const tip = [cx + ux * b / 2, cy + uy * b / 2], back = [cx - ux * b / 2, cy - uy * b / 2];
+        if (!onBend && !onMark) S('polyline', { class: 'yd-chev', points: ptsAttr([[back[0] - uy * a, back[1] + ux * a], tip, [back[0] + uy * a, back[1] - ux * a]]) }, svg);
+        acc += step;
+      }
+      acc -= len;
+    }
+  })();
+
+  /* 5. cars, couplers, the landing place of the move in the builder, the engine */
+  const tagZoneH = show.tags ? M.tagW + 3 : 0, tagZoneV = show.tags ? M.tagH + 3 : 0;
+  const cutOf = {};
+  ST.tracks.forEach((t) => t.cuts.forEach((cut, k) => cut.forEach((id) => { cutOf[id] = t.id + '/' + k; })));
+  const reachTr = show.foul && o.route.reaches ? L.tr[o.route.reaches] : null;
+  const foulSpan = reachTr ? (reachTr.foulL != null ? [reachTr.foulL, reachTr.foulL + M.foulW] : [reachTr.foul[0] - M.foulW / 2, reachTr.foul[0] + M.foulW / 2]) : null;
+  const carPlates = (it, land) => {
+    const c = it.c, cx = it.cx, cy = it.cy;
+    if (!inside(cx, cy)) return;
+    const onFoulPlate = land && foulSpan && it.track === o.route.reaches && Math.abs(cy - reachTr.foul[1]) < 2 && cx + M.numOf(c.number) / 2 > foulSpan[0] - 2 && cx - M.numOf(c.number) / 2 < foulSpan[1] + 2;
+    if (land) { if (show.nums && !it.cutAt && !onFoulPlate) plate('yd-num yd-num--land', esc(c.number), cx, cy + G.carHeight * s / 2 + 3, 'tc'); return; }
+    const tone = TONE[c.type], Lpx = (c.x1 - c.x0) * s, Hh = c.height * s;
+    if (show.tags) {
+      const tg = H('span', { class: 'yd-tag ' + (it.rot ? 'yd-tag--v ' : '') + (c.loaded ? 'yd-tag--on' : 'yd-tag--' + tone), 'data-tone': tone }, esc(c.typeTag));
+      if (it.rot) { tg.style.left = f1(cx) + 'px'; tg.style.top = f1(cy + Lpx / 2 - 1.2 * s - 2.5 - M.tagH / 2) + 'px'; }
+      else { tg.style.left = f1(cx - Lpx / 2 + 1.2 * s + (c.type === 'tank' ? 5 : 2.5)) + 'px'; tg.style.top = f1(cy) + 'px'; }
+      plates.appendChild(tg);
+    }
+    if (show.nums) { if (it.rot) plate('yd-num', esc(c.number), cx + Hh / 2 + 4, cy, 'l'); else plate('yd-num', esc(c.number), cx, cy + Hh / 2 + 3, 'tc'); }
+  };
+  const coupler = (x, y, vertical) => S('line', { class: 'yd-coupler', x1: f1(x - (vertical ? 0 : 1.6 * s)), y1: f1(y - (vertical ? 1.6 * s : 0)), x2: f1(x + (vertical ? 0 : 1.6 * s)), y2: f1(y + (vertical ? 1.6 * s : 0)) }, svg);
+  if (o.landing) L.items.filter((it) => it.kind === 'land').forEach((it) => {
+    S('rect', { class: 'yd-land', x: f1(it.cx - it.len / 2 + 1.2 * s), y: f1(it.cy - G.carHeight * s / 2), width: f1(Math.max(2, it.len - 2.4 * s)), height: f1(G.carHeight * s), rx: 1.5 }, svg);
+    carPlates(it, true);
+  });
+  const onTrack = L.items.filter((it) => it.kind === 'car');
+  onTrack.forEach((it, i) => {
+    drawCar(svg, it.c, it, s, { tagZone: tagZoneH + (it.c.type === 'tank' ? 3 : 0) });
+    const nxt = onTrack[i + 1];
+    if (nxt && nxt.track === it.track && nxt.line === it.line && cutOf[nxt.c.id] === cutOf[it.c.id]) coupler(it.cx + (it.c.x1 - it.c.x0) * s / 2, it.cy, false);
+    carPlates(it, false);
+  });
+  const held = L.items.filter((it) => it.kind === 'held'), e = ST.engine;
+  held.forEach((it, i) => {
+    const hl = (it.c.x1 - it.c.x0) * s / 2;
+    drawCar(svg, it.c, it, s, { tagZone: (it.rot ? tagZoneV : tagZoneH) + (it.c.type === 'tank' ? 3 : 0) });
+    if (i === 0) { if (it.rot) coupler(it.cx, it.cy + hl, true); else coupler(it.cx - hl, it.cy, false); }
+    if (held[i + 1]) { if (it.rot) coupler(it.cx, it.cy - hl, true); else coupler(it.cx + hl, it.cy, false); }
+    carPlates(it, false);
+  });
+  if (inside(L.engine.cx, L.engine.cy, 40 * s)) drawEngine(svg, e, L.engine, s);
+  if (show.engine && inside(L.engine.cx, L.engine.cy)) {
+    if (L.engine.rot) plate('yd-eng-word', 'ENGINE', L.engine.cx + e.height * s / 2 + 4, L.engine.cy, 'l');
+    else plate('yd-eng-word', 'ENGINE', L.engine.cx, L.engine.cy + e.height * s / 2 + 3, 'tc');
+  }
+
+  /* 6. switch stands: the rod, the target mark, the plate with the word, and the 44 px button */
+  G.switches.forEach((sp) => {
+    const lin = o.lined[sp.id], p = L.swp[sp.id], px = p[0], py = p[1];
+    const sx = tall ? px - 15 : px - 12 * s, sy = tall ? py - 3 : py - 16 * s, d = Math.max(5, 5.5 * s);
+    if (!inside(sx, sy, 8)) return;
+    S('line', { class: 'yd-rod', x1: f1(sx), y1: f1(sy), x2: f1(px - 2 * s), y2: f1(tall ? py - 1 : py - 3 * s) }, svg);
+    if (o.ring === sp.id) S('circle', { class: 'yd-ring', cx: f1(sx), cy: f1(sy), r: f1(d + 6) }, svg);
+    S('polygon', { class: 'yd-stand yd-stand--' + lin, points: ptsAttr([[sx, sy - d], [sx + d, sy], [sx, sy + d], [sx - d, sy]]) }, svg);
+    const word = '<span class="yd-lin yd-lin--' + lin + '">' + lin.toUpperCase() + '</span>';
+    const attn = o.ring === sp.id ? '<span class="yd-attn">?</span> ' : '';
+    const hasBtn = (o.buttons || []).indexOf(sp.id) >= 0, bx = tall ? px - 7 : px - 6 * s, by = tall ? py - 1 : py - 8 * s;   /* the centre of the 44 px button */
+    if (show.stand === 'left') plate('yd-standplate', attn + esc(sp.id) + ' ' + word, Math.min(sx - d - 7 - (o.ring === sp.id ? 6 : 0), hasBtn ? bx - TARGET / 2 - 3 : Infinity), sy, 'r');
+    if (hasBtn) {
+      const b = H('button', { class: 'yd-sw', type: 'button', 'data-sw': sp.id, 'aria-pressed': lin === 'reverse' ? 'true' : 'false', 'aria-label': sp.id + ' switch, lined ' + lin });
+      b.style.left = f1(bx) + 'px'; b.style.top = f1(by) + 'px';
+      controls.appendChild(b);
+    }
+  });
+
+  /* 7. the foul point plate, at the lined track only */
+  if (show.foul && o.route.reaches) {
+    const tr = L.tr[o.route.reaches], fy = tr.foul[1] + (tall ? half * s + 6 : Math.max(half * s + 6, TARGET / 2 - 8 * s + 3));
+    if (tr.foulL != null) plate('yd-foulplate', 'foul point', tr.foulL, fy + M.plateH / 2, 'l');
+    else if (inside(tr.foul[0], fy)) plate('yd-foulplate', 'foul point', tr.foul[0], fy, 'tc');
+  }
+
+  /* 8. the break marks: track left out here */
+  L.brks.forEach((k) => {
+    const d = plate('yd-brk' + (k.v ? ' yd-brk--v' : '') + (k.lead || o.route.reaches === k.id ? ' yd-brk--lit' : ''), '⋯', k.x, k.y, 'c');
+    const across = Math.round(15 * s + 4);      /* the mark covers the ballast, so that the rails stop at it */
+    if (k.v) { d.style.width = across + 'px'; d.style.height = '20px'; d.style.lineHeight = '16px'; } else { d.style.height = across + 'px'; d.style.lineHeight = (across - 2) + 'px'; }
+  });
+
+  /* 9. the words of each track, the three labels of the present drawing, the room bar of the lead */
+  if (show.ends) {
+    L.ends.forEach((en) => plate('yd-end', endHTML(en.t, o.route, o.compact), en.x, en.y, 'l').style.minWidth = f1(o.endW) + 'px');
+    (L.caps || []).forEach((cp) => {
+      const d = H('div', { class: 'yd-rowcap' }, capHTML(cp.t, o.lined[cp.t.id], o.route));
+      d.style.left = f1(cp.x) + 'px'; d.style.top = f1(cp.y) + 'px'; d.style.width = f1(cp.w) + 'px';
+      plates.appendChild(d);
+    });
+  }
+  if (show.labels) {
+    L.labels.forEach((lb) => { const d = plate('yd-label' + (lb.wrapW ? ' yd-wrap' : ''), esc(lb.text), lb.x, lb.y, lb.a); if (lb.wrapW) d.style.width = f1(lb.wrapW) + 'px'; });
+    if (L.leadBar) plate('yd-barplate', leadBar(), L.leadBar.x, L.leadBar.y, L.leadBar.a);
+  }
+  setBars(view);
+  return view;
+}
+
+/* ---- the legend -------------------------------------------------------------------------------- */
+function legendNode(s, L) {
+  const box = H('div', { class: 'yd-legend' });
+  let grp = box;
+  const group = (titleHTML) => { grp = H('div', { class: 'yd-lgroup' }); grp.appendChild(H('h3', {}, titleHTML)); box.appendChild(grp); };
+  const row = () => { const r = H('div', { class: 'yd-lrow' }); grp.appendChild(r); return r; };
+  const item = (r, svgNode, html) => { const sp = H('span', {}, ''); if (svgNode) sp.appendChild(svgNode); sp.insertAdjacentHTML('beforeend', html); r.appendChild(sp); return sp; };
+  const tagW = measure('<span class="yd-tag">BX</span>').w;
+  const carPic = (type, loaded) => {
+    const ct = G.carTypes[type], w = Math.ceil(ct.len * s) + 2, h = Math.ceil(G.carHeight * s) + 6;
+    const wrap = H('span', { class: 'yd-lcar' }); wrap.style.width = w + 'px'; wrap.style.height = h + 'px';
+    const svg = S('svg', { width: w, height: h, 'aria-hidden': 'true', focusable: 'false' }, null); wrap.appendChild(svg);
+    const c = { x0: 0, x1: ct.len, height: G.carHeight, type: type, loaded: loaded };
+    const cx = ct.len * s / 2 + 1, cy = h / 2 - 1;
+    drawCar(svg, c, { cx: cx, cy: cy, rot: 0 }, s, { tagZone: tagW + 3 + (type === 'tank' ? 3 : 0) });
+    const tg = H('span', { class: 'yd-tag ' + (loaded ? 'yd-tag--on' : 'yd-tag--' + TONE[type]), 'data-tone': TONE[type] }, esc(ct.tag));
+    tg.style.left = f1(1 + 1.2 * s + (type === 'tank' ? 5 : 2.5)) + 'px'; tg.style.top = f1(cy) + 'px';
+    wrap.appendChild(tg);
+    return wrap;
+  };
+  const pic = (w, h, draw) => { const svg = S('svg', { width: w, height: h, 'aria-hidden': 'true', focusable: 'false' }, null); draw(svg); return svg; };
+  const railPic = (lined, bar) => pic(46, 16, (svg) => {
+    S('line', { class: 'yd-ballast', x1: 0, y1: 8, x2: 46, y2: 8, 'stroke-width': 14 }, svg);
+    S('line', { class: 'yd-tie', x1: 0, y1: 8, x2: 46, y2: 8, 'stroke-width': 11, 'stroke-dasharray': '1.7 8' }, svg);
+    [5, 11].forEach((y) => S('line', { class: 'yd-rail' + (lined ? ' yd-rail--lined' : ''), x1: 0, y1: y, x2: 46, y2: y }, svg));
+    if (lined) [12, 34].forEach((x) => S('polyline', { class: 'yd-chev', points: ptsAttr([[x - 1.6, 3.6], [x + 1.6, 8], [x - 1.6, 12.4]]) }, svg));
+    if (bar) S('line', { class: 'yd-foul', x1: 23, y1: 0, x2: 23, y2: 16 }, svg);
+  });
+  const standPic = (lin) => pic(16, 16, (svg) => S('polygon', { class: 'yd-stand yd-stand--' + lin, points: '8,2 14,8 8,14 2,8' }, svg));
+
+  group('Colour meanings · <em>SME to confirm</em>');
+  let r = row();
+  ['box', 'hopper', 'tank'].forEach((t) => item(r, carPic(t, true), esc(t)));
+  r = row();
+  ['centerbeam', 'autorack'].forEach((t) => item(r, carPic(t, true), esc(t)));
+  r = row();
+  item(r, standPic('normal'), '<span class="yd-lin yd-lin--normal">NORMAL</span>');
+  item(r, standPic('reverse'), '<span class="yd-lin yd-lin--reverse">REVERSE</span>');
+  item(r, railPic(true, false), 'lined route');
+  r = row();
+  item(r, railPic(false, true), 'foul point');
+  item(r, null, '<span class="dusk-state dusk-state--hold">TIED</span>');
+  item(r, null, '<span class="dusk-state dusk-state--caution">LOOSE</span>');
+
+  group('From the words of the app');
+  r = row();
+  item(r, carPic('box', true), 'solid = loaded');
+  item(r, carPic('box', false), 'hollow = empty');
+  r = row();
+  const kick = ST.tracks.find((t) => t.kickableMark);
+  if (kick) item(r, null, esc(kick.kickableMark.split(' ')[0]) + ' = kickable track');
+  item(r, null, '<span class="yd-goal">BUILD</span><span class="dusk-count">n / n</span> goal cars on the track');
+  r = row();
+  item(r, pic(30, 16, (svg) => S('rect', { class: 'yd-land', x: 1, y: 2, width: 28, height: 12, rx: 1.5 }, svg)), 'the move in the builder lands here');
+
+  group('Length');
+  r = row();
+  item(r, null, 'A car and a gap between cars have true length.');
+  r = row();
+  item(r, null, '<span class="yd-brk yd-brk--key">⋯</span> empty track left out');
+  if (L.folds) item(r, pic(26, 16, (svg) => { S('polyline', { class: 'yd-cont', points: '2,4 12,4 12,13' }, svg); S('polyline', { class: 'yd-cont', points: '8.5,9 12,13.5 15.5,9' }, svg); }), 'the track goes on in the next line');
+  r = row();
+  item(r, null, 'room ' + barHTML(380, 150, 0) + ' cars');
+  item(r, null, 'All bars have one scale.');
+  setBars(box);
+  return box;
+}
+
+/* ---- layout: one rule selects between two forms of the same picture ---------------------------- */
+const host = $('#yard');
+let lastW = -1;
+function render() {
+  const Wp = host.clientWidth;
+  lastW = Wp;
+  if (Wp < MIN_W) return;
+  const focusSw = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-sw');
+  host.innerHTML = '';
+  const route = routeFor(live.lined);
+  const M = measureAll(route);
+  const e = ST.engine;
+  /* The form and the car scale must not change when a switch is lined: the picture would jump away from the pointer.
+     Both come from the worst of the seven routes that the six switches can line (no switch reverse, or the first reverse switch). */
+  const routes = [null].concat(IDS).map((id) => { const l = {}; IDS.forEach((k) => { l[k] = k === id ? 'reverse' : 'normal'; }); return routeFor(l); });
+  routes.forEach((r) => { const m = measureAll(r); M.sMinWide = Math.max(M.sMinWide, m.sMinWide); M.sMinTall = Math.max(M.sMinTall, m.sMinTall); });
+  M.routes = routes;
+
+  /* the wide form. Its plate column is measured first. When two plates would touch at the track pitch, the kickable mark shares a line. */
+  const x0u = Math.min(VIEW.x0, e.x0 - 6);                 /* a long cut: the lead of the picture grows to the left, so that the engine stays in it */
+  const unitsTrue = G.TRACK_RIGHT + 2.5 - x0u;
+  const column = (compact) => {
+    const boxes = ST.tracks.map((t) => measure('<div class="yd-plate yd-end">' + endHTML(t, route, compact) + '</div>'));
+    const endW = Math.max.apply(null, boxes.map((b) => b.w)), colW = endW + 9 + 4;
+    const sTrue = (Wp - colW) / unitsTrue, s = Math.max(M.sMinWide, Math.min(sTrue, S_MAX_WIDE)), pitch = Math.abs(G.ladderStep.y) * s;
+    return { compact: compact, endW: endW, colW: colW, sTrue: sTrue, s: s, clash: boxes.some((b, i) => i + 1 < boxes.length && (b.h + boxes[i + 1].h) / 2 + 2 > pitch) };
+  };
+  let col = column(false);
+  if (col.clash) col = column(true);
+  const compact = col.compact, endW = col.endW, colW = col.colW, sTrue = col.sTrue;
+  let s = col.s, D = Math.max(0, unitsTrue * s + colW - Wp), fits = true;
+  const zones = wideZones(route, s, M);
+  const dMaxAt = (zs, sc) => Math.max(0, Math.min.apply(null, zs.map((z) => z.B * sc - Math.min(BMIN, Math.max(0, z.B * sc)))));
+  const dMaxAll = (sc) => Math.min.apply(null, routes.map((r) => dMaxAt(wideZones(r, sc, M), sc)));
+  const dMax = dMaxAll(s);
+  if (D > dMax + 0.01) fits = false;
+  const chromeW = document.documentElement.clientWidth - Wp;
+  const needW = Math.ceil(unitsTrue * M.sMinWide + colW - dMaxAll(M.sMinWide)) + chromeW;      /* the narrowest window that shows the wide form for this state of the yard, with the fonts of this machine */
+  const trueW = Math.ceil(unitsTrue * M.sMinWide + colW) + chromeW;                                  /* the narrowest window that shows it with no track left out */
+
+  let L;
+  if (fits) {
+    L = planWide({ x0u: x0u, y0u: VIEW.y0, y1u: VIEW.y1, s: s, D: D, zones: zones, M: M, route: route, wpx: Wp });
+    const view = paint(host, L, { M: M, lined: live.lined, route: route, landing: true, compact: compact, endW: endW,
+      show: { labels: true, ends: true, stand: 'left', foul: true, nums: true, tags: true, engine: true }, buttons: IDS });
+    /* the legend goes in the empty corner above the ladder when nothing is under it */
+    const lg = legendNode(s, L);
+    lg.classList.add('yd-legend--corner');
+    view.appendChild(lg);
+    const lr = lg.getBoundingClientRect();
+    const hit = Array.prototype.some.call(view.querySelectorAll('.yd-plate, .yd-sw'), (p) => {
+      if (lg.contains(p)) return false;
+      const r = p.getBoundingClientRect();
+      return !(r.right < lr.left - 4 || r.left > lr.right + 4 || r.bottom < lr.top - 4 || r.top > lr.bottom + 4);
+    });
+    const ladderHit = (function () {   /* the ladder must stay clear of the legend */
+      const vr = view.getBoundingClientRect(), bx = lr.right - vr.left + 14, by = lr.bottom - vr.top + 14;
+      const f = G.FOOT, st = G.ladderStep, yAt = (by / s) + VIEW.y0, xl = f.x + (yAt - f.y) / st.y * st.x;
+      return (xl - x0u) * s - 34 * s < bx && yAt > G.switches[G.switches.length - 1].y;
+    })();
+    if (hit || ladderHit) { lg.classList.remove('yd-legend--corner'); lg.classList.add('yd-legend--below'); host.appendChild(lg); }
+    host.setAttribute('data-legend', hit || ladderHit ? 'below' : 'corner');
+  } else {
+    L = planTall(Wp, route, M);
+    const view = paint(host, L, { M: M, lined: live.lined, route: route, landing: true,
+      show: { labels: true, ends: true, stand: 'caption', foul: true, nums: true, tags: true, engine: true }, buttons: IDS });
+    /* the legend stands at the right of the lead when the row is wide enough, and under the picture when it is not */
+    const lg = legendNode(L.s, L);
+    const sideX = Math.max(34 + 190, L.sideMin || 0), sideW = Math.min(520, Wp - sideX - 12);
+    if (sideW >= 300) {
+      lg.classList.add('yd-legend--side');
+      lg.style.left = sideX + 'px'; lg.style.top = f1(L.leadTop + 14) + 'px'; lg.style.width = sideW + 'px';
+      view.appendChild(lg);
+      const need = L.leadTop + 14 + lg.getBoundingClientRect().height + 10;
+      if (need > L.h) { view.style.height = Math.round(need) + 'px'; }
+      host.setAttribute('data-legend', 'side');
+    } else {
+      const fold = H('details', { class: 'yd-legend-fold', open: '' }, '<summary>Legend</summary>');
+      lg.classList.add('yd-legend--below');
+      fold.appendChild(lg);
+      host.appendChild(fold);
+      host.setAttribute('data-legend', 'fold');
+    }
+  }
+  D = L.D;
+  /* for the checks of the sketch: the empty stretch of each track, true (units) and shown (px) */
+  host.setAttribute('data-empty', JSON.stringify(ST.tracks.map((t) => ({ id: t.id, trueUnits: (t.cars.length ? t.cars[0].x0 : t.trackEndX) - t.clearanceX, shownPx: Math.round((L.tr[t.id].routeEnd[0] - L.tr[t.id].foul[0]) * 10) / 10 }))));
+  host.setAttribute('data-form', L.form);
+  host.setAttribute('data-scale', L.s.toFixed(3));
+  host.setAttribute('data-cut', (L.D || 0).toFixed(1));
+  host.setAttribute('data-folds', String(L.folds || 0));
+  host.setAttribute('data-fit', JSON.stringify({ sMinWide: +M.sMinWide.toFixed(3), sMinTall: +M.sMinTall.toFixed(3), sTrue: +sTrue.toFixed(3), colW: +colW.toFixed(1), dMax: +dMax.toFixed(1), needW: needW, trueW: trueW, x0u: x0u, compact: compact }));
+  document.documentElement.setAttribute('data-yard-mode', L.form);
+  $('#st-mode').textContent = fits
+    ? (L.D > 0.5 ? 'View: wide form, empty track left out (wide form from ' + needW + ' px; no track left out from ' + trueW + ' px)' : 'View: wide form, no track left out (window ' + trueW + ' px or wider)')
+    : 'View: tall form (the wide form needs a window of ' + needW + ' px for this state of the yard)';
+
+  /* words outside the drawing that follow the lining */
+  const rw = routeWords(route);
+  /* the route words keep the width of their longest form, so that the head of the panel wraps in one way for every route and the picture does not move when a switch is lined */
+  const longest = [null].concat(IDS).map((id) => 'Route: LEAD → ' + (id || 'MAIN LINE')).map((t) => measure('<span class="dusk-panel-sub">' + esc(t) + '</span>').w);
+  $('#route-sub').style.minWidth = Math.ceil(Math.max.apply(null, longest)) + 'px';
+  $('#route-sub').textContent = 'Route: ' + rw;
+  probe.innerHTML = '<div class="dusk-strip"><div class="dusk-cell"><b>LEAD → MAIN LINE</b></div></div>';
+  $('#route-cell').style.minWidth = Math.ceil(probe.querySelector('b').getBoundingClientRect().width) + 'px';      /* the same for the Route cell of the strip */
+  $('#route-cell').textContent = rw;
+  $('#st-lined').textContent = IDS.map((id) => id + ' ' + live.lined[id]).join(' · ');
+  mirror(route);
+  if (focusSw) { const b = $('[data-sw="' + focusSw + '"]'); if (b) b.focus(); }
+}
+
+/* the text mirror of the yard, for a screen reader */
+function mirror(route) {
+  const e = ST.engine;
+  const carWords = (c) => c.number + ' ' + c.type + ' ' + c.loadWord;
+  let html = '<h3>The yard in words</h3><ul>';
+  html += '<li>Route: ' + esc(routeWords(route)) + '.</li>';
+  html += '<li>ENGINE on the lead. It holds: ' + (e.holds.length ? e.holds.map(carWords).map(esc).join(', ') : 'no car') + '.</li>';
+  ST.tracks.forEach((t) => {
+    const parts = [t.id + ': switch lined ' + live.lined[t.id]];
+    if (t.isGoalTrack) parts.push('BUILD ' + ST.goalProgress.onGoalTrackNow.length + ' / ' + ST.goalProgress.wanted.length);
+    if (t.securementTag) parts.push(t.securementTag);
+    if (t.kickableMark) parts.push(t.kickableMark);
+    parts.push(t.cars.length ? 'cars from the switch end: ' + t.cuts.map((cut) => cut.map((id) => carWords(t.cars.find((c) => c.id === id))).join(', ')).join('; then a gap; ') : 'no car');
+    html += '<li>' + esc(parts.join('. ')) + '.</li>';
+  });
+  $('#mirror').innerHTML = html + '</ul>';
+}
+
+/* ---- the chrome: every word comes from the scene ---------------------------------------------- */
+(function chrome() {
+  const b = WD.builder;
+  $('#back').textContent = b.backButton;
+
+  const m = /^(\S+) (\d+) \/ (\S+) (\d+) · (\S+) (\d+)$/.exec(WD.readout);
+  const strip = $('#strip');
+  strip.setAttribute('aria-label', WD.readout);
+  const cell = (label, value, key, id) => '<div class="dusk-cell' + (key ? ' dusk-cell--key' : '') + '"><small>' + esc(label) + '</small><b' + (id ? ' id="' + id + '"' : '') + '>' + esc(value) + '</b></div>';
+  let cells = cell('Job', WD.workOrder.topParts.id, true);
+  if (m) cells += cell(m[1], m[2]) + cell(m[3], m[4]) + cell(m[5], m[6]);
+  else cells += cell('', WD.readout);
+  cells += cell('Route', '', false, 'route-cell');
+  strip.innerHTML = cells + '<div class="dusk-strip-end yd-picker"><select class="yd-select yd-picker" id="picker" title="' + esc(b.selectTitles.picker) + '" aria-label="' + esc(b.selectTitles.picker) + '"><optgroup label="' + esc(WD.picker.groupLabel) + '"><option>' + esc(WD.picker.optionLabel) + '</option></optgroup></select></div>';
+
+  const gp = ST.goalProgress;
+  $('#goal-word').textContent = 'BUILD ' + gp.track;
+  $('#goal-count').textContent = gp.onGoalTrackNow.length + ' / ' + gp.wanted.length;
+
+  const wo = WD.workOrder;
+  $('#wo-h').innerHTML = '<span class="yd-wo-tag">' + esc(wo.topParts.tag) + '</span> <span class="yd-wo-id">' + esc(wo.topParts.id) + '</span> <span aria-hidden="true">·</span> <span>' + esc(wo.topParts.title) + '</span>';
+  const bold = (text, parts, dim) => {
+    let h = esc(text);
+    (parts || []).forEach((p) => { h = h.replace(esc(p), '<b>' + esc(p) + '</b>'); });
+    if (dim) h = h.replace(esc(dim), '<span class="yd-dim">' + esc(dim) + '</span>');
+    return h;
+  };
+  $('#wo').innerHTML = '<p class="yd-job">' + bold(wo.job, wo.jobBoldParts, wo.jobDimPart) + '</p><p>' + bold(wo.meta, [wo.metaBoldPart]) + '</p><p class="yd-tip">' + esc(wo.tip) + '</p>';
+
+  const sel = b.selectedForScene;
+  const opts = (list, cur) => list.map((v) => '<option' + (String(v).toLowerCase() === String(cur).toLowerCase() ? ' selected' : '') + '>' + esc(v) + '</option>').join('');
+  $('#builder').innerHTML =
+    '<select class="yd-select yd-select--mono" title="' + esc(b.selectTitles.action) + '" aria-label="' + esc(b.selectTitles.action) + '">' + opts(b.actions, sel.action) + '</select>' +
+    '<select class="yd-select yd-select--mono" title="' + esc(b.selectTitles.count) + '" aria-label="' + esc(b.selectTitles.count) + '">' + opts(b.countOptionsForScene, sel.count) + '</select>' +
+    '<span class="yd-dim">' + esc(b.countUnitWord) + '</span>' +
+    '<select class="yd-select yd-select--mono" title="' + esc(b.selectTitles.track) + '" aria-label="' + esc(b.selectTitles.track) + '">' + opts(b.tracks, sel.track) + '</select>' +
+    '<button class="dusk-btn yd-btn yd-btn--go" type="button">' + esc(b.buttons[0]) + '</button>' +
+    '<button class="dusk-btn yd-btn" type="button" title="' + esc(b.selectTitles.watchOptimal) + '">' + esc(b.buttons[1]) + '</button>' +
+    '<span class="dusk-spacer"></span>' +
+    '<button class="dusk-btn yd-btn" type="button">' + esc(b.buttons[2]) + '</button>' +
+    '<button class="dusk-btn yd-btn" type="button" title="' + esc(b.selectTitles.mute) + '" aria-label="' + esc(b.selectTitles.mute) + '">' + esc(b.buttons[3]) + '</button>';
+  $('#msg').textContent = WD.banner.text;
+
+  let lg = esc(WD.legend);
+  ['CROR', 'S.I.'].forEach((k) => { lg = lg.replace(k, '<b>' + k + '</b>'); });
+  /* the emphasis of the app line (yardSim.js:176-180). The words stay the words of the scene. */
+  lg = lg.replace('special instruction', '<em>special instruction</em>').replace(' this yard', ' <em>this</em> yard').replace(/(you must know your yard\S*s\.)/, '<strong>$1</strong>');
+  $('#rules-legend').innerHTML = lg;
+  $('#rules').innerHTML = SCENE.ruleChips.map((c) =>
+    '<li class="yd-chip yd-chip--' + esc(c.kind) + '">' + (c.cite.indexOf(c.kindWord) === 0 ? '' : '<i>' + esc(c.kindWord) + '</i>') + '<b>' + esc(c.cite) + '</b> ' + esc(c.label) + '</li>').join('');
+
+  const rf = SCENE.refusalExample;
+  if (rf && rf.text) $('#ref-msg').innerHTML = '<span class="dusk-state dusk-state--attn">' + esc(rf.text) + '</span><button class="dusk-btn yd-btn" type="button">' + esc(rf.lookupButton) + '</button>';
+})();
+
+/* the refusal example: the throat of the same model, with the lining that the refusal names */
+function renderRefusal() {
+  const rf = SCENE.refusalExample, box = $('#ref-view');
+  if (!rf || rf.ok !== false || !rf.text) { $('#ref-panel').hidden = true; return; }      /* a scene with no refusal has no example */
+  const lined = Object.assign({}, ST.lined, rf.linedThen);
+  const cause = (/^(\S+) is lined/.exec(rf.text) || [])[1] || null;
+  const avail = box.parentElement.clientWidth > 640 ? (box.parentElement.clientWidth - 12) / 2 : box.parentElement.clientWidth;
+  if (avail < MIN_W / 2) return;
+  box.innerHTML = '';
+  const i = Math.max(0, IDS.indexOf(cause));
+  const a = G.switches[Math.max(0, i - 2)], z = G.switches[i];
+  const plateW = measure('<div class="yd-plate yd-standplate"><span class="yd-attn">?</span> ' + esc(a.id) + ' <span class="yd-lin">REVERSE</span></div>').w;
+  const x1 = z.x + 52, y0 = z.y - 44, y1 = a.y + 30;
+  let x0 = a.x - 124, s = Math.min(1.1, avail / (x1 - x0));
+  x0 = Math.min(x0, a.x - 12 - (plateW + 22) / s); s = Math.min(1.1, avail / (x1 - x0));
+  x0 = Math.min(x0, a.x - 12 - (plateW + 22) / s); s = Math.min(1.1, avail / (x1 - x0));
+  box.setAttribute('role', 'img');
+  box.setAttribute('aria-label', 'Example. ' + Object.keys(rf.linedThen).map((id) => id + ' lined ' + rf.linedThen[id]).join(', ') + '. ' + (cause ? cause + ' has the mark of the refusal.' : ''));
+  const route = routeFor(lined), M = measureAll(route);
+  const L = planWide({ x0u: x0, y0u: y0, y1u: y1, s: s, D: 0, zones: wideZones(route, s, M), M: M, route: route, wpx: Math.floor((x1 - x0) * s), crop: true });
+  const view = paint(box, L, { M: M, lined: lined, route: route, landing: false, show: { stand: 'left', foul: false }, buttons: [], ring: cause });
+  /* a stand plate that the window would cut is not shown */
+  const vr = view.getBoundingClientRect();
+  Array.prototype.forEach.call(view.querySelectorAll('.yd-standplate'), (p) => { const r = p.getBoundingClientRect(); if (r.left < vr.left || r.right > vr.right || r.top < vr.top || r.bottom > vr.bottom) p.remove(); });
+}
+
+/* ---- the one interaction: line a switch, by pointer or by keyboard ---------------------------- */
+document.addEventListener('click', (ev) => {
+  const el = ev.target.closest ? ev.target.closest('[data-sw]') : null;
+  if (!el) return;
+  const id = el.getAttribute('data-sw');
+  live.lined[id] = live.lined[id] === 'reverse' ? 'normal' : 'reverse';
+  render();
+  $('#live').textContent = id + ' switch, lined ' + live.lined[id] + '. Route: ' + routeWords(routeFor(live.lined)) + '.';
+});
+
+render();
+renderRefusal();
+let raf = 0;
+const again = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { if (host.clientWidth !== lastW) { render(); renderRefusal(); } }); };
+if (window.ResizeObserver) new ResizeObserver(again).observe(host);
+window.addEventListener('resize', again);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { render(); renderRefusal(); });
+window.__ydRender = () => { render(); renderRefusal(); };
+})();
+</script>
+</body>
+</html>
