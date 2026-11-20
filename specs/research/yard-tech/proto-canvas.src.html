@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en" data-tier="strict">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>R2 Yard drawing prototype: canvas</title>
+<!--DUSK-LAYERS-->
+<style>
+/* Page-local rules, prefix yt-. Every colour is a Dusk token. No raw colour. */
+.yt-page { display: grid; gap: var(--gap); }
+.yt-head { display: grid; gap: var(--sp-2); }
+.yt-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); margin: 0 0 var(--sp-5); }
+.yt-btn { min-height: 44px; min-width: 44px; padding: 0 var(--sp-6); font-size: 0.8125rem; }
+.yt-msg { color: var(--ink-2); font-size: 0.8125rem; min-height: 1.45em; flex: 1 1 12rem; }
+.yt-yard {
+  /* the Yard palette: page-local names that point at Dusk tokens */
+  --yt-floor: var(--well);
+  --yt-rail: var(--ink-3);
+  --yt-rail-dim: var(--grey);
+  --yt-tick: var(--ink-2);
+  --yt-car: var(--tile-grey-lo);
+  --yt-car-edge: var(--ink-3);
+  --yt-car-ink: var(--ink);
+  --yt-eng: var(--panel-hi);
+  --yt-eng-edge: var(--teal-ink);
+  --yt-normal: var(--ink-2);
+  --yt-reverse: var(--amber-ink);
+  --yt-tied: var(--ink-2);
+  --yt-loose: var(--attn-ink);
+  --yt-label: var(--ink-2);
+  --yt-focus: var(--focus);
+  --yt-font: var(--font-mono);
+  --yt-fs: 0.6875rem;              /* 11 px at a 16 px root; follows the root font size */
+  position: relative;
+  background: var(--yt-floor);
+  border-radius: var(--r-tile);
+  overflow: hidden;
+  font: 700 var(--yt-fs) / 1.15 var(--yt-font);
+}
+/* the four reading modes, as token remaps (the app sets these attributes on <html>) */
+html[data-contrast="1"] .yt-yard {
+  --yt-rail: var(--ink); --yt-rail-dim: var(--ink-2); --yt-tick: var(--ink);
+  --yt-car: var(--ground-0); --yt-car-edge: var(--ink);
+  --yt-normal: var(--ink); --yt-tied: var(--ink); --yt-label: var(--ink);
+}
+html[data-dys="1"] .yt-yard { --yt-font: "Atkinson Hyperlegible", Verdana, sans-serif; letter-spacing: 0.02em; }
+.yt-probe { position: absolute; visibility: hidden; pointer-events: none; width: 1rem; height: 1rem; left: 0; top: 0; }
+.yt-mirror { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; font-size: 0.8125rem; color: var(--ink-2); }
+.yt-mirror b { color: var(--ink); }
+.yt-swlist { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin: var(--sp-5) 0 0; }
+.yt-swlist .yt-btn { font-family: var(--font-mono); }
+
+
+</style>
+</head>
+<body>
+<main class="yt-page">
+  <header class="yt-head">
+    <h1 class="dusk-title">Yard drawing prototype: canvas</h1>
+    <p class="dusk-note">Research file for job R2. It is not the game. The state is puzzle p1-clear after four moves of its authored line. The look is not final.</p>
+  </header>
+  <section class="dusk-panel dusk-panel--framed" aria-labelledby="yd-h">
+    <header class="dusk-panel-head"><h2 class="dusk-panel-name" id="yd-h">The yard</h2><span class="dusk-spacer"></span><span class="dusk-count" id="readout"></span></header>
+    <div class="dusk-panel-body">
+      <div class="yt-bar">
+        <button type="button" class="dusk-btn yt-btn" id="play">Spot 3 to AS76</button>
+        <button type="button" class="dusk-btn yt-btn" id="reset">Reset</button>
+        <p class="yt-msg" id="msg" role="status"></p>
+      </div>
+      <div class="yt-yard" id="yard"></div>
+      <div class="yt-swlist" id="swlist" role="group" aria-label="Switches"></div>
+    </div>
+  </section>
+  <section class="dusk-panel dusk-panel--framed" aria-labelledby="mir-h">
+    <header class="dusk-panel-head"><h2 class="dusk-panel-name" id="mir-h">The yard in words</h2></header>
+    <div class="dusk-panel-body"><ul class="yt-mirror" id="mirror"></ul></div>
+  </section>
+</main>
+<script>
+// ---- shared by the three prototypes: scene, view transform, stock model, tween, text mirror ----
+const SCENE = {"source":{"puzzle":"p1-clear","title":"Clear the build track","replayed":[["pull","AS74",3],["pull","AS73",2],["pull","AS72",2],["spot","AS74",4]],"move":["spot","AS76",3],"par":9},"showSecured":true,"before":{"tracks":{"AS71":["UTLX 7120","UTLX 7148"],"AS72":[],"AS73":[],"AS74":["CN 480066","CN 480088","CN 480012","CN 480044"],"AS75":["SHPX 3300","SHPX 3328"],"AS76":[]},"pos":{"AS71":[822,872],"AS72":[],"AS73":[],"AS74":[544,586,628,670],"AS75":[548,595],"AS76":[]},"type":{"UTLX 7120":"tank","UTLX 7148":"tank","CN 480012":"box","CN 480044":"box","CN 480066":"box","CN 480088":"box","DTTX 9001":"autorack","DTTX 9028":"autorack","DTTX 9044":"autorack","SHPX 3300":"hopper","SHPX 3328":"hopper"},"loaded":{"UTLX 7120":true,"UTLX 7148":true,"CN 480012":true,"CN 480044":true,"CN 480066":true,"CN 480088":true,"DTTX 9001":true,"DTTX 9028":true,"DTTX 9044":true,"SHPX 3300":true,"SHPX 3328":true},"engine":["DTTX 9001","DTTX 9028","DTTX 9044"],"secured":{"AS71":true,"AS72":false,"AS73":false,"AS74":false,"AS75":true,"AS76":false},"lined":{"AS71":"normal","AS72":"normal","AS73":"normal","AS74":"reverse","AS75":"normal","AS76":"normal"},"kickable":[],"kickLimit":{"total":5,"loaded":3},"goalTrack":"AS74","out":false,"moves":7,"joints":3,"msg":"Spotted 4 to AS74.","won":false},"after":{"tracks":{"AS71":["UTLX 7120","UTLX 7148"],"AS72":[],"AS73":[],"AS74":["CN 480066","CN 480088","CN 480012","CN 480044"],"AS75":["SHPX 3300","SHPX 3328"],"AS76":["DTTX 9001","DTTX 9028","DTTX 9044"]},"pos":{"AS71":[822,872],"AS72":[],"AS73":[],"AS74":[544,586,628,670],"AS75":[548,595],"AS76":[347,422,497]},"type":{"UTLX 7120":"tank","UTLX 7148":"tank","CN 480012":"box","CN 480044":"box","CN 480066":"box","CN 480088":"box","DTTX 9001":"autorack","DTTX 9028":"autorack","DTTX 9044":"autorack","SHPX 3300":"hopper","SHPX 3328":"hopper"},"loaded":{"UTLX 7120":true,"UTLX 7148":true,"CN 480012":true,"CN 480044":true,"CN 480066":true,"CN 480088":true,"DTTX 9001":true,"DTTX 9028":true,"DTTX 9044":true,"SHPX 3300":true,"SHPX 3328":true},"engine":[],"secured":{"AS71":true,"AS72":false,"AS73":false,"AS74":false,"AS75":true,"AS76":false},"lined":{"AS71":"normal","AS72":"normal","AS73":"normal","AS74":"normal","AS75":"normal","AS76":"reverse"},"kickable":[],"kickLimit":{"total":5,"loaded":3},"goalTrack":"AS74","out":false,"moves":9,"joints":3,"msg":"Spotted 3 to AS76.","won":false},"needLined":{"AS71":"normal","AS72":"normal","AS73":"normal","AS74":"normal","AS75":"normal","AS76":"reverse"},"checks":{"refusedUnlined":true,"acceptedLined":true,"shove":false},"anim":{"trackIndex":5,"restStart":333,"engIn":1458.2055045581994,"restEnd":440,"cutIn":["DTTX 9001","DTTX 9028","DTTX 9044"],"cutOut":[],"phases":[600,600]},"geo":{"W":1340,"H":460,"NTRACK":6,"TRACK_IDS":["AS71","AS72","AS73","AS74","AS75","AS76"],"sw":[{"x":370,"y":320},{"x":440,"y":268},{"x":510,"y":216},{"x":580,"y":164},{"x":650,"y":112},{"x":720,"y":60}],"TRACK_RIGHT":1292,"LEAD_Y":372,"LEAD_LEFT":-320,"FOOT":{"x":300,"y":372},"MAIN_OUT":{"x":930,"y":-96},"ENGLEN":64,"CLEAR":30,"types":{"box":{"len":42,"tag":"BX"},"hopper":{"len":47,"tag":"HP"},"tank":{"len":50,"tag":"TK"},"centerbeam":{"len":61,"tag":"CB"},"autorack":{"len":75,"tag":"AR"}},"routes":{"lead":[{"x":-320,"y":372},{"x":340,"y":372}],"through":[{"x":930,"y":-96},{"x":720,"y":60},{"x":650,"y":112},{"x":580,"y":164},{"x":510,"y":216},{"x":440,"y":268},{"x":370,"y":320},{"x":300,"y":372},{"x":-320,"y":372}],"move":[{"x":-320,"y":372},{"x":300,"y":372},{"x":720,"y":60},{"x":1292,"y":60}]},"rest":{"before":333,"after":440}},"through":{"from":-220,"to":1294.8082568372993,"dur":2200,"cars":11}};
+const G = SCENE.geo, TR = G.TRACK_IDS;
+const t0 = performance.now();
+const $ = (id) => document.getElementById(id);
+const host = $('yard');
+const MAXDPR = +new URLSearchParams(location.search).get('maxdpr') || Infinity;   // measurement switch: clamp the canvas pixel ratio
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);   // same curve as anim.js
+const carLen = (type) => (G.types[type] || G.types.box).len;
+
+// point and heading at arclength s on a polyline; extrapolates off both ends.
+// Checked against the frozen polyAt at 603 sample points (see the report).
+function along(route, s) {
+  const segs = [];
+  for (let i = 0; i < route.length - 1; i++) {
+    const a = route[i], dx = route[i + 1].x - a.x, dy = route[i + 1].y - a.y;
+    segs.push({ a, dx, dy, len: Math.hypot(dx, dy) || 1e-6 });
+  }
+  let g = segs[0], d = s;
+  if (s >= 0) {
+    let acc = 0; g = null;
+    for (const q of segs) { if (s <= acc + q.len) { g = q; d = s - acc; break; } acc += q.len; }
+    if (!g) { g = segs[segs.length - 1]; d = s - acc + g.len; }
+  }
+  return { x: g.a.x + g.dx / g.len * d, y: g.a.y + g.dy / g.len * d, angle: Math.atan2(g.dy, g.dx) };
+}
+
+// ---- the view transform: geometry units -> CSS px. It is the only place layout is decided. ----
+// wide: one unit is k CSS px, k >= 1.   tall: the yard is turned a quarter turn; geometry x runs
+// down the page and geometry y runs across it, so a track is a lane and the page scrolls down.
+const WIDE_MIN = G.W;                       // wide only when one unit is at least one CSS px
+function makeView(boxW) {
+  let v;
+  if (boxW >= WIDE_MIN) {
+    const k = boxW / G.W;
+    v = { mode: 'wide', w: boxW, h: Math.round(G.H * k), a: k, b: 0, c: 0, d: k, e: 0, f: 0, thick: 28 };
+  } else {
+    const lane = boxW / (G.NTRACK + 1), step = G.sw[0].y - G.sw[1].y, lx = lane / step, ky = 0.7, x0 = -40;
+    v = { mode: 'tall', w: boxW, h: Math.round((G.W - x0) * ky), a: 0, b: ky, c: -lx, d: 0,
+      e: G.LEAD_Y * lx + lane / 2, f: -x0 * ky, thick: Math.min(46, lane - 6), lane };
+  }
+  v.pt = (x, y) => ({ x: v.a * x + v.c * y + v.e, y: v.b * x + v.d * y + v.f });
+  v.dir = (ang) => { const cx = Math.cos(ang), sy = Math.sin(ang), ux = v.a * cx + v.c * sy, uy = v.b * cx + v.d * sy;
+    return { deg: Math.atan2(uy, ux) * 180 / Math.PI, k: Math.hypot(ux, uy) }; };
+  return v;
+}
+
+// ---- the state on screen ----
+let V = null;
+let cur = structuredClone(SCENE.before);     // the real mid-game state
+let anim = null;                             // { route, engS, cut } while a move plays
+let thru = null;                             // { s } while the stress train runs
+let moved = false, busy = false, focusSw = -1;
+
+// static scenery, in CSS px
+function scenery() {
+  const P = (p) => V.pt(p.x, p.y), sw = G.sw.map(P);
+  const rails = [];
+  rails.push({ a: sw[G.NTRACK - 1], b: P(G.MAIN_OUT), dim: true });
+  let prev = P(G.FOOT);
+  for (let i = 0; i < G.NTRACK; i++) { rails.push({ a: prev, b: sw[i], dim: true }); prev = sw[i]; }
+  rails.push({ a: V.pt(G.LEAD_LEFT, G.LEAD_Y), b: P(G.FOOT), dim: false });
+  for (let i = 0; i < G.NTRACK; i++) rails.push({ a: sw[i], b: V.pt(G.TRACK_RIGHT, G.sw[i].y), dim: false });
+  const ticks = G.sw.map((s) => { const c = V.pt(s.x + G.CLEAR, s.y), n = V.dir(Math.PI / 2), r = n.deg * Math.PI / 180;
+    return { a: { x: c.x - 9 * Math.cos(r), y: c.y - 9 * Math.sin(r) }, b: { x: c.x + 9 * Math.cos(r), y: c.y + 9 * Math.sin(r) } }; });
+  const switches = G.sw.map((s, i) => {
+    const c = sw[i], up = i < G.NTRACK - 1 ? sw[i + 1] : P(G.MAIN_OUT), tr = V.pt(G.TRACK_RIGHT, s.y);
+    const unit = (to) => { const dx = to.x - c.x, dy = to.y - c.y, L = Math.hypot(dx, dy); return { x: c.x + dx / L * 24, y: c.y + dy / L * 24 }; };
+    const box = V.mode === 'wide' ? { x: c.x - 74, y: c.y - 22, w: 96, h: 44 } : { x: c.x - V.lane / 2 + 1, y: c.y - 54, w: V.lane - 2, h: 76 };
+    const words = V.mode === 'wide' ? { x: c.x - 16, y: c.y, anchor: 'end' } : { x: c.x, y: c.y - 38, anchor: 'middle' };
+    return { id: TR[i], c, normalTo: unit(up), reverseTo: unit(tr), box, words };
+  });
+  const labels = G.sw.map((s, i) => {
+    const e = V.pt(G.TRACK_RIGHT, s.y);
+    return V.mode === 'wide' ? { id: TR[i], x: e.x + 6, y: e.y - 7, tagY: e.y + 7, anchor: 'start' } : { id: TR[i], x: e.x, y: e.y + 10, tagY: e.y + 24, anchor: 'middle' };
+  });
+  const lead = V.mode === 'wide' ? { x: 8, y: V.pt(0, G.LEAD_Y).y - 26, anchor: 'start' } : { x: V.pt(0, G.LEAD_Y).x, y: P(G.FOOT).y + 14, anchor: 'middle' };
+  return { rails, ticks, switches, labels, lead };
+}
+const tagOf = (id) => (SCENE.showSecured && cur.tracks[id].length >= 2 ? (cur.secured[id] ? 'TIED' : 'LOOSE') : '');
+const linedWord = (id) => (cur.lined[id] === 'reverse' ? 'REVERSE' : 'NORMAL');
+
+// rolling stock, in CSS px: every car and the engine, standing or moving
+function stock() {
+  const out = [];
+  const put = (id, kind, gx, gy, ang, len, type) => { const p = V.pt(gx, gy), d = V.dir(ang);
+    out.push({ id, kind, x: p.x, y: p.y, deg: d.deg, len: len * d.k, num: kind === 'eng' ? 'ENG' : (id ? id.split(' ').pop() : ''),
+      tag: kind === 'eng' || !id ? '' : (G.types[type] || G.types.box).tag, empty: kind !== 'eng' && id ? cur.loaded[id] === false : false }); };
+  for (let i = 0; i < G.NTRACK; i++) {
+    const id = TR[i], cars = cur.tracks[id], pos = cur.pos[id];
+    for (let k = 0; k < cars.length; k++) { const w = carLen(cur.type[cars[k]]); put(cars[k], 'car', G.sw[i].x + pos[k] + w / 2, G.sw[i].y, 0, w, cur.type[cars[k]]); }
+  }
+  const route = anim ? anim.route : G.routes.lead, cut = anim ? anim.cut : cur.engine;
+  const engS = anim ? anim.engS : (moved ? G.rest.after : G.rest.before);
+  let p = along(route, engS); put('ENG', 'eng', p.x, p.y, p.angle, G.ENGLEN);
+  let s = engS + G.ENGLEN / 2;
+  for (const c of cut) { const w = carLen(cur.type[c]); p = along(route, s + w / 2); put(c, 'car', p.x, p.y, p.angle, w, cur.type[c]); s += w; }
+  if (thru) {                                 // stress train: one engine and 14 cars, three with a label
+    p = along(G.routes.through, thru.s); put('ENG2', 'eng', p.x, p.y, p.angle, G.ENGLEN);
+    s = thru.s - G.ENGLEN / 2;
+    for (let k = 0; k < 14; k++) { const lab = k >= 6 && k < 9 ? 'TEST ' + (k - 5) : '', w = 42; p = along(G.routes.through, s - w / 2);
+      put(lab || '', 'car', p.x, p.y, p.angle, w, 'box'); out[out.length - 1].key = 'T' + k; s -= w; }
+  }
+  return out;
+}
+
+// ---- reduced motion: the operating-system flag or the app attribute ----
+const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.reduce === '1';
+
+// ---- tween driver: same behaviour as anim.js play(); records frame times for the measurement ----
+function play(steps, onDone) {
+  const rec = { stamps: [], script: [] };
+  let i = 0, start = null;
+  function frame(now) {
+    const s0 = performance.now();
+    if (start == null) start = now;
+    const t = Math.min(1, (now - start) / steps[i].dur);
+    steps[i].fn(easeInOut(t));
+    R.frame();
+    rec.stamps.push(now); rec.script.push(performance.now() - s0);
+    if (t >= 1) { i++; start = null; if (i >= steps.length) { onDone(rec); return; } }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+function routeLined() { return TR.every((id) => cur.lined[id] === SCENE.needLined[id]); }
+function playMove(force) {
+  return new Promise((resolve) => {
+    if (busy || moved) return resolve(null);
+    if (!force && !routeLined()) { say('The route to ' + SCENE.source.move[1] + ' is not lined. The move did not start.'); return resolve(null); }
+    const A = SCENE.anim, route = G.routes.move;
+    const commit = () => { if (moved) return; const lined = cur.lined; cur = structuredClone(SCENE.after); cur.lined = lined; moved = true; };
+    const finish = (rec) => { anim = null; busy = false; R.sync(); R.frame(); mirror(); say(SCENE.after.msg); readout(); __proto.last = rec; resolve(rec); };
+    if (reduced()) { commit(); return finish({ stamps: [], script: [], reduced: true }); }   // the move ends at once
+    busy = true;
+    play([
+      { dur: A.phases[0], fn: (t) => { anim = { route, engS: lerp(A.restStart, A.engIn, t), cut: A.cutIn }; } },
+      { dur: A.phases[1], fn: (t) => { commit(); anim = { route, engS: lerp(A.engIn, A.restEnd, t), cut: A.cutOut }; } },
+    ], finish);
+  });
+}
+function playThrough() {
+  return new Promise((resolve) => {
+    if (busy) return resolve(null);
+    busy = true; const T = SCENE.through;
+    play([{ dur: T.dur, fn: (t) => { thru = { s: lerp(T.from, T.to, t) }; } }], (rec) => { thru = null; busy = false; R.frame(); __proto.last = rec; resolve(rec); });
+  });
+}
+function reset() { if (busy) return; cur = structuredClone(SCENE.before); moved = false; anim = null; R.sync(); R.frame(); mirror(); readout(); say('Reset.'); }
+function line(i) {
+  if (busy) return;
+  const id = TR[i]; cur.lined[id] = cur.lined[id] === 'reverse' ? 'normal' : 'reverse';
+  R.sync(); R.frame(); mirror(); say(id + ' switch lined ' + cur.lined[id] + '.');
+}
+
+// ---- words: the text mirror, the status line, the readout ----
+function say(text) { $('msg').textContent = text; }
+function readout() { $('readout').textContent = 'Moves ' + cur.moves + ' / par ' + SCENE.source.par; }
+function carWords(c) { return c + ' ' + cur.type[c] + (cur.loaded[c] === false ? ' empty' : ''); }
+function mirror() {
+  const ul = $('mirror'); ul.textContent = '';
+  const li = (html) => { const e = document.createElement('li'); e.innerHTML = html; ul.appendChild(e); };
+  li('<b>Engine</b> on the lead. ' + (cur.engine.length ? 'It holds ' + cur.engine.length + ' cars: ' + cur.engine.map(carWords).join(', ') + '.' : 'It holds no cars.'));
+  for (const id of TR) {
+    const n = cur.tracks[id].length, tag = tagOf(id);
+    li('<b>' + id + '</b>. Switch lined ' + cur.lined[id] + '. ' + (n ? n + (n === 1 ? ' car' : ' cars') + (tag ? ', ' + tag.toLowerCase() : '') + ', from the switch end: ' + cur.tracks[id].map(carWords).join(', ') + '.' : 'Empty.'));
+  }
+}
+
+// ---- measurement hooks ----
+const __proto = window.__proto = { tech: 'canvas', playMove, playThrough, reset, line, last: null, redraws: 0, retokens: 0, firstDraw: null,
+  view: () => ({ mode: V.mode, w: V.w, h: V.h }), state: () => cur };
+
+// ==== drawing code: canvas (start) ====
+const R = (() => {
+  const KEYS = ['floor', 'rail', 'rail-dim', 'tick', 'car', 'car-edge', 'car-ink', 'eng', 'eng-edge', 'normal', 'reverse', 'tied', 'loose', 'label', 'focus'];
+  const T = {};
+  let cv, ctx, S, dpr = 1, btns = [];
+
+  // a canvas cannot read a CSS variable while it paints: copy the tokens out of the cascade
+  function readTokens() {
+    const cs = getComputedStyle(host);
+    for (const k of KEYS) T[k] = cs.getPropertyValue('--yt-' + k).trim();
+    T.fs = parseFloat(cs.fontSize); T.font = '700 ' + T.fs + 'px ' + cs.fontFamily; T.ls = cs.letterSpacing === 'normal' ? '0px' : cs.letterSpacing;
+    __proto.retokens++;
+  }
+  function size() {
+    dpr = Math.min(MAXDPR, window.devicePixelRatio || 1);
+    cv.style.width = V.w + 'px'; cv.style.height = V.h + 'px';
+    cv.width = Math.round(V.w * dpr); cv.height = Math.round(V.h * dpr);
+    S = scenery();
+  }
+  function init() {
+    cv = document.createElement('canvas');
+    cv.setAttribute('role', 'img');
+    cv.setAttribute('aria-label', 'Yard diagram. The switches and the yard state follow in words.');
+    cv.style.display = 'block';
+    host.appendChild(cv); ctx = cv.getContext('2d');
+    readTokens(); size();
+    // pointer: hit-test the switch boxes in CSS px
+    cv.addEventListener('click', (e) => {
+      const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      const i = S.switches.findIndex((s) => x >= s.box.x && x <= s.box.x + s.box.w && y >= s.box.y && y <= s.box.y + s.box.h);
+      if (i >= 0) line(i);
+    });
+    // keyboard: the fallback buttons beside the canvas
+    const list = $('swlist');
+    TR.forEach((id, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'dusk-btn yt-btn';
+      b.addEventListener('click', () => line(i));
+      b.addEventListener('focus', () => { focusSw = i; frame(); });
+      b.addEventListener('blur', () => { focusSw = -1; frame(); });
+      list.appendChild(b); btns.push(b);
+    });
+    // nothing tells a canvas that a token, the font size, or the pixel ratio changed: watch for each
+    const retoken = () => { readTokens(); size(); frame(); };
+    new MutationObserver(retoken).observe(document.documentElement, { attributes: true });
+    const probe = document.createElement('div'); probe.className = 'yt-probe'; host.appendChild(probe);
+    let first = true; new ResizeObserver(() => { if (first) { first = false; return; } retoken(); }).observe(probe);
+    const watchDpr = () => matchMedia('(resolution: ' + window.devicePixelRatio + 'dppx)').addEventListener('change', () => { retoken(); watchDpr(); }, { once: true });
+    watchDpr();
+  }
+  function layout() { size(); }
+  function sync() {
+    btns.forEach((b, i) => { b.innerHTML = TR[i] + ' <span class="dusk-sr">switch, lined</span> ' + linedWord(TR[i]); });
+  }
+  function rr(x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function seg(a, b, color, w) { ctx.strokeStyle = color; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+  function text(str, x, y, anchor, color) { ctx.textAlign = anchor === 'middle' ? 'center' : anchor; ctx.fillStyle = color; ctx.fillText(str, x, y); }
+  function frame() {
+    __proto.redraws++;
+    const fs = T.fs;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = T.floor; ctx.fillRect(0, 0, V.w, V.h);
+    ctx.lineCap = 'round'; ctx.font = T.font; ctx.textBaseline = 'middle'; if ('letterSpacing' in ctx) ctx.letterSpacing = T.ls;
+    for (const r of S.rails) seg(r.a, r.b, r.dim ? T['rail-dim'] : T.rail, r.dim ? 3 : 4);
+    for (const t of S.ticks) seg(t.a, t.b, T.tick, 2);
+    text('LEAD', S.lead.x, S.lead.y, S.lead.anchor, T.label);
+    S.switches.forEach((s, i) => {
+      const rev = cur.lined[s.id] === 'reverse', col = rev ? T.reverse : T.normal;
+      seg(s.c, rev ? s.reverseTo : s.normalTo, col, 5);
+      ctx.save(); ctx.translate(s.c.x, s.c.y); ctx.rotate(Math.PI / 4); ctx.fillStyle = col; ctx.strokeStyle = T.floor; ctx.lineWidth = 2;
+      ctx.fillRect(-6, -6, 12, 12); ctx.strokeRect(-6, -6, 12, 12); ctx.restore();
+      text(s.id, s.words.x, s.words.y - fs * 0.6, s.words.anchor, T.label);
+      text(rev ? 'REVERSE' : 'NORMAL', s.words.x, s.words.y + fs * 0.6, s.words.anchor, col);
+      if (focusSw === i) { ctx.strokeStyle = T.focus; ctx.lineWidth = 2; rr(s.box.x + 1, s.box.y + 1, s.box.w - 2, s.box.h - 2, 6); ctx.stroke(); }
+    });
+    for (const l of S.labels) {
+      text(l.id, l.x, l.y, l.anchor, T.label);
+      const tag = tagOf(l.id); if (tag) text(tag, l.x, l.tagY, l.anchor, tag === 'LOOSE' ? T.loose : T.tied);
+    }
+    for (const b of stock()) {
+      ctx.save(); ctx.translate(b.x, b.y);
+      ctx.save(); ctx.rotate(b.deg * Math.PI / 180);
+      const eng = b.kind === 'eng';
+      ctx.fillStyle = eng ? T.eng : b.empty ? T.floor : T.car; ctx.strokeStyle = eng ? T['eng-edge'] : T['car-edge']; ctx.lineWidth = eng ? 2 : 1.5;
+      rr(-b.len / 2, -V.thick / 2, b.len, V.thick, 3); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      if (b.tag) { text(b.num, 0, -fs * 0.575, 'middle', T['car-ink']); text(b.tag, 0, fs * 0.575, 'middle', T['car-ink']); }
+      else if (b.num) text(b.num, 0, 0, 'middle', T['car-ink']);
+      ctx.restore();
+    }
+  }
+  return { init, layout, sync, frame };
+})();
+
+// ==== drawing code: canvas (end) ====
+// ---- start ----
+V = makeView(host.clientWidth);
+R.init(); R.sync(); R.frame(); mirror(); readout();
+__proto.firstDraw = performance.now();
+new ResizeObserver(() => { const w = host.clientWidth; if (w && w !== V.w) { V = makeView(w); R.layout(); R.sync(); R.frame(); } }).observe(host);
+$('play').addEventListener('click', () => playMove(false));
+$('reset').addEventListener('click', reset);
+
+</script>
+</body>
+</html>
