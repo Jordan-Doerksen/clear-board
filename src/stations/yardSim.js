@@ -1,15 +1,21 @@
-// yard.js — Clear Board station wrapping the switch-list canvas sim.
+// yardSim.js — the controller of the Yard station.
 //
-// The 7 engine modules in ./yard/ WERE byte-for-byte copies of switch-list/src. That is no longer
-// true: D-0029 made securement a player action, which required editing model.js, solver.js,
-// render.js and puzzles.js. Divergence from switch-list is now deliberate and gated —
-// tools/solve.mjs re-proves all 19 pars and tools/securement-check.mjs pins the new behaviour.
-// Treat those files as OWNED here, not mirrored: don't re-sync them from switch-list.
+// It holds the game state, the move logic, the records, the sound calls and the event wiring.
+// It exports mount(root, ctx) and nothing else. It works with these files in ./yard/:
+//   view.ts            each markup string, each class name and each DOM write of the chrome
+//   yard.css           the style of the chrome
+//   draw.ts            the drawing: the canvas, the hit test of a click and the one draw call
+//   anim.js, sound.js  the tween driver and the sounds
+//   model.js, puzzles.js, geometry.js, solver.js
+//                      the engine. These four modules are frozen: no job edits them. This file
+//                      imports the first three. tools/solve.mjs uses solver.js to prove each par.
 //
-// This file is the station adaptation:
-// switch-list/src/main.js, wrapped in mount(root, ctx) with all DOM scoped to
-// `root`, CSS scoped to `.yard-wrap`, and Clear Board hooks (profile/save,
-// back button, reduced-motion, sound default). No top-level side effects.
+// Two seam rules. This file holds no class name, no markup string and no inline style: it reaches
+// an element by its id or through a view function. This file draws only through the drawing
+// object: it does not import render.js.
+//
+// This file does nothing when it is imported. One module that it imports does: sound.js reads
+// the stored mute value.
 
 import { TRACK_IDS, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
 import { freshState, lineSwitch, canPull, canSpot, canKick, canSecure, spotPlan, pull, spot, kick, secure, checkWin, unsecuredGoal, grade } from './yard/model.js';
@@ -46,11 +52,13 @@ export function mount(root, ctx) {
   // Back button → Clear Board home.
   view.onGo((route) => ctx.go(route));
 
-  // reduced motion: animations near-instant when the user's setting asks for it.
+  // The reduce setting is read one time, here. With the setting on, the speed factor is 6.
+  // anim.js multiplies each duration by the factor, so a move takes about 6 times longer and
+  // motion does not stop. This is a known defect. It stays as it is in this file for now.
   const reduce = !!(ctx.settings && ctx.settings.reduce);
-  const fast = () => reduce ? 6 : 1;          // setSpeed(6) ≈ instant; setSpeed(1) = normal
+  const fast = () => reduce ? 6 : 1;          // setSpeed(6) = 6 times slower; setSpeed(1) = normal
 
-  // --- everything below is switch-list/src/main.js, scoped to `root` ----------
+  // The drawing adapter makes the canvas inside the frame that the view gives.
   const drawing = createDrawing(view.drawHost, { onPick });
 
   let puzzle, state, anim = null, busy = false, fromDemo = false;
