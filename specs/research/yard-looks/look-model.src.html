@@ -94,7 +94,7 @@
 .yd-rod{ stroke: var(--ink-3); stroke-width: 1.5; }
 .yd-stand{ stroke-width: 1.75; stroke-linejoin: round; }
 .yd-stand--normal{ fill: var(--well); stroke: var(--green-ink); }
-.yd-stand--reverse{ fill: var(--amber-ink); stroke: var(--amber-ink); }
+.yd-stand--reverse{ fill: var(--amber); stroke: var(--amber-ink); }
 .yd-ring{ fill: none; stroke: var(--red-ink); stroke-width: 2; filter: var(--yd-red-glow); }
 
 /* the map camera: shapes only */
@@ -117,9 +117,9 @@
 .yd-a-l { transform: translateY(-50%); }
 .yd-a-r { transform: translate(-100%, -50%); }
 .yd-label{ font-size: var(--fs-s); }
-.yd-num{ padding: 0 1px; box-shadow: none; border-radius: 2px; color: var(--ink); font-size: var(--fs-s); font-weight: var(--fw-bold); line-height: 1.2; }
+.yd-num{ padding: 0 1px; box-shadow: none; border-radius: var(--r-chip); color: var(--ink); font-size: var(--fs-s); font-weight: var(--fw-bold); line-height: 1.2; }
 .yd-num--land{ background: none; color: var(--lit); outline: 1px dashed var(--lit); outline-offset: -1px; }
-.yd-tag{ position: absolute; transform: translate(0, -50%); padding: 0 1px; border-radius: 2px; font: var(--fw-bold) var(--fs-xs)/1.15 var(--font-mono); white-space: nowrap; }
+.yd-tag{ position: absolute; transform: translate(0, -50%); padding: 0 1px; border-radius: var(--r-chip); font: var(--fw-bold) var(--fs-xs)/1.15 var(--font-mono); white-space: nowrap; }
 .yd-tag--on{ color: var(--on-tile); background: var(--tile-glyph); }
 .yd-tag--grey{ color: var(--grey-ink); }
 .yd-tag--teal{ color: var(--teal-ink); }
@@ -160,7 +160,7 @@
 .yd-legend h3:not(:first-child){ margin-top: var(--sp-3); }
 .yd-legend h3 em{ color: var(--amber-ink); font-style: normal; text-transform: none; letter-spacing: 0; }
 .yd-lrow{ display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-5); margin-top: var(--sp-2); }
-.yd-lrow > span{ display: inline-flex; align-items: center; gap: var(--sp-1); white-space: nowrap; }
+.yd-lrow > span{ display: inline-flex; align-items: center; gap: var(--sp-1); max-width: 100%; }
 .yd-lrow svg{ display: block; flex: none; }
 .yd-lcar{ position: relative; display: inline-block; flex: none; }
 .yd-lrow .dusk-state{ font-size: var(--fs-xs); }
@@ -173,7 +173,7 @@ details.yd-legend-fold .yd-legend--below{ margin-top: 0; }
 .yd-cam{ border-top: 1px solid var(--hair); }
 .yd-cam:first-child{ border-top: 0; }
 .yd-cam--map{ display: flex; justify-content: center; border-top: 0; }
-.yd-mapcap{ display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-1) var(--sp-3); padding: var(--sp-2) var(--sp-2) 0; }
+.yd-mapcap{ display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-1) var(--sp-3); width: 100%; margin: 0 auto; padding: var(--sp-2) var(--sp-2) 0; box-sizing: border-box; }
 .yd-mapcap .yd-plate{ position: static; font-size: var(--fs-xs); }
 .yd-seg{ display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: var(--sp-2) 0; border-radius: 0; }
 .yd-seg button{ min-height: var(--yd-target); min-width: 0; padding: 2px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font-family: var(--font-mono); overflow: hidden; }
@@ -182,10 +182,11 @@ details.yd-legend-fold .yd-legend--below{ margin-top: 0; }
 .yd-seg--short button small .yd-lin-word{ display: none; }
 .yd-seg:not(.yd-seg--short) button small .yd-lin-glyph{ display: none; }
 .yd-camgrid{ display: grid; gap: 0 var(--gap); }
+.yd-camgrid--two .yd-cam{ border-top: 0; }
 .yd-cap{ display: flex; align-items: center; gap: var(--sp-3); min-height: 30px; padding: var(--sp-1) var(--sp-3); }
 .yd-cap .yd-plate{ position: static; background: none; box-shadow: none; padding: 0; }
 .yd-strip{ display: flex; align-items: stretch; }
-.yd-break{ flex: none; display: flex; align-items: center; justify-content: center; color: var(--ink-2); font-size: var(--fs-l); font-weight: var(--fw-bold); background: var(--panel-lo); border-left: 1px dashed var(--hair-2); border-right: 1px dashed var(--hair-2); }
+.yd-break{ flex: none; display: flex; align-items: flex-start; justify-content: center; box-sizing: border-box; line-height: 1; color: var(--ink-2); font-size: var(--fs-l); font-weight: var(--fw-bold); background: var(--panel-lo); border-left: 1px dashed var(--hair-2); border-right: 1px dashed var(--hair-2); }
 .yd-pan{ display: inline-flex; gap: var(--sp-2); margin-left: auto; }
 
 /* ---- the chrome around the model ------------------------------------------------------------- */
@@ -201,7 +202,7 @@ details.yd-legend-fold .yd-legend--below{ margin-top: 0; }
 .yd-banner{ display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--gap); min-height: var(--yd-target); margin-top: var(--gap); padding: var(--sp-2) var(--gap); background: var(--well); border-radius: var(--r-control); box-shadow: var(--ring-well); font-size: var(--fs-base); }
 .yd-banner--attn{ box-shadow: var(--rowneon-red); }
 .yd-rules-legend{ margin: 0 0 var(--sp-4); color: var(--ink-2); max-width: var(--measure); }
-.yd-rules-legend b{ color: var(--ink); }
+.yd-rules-legend b, .yd-rules-legend strong{ color: var(--ink); }
 .yd-chips{ display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
 .yd-chip{ padding: var(--sp-2) var(--sp-4); background: var(--well); border-radius: var(--r-control); border: 1px solid var(--hair-2); color: var(--ink-2); font-size: var(--fs-s); }
 .yd-chip--si{ border-style: dashed; }
@@ -259,6 +260,7 @@ details.yd-how > summary{ min-height: var(--yd-target); display: flex; align-ite
           <h2 class="dusk-panel-name" id="yard-h">The Yard</h2>
           <span class="dusk-panel-sub" id="route-sub"></span>
           <span class="dusk-spacer"></span>
+          <span class="yd-goal" id="goal-word"></span>
           <span class="dusk-count" id="goal-count"></span>
         </header>
         <div class="dusk-panel-body dusk-panel-body--flush yd-host" id="yard"></div>
@@ -323,7 +325,7 @@ details.yd-how > summary{ min-height: var(--yd-target); display: flex; align-ite
     </main>
 
     <footer class="dusk-status">
-      <span><i class="dusk-led dusk-led--caution" aria-hidden="true"></i>Sketch: the switches and the track selector work. The other controls do nothing.</span>
+      <span><i class="dusk-led dusk-led--caution" aria-hidden="true"></i>Sketch: only the switches and the track selector work.</span>
       <span id="st-lined"></span>
       <span class="dusk-spacer"></span>
       <span id="st-mode"></span>
@@ -346,6 +348,8 @@ const TONE = { box: 'grey', hopper: 'teal', tank: 'violet', centerbeam: 'amber',
 const GAUGE = 3;        /* half of the rail spacing, in units (two rails 6 units apart) */
 const TIE_STEP = 10;    /* a tie every 10 units */
 const VIEW = { x0: 0, y0: -6, y1: 412 };   /* the window of the whole yard, in units */
+const TARGET = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--yd-target')) || 44;   /* the side of a switch button, in px */
+const MIN_W = 240;      /* under this panel width no view is drawn: the last picture stays */
 
 const live = { lined: Object.assign({}, ST.lined), sel: ST.linedRoute.reachesTrack || IDS[0], pan: 0 };
 
@@ -539,7 +543,8 @@ function paint(host, o) {
   /* 4. the lined route: bright rails and chevrons that point from the engine to the track */
   rails(route, ' yd-rail--lined');
   (function chevrons() {
-    const step = 32 * s, a = 4.6 * s, b = 3.2 * s;
+    const step = 32 * s, a = 4.6 * s, b = 3.2 * s, keep = 8 * s;
+    const foulPx = o.route.reaches ? X(track(o.route.reaches).clearanceX) : null;
     let acc = 16 * s;
     for (let i = 0; i < route.length - 1; i++) {
       const p = route[i], q = route[i + 1], len = Math.hypot(q[0] - p[0], q[1] - p[1]);
@@ -547,8 +552,10 @@ function paint(host, o) {
       const lastSeg = i === route.length - 2;
       while (acc <= len - (lastSeg ? 10 * s : 0)) {
         const cx = p[0] + ux * acc, cy = p[1] + uy * acc;
+        const onBend = (i > 0 && acc < keep) || (!lastSeg && len - acc < keep);
+        const onFoul = lastSeg && foulPx != null && Math.abs(cx - foulPx) < keep;
         const tip = [cx + ux * b / 2, cy + uy * b / 2], back = [cx - ux * b / 2, cy - uy * b / 2];
-        S('polyline', { class: 'yd-chev', points: ptsAttr([[back[0] - uy * a, back[1] + ux * a], tip, [back[0] + uy * a, back[1] - ux * a]]) }, svg);
+        if (!onBend && !onFoul) S('polyline', { class: 'yd-chev', points: ptsAttr([[back[0] - uy * a, back[1] + ux * a], tip, [back[0] + uy * a, back[1] - ux * a]]) }, svg);
         acc += step;
       }
       acc -= len;
@@ -603,11 +610,12 @@ function paint(host, o) {
     S('polygon', { class: 'yd-stand yd-stand--' + lin, points: ptsAttr([[sx, sy - d], [sx + d, sy], [sx, sy + d], [sx - d, sy]]) }, svg);
     const word = '<span class="yd-lin yd-lin--' + lin + '">' + lin.toUpperCase() + '</span>';
     const attn = o.ring === sp.id ? '<span class="yd-attn">?</span> ' : '';
-    if (show.stand === 'left') plate('yd-standplate', attn + esc(sp.id) + ' ' + word, sx - d - 7 - (o.ring === sp.id ? 6 : 0), sy, 'r');
-    if (show.stand === 'above') plate('yd-standplate', attn + word, sx, sy - d - 4, 'bc');
-    if ((o.buttons || []).indexOf(sp.id) >= 0) {
+    const hasBtn = (o.buttons || []).indexOf(sp.id) >= 0, bx = X(sp.x - 6), by = Y(sp.y - 8);   /* the centre of the 44 px button */
+    if (show.stand === 'left') plate('yd-standplate', attn + esc(sp.id) + ' ' + word, Math.min(sx - d - 7 - (o.ring === sp.id ? 6 : 0), hasBtn ? bx - TARGET / 2 - 3 : Infinity), sy, 'r');
+    if (show.stand === 'above') plate('yd-standplate', attn + word, sx, Math.min(sy - d - 4, hasBtn ? by - TARGET / 2 - 3 : Infinity), 'bc');
+    if (hasBtn) {
       const b = H('button', { class: 'yd-sw', type: 'button', 'data-sw': sp.id, 'aria-pressed': lin === 'reverse' ? 'true' : 'false', 'aria-label': sp.id + ' switch, lined ' + lin });
-      b.style.left = f1(X(sp.x - 6)) + 'px'; b.style.top = f1(Y(sp.y - 8)) + 'px';
+      b.style.left = f1(bx) + 'px'; b.style.top = f1(by) + 'px';
       controls.appendChild(b);
     }
   });
@@ -691,8 +699,9 @@ function legendNode(s, cams) {
   if (kick) item(r, null, esc(kick.kickableMark.split(' ')[0]) + ' = kickable track');
   item(r, null, '<span class="yd-goal">BUILD</span><span class="dusk-count">n / n</span> goal cars on the track');
   r = row();
-  item(r, pic(30, 16, (svg) => S('rect', { class: 'yd-land', x: 1, y: 2, width: 28, height: 12, rx: 1.5 }, svg)), 'the called move lands here');
+  item(r, pic(30, 16, (svg) => S('rect', { class: 'yd-land', x: 1, y: 2, width: 28, height: 12, rx: 1.5 }, svg)), 'the move in the builder lands here');
   if (cams) item(r, null, '<span class="yd-dim">⋯</span> empty track left out');
+  if (cams) { r = row(); item(r, pic(30, 16, (svg) => S('rect', { class: 'yd-m-frame', x: 1, y: 2, width: 28, height: 12, rx: 2 }, svg)), 'frame on the map = a view below'); }
   return box;
 }
 
@@ -702,6 +711,7 @@ let lastW = -1;
 function render() {
   const Wp = host.clientWidth;
   lastW = Wp;
+  if (Wp < MIN_W) return;
   const focusSw = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-sw');
   const focusSel = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-sel');
   const focusPan = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-pan');
@@ -718,7 +728,8 @@ function render() {
   if (full) renderFull(Wp, Math.min(sFit, 1.3), route);
   else renderCams(Wp, route);
   document.documentElement.setAttribute('data-yard-mode', full ? 'model' : 'cameras');
-  $('#st-mode').textContent = full ? 'View: whole model' : 'View: three cameras';
+  const needW = Math.ceil(sMin * unitsW + colW) + (document.documentElement.clientWidth - Wp);     /* the narrowest window that shows the whole model, with the fonts of this machine */
+  $('#st-mode').textContent = full ? 'View: whole model (window ' + needW + ' px or wider)' : 'View: three cameras (window under ' + needW + ' px)';
 
   /* words outside the drawing that follow the lining */
   const rw = routeWords(route);
@@ -785,19 +796,21 @@ function renderCams(Wp, route) {
   for (let k = 0; k < 4; k++) s2 = Math.max(sLow, Math.min(sHigh, Math.min.apply(null, IDS.map((id) => { const q = pieces(id, s2); return (camW - breakPx) / ((q.b - q.a) + (q.d1 - q.d0)); }))));
   const t = track(live.sel), sp = sw(live.sel), th = pieces(live.sel, s2);
   const throatPx = Math.round((th.b - th.a) * s2);
-  const availPx = camW - throatPx - breakPx, availU = availPx / s2;
+  const availPx = Math.max(1, camW - throatPx - breakPx), availU = availPx / s2;
   const needPan = (th.d1 - th.d0) * s2 > availPx + 0.5;
   const maxPan = Math.max(0, (th.d1 - th.d0) - availU);
   live.pan = Math.max(0, Math.min(live.pan, maxPan));
   const deepA = needPan ? th.d0 + live.pan : th.d1 - availU, deepPx = availPx;
-  const y2 = sp.y - 42, hu = 76, h2 = Math.round(hu * s2);
-  const xr3 = G.FOOT.x + 34, xl3 = xr3 - camW / s2, y3 = G.LEAD_Y - 42;
+  const wordH = measure('<div class="yd-plate"><span class="yd-lin">REVERSE</span></div>').h;
+  const topU = Math.max(42, (8 * s2 + TARGET / 2 + 3 + wordH + 2) / s2);     /* units above the track: the button, a gap, the word plate */
+  const y2 = sp.y - topU, hu = topU + 34, h2 = Math.round(hu * s2);
+  const xr3 = G.FOOT.x + 34, xl3 = xr3 - camW / s2, y3 = G.LEAD_Y - topU;
 
   /* camera 1: the map. Shapes only. */
-  const sMap = Math.min(0.8, Wp / G.W);
+  const sMap = Math.min(two ? 0.5 : 0.8, Wp / G.W);     /* side by side cameras: a smaller map, so that the three views fit one screen */
   /* the two labels of the top edge of the present drawing stand above the map: the map itself holds no text */
   const top = WD.canvasLabels.filter((lb) => lb.y < G.switches[G.switches.length - 1].y);
-  if (top.length) cams.appendChild(H('div', { class: 'yd-mapcap' }, top.map((lb) => '<span class="yd-plate yd-label">' + esc(lb.text) + '</span>').join('')));
+  if (top.length) { const mc = H('div', { class: 'yd-mapcap' }, top.map((lb) => '<span class="yd-plate yd-label">' + esc(lb.text) + '</span>').join('')); mc.style.maxWidth = Math.round(G.W * sMap) + 'px'; cams.appendChild(mc); }
   const mapBox = H('div', { class: 'yd-cam yd-cam--map', role: 'img', 'aria-label': 'Map of the whole yard. Route: ' + routeWords(route) + '. The frames show the track view and the lead view.' });
   cams.appendChild(mapBox);
   paint(mapBox, {
@@ -816,7 +829,7 @@ function renderCams(Wp, route) {
   cams.appendChild(seg);
   if (Array.prototype.some.call(seg.querySelectorAll('button'), (b) => b.querySelector('small').scrollWidth > b.clientWidth - 8)) seg.classList.add('yd-seg--short');
 
-  const grid = H('div', { class: 'yd-camgrid' });
+  const grid = H('div', { class: 'yd-camgrid' + (two ? ' yd-camgrid--two' : '') });
   grid.style.gridTemplateColumns = two ? camW + 'px ' + camW + 'px' : '1fr';
   cams.appendChild(grid);
 
@@ -836,6 +849,7 @@ function renderCams(Wp, route) {
   paint(strip, { x0: th.a, y0: y2, wpx: throatPx, hpx: h2, s: s2, lined: live.lined, route: route, landing: true,
     show: { stand: 'above', foul: true, nums: true, tags: true }, buttons: [t.id], onlyCars: t.id });
   const br = H('div', { class: 'yd-break', 'aria-hidden': 'true' }, '⋯'); br.style.width = breakPx + 'px';
+  br.style.paddingTop = Math.max(0, Math.round(topU * s2 - 8)) + 'px';      /* the mark stands on the track */
   strip.appendChild(br);
   paint(strip, { x0: deepA, y0: y2, wpx: deepPx, hpx: h2, s: s2, lined: live.lined, route: route, landing: true,
     show: { nums: true, tags: true }, buttons: [], onlyCars: t.id });
@@ -889,7 +903,8 @@ function mirror(route) {
   strip.innerHTML = cells + '<div class="dusk-strip-end yd-picker"><select class="yd-select yd-picker" id="picker" title="' + esc(b.selectTitles.picker) + '" aria-label="' + esc(b.selectTitles.picker) + '"><optgroup label="' + esc(WD.picker.groupLabel) + '"><option>' + esc(WD.picker.optionLabel) + '</option></optgroup></select></div>';
 
   const gp = ST.goalProgress;
-  $('#goal-count').textContent = 'BUILD ' + gp.track + ' · ' + gp.onGoalTrackNow.length + ' / ' + gp.wanted.length;
+  $('#goal-word').textContent = 'BUILD ' + gp.track;
+  $('#goal-count').textContent = gp.onGoalTrackNow.length + ' / ' + gp.wanted.length;
 
   const wo = WD.workOrder;
   $('#wo-h').innerHTML = '<span class="yd-wo-tag">' + esc(wo.topParts.tag) + '</span> <span class="yd-wo-id">' + esc(wo.topParts.id) + '</span> <span aria-hidden="true">·</span> <span>' + esc(wo.topParts.title) + '</span>';
@@ -917,6 +932,8 @@ function mirror(route) {
 
   let lg = esc(WD.legend);
   ['CROR', 'S.I.'].forEach((k) => { lg = lg.replace(k, '<b>' + k + '</b>'); });
+  /* the emphasis of the app line (yardSim.js:176-180). The words stay the words of the scene. */
+  lg = lg.replace('special instruction', '<em>special instruction</em>').replace(' this yard', ' <em>this</em> yard').replace(/(you must know your yard\S*s\.)/, '<strong>$1</strong>');
   $('#rules-legend').innerHTML = lg;
   $('#rules').innerHTML = SCENE.ruleChips.map((c) =>
     '<li class="yd-chip yd-chip--' + esc(c.kind) + '">' + (c.cite.indexOf(c.kindWord) === 0 ? '' : '<i>' + esc(c.kindWord) + '</i>') + '<b>' + esc(c.cite) + '</b> ' + esc(c.label) + '</li>').join('');
@@ -928,10 +945,11 @@ function mirror(route) {
 /* the refusal example: the throat of the same model, with the lining that the refusal names */
 function renderRefusal() {
   const rf = SCENE.refusalExample, box = $('#ref-view');
-  box.innerHTML = '';
   const lined = Object.assign({}, ST.lined, rf.linedThen);
   const cause = (/^(\S+) is lined/.exec(rf.text) || [])[1] || null;
   const avail = box.parentElement.clientWidth > 640 ? (box.parentElement.clientWidth - 12) / 2 : box.parentElement.clientWidth;
+  if (avail < MIN_W / 2) return;
+  box.innerHTML = '';
   const i = Math.max(0, IDS.indexOf(cause));
   const a = G.switches[Math.max(0, i - 2)], z = G.switches[i];
   const x0 = a.x - 124, x1 = z.x + 52, y0 = z.y - 44, y1 = a.y + 30;
