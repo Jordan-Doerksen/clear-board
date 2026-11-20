@@ -50,3 +50,248 @@
    An empty Dusk bar is a well on a panel, and a learner at 0 % sees no bar. The track gets the
    edge of a control. The fill has no width transition. */
 .cb-app .dusk-bar { border: 1px solid var(--cb-edge); }
+
+/* ---- G1: the answer option -------------------------------------------------------------------
+   An answer is reading text: ink on a head fill, not the gold word of a Dusk button.
+   States: rest, hover, press, selected (aria-pressed), right, wrong, disabled. A right and a
+   wrong option differ by fill, edge and mark. The marks are in the mark block. No opacity. */
+.cb-opts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.cb-opt {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: var(--sp-5) var(--sp-6);
+  border: 1px solid var(--lit-rule);
+  border-radius: var(--r-control);
+  background-color: var(--head);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  line-height: var(--lh-base);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--m-confirm) var(--ease), box-shadow var(--m-confirm) var(--ease);
+}
+.cb-opt:hover:not(:disabled) {
+  background-image: linear-gradient(var(--wash-1), var(--wash-1));
+  box-shadow: var(--neon-ctl);
+}
+.cb-opt:active:not(:disabled) {
+  background-image: linear-gradient(var(--wash-2), var(--wash-2));
+  box-shadow: var(--neon-ctl-on);
+}
+.cb-opt[aria-pressed="true"] {
+  background-image: linear-gradient(var(--wash-2), var(--wash-2));
+  box-shadow: var(--neon-ctl);
+}
+.cb-opt:disabled {
+  background-color: var(--well);
+  color: var(--ink-2);
+  cursor: not-allowed;
+}
+.cb-opt.cb-opt--right {
+  background-color: var(--head);
+  background-image: linear-gradient(var(--rowwash-green), var(--rowwash-green));
+  box-shadow: var(--rowneon-green);
+  color: var(--ink);
+}
+.cb-opt.cb-opt--wrong {
+  background-color: var(--head);
+  background-image: linear-gradient(var(--rowwash-red), var(--rowwash-red));
+  box-shadow: var(--rowneon-red);
+  color: var(--ink);
+}
+
+/* ---- G4: the toggle ---------------------------------------------------------------------------
+   Markup: span.cb-toggle > input[type=checkbox] + i. The checkbox is not seen and covers a box of
+   56 by 44 px. The track is 50 by 28 px and the knob is 20 by 20 px. On: the knob is at the right,
+   and the track has a wash and a lit edge. The knob changes place at once. It does not slide.
+   The focus ring is on the track. The knob has a border with no colour, so that a forced-colours
+   mode draws it. No pill and no circle. */
+.cb-toggle {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 56px;
+  height: var(--cb-target);
+}
+.cb-toggle input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.cb-toggle i {
+  position: absolute;
+  top: 8px;
+  left: 3px;
+  width: 50px;
+  height: 28px;
+  border: 1px solid var(--cb-edge);
+  border-radius: var(--r-control);
+  background-color: var(--well);
+  pointer-events: none;
+}
+.cb-toggle i::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border: 1px solid transparent;
+  border-radius: var(--r-chip);
+  background-color: var(--ink-3);
+}
+.cb-toggle input:hover + i { background-image: linear-gradient(var(--wash-1), var(--wash-1)); }
+.cb-toggle input:checked + i {
+  background-image: linear-gradient(var(--wash-2), var(--wash-2));
+  box-shadow: var(--neon-ctl);
+}
+.cb-toggle input:checked + i::after {
+  left: 25px;
+  background-color: var(--lit);
+}
+.cb-toggle input:focus-visible + i {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---- G5 and G6: the text field and the select ------------------------------------------------
+   One skin for both. The native arrow and the native list of a select stay. */
+.cb-input,
+.cb-select {
+  min-height: var(--cb-target);
+  padding: var(--sp-2) var(--sp-5);
+  border: 1px solid var(--cb-edge);
+  border-radius: var(--r-control);
+  background-color: var(--well);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  transition: border-color var(--m-confirm) var(--ease);
+}
+.cb-input { width: 100%; }
+.cb-select { min-width: var(--cb-target); }
+.cb-input::placeholder {
+  color: var(--ink-3);
+  opacity: 1;
+}
+.cb-input:hover:not(:disabled),
+.cb-select:hover:not(:disabled) { border-color: var(--lit); }
+.cb-input:disabled,
+.cb-select:disabled {
+  border-color: var(--hair-2);
+  color: var(--ink-2);
+  cursor: not-allowed;
+}
+
+/* ---- G10: the tabs -----------------------------------------------------------------------------
+   Markup: .cb-tabs[role=tablist] > button.cb-tab[role=tab][aria-selected]. A tab holds a name and
+   a sub-line in a small element. The selected tab reads aria-selected. It is gold: chrome. */
+.cb-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--r-control);
+  background: var(--well);
+  box-shadow: var(--ring-well);
+}
+.cb-tab {
+  display: flex;
+  flex: 1 1 220px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--cb-target);
+  padding: var(--sp-3) var(--sp-5);
+  border: 0;
+  border-radius: var(--r-chip);
+  background: none;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-base);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--m-confirm) var(--ease), box-shadow var(--m-confirm) var(--ease);
+}
+.cb-tab small {
+  color: var(--ink-2);
+  font-size: var(--fs-s);
+  font-weight: 400;
+}
+.cb-tab:hover { background: var(--wash-1); }
+.cb-tab[aria-selected="true"] {
+  background: var(--wash-2);
+  box-shadow: var(--neon-ctl);
+  color: var(--lit);
+}
+
+/* ---- G11: the plain button and the link --------------------------------------------------------
+   A second-rank action: the word in the link colour, no fill. The plain button gets an underline
+   on hover. The link has an underline at each time. */
+.cb-btn--plain,
+.cb-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-width: var(--cb-target);
+  min-height: var(--cb-target);
+  padding: var(--sp-2) var(--sp-3);
+  border: 0;
+  border-radius: var(--r-control);
+  background: none;
+  color: var(--cb-link);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--m-confirm) var(--ease);
+}
+.cb-link { text-decoration: underline; }
+.cb-btn--plain:hover,
+.cb-link:hover {
+  background: var(--wash-1);
+  text-decoration: underline;
+}
+.cb-btn--plain:active,
+.cb-link:active { background: var(--wash-2); }
+.cb-btn--plain:disabled {
+  background: none;
+  color: var(--ink-2);
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
+/* ---- G12: the attention button ------------------------------------------------------------------
+   Red is on this one control. The word carries the meaning. */
+.cb-btn--attn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-width: var(--cb-target);
+  min-height: var(--cb-target);
+  padding: var(--sp-2) var(--gap);
+  border: 1px solid var(--red-ink);
+  border-radius: var(--r-control);
+  background: none;
+  color: var(--cb-attn-ink);
+  font: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: background-color var(--m-confirm) var(--ease);
+}
+.cb-btn--attn:hover { background: var(--rowwash-red); }
+.cb-btn--attn:active { background: var(--wash-1); }

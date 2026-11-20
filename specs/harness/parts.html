@@ -92,6 +92,71 @@
     </div>
   </section>
 
+  <section class="hx-sec" id="g1">
+    <h2 class="dusk-panel-title">G1. The answer option</h2>
+    <div class="cb-opts">
+      <button class="cb-opt" type="button">A sample answer, at rest</button>
+      <button class="cb-opt" type="button" aria-pressed="true">A sample answer, selected</button>
+      <button class="cb-opt cb-opt--right" type="button" disabled>A sample answer, marked right</button>
+      <button class="cb-opt cb-opt--wrong" type="button" disabled>A sample answer, marked wrong</button>
+      <button class="cb-opt" type="button" disabled>A sample answer, disabled</button>
+      <button class="cb-opt" type="button">A long sample answer that goes on for more than one line on a narrow screen, so that the page shows how the option grows with its text</button>
+    </div>
+  </section>
+
+  <section class="hx-sec" id="g4">
+    <h2 class="dusk-panel-title">G4. The toggle</h2>
+    <div class="hx-row">
+      <label for="hx-t1">Sample setting, off</label>
+      <span class="cb-toggle"><input type="checkbox" id="hx-t1" /><i></i></span>
+      <label for="hx-t2">Sample setting, on</label>
+      <span class="cb-toggle"><input type="checkbox" id="hx-t2" checked /><i></i></span>
+    </div>
+  </section>
+
+  <section class="hx-sec" id="g5">
+    <h2 class="dusk-panel-title">G5. The text field</h2>
+    <div class="hx-stack hx-narrow">
+      <input class="cb-input" type="search" placeholder="A sample placeholder" aria-label="Sample field, empty" />
+      <input class="cb-input" type="text" value="Sample text in a field" aria-label="Sample field, with text" />
+      <input class="cb-input" type="text" value="Sample field, disabled" aria-label="Sample field, disabled" disabled />
+    </div>
+  </section>
+
+  <section class="hx-sec" id="g6">
+    <h2 class="dusk-panel-title">G6. The select</h2>
+    <div class="hx-row">
+      <select class="cb-select" aria-label="Sample select"><option>Sample choice one</option><option>Sample choice two</option></select>
+      <select class="cb-select" aria-label="Sample select, short"><option>1</option><option>2</option></select>
+      <select class="cb-select" aria-label="Sample select, disabled" disabled><option>Sample choice, disabled</option></select>
+    </div>
+  </section>
+
+  <section class="hx-sec" id="g10">
+    <h2 class="dusk-panel-title">G10. The tabs</h2>
+    <div class="cb-tabs" role="tablist" aria-label="Sample tabs">
+      <button class="cb-tab" type="button" role="tab" aria-selected="true">Sample tab one<small>The selected tab</small></button>
+      <button class="cb-tab" type="button" role="tab" aria-selected="false">Sample tab two<small>A tab at rest</small></button>
+    </div>
+  </section>
+
+  <section class="hx-sec" id="g11">
+    <h2 class="dusk-panel-title">G11. The plain button and the link</h2>
+    <div class="hx-row">
+      <button class="cb-btn--plain" type="button">Sample plain button</button>
+      <button class="cb-btn--plain" type="button">Go</button>
+      <button class="cb-btn--plain" type="button" disabled>Sample plain button, disabled</button>
+      <a class="cb-link" href="#g11">Sample link</a>
+    </div>
+  </section>
+
+  <section class="hx-sec" id="g12">
+    <h2 class="dusk-panel-title">G12. The attention button</h2>
+    <div class="hx-row">
+      <button class="cb-btn--attn" type="button">Sample attention button</button>
+    </div>
+  </section>
+
   <section class="hx-sec" id="win">
     <h2 class="dusk-panel-title">The app window: section.dusk-win.cb-win with .dusk-main and no sidebar</h2>
     <section class="dusk-win cb-win" aria-label="Sample window">
