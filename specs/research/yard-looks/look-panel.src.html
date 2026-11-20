@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="en" data-tier="strict">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clear Board · Yard · look A, panel</title>
+<meta name="description" content="Look sketch A, panel: the Yard station as a dispatcher track diagram in Dusk 0.2.0. Static scene p4-peel. Not the product.">
+<!--DUSK-LAYERS-->
+<style>
+/* ============================================================================================
+   Look A, "panel". Page-local rules only. Every colour is a Dusk token. cb- is the drawing and
+   the gaps that Dusk does not cover. yd- is the 44 px target rule (a gap in Dusk).
+   ============================================================================================ */
+
+:root { /* bridge: values that Dusk 0.2.0 does not have. Lengths and plain numbers only. No raw colour. */
+  --cb-rail-w: 2px;            /* a track line */
+  --cb-route-w: 4px;           /* the lined route. Thicker than a chrome line (1px). */
+  --cb-route-glow-w: 13px;     /* the still glow of the route: the same line, wider, faint, blurred */
+  --cb-route-glow-a: 0.22;
+  --cb-route-glow-blur: 3px;
+  --cb-block-h: 26px;          /* a car block, across the track */
+  --cb-engine-h: 30px;
+  --cb-target: 44px;           /* a pointer target */
+  --cb-ay: 1.35;               /* wide view: px for one logical unit, down. Track pitch 52 units = 70.2 px */
+  --cb-k: 1.1;                 /* row view: px for one logical unit of car length (a box car is 46 px) */
+  --cb-spine-x: 28px;          /* row view: the ladder is one vertical line here */
+  --cb-row-indent: 56px;       /* row view: where a row's words and track start */
+}
+
+body { font-variant-emoji: text; }   /* ⚡ ▶ ◄ are text glyphs in token ink, not colour pictures */
+
+/* ---- gaps in Dusk (reported in the notes) ---------------------------------------------------- */
+.cb-win > .dusk-main { grid-column: 1 / -1; }               /* a window with no sidebar */
+.yd-t44 { min-height: var(--cb-target); min-width: var(--cb-target); justify-content: center; }
+.yd-seg44 button { min-height: var(--cb-target); min-width: var(--cb-target); }
+.cb-select {                                                 /* Dusk has no select part */
+  background: var(--well);
+  color: var(--ink);
+  border: 0;
+  border-radius: var(--r-control);
+  box-shadow: var(--ring-well);
+  padding: 0 var(--sp-4);
+  font-size: var(--fs-data);
+  max-width: 100%;
+}
+.cb-btn--key { background: var(--btn-bg-hover); box-shadow: var(--neon-ctl-on); font-weight: var(--fw-bold); }  /* Dusk has one button weight */
+.cb-emoji { font-variant-emoji: emoji; font-size: var(--fs-l); }
+
+/* ---- the yard diagram ------------------------------------------------------------------------ */
+.cb-yard {
+  position: relative;
+  background: var(--glass);
+  overflow: hidden;
+  forced-color-adjust: none;   /* the solid and hollow blocks must survive a forced palette */
+}
+.cb-svg { position: absolute; left: 0; top: 0; pointer-events: none; }
+.cb-layer { position: absolute; inset: 0; }
+.cb-rail { stroke: var(--ink-3); stroke-width: var(--cb-rail-w); fill: none; }
+.cb-tick { stroke: var(--ink-2); stroke-width: 2px; }
+.cb-route { stroke: var(--lit); stroke-width: var(--cb-route-w); fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.cb-route-glow { stroke: var(--lit); stroke-width: var(--cb-route-glow-w); opacity: var(--cb-route-glow-a); filter: blur(var(--cb-route-glow-blur)); fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.cb-ring { stroke: var(--red-ink); stroke-width: 2px; fill: none; }
+
+/* a car block. Loaded is solid. Empty is hollow. The tone is the car type (a category). */
+.cb-tone--grey   { --cb-fill: var(--tile-grey);   --cb-ink: var(--grey-ink); }
+.cb-tone--teal   { --cb-fill: var(--tile-teal);   --cb-ink: var(--teal-ink); }
+.cb-tone--violet { --cb-fill: var(--tile-violet); --cb-ink: var(--violet-ink); }
+.cb-tone--amber  { --cb-fill: var(--tile-amber);  --cb-ink: var(--amber-ink); }
+.cb-tone--blue   { --cb-fill: var(--tile-blue);   --cb-ink: var(--blue-ink); }
+.cb-car {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  height: var(--cb-block-h);
+  border-radius: var(--r-chip);
+  font: var(--fw-bold) var(--fs-s) / 1 var(--font-mono);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.cb-car--loaded { background: var(--cb-fill); color: var(--on-tile); }
+.cb-car--empty  { background: var(--well); border: 1.5px solid var(--cb-ink); color: var(--ink); }
+.cb-car--out .cb-car-num {          /* the number does not fit in the block: it stands above it */
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 3px + var(--cb-liftpx, 0px));
+  translate: -50% 0;
+  color: var(--ink);
+}
+.cb-car-tag {                        /* BX HP TK CB AR, at the throat end */
+  position: absolute;
+  left: 0;
+  top: calc(100% + 2px);
+  color: var(--cb-ink);
+  font: var(--fw-medium) var(--fs-xs) / 1 var(--font-mono);
+}
+.cb-car--v { min-width: var(--cb-target); padding: 0 var(--sp-1); }
+.cb-car--v .cb-car-tag { left: calc(100% + var(--sp-2)); top: 50%; translate: 0 -50%; }
+.cb-engine {
+  background: var(--head);
+  box-shadow: var(--neon-ctl);
+  color: var(--lit);
+  height: var(--cb-engine-h);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-label);
+}
+.cb-headlight { position: absolute; width: 6px; height: 6px; border-radius: var(--r-circle); background: var(--lit); }
+.cb-landing { background: var(--glass); border: 1.5px dashed var(--lit); color: var(--lit); }
+
+/* a switch: a real button, 44 by 44, over the node. The diamond is its visible mark. */
+.cb-sw, .cb-swmark {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: var(--cb-target);
+  height: var(--cb-target);
+  --cb-sw-ink: var(--green-ink);
+}
+.cb-sw {
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: var(--r-control);
+  cursor: pointer;
+  transition: background-color var(--m-confirm) var(--ease);
+}
+.cb-sw:hover { background: var(--wash-1); }
+.cb-sw[aria-pressed="true"], .cb-swmark--reverse { --cb-sw-ink: var(--amber-ink); }
+.cb-sw i, .cb-swmark i {
+  display: block;
+  width: 14px;
+  height: 14px;
+  rotate: 45deg;
+  background: var(--glass);
+  border: 2px solid var(--cb-sw-ink);
+}
+.cb-sw[aria-pressed="true"] i, .cb-swmark--reverse i { background: var(--cb-sw-ink); }   /* reverse is a solid diamond, normal is a hollow one: a shape, not only a colour */
+.cb-st--normal  { color: var(--green-ink); }
+.cb-st--reverse { color: var(--amber-ink); }
+
+.cb-swword { font: var(--fw-medium) var(--fs-s) / 1.2 var(--font-mono); color: var(--ink-2); white-space: nowrap; }
+.cb-swword b { font-weight: var(--fw-bold); }
+.cb-legend .cb-swword { font-weight: var(--fw-bold); }
+.cb-legend .cb-st--normal { color: var(--green-ink); }
+.cb-legend .cb-st--reverse { color: var(--amber-ink); }
+.cb-swword--abs { position: absolute; translate: 0 -50%; background: var(--glass); padding: 1px var(--sp-1); }
+.cb-plate {                          /* a label on the diagram, on a plate so a line does not cross it */
+  position: absolute;
+  background: var(--glass);
+  border-radius: var(--r-chip);
+  color: var(--ink-2);
+  font: var(--fs-s) / 1.3 var(--font-mono);
+  padding: 1px var(--sp-2);
+  white-space: nowrap;
+}
+.cb-foulword { position: absolute; translate: -50% 0; color: var(--ink-2); font-size: var(--fs-xs); line-height: 1.1; white-space: nowrap; background: var(--glass); padding: 0 var(--sp-1); }
+.cb-foulword--left { translate: 0 0; }
+.cb-legend .cb-break { position: static; translate: none; }
+.cb-break { position: absolute; translate: -50% -50%; background: var(--glass); color: var(--ink-2); font: var(--fw-bold) var(--fs-base) / 1 var(--font-mono); padding: 0 var(--sp-1); }
+.cb-ringword { position: absolute; color: var(--red-ink); font: var(--fw-bold) var(--fs-base) / 1 var(--font-mono); }
+
+.cb-tlabel { font-size: var(--fs-s); line-height: 1.35; white-space: nowrap; }
+.cb-tlabel--abs { position: absolute; }
+.cb-tl { display: flex; align-items: baseline; gap: var(--sp-3); }
+.cb-tid { color: var(--ink); font: var(--fw-bold) var(--fs-data) / 1.35 var(--font-mono); }
+.cb-kick { color: var(--ink-2); font-weight: var(--fw-medium); }
+.cb-build { color: var(--lit); font-weight: var(--fw-bold); letter-spacing: var(--track-label); }
+.cb-tl .dusk-count { letter-spacing: 0; }
+
+/* the track bar: true proportion. A thin line is room. The thick part is taken. */
+.cb-pbar { position: relative; display: block; height: 7px; border: 1px solid var(--ink-3); border-radius: 2px; }
+.cb-pbar i { position: absolute; right: -1px; top: -1px; bottom: -1px; height: auto; background: var(--ink-2); border-radius: 0 2px 2px 0; }
+.cb-pbar--lead i { right: auto; left: -1px; border-radius: 2px 0 0 2px; }
+
+/* row view (a narrow window): the ladder is one vertical spine and each track is one row */
+.cb-rows-head { position: relative; height: 38px; }
+.cb-rows { display: flex; flex-direction: column-reverse; }   /* DOM order AS71 to AS76 for Tab, AS76 at the top for the eye */
+.cb-row { position: relative; padding: var(--sp-2) var(--sp-3) var(--sp-3) var(--cb-row-indent); }
+.cb-row + .cb-row { border-bottom: 1px solid var(--hair); }
+.cb-row-words { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--sp-4); min-height: 20px; font-size: var(--fs-s); line-height: 1.5; }
+.cb-row-rail { position: relative; height: 50px; }
+.cb-row-rail--lift { margin-top: calc(2 * var(--fs-s) + 8px); }   /* numbers stand above the blocks in this row */
+.cb-leadzone { position: relative; padding: 0 var(--sp-3) var(--sp-4) var(--cb-row-indent); display: flex; flex-direction: column; justify-content: flex-end; gap: var(--sp-2); }
+.cb-leadzone .cb-plate { position: static; align-self: flex-start; white-space: normal; }
+
+/* the legend of the diagram */
+.cb-legend { margin: 0; padding: var(--sp-4) var(--gap) var(--sp-5); border-top: 1px solid var(--lit-rule); gap: var(--sp-3) var(--sp-8); align-items: center; }
+.cb-legend > span { flex-wrap: wrap; gap: var(--sp-2) var(--sp-3); }
+.cb-legend .cb-car { position: static; width: 30px; height: 16px; font-size: var(--fs-xs); }
+.cb-legend .cb-swmark { position: static; width: 20px; height: 20px; }
+.cb-legend .cb-swmark i { width: 11px; height: 11px; }
+.cb-legend .cb-pbar { display: inline-block; width: 54px; }
+.cb-legend .cb-swmark i { border-radius: 0; }
+.cb-legend .cb-lg-unit { display: inline-flex; align-items: center; gap: var(--sp-2); white-space: nowrap; }
+.cb-legend[data-view="wide"] .cb-lg-rows { display: none; }
+.cb-legend .dusk-flag { margin: 0; padding: 0 var(--sp-2); font-size: var(--fs-xs); }
+.cb-lg-line { display: inline-block; width: 30px; border-top: var(--cb-route-w) solid var(--lit); border-radius: 2px; }
+.cb-lg-tick { display: inline-block; height: 16px; border-left: 2px solid var(--ink-2); margin: 0 var(--sp-1); }
+.cb-lg-tag { color: var(--cb-ink); font: var(--fw-medium) var(--fs-xs) / 1 var(--font-mono); }
+.cb-legend i.cb-lg-line, .cb-legend i.cb-lg-tick { border-radius: 0; width: auto; height: auto; }
+.cb-legend i.cb-lg-line { width: 30px; height: 0; }
+.cb-legend i.cb-lg-tick { width: 0; height: 16px; }
+
+/* ---- the chrome under the diagram ------------------------------------------------------------ */
+.cb-deck { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap); align-items: start; }
+@media (min-width: 1000px) { .cb-deck { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); } }
+.cb-speed { color: var(--ink-2); font: var(--fs-s) / 1.3 var(--font-mono); }
+.cb-wo-top .dusk-num { color: var(--lit); }
+.cb-wo-job { font-size: var(--fs-l); }
+.cb-wo-job b { font-family: var(--font-mono); }
+.cb-wo-from { color: var(--ink-3); font-size: var(--fs-data); font-weight: var(--fw-medium); }
+.cb-wo-meta { margin-top: var(--sp-2); color: var(--ink-2); }
+.cb-wo-meta b { color: var(--ink); font-family: var(--font-mono); }
+.cb-wo-tip { margin-top: var(--sp-2); color: var(--ink-2); max-width: var(--measure); }
+.cb-builder { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+.cb-unit { color: var(--ink-2); }
+.cb-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3) var(--gap);
+  min-height: var(--cb-target);
+  margin-top: var(--gap);
+  padding: var(--sp-2) var(--gap);
+  background: var(--well);
+  border-radius: var(--r-control);
+  box-shadow: var(--ring-well);
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+.cb-banner--bad { box-shadow: var(--rowneon-red); }
+.cb-banner--bad > span { flex: 1 1 16ch; }
+.cb-rulesline { color: var(--ink-2); font-size: var(--fs-s); max-width: var(--measure); }
+.cb-rulesline b { color: var(--ink); }
+.cb-chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: var(--sp-3); margin-top: var(--sp-4); }
+.cb-chip { display: flex; flex-direction: column; gap: 2px; padding: var(--sp-3) var(--sp-5); background: var(--well); border: 1px solid var(--hair-2); border-radius: var(--r-control); }
+.cb-chip b { color: var(--ink); font: var(--fw-bold) var(--fs-s) / 1.4 var(--font-mono); }
+.cb-chip > span { color: var(--ink-2); font-size: var(--fs-s); }
+.cb-chip--si { border: 1px dashed var(--ink-3); }
+.cb-kind { display: inline-block; margin-right: var(--sp-3); padding: 0 var(--sp-2); border: 1px dashed var(--ink-3); border-radius: var(--r-chip); color: var(--ink-2); font: var(--fw-medium) var(--fs-xs) / 1.4 var(--font-mono); }
+.cb-copy { color: var(--ink-2); max-width: var(--measure); }
+.cb-copy strong { color: var(--ink); }
+.cb-dim { color: var(--ink-3); }
+.cb-how summary { display: flex; align-items: center; min-height: var(--cb-target); color: var(--ink); font-weight: var(--fw-medium); cursor: pointer; }
+.cb-how summary::before { content: "▸\00a0"; color: var(--lit); }
+.cb-how[open] summary::before { content: "▾\00a0"; }
+.cb-how p, .cb-how ul { margin: 0 0 var(--sp-4); color: var(--ink-2); max-width: var(--measure); }
+.cb-how strong { color: var(--ink); }
+.cb-how code { background: var(--well); border-radius: var(--r-chip); padding: 1px var(--sp-1); font-family: var(--font-mono); font-size: var(--fs-s); }
+.cb-inset { position: relative; max-width: 100%; }
+.cb-inset .cb-yard { border-radius: var(--r-control); box-shadow: var(--ring-well); }
+.cb-yard-inner { position: absolute; }
+
+.cb-probe { position: absolute; left: 0; top: 0; visibility: hidden; pointer-events: none; font-size: var(--fs-s); white-space: nowrap; }
+.cb-probe--mono { font-family: var(--font-mono); font-weight: var(--fw-bold); }
+
+@media (prefers-reduced-motion: reduce) { .cb-sw { transition: none; } }
+</style>
+</head>
+<body>
+<a class="dusk-skip" href="#yard">Skip to the yard</a>
+
+<div class="dusk-stage dusk-stage--app">
+  <section class="dusk-win cb-win" aria-label="Clear Board, Yard">
+    <header class="dusk-titlebar">
+      <span class="dusk-brand"><span class="dusk-disc" aria-hidden="true"></span>Clear Board</span>
+      <span class="dusk-crumb">Yard <i aria-hidden="true">/</i> <b id="crumb"></b></span>
+      <span class="dusk-spacer"></span>
+      <span class="dusk-flag" id="sketchflag"></span>
+      <button class="dusk-btn yd-t44" type="button" id="back"></button>
+    </header>
+    <div class="dusk-thread" aria-hidden="true"></div>
+
+    <main class="dusk-main" id="yard">
+      <div class="dusk-strip" id="strip" role="group">
+        <div class="dusk-strip-end">
+          <select class="cb-select yd-t44" id="picker"></select>
+          <button class="dusk-btn yd-t44" type="button" id="reset"></button>
+          <button class="dusk-btn yd-t44" type="button" id="mute"><span class="cb-emoji" id="mute-glyph"></span></button>
+        </div>
+      </div>
+
+      <section class="dusk-panel dusk-panel--framed" aria-labelledby="yard-h">
+        <header class="dusk-panel-head">
+          <h2 class="dusk-panel-name" id="yard-h">Yard</h2>
+          <span class="dusk-panel-sub" id="routewords"></span>
+          <span class="dusk-spacer"></span>
+          <span class="cb-speed" id="speed"></span>
+        </header>
+        <div class="dusk-panel-body dusk-panel-body--flush">
+          <div class="cb-yard" id="diagram" role="group" aria-label="Yard track diagram"></div>
+          <ul class="dusk-sr" id="mirror"></ul>
+          <p class="dusk-sr" id="live" role="status" aria-live="polite"></p>
+          <div class="dusk-legend cb-legend" id="legend" aria-label="Legend"></div>
+        </div>
+      </section>
+
+      <div class="cb-deck">
+        <section class="dusk-panel dusk-panel--framed" aria-labelledby="wo-h">
+          <header class="dusk-panel-head">
+            <h2 class="dusk-panel-name cb-wo-top" id="wo-h"></h2>
+            <span class="dusk-spacer"></span>
+            <span class="dusk-count" id="wo-par"></span>
+          </header>
+          <div class="dusk-panel-body">
+            <p class="cb-wo-job" id="wo-job"></p>
+            <p class="cb-wo-meta" id="wo-meta"></p>
+            <p class="cb-wo-tip" id="wo-tip"></p>
+          </div>
+        </section>
+
+        <section class="dusk-panel" id="builder-panel" role="group" aria-label="Move builder">
+          <div class="cb-builder" id="builder"></div>
+          <p class="cb-banner" id="msg" role="status"></p>
+        </section>
+      </div>
+
+      <div class="cb-deck">
+        <div class="dusk-stack">
+          <section class="dusk-panel" aria-label="Rules in play">
+            <p class="cb-rulesline" id="rulesline"></p>
+            <div class="cb-chips" id="rules"></div>
+          </section>
+          <section class="dusk-panel" aria-label="What this trainer builds">
+            <p class="cb-copy"><strong>What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span class="cb-dim">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span></p>
+          </section>
+          <details class="cb-how dusk-panel">
+<summary>How to play &amp; why these rules</summary>
+      <p><strong>You are the conductor, not the engineer.</strong> Click a switch target to line it
+      (<span class="cb-st--reverse">yellow</span> = lined into the track / diverging,
+      <span class="cb-st--normal">green</span> = normal, straight up the ladder). Then call a move:</p>
+      <ul>
+        <li><strong>PULL n from a track</strong> — back in, couple the near (throat) cut, pull <code>n</code> cars onto the lead.</li>
+        <li><strong>SPOT n to a track</strong> — shove <code>n</code> cars in and leave them.</li>
+        <li><strong>KICK n to a track</strong> — shove and cut away; the cars coast in on their own with no coupling. Only where a special instruction allows it (<span>⚡</span>), only onto a secured 2+ car cut, and only car types that can be kicked.</li>
+      </ul>
+      <p><strong>Score = fewest engine MOVES</strong> — beat or match <em>par</em>. A move is one run of the
+      engine in one direction, so every change of direction counts: a <strong>PULL = 2</strong> (back in, pull
+      out) and a <strong>SPOT = 2</strong> (shove in, pull out) — <em>except the spot that finishes the job is 1</em>,
+      because the engine just leaves the cars and is done (no pull-out). A <strong>KICK = 1</strong> (one shove,
+      the cars coast in by themselves). So <em>pull, pull, spot</em> = 5 moves, and kicking saves the pull-out.
+      <strong>Joints</strong> (couplings) is a second, "also good" stat: lower is cleaner. To reach a
+      track, line <em>its</em> switch reverse and the ones below it normal, or the engineer refuses
+      (<strong>CROR 104</strong>).</p>
+      <p><strong>Securing &amp; kicking.</strong> <strong>Rule 112</strong> — any car left unattended gets a hand brake.
+      A <strong>KICK</strong> (Rule 113.5) needs a <em>secured</em> cut of at least two cars as a <em>backstop</em> to
+      catch the rolling car — and a tank, autorack or centrebeam is never kicked. After coupling, the engineer
+      <em>stretches</em> the joint to confirm the knuckles are locked before moving (<strong>Rule 113.2</strong>).</p>
+          </details>
+        </div>
+
+        <section class="dusk-panel dusk-panel--framed" aria-labelledby="ref-h">
+          <header class="dusk-panel-head">
+            <h2 class="dusk-panel-name" id="ref-h">Refusal example</h2>
+            <span class="dusk-panel-sub" id="ref-sub"></span>
+            <span class="dusk-spacer"></span>
+            <span class="dusk-flag">SKETCH ONLY</span>
+          </header>
+          <div class="dusk-panel-body">
+            <div class="cb-inset" id="inset-wrap"><div class="cb-yard" id="inset" role="img"></div></div>
+            <p class="cb-banner cb-banner--bad" id="ref-msg"></p>
+          </div>
+        </section>
+      </div>
+
+    </main>
+
+    <footer class="dusk-status" id="status" aria-label="Switch lining"></footer>
+  </section>
+</div>
+
+<script>
+(function () {
+'use strict';
+/* The scene: one object, copied from scene.json by the build script. Nothing below types a
+   coordinate, a car, a count or a state by hand. */
+const SCENE = {"schema":"clear-board-yard-scene/1","purpose":"One real mid-game Yard state for the three look sketches. Every state value is output of the frozen engine. Draw from this file alone.","producedBy":"R1 scratch script make-scene.mjs (read-only on the repository)","source":{"files":{"src/stations/yard/geometry.js":"49bc3f5e0703d8dbde31219ce95e86525f8e7fbbf0f027689eef15a9077c13d5","src/stations/yard/model.js":"144ec68621795ff6c4186335c2129dabcbde41fe12cfae800034563f65ba0ceb","src/stations/yard/puzzles.js":"633cc6056cdca7df5249508c566ac0891aedbf03ee7b9189d2617b913869bb9b","src/stations/yard/solver.js":"e547180bca95f723c30e16b89e7af0b4d0595d73764bd8dac1119a38a5bc2215"},"crossCheck":"solver.js replay() of the full opt line: ok=true, moves=6, joints=2; par=6, optJoints=2"},"puzzle":{"id":"p4-peel","title":"Don’t slam a load into empties","tier":4,"tierLabel":"Tier 4 — loads & empties","par":6,"optJoints":2,"hint":"AS73 is a tied, kickable cut of EMPTIES (⚡). Two empty box cars for it sit on AS71 — but a LOADED car is coupled between them, and you must never kick a load onto empties (it damages the light cars). Pull all three, KICK the empties on, and SPOT the loaded car clear in between.","rules":["loads","kickable","secure","kick","line","speed","couple","shove"],"kickable":["AS73"],"kickLimit":{"total":5,"loaded":3},"goal":{"track":"AS73","cars":["CN 70010","CN 70028","CN 70110","CN 70134"],"ordered":false,"depart":false},"optLine":[{"act":"pull","track":"AS71","n":3},{"act":"kick","track":"AS73","n":1},{"act":"spot","track":"AS72","n":1},{"act":"kick","track":"AS73","n":1}],"inbound":null,"listed":null},"replay":{"k":3,"ofMoves":4,"movesReplayed":[{"act":"pull","track":"AS71","n":3},{"act":"kick","track":"AS73","n":1},{"act":"spot","track":"AS72","n":1}],"steps":[{"op":"lineSwitch","track":"AS71","result":"reverse"},{"op":"pull","track":"AS71","n":3,"engineSays":"Pulled 3 from AS71.","movesAfter":2,"jointsAfter":1},{"op":"lineSwitch","track":"AS71","result":"normal"},{"op":"lineSwitch","track":"AS73","result":"reverse"},{"op":"kick","track":"AS73","n":1,"engineSays":"Kicked 1 to AS73.","movesAfter":3,"jointsAfter":1},{"op":"lineSwitch","track":"AS72","result":"reverse"},{"op":"lineSwitch","track":"AS73","result":"normal"},{"op":"spot","track":"AS72","n":1,"engineSays":"Spotted 1 to AS72.","movesAfter":4,"jointsAfter":2},{"op":"lineSwitch","track":"AS72","result":"normal"},{"op":"lineSwitch","track":"AS73","result":"reverse"}],"then":"After move 3 the player lines the route for the next move with lineSwitch(): AS72 to normal, AS73 to reverse. These are the last two steps. They cost no move."},"state":{"moves":4,"joints":2,"par":6,"engineOut":false,"engineOutNote":"model.js keeps \"out\" for move cost only. The present drawing always shows the engine at rest on the lead between moves (render.js:47-49).","lined":{"AS71":"normal","AS72":"normal","AS73":"reverse","AS74":"normal","AS75":"normal","AS76":"normal"},"secured":{"AS71":false,"AS72":false,"AS73":true,"AS74":true,"AS75":true,"AS76":true},"kickable":["AS73"],"goalTrack":"AS73","showSecuredTags":true,"tracks":[{"id":"AS71","index":0,"switch":{"x":370,"y":320},"y":320,"trackEndX":1292,"clearanceX":400,"lined":"normal","secured":false,"securementTag":null,"kickable":false,"kickableMark":null,"isGoalTrack":false,"cars":[],"cuts":[],"gaps":[],"derived":{"note":"Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.","trackLength":922,"carLengthTotal":0,"throatGap":922,"roomBeforeFoul":892,"roomInBoxCars":21}},{"id":"AS72","index":1,"switch":{"x":440,"y":268},"y":268,"trackEndX":1292,"clearanceX":470,"lined":"normal","secured":false,"securementTag":"LOOSE","kickable":false,"kickableMark":null,"isGoalTrack":false,"cars":[{"id":"CN 70222","number":"70222","type":"box","typeTag":"BX","loaded":true,"loadWord":"loaded","len":42,"kickableType":true,"isGoalCar":false,"order":1,"nearEdgeFromSwitch":668,"x0":1108,"x1":1150,"centre":{"x":1129,"y":268},"height":20},{"id":"GATX 8810","number":"8810","type":"tank","typeTag":"TK","loaded":true,"loadWord":"loaded","len":50,"kickableType":false,"isGoalCar":false,"order":2,"nearEdgeFromSwitch":752,"x0":1192,"x1":1242,"centre":{"x":1217,"y":268},"height":20},{"id":"GATX 8828","number":"8828","type":"tank","typeTag":"TK","loaded":true,"loadWord":"loaded","len":50,"kickableType":false,"isGoalCar":false,"order":3,"nearEdgeFromSwitch":802,"x0":1242,"x1":1292,"centre":{"x":1267,"y":268},"height":20}],"cuts":[["CN 70222"],["GATX 8810","GATX 8828"]],"gaps":[{"after":"CN 70222","before":"GATX 8810","x0":1150,"x1":1192,"len":42}],"derived":{"note":"Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.","trackLength":852,"carLengthTotal":142,"throatGap":668,"roomBeforeFoul":638,"roomInBoxCars":15}},{"id":"AS73","index":2,"switch":{"x":510,"y":216},"y":216,"trackEndX":1292,"clearanceX":540,"lined":"reverse","secured":true,"securementTag":"TIED","kickable":true,"kickableMark":"⚡ KICKABLE","isGoalTrack":true,"cars":[{"id":"CN 70134","number":"70134","type":"box","typeTag":"BX","loaded":false,"loadWord":"empty","len":42,"kickableType":true,"isGoalCar":true,"order":1,"nearEdgeFromSwitch":656,"x0":1166,"x1":1208,"centre":{"x":1187,"y":216},"height":20},{"id":"CN 70010","number":"70010","type":"box","typeTag":"BX","loaded":false,"loadWord":"empty","len":42,"kickableType":true,"isGoalCar":true,"order":2,"nearEdgeFromSwitch":698,"x0":1208,"x1":1250,"centre":{"x":1229,"y":216},"height":20},{"id":"CN 70028","number":"70028","type":"box","typeTag":"BX","loaded":false,"loadWord":"empty","len":42,"kickableType":true,"isGoalCar":true,"order":3,"nearEdgeFromSwitch":740,"x0":1250,"x1":1292,"centre":{"x":1271,"y":216},"height":20}],"cuts":[["CN 70134","CN 70010","CN 70028"]],"gaps":[],"derived":{"note":"Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.","trackLength":782,"carLengthTotal":126,"throatGap":656,"roomBeforeFoul":626,"roomInBoxCars":14}},{"id":"AS74","index":3,"switch":{"x":580,"y":164},"y":164,"trackEndX":1292,"clearanceX":610,"lined":"normal","secured":true,"securementTag":"TIED","kickable":false,"kickableMark":null,"isGoalTrack":false,"cars":[{"id":"SHPX 6610","number":"6610","type":"hopper","typeTag":"HP","loaded":true,"loadWord":"loaded","len":47,"kickableType":true,"isGoalCar":false,"order":1,"nearEdgeFromSwitch":618,"x0":1198,"x1":1245,"centre":{"x":1221.5,"y":164},"height":20},{"id":"SHPX 6628","number":"6628","type":"hopper","typeTag":"HP","loaded":true,"loadWord":"loaded","len":47,"kickableType":true,"isGoalCar":false,"order":2,"nearEdgeFromSwitch":665,"x0":1245,"x1":1292,"centre":{"x":1268.5,"y":164},"height":20}],"cuts":[["SHPX 6610","SHPX 6628"]],"gaps":[],"derived":{"note":"Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.","trackLength":712,"carLengthTotal":94,"throatGap":618,"roomBeforeFoul":588,"roomInBoxCars":14}},{"id":"AS75","index":4,"switch":{"x":650,"y":112},"y":112,"trackEndX":1292,"clearanceX":680,"lined":"normal","secured":true,"securementTag":"TIED","kickable":false,"kickableMark":null,"isGoalTrack":false,"cars":[{"id":"ETTX 9001","number":"9001","type":"autorack","typeTag":"AR","loaded":true,"loadWord":"loaded","len":75,"kickableType":false,"isGoalCar":false,"order":1,"nearEdgeFromSwitch":492,"x0":1142,"x1":1217,"centre":{"x":1179.5,"y":112},"height":20},{"id":"ETTX 9020","number":"9020","type":"autorack","typeTag":"AR","loaded":true,"loadWord":"loaded","len":75,"kickableType":false,"isGoalCar":false,"order":2,"nearEdgeFromSwitch":567,"x0":1217,"x1":1292,"centre":{"x":1254.5,"y":112},"height":20}],"cuts":[["ETTX 9001","ETTX 9020"]],"gaps":[],"derived":{"note":"Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.","trackLength":642,"carLengthTotal":150,"throatGap":492,"roomBeforeFoul":462,"roomInBoxCars":11}},{"id":"AS76","index":5,"switch":{"x":720,"y":60},"y":60,"trackEndX":1292,"clearanceX":750,"lined":"normal","secured":true,"securementTag":"TIED","kickable":false,"kickableMark":null,"isGoalTrack":false,"cars":[{"id":"CN 81002","number":"81002","type":"box","typeTag":"BX","loaded":false,"loadWord":"empty","len":42,"kickableType":true,"isGoalCar":false,"order":1,"nearEdgeFromSwitch":488,"x0":1208,"x1":1250,"centre":{"x":1229,"y":60},"height":20},{"id":"CN 81044","number":"81044","type":"box","typeTag":"BX","loaded":false,"loadWord":"empty","len":42,"kickableType":true,"isGoalCar":false,"order":2,"nearEdgeFromSwitch":530,"x0":1250,"x1":1292,"centre":{"x":1271,"y":60},"height":20}],"cuts":[["CN 81002","CN 81044"]],"gaps":[],"derived":{"note":"Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.","trackLength":572,"carLengthTotal":84,"throatGap":488,"roomBeforeFoul":458,"roomInBoxCars":10}}],"engine":{"centre":{"x":120,"y":372},"angle":0,"len":64,"height":24,"x0":88,"x1":152,"restArclength":440,"headlight":{"x":93,"y":372,"radius":2.6,"note":"At the end away from the cars, toward the departure end of the lead (render.js:161-162)."},"holds":[{"id":"CN 70110","number":"70110","type":"box","typeTag":"BX","loaded":false,"loadWord":"empty","len":42,"kickableType":true,"isGoalCar":true,"order":1,"nearestLoco":true,"x0":152,"x1":194,"centre":{"x":173,"y":372},"angle":0,"height":20}],"holdsNote":"holds[0] is the car nearest the engine. A SPOT or KICK takes cars from the far end. A PULL adds cars at the far end.","leadRoomUnits":558,"heldLengthUnits":42},"linedRoute":{"note":"Derived by R1 from the lined map with the logic of model.js:66-75: from the far end of the held cut, along the lead, up the ladder, into the first track whose switch is reverse, to the near edge of its first standing car.","points":[{"x":194,"y":372},{"x":300,"y":372},{"x":370,"y":320},{"x":440,"y":268},{"x":510,"y":216},{"x":1166,"y":216}],"reachesTrack":"AS73"},"goalProgress":{"track":"AS73","wanted":["CN 70010","CN 70028","CN 70110","CN 70134"],"onGoalTrackNow":["CN 70134","CN 70010","CN 70028"],"stillToCome":["CN 70110"],"note":"Derived. The present drawing has no goal mark on the canvas; the goal is in the work order words only."}},"words":{"note":"Text as the app shows it. Built here with the same templates as yardSim.js:621-634 and checked against the running app (see the report). Do not change a word.","workOrder":{"top":"WORK ORDER P4-PEEL · Don’t slam a load into empties","topParts":{"tag":"WORK ORDER","id":"P4-PEEL","title":"Don’t slam a load into empties"},"job":"Build AS73 — gather 70010 · 70028 · 70110 · 70134 onto it (now on AS73, AS71).","jobBoldParts":["AS73","70010 · 70028 · 70110 · 70134"],"jobDimPart":"(now on AS73, AS71)","meta":"Target 6 moves (par) — fewest moves wins.","metaBoldPart":"6 moves","tip":"AS73 is a tied, kickable cut of EMPTIES (⚡). Two empty box cars for it sit on AS71 — but a LOADED car is coupled between them, and you must never kick a load onto empties (it damages the light cars). Pull all three, KICK the empties on, and SPOT the loaded car clear in between.","staticNote":"The work order is built from puzzle.start and does not change during play. \"(now on AS73, AS71)\" stays on screen in this mid-game scene."},"picker":{"groupLabel":"Tier 4 — loads & empties","optionLabel":"Don’t slam a load into empties · par 6","marks":"\"✓ \" before a completed job, \"→ \" before the recommended next job, \" · your best \u003cn>m\" after a job with a record (yardSim.js:698-703)"},"readout":"Moves 4 / par 6 · Joints 2","banner":{"text":"Spotted 1 to AS72.","tone":"ok"},"builder":{"actions":["PULL","SPOT","KICK","SECURE"],"countUnitWord":"cars","tracks":["AS71","AS72","AS73","AS74","AS75","AS76"],"buttons":["Work it ▸","▶ Watch optimal","Reset","🔊"],"hiddenForThisPuzzle":["Depart ▸"],"muteButtonNote":"The sound button shows 🔊 when sound is on and 🔇 when it is off (yardSim.js:307, 716). In a fresh profile the app shows 🔇.","selectTitles":{"picker":"Pick a job","action":"Action","count":"How many cars","track":"Which track","watchOptimal":"Auto-line and play the fewest-moves line in slow motion","mute":"Sound"},"backButton":"← Home","selectedForScene":{"action":"KICK","count":1,"track":"AS73"},"countOptionsForScene":[1]},"legend":"Rules in play — CROR = the national rulebook (applies everywhere) · S.I. = a special instruction, specific to this yard — you must know your yard's.","canvasLabels":[{"text":"◄ DEPARTURE · LEAD / DRILL","x":10,"y":348,"align":"left","where":"render.js:92"},{"text":"MAIN LINE → the road","x":840,"y":18,"align":"left","where":"render.js:93"},{"text":"15 MPH · REDUCED (CROR 105)","x":1330,"y":18,"align":"right","where":"render.js:94"}],"trackLabelPlacement":"Track id at x = TRACK_RIGHT + 10, y = track y (render.js:139). TIED or LOOSE under it at y + 16 (render.js:146). ⚡ KICKABLE under that (render.js:150)."},"ruleChips":[{"key":"loads","kind":"si","kindWord":"S.I.","cite":"Loads & empties","label":"Solid = loaded, hollow = empty. Don’t kick a load into empties; kick ≤5 (≤3 loaded)"},{"key":"kickable","kind":"si","kindWord":"S.I.","cite":"Kickable tracks","label":"Kick only where the special instruction allows (⚡)"},{"key":"secure","kind":"cror","kindWord":"CROR","cite":"CROR 112","label":"Unattended equipment gets a hand brake (secured)"},{"key":"kick","kind":"cror","kindWord":"CROR","cite":"CROR 113.4 / 113.5","label":"Kick only onto a secured 2+ car backstop; tanks/autoracks aren’t kicked"},{"key":"line","kind":"cror","kindWord":"CROR","cite":"CROR 104","label":"Line & examine the switch for your route"},{"key":"speed","kind":"cror","kindWord":"CROR","cite":"CROR 105","label":"Yard speed — REDUCED (stop within ½ range of vision); transfers ≤ 15 MPH"},{"key":"couple","kind":"cror","kindWord":"CROR","cite":"CROR 113.0 / 113.2","label":"Couple, then stretch to verify the joint"},{"key":"shove","kind":"cror","kindWord":"CROR","cite":"CROR 115","label":"Shove only with the route lined & protected"}],"nextMove":{"act":"kick","actWord":"KICK","track":"AS73","n":1,"cars":["CN 70110"],"legalInScene":true,"landing":[{"id":"CN 70110","number":"70110","x0":1124,"x1":1166,"centre":{"x":1145,"y":216}}],"landingNote":"From spotPlan() of model.js. The kicked car couples onto the standing cut.","asSentence":"KICK 1 to AS73","afterIt":{"engineSays":"Kicked 1 to AS73.","moves":6,"joints":2,"jobWon":true,"winBanner":"✓ Par! 6 moves — 2 couplings, clean","readout":"Moves 6 / par 6 · Joints 2"}},"wordsThatBindTheDrawing":[{"rule":"Loaded is solid. Empty is hollow.","because":"The rule chip says \"Solid = loaded, hollow = empty.\" (puzzles.js:18, frozen). The hint of p4-loads says \"Solid cars are loaded, hollow are empty.\" (puzzles.js:281, frozen)."},{"rule":"The glyph ⚡ marks a kickable track.","because":"The rule chip says \"(⚡)\" (puzzles.js:17, frozen). Six hints say \"(⚡)\". The canvas tag is \"⚡ KICKABLE\" (render.js:150)."},{"rule":"The words TIED and LOOSE name the securement state of a standing cut of 2 or more cars.","because":"render.js:146. Hints say \"tied\" and \"tied-down\" (puzzles.js, frozen). model.js says \"tied down\" and \"standing loose\"."},{"rule":"The app text says: yellow = lined into the track / diverging, green = normal.","because":"yardSim.js:190-191 (How to play). If a look changes these two colours, that sentence becomes false. The owner decides. render.js:2 calls yellow a rule convention; that claim is not verified (T12)."},{"rule":"A track nearer the lead is drawn below a track farther from the lead. AS71 is the lowest track. The ladder runs up.","because":"The app text says \"line its switch reverse and the ones below it normal\" (yardSim.js:203) and \"green = normal, straight up the ladder\" (yardSim.js:191)."},{"rule":"The app text says \"Click a switch target to line it\".","because":"yardSim.js:189. Each switch needs a visible target that a pointer can press."},{"rule":"A car is called by its number: the last word of its mark.","because":"render.js:169. The work order lists numbers only (yardSim.js:627)."}],"inventoryNotInThisScene":["Car type centerbeam (tag CB, length 61). It is in geometry.carTypes. Only puzzle p2-types has one.","A track that holds one car. It shows no TIED or LOOSE tag (render.js:144).","The arrival cinematic (puzzle p6-road only) and the departure run (depart goals only).","The switch-list check (puzzle p2-list only).","A long held cut. The engine backs off the frame to the left: with a cut of 252 units its centre is at x = -14; at the lead limit (558 units) it is at x = -320 (geometry.js:60-62)."],"refusalExample":{"note":"What the app says if the player calls the next move before relining (AS72 still reverse, AS73 normal). Verbatim output of model.js. Shown in the banner with tone \"bad\" and a \"Look it up →\" button (yardSim.js:644-655). Use it only to show the refusal state. Do not reword it.","linedThen":{"AS72":"reverse","AS73":"normal"},"ok":false,"text":"AS73 is lined normal — line its switch reverse for the track (CROR 104).","lookupButton":"Look it up →"},"geometry":{"note":"Logical units of geometry.js. The present canvas is W x H units, scaled by CSS. x grows right, y grows down. Do not change a number: model.js reads the lengths and clearances.","W":1340,"H":460,"LEAD_Y":372,"LEAD_LEFT":-320,"FOOT":{"x":300,"y":372},"ladderStep":{"x":70,"y":-52},"NTRACK":6,"TRACK_IDS":["AS71","AS72","AS73","AS74","AS75","AS76"],"TRACK_RIGHT":1292,"MAIN_OUT":{"x":930,"y":-96},"switches":[{"id":"AS71","x":370,"y":320},{"id":"AS72","x":440,"y":268},{"id":"AS73","x":510,"y":216},{"id":"AS74","x":580,"y":164},{"id":"AS75","x":650,"y":112},{"id":"AS76","x":720,"y":60}],"trackY":{"AS71":320,"AS72":268,"AS73":216,"AS74":164,"AS75":112,"AS76":60},"trackLength":{"AS71":922,"AS72":852,"AS73":782,"AS74":712,"AS75":642,"AS76":572},"clearanceX":{"AS71":400,"AS72":470,"AS73":540,"AS74":610,"AS75":680,"AS76":750},"CLEAR":30,"SPOT_CLEAR":120,"TRACK_HEAD":120,"LEAD_REST":120,"S_FOOT":620,"REST_DEFAULT":440,"LEAD_CLEAR":558,"ENGLEN":64,"CARLEN":42,"carHeight":20,"locoHeight":24,"carTypes":{"box":{"len":42,"tag":"BX","kick":true},"hopper":{"len":47,"tag":"HP","kick":true},"tank":{"len":50,"tag":"TK","kick":false},"centerbeam":{"len":61,"tag":"CB","kick":false},"autorack":{"len":75,"tag":"AR","kick":false}},"carTypesNote":"geometry.js also holds a fill and an edge colour for each type. They are the old palette. A new drawing takes its colours from Dusk tokens, not from there.","polylines":{"lead":[{"x":-320,"y":372},{"x":300,"y":372}],"leadVisible":[{"x":0,"y":372},{"x":300,"y":372}],"ladder":[{"x":300,"y":372},{"x":370,"y":320},{"x":440,"y":268},{"x":510,"y":216},{"x":580,"y":164},{"x":650,"y":112},{"x":720,"y":60}],"mainLine":[{"x":720,"y":60},{"x":930,"y":-96}],"bodyTracks":{"AS71":[{"x":370,"y":320},{"x":1292,"y":320}],"AS72":[{"x":440,"y":268},{"x":1292,"y":268}],"AS73":[{"x":510,"y":216},{"x":1292,"y":216}],"AS74":[{"x":580,"y":164},{"x":1292,"y":164}],"AS75":[{"x":650,"y":112},{"x":1292,"y":112}],"AS76":[{"x":720,"y":60},{"x":1292,"y":60}]},"engineRoute":{"AS71":[{"x":-320,"y":372},{"x":300,"y":372},{"x":370,"y":320},{"x":1292,"y":320}],"AS72":[{"x":-320,"y":372},{"x":300,"y":372},{"x":440,"y":268},{"x":1292,"y":268}],"AS73":[{"x":-320,"y":372},{"x":300,"y":372},{"x":510,"y":216},{"x":1292,"y":216}],"AS74":[{"x":-320,"y":372},{"x":300,"y":372},{"x":580,"y":164},{"x":1292,"y":164}],"AS75":[{"x":-320,"y":372},{"x":300,"y":372},{"x":650,"y":112},{"x":1292,"y":112}],"AS76":[{"x":-320,"y":372},{"x":300,"y":372},{"x":720,"y":60},{"x":1292,"y":60}]},"leadRestRoute":[{"x":-320,"y":372},{"x":340,"y":372}],"throughRoute":[{"x":930,"y":-96},{"x":720,"y":60},{"x":650,"y":112},{"x":580,"y":164},{"x":510,"y":216},{"x":440,"y":268},{"x":370,"y":320},{"x":300,"y":372},{"x":-320,"y":372}]},"ladderAngleDeg":-36.61,"presentStrokeWidths":{"leadAndBodyTracks":4,"ladderAndMainLine":3,"clearanceTick":2,"clearanceTickHalfHeight":9,"switchDiamondHalfSide":7,"switchGlowRadius":13,"headlightRadius":2.6},"presentSwitchHitRadius":18}};
+const G = SCENE.geometry, S = SCENE.state, WORDS = SCENE.words, NEXT = SCENE.nextMove, REF = SCENE.refusalExample;
+
+/* The look's own choices (not scene data). */
+const TONE = { box: 'grey', hopper: 'teal', tank: 'violet', centerbeam: 'amber', autorack: 'blue' };
+const NEW = {                       /* labels that the present app does not have. Each one is in the notes. */
+  normal: 'NORMAL', reverse: 'REVERSE', engine: 'ENGINE', build: 'BUILD', foul: 'foul point',
+  route: 'Route', job: 'Job', brk: '⋯', room: 'room', cut: 'not to scale', sme: 'SME to confirm'
+};
+const css = getComputedStyle(document.documentElement);
+const num = (name) => parseFloat(css.getPropertyValue(name));
+const BLOCK_H = num('--cb-block-h'), ENGINE_H = num('--cb-engine-h'), TARGET = num('--cb-target');
+const AY = num('--cb-ay'), K = num('--cb-k'), SPINE_X = num('--cb-spine-x'), INDENT = num('--cb-row-indent');
+const OPEN_GAP = 17;                /* px from the node centre to the start of the open leg (diamond half 10 + gap 7) */
+const VIEW_X0 = 40;                /* wide view: the left edge of the picture, in logical units. The lead leaves the frame there. */
+const WIDE_MIN_AX = 0.8;            /* under this x factor a car number does not read: use the row view */
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+const $ = (id) => document.getElementById(id);
+function h(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function sv(tag, cls, attrs) { const e = document.createElementNS(SVGNS, tag); if (cls) e.setAttribute('class', cls); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+const poly = (a) => a.map((p) => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+function along(a, b, d) { const L = Math.hypot(b.x - a.x, b.y - a.y) || 1; return { x: a.x + (b.x - a.x) * d / L, y: a.y + (b.y - a.y) * d / L }; }
+const trackById = (id) => S.tracks.find((t) => t.id === id);
+const mainWord = WORDS.canvasLabels[1].text.split(' → ')[0];     /* "MAIN LINE" */
+const leadWord = WORDS.canvasLabels[0].text.split(' · ')[1].split(' / ')[0];   /* "LEAD" */
+
+/* ---- the lined route, with the logic of model.js routeReady: the first reverse switch from the lead takes the movement ---- */
+const held = S.engine.holds;
+const heldFar = held.length ? held[held.length - 1].x1 : S.engine.x1;
+function routeFor(lined) {
+  const pts = [{ x: heldFar, y: G.LEAD_Y }, { x: G.FOOT.x, y: G.FOOT.y }];
+  for (const sw of G.switches) {
+    pts.push({ x: sw.x, y: sw.y });
+    if (lined[sw.id] === 'reverse') {
+      const t = trackById(sw.id);
+      pts.push({ x: t.cars.length ? t.cars[0].x0 : t.trackEndX, y: t.y });
+      return { points: pts, reaches: sw.id, words: NEW.route + ': ' + leadWord + ' → ' + sw.id };
+    }
+  }
+  pts.push({ x: G.MAIN_OUT.x, y: G.MAIN_OUT.y });
+  return { points: pts, reaches: null, words: NEW.route + ': ' + leadWord + ' → ' + mainWord };
+}
+const selfCheck = JSON.stringify(routeFor(S.lined).points) === JSON.stringify(S.linedRoute.points);
+document.documentElement.dataset.routeCheck = selfCheck ? 'ok' : 'differs';
+console.assert(selfCheck, 'routeFor() does not reproduce scene.state.linedRoute.points');
+
+/* ---- parts shared by the two views ---- */
+function carBlock(car, cls) {
+  const b = h('span', 'cb-car cb-tone--' + TONE[car.type] + (car.loaded ? ' cb-car--loaded' : ' cb-car--empty') + (cls ? ' ' + cls : ''));
+  b.appendChild(h('span', 'cb-car-num', car.number));
+  b.appendChild(h('span', 'cb-car-tag', car.typeTag));
+  return b;
+}
+function engineBlock(cls) {
+  const b = h('span', 'cb-car cb-engine' + (cls ? ' ' + cls : ''));
+  b.appendChild(h('span', 'cb-car-num', NEW.engine));
+  b.appendChild(h('i', 'cb-headlight'));
+  return b;
+}
+function landingBlock(l, cls) {
+  const b = h('span', 'cb-car cb-landing' + (cls ? ' ' + cls : ''));
+  b.appendChild(h('span', 'cb-car-num', l.number));
+  return b;
+}
+/* A number that does not fit in its block stands above it. Neighbours then take two heights in turn. */
+function fitNumbers(blocks) {
+  if (!blocks.some((b) => b.firstChild.offsetWidth + 2 > b.clientWidth)) return false;
+  const step = blocks[0].firstChild.offsetHeight + 2;
+  blocks.forEach((b, i) => { b.classList.add('cb-car--out'); b.style.setProperty('--cb-liftpx', (i % 2 ? step : 0) + 'px'); });
+  return true;
+}
+function swWord(id, lined, abs) {
+  const w = h('span', 'cb-swword' + (abs ? ' cb-swword--abs' : ''), id + ' ');
+  w.appendChild(h('b', 'cb-st--' + lined, NEW[lined]));
+  return w;
+}
+function stateWords(t) {            /* TIED or LOOSE, ⚡ KICKABLE, BUILD 3 / 4: only what the scene gives */
+  const out = [];
+  if (t.securementTag) out.push(h('span', 'dusk-state ' + (t.secured ? 'dusk-state--hold' : 'dusk-state--caution'), t.securementTag));
+  if (t.kickableMark) out.push(h('span', 'cb-kick', t.kickableMark));
+  return out;
+}
+function buildWords(t) {
+  if (!t.isGoalTrack) return null;
+  const gp = S.goalProgress;
+  const b = h('span', 'cb-tl cb-build', NEW.build + ' ');
+  b.appendChild(h('span', 'dusk-count', gp.onGoalTrackNow.length + ' / ' + gp.wanted.length));
+  return b;
+}
+function pbar(usedShare, cls) {
+  const b = h('span', 'cb-pbar' + (cls ? ' ' + cls : ''));
+  const i = h('i'); i.style.width = (usedShare * 100).toFixed(2) + '%'; b.appendChild(i);
+  return b;
+}
+/* the bar runs from the foul point to the track end. Taken = from the near edge of the first car to the end (a gap between two cuts is not room). */
+const usedShare = (t) => (t.derived.trackLength - t.derived.throatGap) / (t.derived.trackLength - G.CLEAR);
+const leadShare = S.engine.heldLengthUnits / S.engine.leadRoomUnits;
+function switchButton(id, lined, onToggle) {
+  const b = h('button', 'cb-sw');
+  b.type = 'button';
+  b.dataset.sw = id;
+  b.setAttribute('aria-pressed', String(lined === 'reverse'));
+  b.setAttribute('aria-label', id + ' switch, lined ' + lined);
+  b.appendChild(h('i'));
+  b.addEventListener('click', () => onToggle(id));
+  return b;
+}
+function switchMark(lined) { const m = h('span', 'cb-swmark' + (lined === 'reverse' ? ' cb-swmark--reverse' : '')); m.appendChild(h('i')); return m; }
+
+/* ============================ the wide view: affine, x' = ax * x, y' = T + ay * (y - yTop) ============================ */
+function renderWide(host, o) {
+  const Wd = o.width, lined = o.lined;
+  const layer = h('div', 'cb-layer'); layer.setAttribute('aria-hidden', 'true');
+  host.appendChild(layer);
+
+  /* 1. the label column first: its measured width sets the x factor, so a label is never cut */
+  const labels = S.tracks.map((t) => {
+    const l = h('div', 'cb-tlabel cb-tlabel--abs');
+    const l1 = h('div', 'cb-tl'); l1.appendChild(h('span', 'cb-tid', t.id));
+    l.appendChild(l1);
+    stateWords(t).forEach((w, k) => { if (k === 0 && t.securementTag) l1.appendChild(w); else { const ln = h('div', 'cb-tl'); ln.appendChild(w); l.appendChild(ln); } });
+    const bw = buildWords(t); if (bw) l.appendChild(bw);
+    layer.appendChild(l);
+    return l;
+  });
+  const colGap = 12, padR = 10;
+  const colW = o.colW != null ? o.colW : Math.ceil(Math.max.apply(null, labels.map((l) => l.offsetWidth)));
+  const ax = o.ax != null ? o.ax : (Wd - colGap - colW - padR) / (G.TRACK_RIGHT - VIEW_X0);
+  const T = 64, yTop = G.switches[G.NTRACK - 1].y;
+  const X = (x) => ax * (x - VIEW_X0), Y = (y) => T + AY * (y - yTop);
+  const yL = Y(G.LEAD_Y), H = Math.round(yL + 58);
+  host.style.height = H + 'px';
+
+  const svg = sv('svg', 'cb-svg', { width: Wd, height: H, viewBox: '0 0 ' + Wd + ' ' + H, focusable: 'false' });
+  layer.insertBefore(svg, layer.firstChild);
+  const nodes = G.switches.map((s) => ({ id: s.id, x: X(s.x), y: Y(s.y) }));
+  const foot = { x: X(G.FOOT.x), y: yL };
+  const mo = { x: X(G.MAIN_OUT.x), y: Y(G.MAIN_OUT.y) }, top = nodes[nodes.length - 1];
+  const mainEnd = { x: top.x + (mo.x - top.x) * (top.y - 14) / (top.y - mo.y), y: 14 };   /* the main line leaves at the top */
+
+  /* 2. rails. The closed leg of a switch is joined. The open leg starts after a gap. */
+  svg.appendChild(sv('line', 'cb-rail', { x1: 0, y1: yL, x2: foot.x, y2: yL }));
+  svg.appendChild(sv('line', 'cb-rail', { x1: foot.x, y1: foot.y, x2: nodes[0].x, y2: nodes[0].y }));
+  nodes.forEach((n, i) => {
+    const rev = lined[n.id] === 'reverse', t = S.tracks[i];
+    const up = i < nodes.length - 1 ? nodes[i + 1] : mainEnd, end = { x: X(t.trackEndX), y: n.y };
+    const a = along(n, up, rev ? OPEN_GAP : 0), b = along(n, end, rev ? 0 : OPEN_GAP);
+    svg.appendChild(sv('line', 'cb-rail', { x1: a.x, y1: a.y, x2: up.x, y2: up.y }));
+    svg.appendChild(sv('line', 'cb-rail', { x1: b.x, y1: b.y, x2: end.x, y2: end.y }));
+    const xt = X(t.clearanceX);
+    svg.appendChild(sv('line', 'cb-tick', { x1: xt, y1: n.y - 10, x2: xt, y2: n.y + 10 }));
+  });
+
+  /* 3. the lined route: one line from the far end of the held cut to the first standing car */
+  const r = routeFor(lined);
+  const rp = r.points.map((p, i) => (!r.reaches && i === r.points.length - 1) ? mainEnd : { x: X(p.x), y: Y(p.y) });
+  svg.appendChild(sv('polyline', 'cb-route-glow', { points: poly(rp) }));
+  svg.appendChild(sv('polyline', 'cb-route', { points: poly(rp) }));
+
+  /* 4. track bars, cars, landing place */
+  S.tracks.forEach((t, i) => {
+    const y = nodes[i].y;
+    const blocks = t.cars.map((c) => {
+      const b = carBlock(c);
+      b.style.left = X(c.x0) + 'px'; b.style.width = (X(c.x1) - X(c.x0)) + 'px'; b.style.top = (y - BLOCK_H / 2) + 'px';
+      layer.appendChild(b); return b;
+    });
+    if (o.landing && r.reaches === NEXT.track && t.id === NEXT.track) NEXT.landing.forEach((l) => {
+      const b = landingBlock(l);
+      b.style.left = X(l.x0) + 'px'; b.style.width = (X(l.x1) - X(l.x0)) + 'px'; b.style.top = (y - BLOCK_H / 2) + 'px';
+      layer.appendChild(b); blocks.unshift(b);
+    });
+    fitNumbers(blocks);
+    labels[i].style.left = (X(t.trackEndX) + colGap) + 'px'; labels[i].style.top = (y - 10) + 'px';
+    if (r.reaches === t.id) {
+      const f = h('span', 'cb-foulword cb-foulword--left', NEW.foul);
+      f.style.left = (X(t.clearanceX) - 4) + 'px'; f.style.top = (y + 13) + 'px';
+      layer.appendChild(f);
+    }
+  });
+
+  /* 5. the engine and the cut it holds, on the lead */
+  const eng = engineBlock();
+  eng.style.left = X(S.engine.x0) + 'px'; eng.style.width = (X(S.engine.x1) - X(S.engine.x0)) + 'px'; eng.style.top = (yL - ENGINE_H / 2) + 'px';
+  eng.lastChild.style.left = (X(S.engine.headlight.x) - X(S.engine.x0) - 3) + 'px';
+  layer.appendChild(eng);
+  const hb = held.map((c) => {
+    const b = carBlock(c);
+    b.style.left = X(c.x0) + 'px'; b.style.width = (X(c.x1) - X(c.x0)) + 'px'; b.style.top = (yL - BLOCK_H / 2) + 'px';
+    layer.appendChild(b); return b;
+  });
+  fitNumbers(hb);
+  fitNumbers([eng]);
+
+  /* 6. words on the diagram */
+  if (!o.inset) {
+    const p1 = h('span', 'cb-plate', WORDS.canvasLabels[0].text);
+    p1.style.left = '10px'; p1.style.top = (yL + 30) + 'px';
+    layer.appendChild(p1);
+    const p2 = h('span', 'cb-plate', WORDS.canvasLabels[1].text);
+    p2.style.left = (mainEnd.x + 12) + 'px'; p2.style.top = '6px';
+    layer.appendChild(p2);
+  }
+  nodes.forEach((n) => {
+    const w = swWord(n.id, lined[n.id], true);
+    w.style.right = (Wd - (n.x - TARGET / 2 - 4)) + 'px'; w.style.top = n.y + 'px';
+    layer.appendChild(w);
+    if (o.ring === n.id) {
+      svg.appendChild(sv('circle', 'cb-ring', { cx: n.x, cy: n.y, r: 17 }));
+      const q = h('span', 'cb-ringword', '?'); q.style.left = (n.x + 14) + 'px'; q.style.top = (n.y - 30) + 'px';
+      layer.appendChild(q);
+    }
+    if (o.onToggle) {
+      const b = switchButton(n.id, lined[n.id], o.onToggle);
+      b.style.left = (n.x - TARGET / 2) + 'px'; b.style.top = (n.y - TARGET / 2) + 'px';
+      host.appendChild(b);                     /* outside the hidden layer, in the order AS71 to AS76 */
+    } else {
+      const m = switchMark(lined[n.id]);
+      m.style.left = (n.x - TARGET / 2) + 'px'; m.style.top = (n.y - TARGET / 2) + 'px';
+      layer.appendChild(m);
+    }
+  });
+  return { mode: 'wide', Wd: Wd, H: H, ax: ax, ay: AY, colW: colW, X: X, Y: Y, route: r, nodes: nodes };
+}
+
+/* ============================ the row view: re-projected. The ladder is a vertical spine. ============================
+   Along each track the map from logical units to px is piecewise linear, continuous and monotonic:
+   [switch .. foul point] and [foul point .. nearest thing] are compressed runs, [nearest thing .. track end] is at car scale. */
+function renderRows(host, o) {
+  const lined = o.lined, ids = o.tracks || G.TRACK_IDS, r = routeFor(lined);
+  const svgHolder = h('div', 'cb-layer'); svgHolder.setAttribute('aria-hidden', 'true');
+  host.appendChild(svgHolder);
+  const head = h('div', 'cb-rows-head'); head.setAttribute('aria-hidden', 'true');
+  const full = ids.length === G.NTRACK;
+  const hp = h('span', full ? 'cb-plate' : 'cb-break', full ? WORDS.canvasLabels[1].text : NEW.brk);
+  hp.style.left = (full ? INDENT : SPINE_X) + 'px'; hp.style.top = full ? '6px' : '12px';
+  head.appendChild(hp);
+  const rows = h('div', 'cb-rows');
+  host.appendChild(head); host.appendChild(rows);
+
+  const LINE_Y = 21;
+  const rowInfo = ids.map((id) => {
+    const t = trackById(id);
+    const row = h('div', 'cb-row');
+    const words = h('div', 'cb-row-words'); words.setAttribute('aria-hidden', 'true');
+    words.appendChild(swWord(id, lined[id], false));
+    stateWords(t).forEach((w) => words.appendChild(w));
+    const bw = buildWords(t); if (bw) words.appendChild(bw);
+    const rail = h('div', 'cb-row-rail');
+    if (o.onToggle) {
+      const b = switchButton(id, lined[id], o.onToggle);
+      b.style.left = (SPINE_X - INDENT - TARGET / 2) + 'px'; b.style.top = (LINE_Y - TARGET / 2) + 'px';
+      rail.appendChild(b);
+    } else {
+      const m = switchMark(lined[id]); m.setAttribute('aria-hidden', 'true');
+      m.style.left = (SPINE_X - INDENT - TARGET / 2) + 'px'; m.style.top = (LINE_Y - TARGET / 2) + 'px';
+      rail.appendChild(m);
+    }
+    const bar = pbar(usedShare(t)); bar.setAttribute('aria-hidden', 'true');
+    row.appendChild(words); row.appendChild(rail); row.appendChild(bar);
+    rows.appendChild(row);
+    return { t: t, row: row, rail: rail, bar: bar };
+  });
+
+  /* the lead: it continues down. The car at the far end of the held cut is nearest the foot. */
+  const lead = h('div', 'cb-leadzone'); lead.setAttribute('aria-hidden', 'true');
+  const lineH = probes[0].offsetHeight;                       /* the height of one line of figures, so a block grows with the text */
+  const CAR_V = Math.max(28, lineH + 12), ENG_V = CAR_V + 6, FOOT_RUN = 26, TAIL = 26;
+  const stackH = FOOT_RUN + held.length * CAR_V + ENG_V + TAIL;
+  lead.style.minHeight = stackH + 'px';
+  const onSpine = (b) => { b.style.left = Math.max(2, SPINE_X - b.offsetWidth / 2) + 'px'; };
+  let yy = FOOT_RUN;
+  held.slice().reverse().forEach((c) => {
+    const b = carBlock(c, 'cb-car--v');
+    b.style.height = CAR_V + 'px'; b.style.top = yy + 'px';
+    lead.appendChild(b); yy += CAR_V;
+  });
+  const eng = engineBlock('cb-car--v');
+  eng.style.height = ENG_V + 'px'; eng.style.top = yy + 'px';
+  eng.lastChild.style.left = 'calc(50% - 3px)'; eng.lastChild.style.bottom = '2px';
+  eng.firstChild.style.translate = '0 -3px';
+  lead.appendChild(eng);
+  lead.appendChild(h('span', 'cb-plate', WORDS.canvasLabels[0].text));
+  const lb = pbar(leadShare, 'cb-pbar--lead');
+  if (o.leadBar) lead.appendChild(lb);
+  host.appendChild(lead);
+  lead.querySelectorAll('.cb-car--v').forEach(onSpine);
+  lead.style.paddingLeft = Math.max(INDENT, eng.offsetLeft + eng.offsetWidth + 8) + 'px';   /* the lead label stays clear of the engine block */
+
+  /* measure the rows, then place the blocks and draw the lines over them */
+  const spineOff = INDENT - SPINE_X;
+  const placed = rowInfo.map((ri) => {
+    const rb = ri.rail.getBoundingClientRect(), t = ri.t;
+    const railW = rb.width, x0 = rb.left - host.getBoundingClientRect().left;
+    const xEnd = railW - 1, xTick = 14;
+    const landing = (o.landing && r.reaches === NEXT.track && t.id === NEXT.track) ? NEXT.landing : [];
+    let occStart = t.cars.length ? t.cars[0].nearEdgeFromSwitch : t.derived.trackLength;
+    landing.forEach((l) => { occStart = Math.min(occStart, l.x0 - t.switch.x); });
+    const occ = t.derived.trackLength - occStart;
+    const minRun = r.reaches === t.id ? 72 : 30;      /* the lined row keeps room for the words "foul point" */
+    const k = occ > 0 ? Math.min(K, (xEnd - xTick - minRun) / occ) : K;
+    const xOcc = xEnd - occ * k;
+    const fx = (u) => u <= G.CLEAR ? -spineOff + (u / G.CLEAR) * (xTick + spineOff)
+      : u <= occStart ? xTick + (u - G.CLEAR) / Math.max(1, occStart - G.CLEAR) * (xOcc - xTick)
+      : xOcc + (u - occStart) * k;
+    const blocks = t.cars.map((c) => {
+      const b = carBlock(c);
+      b.style.left = fx(c.nearEdgeFromSwitch) + 'px'; b.style.width = (c.len * k) + 'px'; b.style.top = (LINE_Y - BLOCK_H / 2) + 'px';
+      b.setAttribute('aria-hidden', 'true'); ri.rail.appendChild(b); return b;
+    });
+    landing.forEach((l) => {
+      const b = landingBlock(l);
+      b.style.left = fx(l.x0 - t.switch.x) + 'px'; b.style.width = ((l.x1 - l.x0) * k) + 'px'; b.style.top = (LINE_Y - BLOCK_H / 2) + 'px';
+      b.setAttribute('aria-hidden', 'true'); ri.rail.appendChild(b); blocks.unshift(b);
+    });
+    if (fitNumbers(blocks)) ri.rail.classList.add('cb-row-rail--lift');
+    if (Math.abs((occStart - G.CLEAR) * k - (xOcc - xTick)) > 1) {   /* the empty run is not to scale (compressed or stretched): say so with a break mark */
+      const m = h('span', 'cb-break', NEW.brk); m.setAttribute('aria-hidden', 'true');
+      m.style.left = ((xTick + xOcc) / 2) + 'px'; m.style.top = LINE_Y + 'px';
+      ri.rail.appendChild(m);
+    }
+    if (r.reaches === t.id) {
+      const f = h('span', 'cb-foulword cb-foulword--left', NEW.foul); f.setAttribute('aria-hidden', 'true');
+      f.style.left = (xTick - 4) + 'px'; f.style.top = (LINE_Y + 13) + 'px';
+      ri.rail.appendChild(f);
+    }
+    ri.bar.style.marginLeft = xTick + 'px';
+    return { id: t.id, x: SPINE_X, y: 0, railX: x0, fx: fx, xEnd: x0 + xEnd, xTick: x0 + xTick, t: t, rail: ri.rail };
+  });
+  const hostBox = host.getBoundingClientRect();
+  const Wd = hostBox.width, Hd = hostBox.height;
+  const svg = sv('svg', 'cb-svg', { width: Wd, height: Hd, viewBox: '0 0 ' + Wd + ' ' + Hd, focusable: 'false' });
+  svgHolder.appendChild(svg);
+  const nodes = placed.map((n) => { n.y = n.rail.getBoundingClientRect().top - hostBox.top + LINE_Y; return n; });
+  const lbx = lead.getBoundingClientRect();
+  const leadTop = lbx.top - hostBox.top, foot = { x: SPINE_X, y: leadTop };
+  const topNode = nodes[nodes.length - 1], mainEnd = { x: SPINE_X, y: full ? 6 : 26 };
+  svg.appendChild(sv('line', 'cb-rail', { x1: SPINE_X, y1: leadTop + stackH, x2: SPINE_X, y2: nodes[0].y }));
+  nodes.forEach((n, i) => {
+    const rev = lined[n.id] === 'reverse';
+    const up = i < nodes.length - 1 ? nodes[i + 1] : mainEnd, end = { x: n.xEnd, y: n.y };
+    const a = along(n, up, rev ? OPEN_GAP : 0), b = along(n, end, rev ? 0 : OPEN_GAP);
+    svg.appendChild(sv('line', 'cb-rail', { x1: a.x, y1: a.y, x2: up.x, y2: up.y }));
+    svg.appendChild(sv('line', 'cb-rail', { x1: b.x, y1: b.y, x2: end.x, y2: end.y }));
+    svg.appendChild(sv('line', 'cb-tick', { x1: n.xTick, y1: n.y - 10, x2: n.xTick, y2: n.y + 10 }));
+    if (o.ring === n.id) {
+      svg.appendChild(sv('circle', 'cb-ring', { cx: n.x, cy: n.y, r: 17 }));
+      const q = h('span', 'cb-ringword', '?'); q.setAttribute('aria-hidden', 'true');
+      q.style.left = (SPINE_X + 12) + 'px'; q.style.top = (n.y - 34) + 'px';
+      svgHolder.appendChild(q);
+    }
+  });
+  const rp = [{ x: SPINE_X, y: leadTop + FOOT_RUN }, foot];
+  let reached = false;
+  for (const n of nodes) {
+    rp.push({ x: n.x, y: n.y });
+    if (lined[n.id] === 'reverse') {
+      const endU = (n.t.cars.length ? n.t.cars[0].x0 : n.t.trackEndX) - n.t.switch.x;
+      rp.push({ x: n.railX + n.fx(endU), y: n.y }); reached = true; break;
+    }
+  }
+  if (!reached) rp.push(mainEnd);
+  svg.appendChild(sv('polyline', 'cb-route-glow', { points: poly(rp) }));
+  svg.appendChild(sv('polyline', 'cb-route', { points: poly(rp) }));
+  return { mode: 'rows', Wd: Wd, H: Hd, route: r, nodes: nodes };
+}
+
+/* Does any word, block or target of the diagram touch another, or leave the frame? The wide view is used only when none does. */
+function collides(host) {
+  const hb = host.getBoundingClientRect();
+  const parts = Array.from(host.querySelectorAll('.cb-car, .cb-car--out > .cb-car-num, .cb-car-tag, .cb-swword, .cb-plate, .cb-foulword, .cb-tlabel, .cb-sw'));
+  const rs = parts.map((el) => el.getBoundingClientRect());
+  for (let i = 0; i < parts.length; i++) {
+    const a = rs[i];
+    if (a.left < hb.left - 0.5 || a.right > hb.right + 0.5 || a.top < hb.top - 0.5 || a.bottom > hb.bottom + 0.5) return true;
+    for (let j = i + 1; j < parts.length; j++) {
+      const b = rs[j];
+      if (parts[i].contains(parts[j]) || parts[j].contains(parts[i])) continue;
+      if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.6 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.6) return true;
+    }
+  }
+  return false;
+}
+
+/* ============================ the page ============================ */
+const lined = Object.assign({}, S.lined);          /* the one thing this sketch lets a person change */
+const probes = ['cb-probe cb-probe--mono', 'cb-probe'].map((c) => { const p = h('span', c, '0000000000'); p.setAttribute('aria-hidden', 'true'); document.body.appendChild(p); return p; });
+let lastFocus = null;
+
+function draw() {
+  const host = $('diagram');
+  const w = host.clientWidth;
+  host.textContent = ''; host.style.height = '';
+  /* try the wide view; fall back to the row view when the window is narrow or when anything in the wide view collides */
+  let view = renderWide(host, { width: w, lined: lined, landing: true, leadBar: true, onToggle: toggle });
+  if (view.ax < WIDE_MIN_AX || collides(host)) { host.textContent = ''; host.style.height = ''; view = renderRows(host, { lined: lined, landing: true, leadBar: true, onToggle: toggle }); }
+  host.dataset.view = view.mode; $('legend').dataset.view = view.mode;
+  $('routewords').textContent = view.route.words;
+  const rc = document.querySelector('#strip [data-cell="route"] b'); if (rc) rc.textContent = view.route.words.split(': ')[1];
+  drawInset(view);
+  drawStatus();
+  drawMirror(view.route);
+  if (lastFocus) { const b = host.querySelector('[data-sw="' + lastFocus + '"]'); if (b) b.focus(); }
+}
+function toggle(id) {
+  lined[id] = lined[id] === 'reverse' ? 'normal' : 'reverse';
+  lastFocus = id;
+  draw();
+  $('live').textContent = id + ' switch, lined ' + lined[id] + '. ' + routeFor(lined).words + '.';
+}
+function drawInset(main) {
+  const wrap = $('inset-wrap'), host = $('inset');
+  host.textContent = ''; host.style.cssText = '';
+  const refLined = Object.assign({}, S.lined, REF.linedThen);
+  const cause = REF.text.split(' ')[0];                      /* the switch that the refusal names: its first word */
+  if (main.mode === 'wide') {
+    const inner = h('div', 'cb-yard-inner'); host.appendChild(inner);
+    inner.style.width = main.Wd + 'px';
+    const v = renderWide(inner, { width: main.Wd, ax: main.ax, colW: main.colW, lined: refLined, ring: cause, inset: true });
+    const x0 = Math.max(0, v.X(S.engine.x0) - 20), y0 = v.Y(trackById(cause).y) - 46;
+    const cw = wrap.clientWidth;
+    host.style.width = cw + 'px'; host.style.height = (v.H - y0) + 'px';
+    inner.style.left = -x0 + 'px'; inner.style.top = -y0 + 'px'; inner.style.height = v.H + 'px';
+  } else {
+    const upTo = G.TRACK_IDS.indexOf(cause);
+    renderRows(host, { lined: refLined, ring: cause, tracks: G.TRACK_IDS.slice(0, upTo + 1) });
+  }
+  host.setAttribute('aria-label', Object.keys(REF.linedThen).map((id) => id + ' switch, lined ' + REF.linedThen[id]).join('. ') + '.');
+}
+function drawStatus() {
+  const st = $('status'); st.textContent = '';
+  G.TRACK_IDS.forEach((id) => {
+    const c = h('span');
+    c.appendChild(h('i', 'dusk-led ' + (lined[id] === 'reverse' ? 'dusk-led--caution' : 'dusk-led--ok')));
+    c.appendChild(document.createTextNode(id + ' ' + NEW[lined[id]]));
+    st.appendChild(c);
+  });
+  st.appendChild(h('span', 'dusk-spacer'));
+  st.appendChild(h('span', null, WORDS.picker.groupLabel));
+}
+function drawMirror(route) {                                 /* the yard as text, for a screen reader */
+  const m = $('mirror'); m.textContent = '';
+  const carWords = (c) => c.number + ' ' + c.typeTag + ' ' + c.loadWord;
+  m.appendChild(h('li', null, route.words + '.'));
+  m.appendChild(h('li', null, NEW.engine + ', ' + leadWord + ': ' + (held.map(carWords).join(', ') || '0') + '.'));
+  S.tracks.forEach((t) => {
+    const bits = [t.id + ' switch, lined ' + lined[t.id]];
+    if (t.securementTag) bits.push(t.securementTag);
+    if (t.kickableMark) bits.push(t.kickableMark);
+    if (t.isGoalTrack) bits.push(NEW.build + ' ' + S.goalProgress.onGoalTrackNow.length + ' / ' + S.goalProgress.wanted.length);
+    bits.push(t.cars.length ? t.cars.map(carWords).join(', ') : '0 ' + WORDS.builder.countUnitWord);
+    m.appendChild(h('li', null, bits.join('. ') + '.'));
+  });
+}
+
+function chrome() {
+  const B = WORDS.builder, T = B.selectTitles, WO = WORDS.workOrder;
+  $('crumb').textContent = SCENE.puzzle.title;
+  $('sketchflag').textContent = 'SKETCH · look A, panel · ' + SCENE.puzzle.id + ', ' + SCENE.replay.k + ' of ' + SCENE.replay.ofMoves;
+  $('back').textContent = B.backButton;
+  $('speed').textContent = WORDS.canvasLabels[2].text;
+
+  /* the strip: the readout "Moves 4 / par 6 · Joints 2" split into cells. The label words come from the readout itself. */
+  const strip = $('strip'), end = strip.firstElementChild;
+  strip.setAttribute('aria-label', WORDS.readout);
+  const m = /^(\S+) (\d+) \/ (\S+) (\d+) · (\S+) (\d+)$/.exec(WORDS.readout);
+  const cell = (label, value, key, name) => {
+    const c = h('div', 'dusk-cell' + (key ? ' dusk-cell--key' : '')); if (name) c.dataset.cell = name;
+    c.appendChild(h('small', null, label)); c.appendChild(h('b', null, value)); strip.insertBefore(c, end);
+  };
+  cell(NEW.job, WO.topParts.id, true);
+  cell(m[1], m[2]); cell(m[3], m[4]); cell(m[5], m[6]);
+  cell(NEW.route, '', false, 'route');
+
+  const pk = $('picker'); pk.title = T.picker; pk.setAttribute('aria-label', T.picker);
+  const og = document.createElement('optgroup'); og.label = WORDS.picker.groupLabel;
+  og.appendChild(h('option', null, WORDS.picker.optionLabel)); pk.appendChild(og);
+  $('reset').textContent = B.buttons[2];
+  $('mute').title = T.mute; $('mute').setAttribute('aria-label', T.mute); $('mute-glyph').textContent = B.buttons[3];
+
+  /* the work order: the app's three lines and the hint, with the same bold and dim parts */
+  const top = $('wo-h');
+  top.appendChild(document.createTextNode(WO.topParts.tag + ' '));
+  top.appendChild(h('span', 'dusk-num', WO.topParts.id));
+  top.appendChild(document.createTextNode(WO.top.slice((WO.topParts.tag + ' ' + WO.topParts.id).length)));
+  $('wo-par').textContent = /par \d+/.exec(WORDS.picker.optionLabel)[0];
+  const mark = (target, text, bolds, dim) => {
+    let rest = text;
+    const parts = bolds.map((b) => ({ s: b, tag: 'b' })).concat(dim ? [{ s: dim, tag: 'span', cls: 'cb-wo-from' }] : []);
+    parts.forEach((p) => {
+      const i = rest.indexOf(p.s);
+      target.appendChild(document.createTextNode(rest.slice(0, i)));
+      target.appendChild(h(p.tag, p.cls || null, p.s));
+      rest = rest.slice(i + p.s.length);
+    });
+    target.appendChild(document.createTextNode(rest));
+  };
+  mark($('wo-job'), WO.job, WO.jobBoldParts, WO.jobDimPart);
+  mark($('wo-meta'), WO.meta, [WO.metaBoldPart], null);
+  $('wo-tip').textContent = WO.tip;
+
+  /* the move builder: the app's controls and words, in the app's order */
+  const bd = $('builder'), sel = B.selectedForScene;
+  const seg = h('div', 'dusk-seg yd-seg44'); seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', T.action); seg.title = T.action;
+  B.actions.forEach((a) => {
+    const b = h('button', null, a); b.type = 'button'; b.setAttribute('aria-pressed', String(a === sel.action));
+    b.addEventListener('click', () => seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))));
+    seg.appendChild(b);
+  });
+  const cnt = h('select', 'cb-select yd-t44'); cnt.title = T.count; cnt.setAttribute('aria-label', T.count);
+  B.countOptionsForScene.forEach((n) => { const op = h('option', null, String(n)); op.selected = n === sel.count; cnt.appendChild(op); });
+  const trk = h('select', 'cb-select yd-t44'); trk.title = T.track; trk.setAttribute('aria-label', T.track);
+  B.tracks.forEach((id) => { const op = h('option', null, id); op.selected = id === sel.track; trk.appendChild(op); });
+  const work = h('button', 'dusk-btn cb-btn--key yd-t44', B.buttons[0]); work.type = 'button';
+  const opt = h('button', 'dusk-btn yd-t44', B.buttons[1]); opt.type = 'button'; opt.title = T.watchOptimal;
+  [seg, cnt, h('span', 'cb-unit', B.countUnitWord), trk, work, opt].forEach((e) => bd.appendChild(e));
+  $('msg').textContent = WORDS.banner.text;
+
+  /* rules in play: the app's line and one chip for each rule. The kind is a word, not a colour. */
+  const kinds = Array.from(new Set(SCENE.ruleChips.map((c) => c.kindWord)));
+  let line = WORDS.legend; const rl = $('rulesline');
+  kinds.slice().sort((a, b) => line.indexOf(a) - line.indexOf(b)).forEach((kw) => {
+    const i = line.indexOf(kw);
+    rl.appendChild(document.createTextNode(line.slice(0, i))); rl.appendChild(h('b', null, kw)); line = line.slice(i + kw.length);
+  });
+  rl.appendChild(document.createTextNode(line));
+  SCENE.ruleChips.forEach((c) => {
+    const chip = h('div', 'cb-chip cb-chip--' + c.kind);
+    const b = h('b');
+    if (c.cite.indexOf(c.kindWord) < 0) b.appendChild(h('span', 'cb-kind', c.kindWord));
+    b.appendChild(document.createTextNode(c.cite));
+    chip.appendChild(b); chip.appendChild(h('span', null, c.label));
+    $('rules').appendChild(chip);
+  });
+
+  /* the refusal example: the app's words for the next move called before the route is relined */
+  $('ref-sub').textContent = NEXT.asSentence + ' · ' + Object.keys(REF.linedThen).map((id) => id + ' ' + NEW[REF.linedThen[id]]).join(' · ');
+  const rm = $('ref-msg');
+  rm.appendChild(h('span', 'dusk-state dusk-state--attn', REF.text));
+  const lk = h('button', 'dusk-btn yd-t44', REF.lookupButton); lk.type = 'button'; rm.appendChild(lk);
+
+  /* the legend of the diagram. "SME to confirm" marks each meaning that a reader could take for a rail convention. */
+  const lg = $('legend');
+  const item = (parts, sme) => {
+    const s = h('span');
+    parts.forEach((p) => s.appendChild(typeof p === 'string' ? document.createTextNode(p) : p));
+    if (sme) s.appendChild(h('span', 'dusk-flag', NEW.sme));
+    lg.appendChild(s);
+  };
+  const sw = (tone, loaded) => { const b = h('span', 'cb-car cb-tone--' + tone + (loaded ? ' cb-car--loaded' : ' cb-car--empty')); b.setAttribute('aria-hidden', 'true'); return b; };
+  const loadWords = { true: 'loaded', false: 'empty' };
+  S.tracks.forEach((t) => t.cars.forEach((c) => { loadWords[c.loaded] = c.loadWord; }));
+  item([sw('grey', true), loadWords[true], sw('grey', false), loadWords[false]], false);
+  const types = [];
+  Object.keys(G.carTypes).forEach((name) => { const u = h('span', 'cb-lg-unit'); u.appendChild(sw(TONE[name], true)); u.appendChild(h('span', 'cb-lg-tag cb-tone--' + TONE[name], G.carTypes[name].tag)); u.appendChild(document.createTextNode(name)); types.push(u); });
+  item(types, true);
+  const sm = (l) => { const m = switchMark(l); m.setAttribute('aria-hidden', 'true'); return m; };
+  item([sm('normal'), h('span', 'cb-swword cb-st--normal', NEW.normal), sm('reverse'), h('span', 'cb-swword cb-st--reverse', NEW.reverse)], true);
+  item([h('i', 'cb-lg-line'), NEW.route], true);
+  item([h('i', 'cb-lg-tick'), NEW.foul], true);
+  const tied = S.tracks.find((t) => t.securementTag && t.secured), loose = S.tracks.find((t) => t.securementTag && !t.secured);
+  item([h('span', 'dusk-state dusk-state--hold', tied.securementTag), h('span', 'dusk-state dusk-state--caution', loose.securementTag)], true);
+  item([h('span', 'cb-kick', S.tracks.find((t) => t.kickableMark).kickableMark)], false);
+  const ld = h('span', 'cb-car cb-landing'); ld.setAttribute('aria-hidden', 'true');
+  item([ld, NEXT.asSentence], false);
+  const pb = pbar(0.35); pb.setAttribute('aria-hidden', 'true');
+  item([NEW.room, pb, WORDS.builder.countUnitWord], false);
+  lg.lastChild.className = 'cb-lg-rows';
+  item([h('span', 'cb-break', NEW.brk), NEW.cut], false);
+  lg.lastChild.className = 'cb-lg-rows';
+}
+
+chrome();
+draw();
+/* Draw again when the width changes, and when the type changes (text scale, a dyslexia typeface): two probes watch the type. */
+const stamp = () => $('diagram').clientWidth + '/' + probes.map((p) => p.offsetWidth + 'x' + p.offsetHeight).join('/');
+let last = stamp();
+const ro = new ResizeObserver(() => { const now = stamp(); if (now !== last) { last = now; lastFocus = null; draw(); } });
+ro.observe($('diagram')); probes.forEach((p) => ro.observe(p));
+document.documentElement.dataset.ready = '1';
+})();
+</script>
+</body>
+</html>

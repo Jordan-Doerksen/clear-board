@@ -1,0 +1,2441 @@
+<!doctype html>
+<html lang="en" data-tier="strict">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clear Board · The Yard · look B, list (sketch)</title>
+<meta name="description" content="Sketch. The Yard station as a live switch list, in Dusk 0.2.0. One row is one track. Scene: puzzle p4-peel after 3 of 4 moves.">
+<!--DUSK-LAYERS-->
+<style data-page="look B, list">
+/* Look B, "list": the yard as a live switch list. Page-local rules.
+   Every colour is a Dusk token. This block holds no raw colour.
+   cb-  a gap that any Clear Board page has (tap size, select, window with no sidebar, banner, chip).
+   yd-  a part of the Yard list itself. */
+
+:root {
+  /* bridge: sizes of this page only. Dusk has no token for them. No colour here. */
+  --cb-tap: 44px;        /* the smallest pointer target */
+  --yd-u: 1.3px;         /* one geometry.js unit of car length */
+  --yd-car-h: 44px;      /* the compact tile */
+  --yd-car-min: 56px;
+  --yd-spine-x: 18px;    /* the centre of the spine in the Switch cell */
+  --yd-gutter: 34px;     /* the left edge of a switch button */
+  --yd-pad: 8px;         /* the vertical padding of a row */
+  --yd-headroom: 0px;    /* room above a tile for the goal tag; a row that has a tag sets it */
+  --yd-w: 2px;           /* a rail that is not lined */
+  --yd-w-lit: 4px;       /* the lined route */
+  --yd-leadin: 68px;     /* the rail from the switch to the first car, at least */
+}
+
+/* ---- cb-: gaps ------------------------------------------------------------------------------ */
+
+/* Dusk's window keeps a column for a sidebar. This page has no sidebar. */
+.cb-win { grid-template-columns: minmax(0, 1fr); font-variant-emoji: text; }   /* a glyph in the app's words stays a text glyph, in the ink of its line */
+
+/* Dusk's button is 29 px high and a segment is 24 px. A target here is 44 px. */
+.cb-tap,
+.dusk-seg.cb-seg button { min-height: var(--cb-tap); min-width: var(--cb-tap); }
+.cb-tap { justify-content: center; }
+.dusk-seg.cb-seg { flex-wrap: wrap; }
+.dusk-seg.cb-seg button { font-family: var(--font-mono); }
+
+/* Dusk has no select. */
+.cb-select {
+  min-height: var(--cb-tap);
+  min-width: var(--cb-tap);
+  max-width: 100%;
+  padding: 0 var(--sp-3);
+  background-color: var(--well);
+  border: 1px solid var(--hair-2);
+  border-radius: var(--r-control);
+  color: var(--ink);
+  font-size: var(--fs-s);
+}
+
+/* Dusk has no banner: one line of state with an optional control. */
+.cb-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3) var(--gap);
+  min-height: calc(var(--cb-tap) + 2 * var(--sp-3));
+  padding: var(--sp-3) var(--gap);
+  background: var(--well);
+  border-radius: var(--r-control);
+  box-shadow: var(--ring-well);
+  font-size: var(--fs-base);
+}
+.cb-banner .dusk-flag { margin-top: 0; }
+
+/* Dusk has no chip that holds a cite and a line of words. */
+.cb-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--sp-3);
+  list-style: none;
+  margin: var(--sp-4) 0 0;
+  padding: 0;
+}
+.cb-chip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--well);
+  border: 1px solid var(--hair-2);
+  border-radius: var(--r-control);
+  color: var(--ink-2);
+  font-size: var(--fs-s);
+}
+.cb-chip--si { border-style: dashed; }
+.cb-chip b { color: var(--ink); font-family: var(--font-mono); font-weight: var(--fw-bold); }
+.cb-chip-kind {
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-label);
+}
+.cb-chip-label { flex: 1 1 100%; }
+
+.cb-details summary {
+  display: list-item;
+  padding: 13px 0;
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+.cb-details,
+.cb-about { color: var(--ink-2); font-size: var(--fs-data); }
+.cb-details p,
+.cb-details ul,
+.cb-about p { max-width: var(--measure); margin: 0 0 var(--sp-3); }
+.cb-details strong,
+.cb-about strong { color: var(--ink); }
+.cb-details code {
+  padding: 1px var(--sp-1);
+  background: var(--well);
+  border-radius: var(--r-chip);
+  font-family: var(--font-mono);
+  font-size: var(--fs-s);
+}
+
+/* ---- the page ------------------------------------------------------------------------------- */
+
+.yd-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--gap);
+}
+.yd-side { display: grid; gap: var(--gap); min-width: 0; align-content: start; }
+@media (min-width: 1180px) {
+  .yd-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
+    grid-template-areas: "yard side" "key side" "rules rules" "about about";
+    align-items: start;
+  }
+  .yd-yard  { grid-area: yard; }
+  .yd-side  { grid-area: side; }
+  .yd-keyp  { grid-area: key; }
+  .yd-rules { grid-area: rules; }
+  .yd-about { grid-area: about; }
+}
+
+.dusk-titlebar .cb-tap { padding-inline: var(--gap); }
+.yd-strip-pick { display: flex; align-items: center; gap: var(--sp-3); }
+
+/* work order */
+.yd-wo-id { font-family: var(--font-mono); color: var(--lit); }
+.yd-wo p { margin: 0 0 var(--sp-3); max-width: var(--measure); }
+.yd-wo-job { color: var(--ink); font-size: var(--fs-base); }
+.yd-wo-job b,
+.yd-wo-meta b { font-family: var(--font-mono); }
+.yd-wo-from,
+.yd-wo-meta { color: var(--ink-2); }
+.yd-wo-meta b { color: var(--ink); }
+.yd-wo p.yd-wo-tip { margin-bottom: 0; color: var(--ink-2); font-size: var(--fs-s); }
+
+/* move builder */
+.yd-builder { display: grid; gap: var(--sp-4); }
+.yd-builder-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+.yd-unit { color: var(--ink-2); }
+.yd-go { min-width: 112px; font-size: var(--fs-data); }
+.yd-sound { font-variant-emoji: emoji; }   /* the sound button keeps the glyph of the present app */
+
+/* ---- the yard table ------------------------------------------------------------------------- */
+
+.yd-table td {
+  position: relative;
+  height: auto;
+  padding: calc(var(--yd-pad) + var(--yd-headroom)) var(--gap) var(--yd-pad);
+  vertical-align: top;
+}
+.yd-table tr.has-dest { --yd-headroom: 14px; }
+/* every cell keeps a band as high as a car, so the rail passes the centre of its first line */
+.yd-band { display: flex; align-items: center; min-height: var(--yd-car-h); }
+.yd-table th.yd-h-track  { width: 76px; }
+.yd-table th.yd-h-state  { width: 19%; }
+.yd-table th.yd-h-switch { width: 166px; }
+.yd-table th.yd-h-room   { width: 20%; }
+.yd-foul-mini { display: inline-block; width: 3px; height: 11px; margin-right: var(--sp-2); background: var(--ink-2); vertical-align: -1px; }
+.yd-table th small {
+  margin-left: var(--sp-3);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+}
+.yd-id { color: var(--ink); font-size: var(--fs-base); font-weight: var(--fw-bold); }
+
+/* the State cell: words, never colour alone */
+.yd-states { display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 2px var(--gap); min-height: var(--yd-car-h); font-size: var(--fs-s); }
+.yd-kick { color: var(--ink-2); font-weight: var(--fw-medium); font-variant-emoji: text; }
+.yd-build {
+  color: var(--lit);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--track-label);
+}
+.yd-build + .dusk-count { margin-left: var(--sp-1); }
+
+/* the Switch cell: the spine and one button */
+.yd-table td.yd-c-sw { padding-left: var(--yd-gutter); }
+.yd-switch {
+  width: 100%;
+  min-width: 96px;
+  justify-content: flex-start;
+  gap: var(--sp-2);
+  padding-inline: var(--sp-4);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  letter-spacing: var(--track-label);
+}
+/* the word is a state ink. Dusk measures a state ink on --well and not on the gold wash of a button. */
+.yd-switch,
+.yd-switch:hover,
+.yd-switch:active { background: var(--well); }
+.yd-drop { display: none; }
+.yd-switch svg { flex: none; width: 18px; height: 18px; stroke-width: 2.2; }
+.yd-switch[data-lined="normal"]  { color: var(--green-ink); }
+.yd-switch[data-lined="reverse"] { color: var(--amber-ink); }
+/* a refusal: the red edge, and the glyph ? before the word */
+.yd-switch.is-refused { box-shadow: var(--rowneon-red); }
+.yd-switch.is-refused::before { content: "?"; color: var(--red-ink); font-weight: var(--fw-bold); }
+
+.yd-spine { position: absolute; inset: -1px 0 0 0; pointer-events: none; }
+.yd-spine i {
+  --w: var(--yd-w);
+  --c: var(--ink-3);
+  --y: calc(1px + var(--yd-pad) + var(--yd-headroom) + var(--yd-car-h) / 2);   /* the rail, from the top of the row */
+  --yb: calc(var(--yd-pad) + var(--yd-car-h) / 2);                               /* the rail of the lead, from the bottom */
+  position: absolute;
+  display: block;
+}
+.yd-spine i.is-lit { --w: var(--yd-w-lit); --c: var(--lit); }
+.yd-sp-thru,
+.yd-sp-up {
+  left: calc(var(--yd-spine-x) - var(--w) / 2);
+  width: var(--w);
+  top: 0;
+  bottom: 0;
+  background: var(--c);
+}
+.yd-sp-up { bottom: auto; height: var(--y); }
+.yd-sp-turn {
+  left: calc(var(--yd-spine-x) - var(--w) / 2);
+  width: calc(var(--yd-gutter) - var(--yd-spine-x) + var(--w) / 2);
+  top: calc(var(--y) - var(--w) / 2);
+  bottom: 0;
+  border-left: var(--w) solid var(--c);
+  border-top: var(--w) solid var(--c);
+  border-top-left-radius: var(--r-window);
+}
+.yd-spine i.yd-sp-tail {
+  right: -1px;
+  width: calc(var(--gap) + 1px);
+  top: calc(var(--y) - var(--w) / 2);
+  height: var(--w);
+  background: var(--c);
+}
+.yd-sp-foot {
+  left: -1px;
+  width: calc(var(--yd-spine-x) + var(--w) / 2 + 1px);
+  top: 0;
+  bottom: calc(var(--yb) - var(--w) / 2);
+  border-right: var(--w) solid var(--c);
+  border-bottom: var(--w) solid var(--c);
+  border-bottom-right-radius: var(--r-window);
+}
+.yd-sp-top {
+  left: calc(var(--yd-spine-x) - var(--w) / 2);
+  right: -1px;
+  bottom: 0;
+  height: calc(50% + var(--w) / 2);
+  border-left: var(--w) solid var(--c);
+  border-top: var(--w) solid var(--c);
+  border-top-left-radius: var(--r-window);
+}
+
+/* the Cars cell: a rail, the foul tick, the cars in order from the throat */
+.yd-table td.yd-c-cars { padding-left: 0; }
+.yd-track { display: flex; align-items: flex-start; min-width: 0; }
+.yd-leadin {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  min-width: var(--yd-leadin);
+  height: var(--yd-car-h);
+  padding: 1px var(--sp-1) 0 22px;
+}
+.yd-rail {
+  --w: var(--yd-w);
+  --c: var(--ink-3);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - var(--w) / 2);
+  height: var(--w);
+  background: var(--c);
+}
+.yd-rail.is-lit { --w: var(--yd-w-lit); --c: var(--lit); }
+.yd-foul {
+  position: absolute;
+  left: 12px;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  background: var(--ink-2);
+}
+.yd-throat {
+  margin-left: auto;
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.yd-cars {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  row-gap: var(--sp-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.yd-car { position: relative; display: flex; }
+.yd-gap { position: relative; flex: 0 0 22px; height: var(--yd-car-h); }
+.yd-gap::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 1px);
+  top: 7px;
+  bottom: 7px;
+  border-left: 2px dotted var(--ink-2);
+}
+
+/* the compact tile. Dusk's tile is 138 px high, lifts on hover and glows. A car does none of these. */
+.yd-tile {
+  width: max(var(--yd-car-min), calc(var(--yd-len) * var(--yd-u)));
+  min-width: min-content;
+  min-height: var(--yd-car-h);
+  border: 1px solid var(--tile-ink);
+  border-radius: var(--r-chip);
+  background-color: var(--well);
+  background-image: none;
+  box-shadow: none;
+  transition: none;
+}
+.yd-tile:hover,
+.yd-tile:focus-within { transform: none; box-shadow: none; }
+.yd-tile .dusk-tile-cap {
+  flex: 1 1 auto;
+  justify-content: center;
+  min-height: 23px;
+  padding: 2px var(--sp-2);
+}
+.yd-num { font-family: var(--font-mono); font-size: var(--fs-s); font-weight: var(--fw-bold); line-height: 1.2; white-space: nowrap; }
+.yd-tile .dusk-tile-body {
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  min-height: 19px;
+  padding: 1px var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  line-height: 1.2;
+}
+.yd-tag { color: var(--tile-ink); }
+.yd-e { color: var(--ink); }
+/* loaded is solid */
+.yd-tile--loaded { background-color: var(--panel-hi); background-image: var(--tile-tint); }
+/* empty is hollow */
+.yd-tile--empty .dusk-tile-cap {
+  background: none;
+  border-bottom-color: var(--hair-2);
+  box-shadow: none;
+  color: var(--ink);
+}
+
+.yd-engine {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: calc(var(--yd-len) * var(--yd-u));
+  min-width: min-content;
+  min-height: var(--yd-car-h);
+  padding: 0 var(--sp-3);
+  background: var(--head);
+  border-radius: var(--r-chip);
+  box-shadow: var(--neon-ctl);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--track-label);
+}
+.yd-engine .dusk-eye { flex: none; }
+
+/* the goal tag, the next move and the place where it lands */
+.yd-dest {
+  position: absolute;
+  left: 1px;
+  bottom: calc(100% + 2px);
+  color: var(--lit);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.yd-car.is-next .yd-tile { outline: 2px solid var(--lit); outline-offset: 2px; }
+.yd-car.is-next { margin-inline: var(--sp-1); }
+.yd-slot {
+  display: grid;
+  place-items: center;
+  width: max(var(--yd-car-min), calc(var(--yd-len) * var(--yd-u)));
+  min-height: var(--yd-car-h);
+  border: 2px dashed var(--lit);
+  border-radius: var(--r-chip);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+}
+
+/* the lead: left of the spine, as in the yard */
+.yd-table td.yd-c-lead { padding-top: var(--yd-pad); padding-right: 0; vertical-align: bottom; white-space: normal; font-weight: inherit; }
+.yd-leadbox { display: flex; flex-direction: column; gap: calc(var(--sp-2) + var(--yd-headroom)); }
+.yd-leadlabel {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-s);
+  font-weight: var(--fw-medium);
+}
+.yd-leadrow { display: flex; align-items: flex-end; }
+.yd-table tr.yd-r-main td { padding-top: var(--sp-3); }
+.yd-leadtail,
+.yd-stub { position: relative; height: var(--yd-car-h); }
+.yd-leadtail { flex: 1 1 var(--sp-6); min-width: var(--sp-6); }
+.yd-stub { flex: 0 0 var(--gap); }
+.yd-stub .yd-rail { right: -1px; }
+.yd-cars--lead { flex-wrap: nowrap; }
+
+/* the main line: the spine goes on, off the top */
+.yd-mainwords { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 2px var(--sp-7); font-family: var(--font-mono); font-size: var(--fs-s); }
+.yd-mainwords span:first-child { color: var(--ink); font-weight: var(--fw-medium); }
+
+/* the Room cell: the track to one scale, the cars at the far end, the foul tick */
+.yd-room { display: flex; align-items: center; gap: var(--sp-4); min-height: var(--yd-car-h); }
+.yd-roomline { flex: 1 1 auto; display: flex; justify-content: flex-end; min-width: 0; }
+.yd-roomline--lead { justify-content: flex-start; }
+.yd-roomtrack {
+  position: relative;
+  height: 14px;
+  background: var(--well);
+  border-radius: var(--r-bar);
+  box-shadow: var(--ring-well);
+}
+.yd-roomtrack .dusk-heat { position: absolute; top: 2px; bottom: 2px; height: auto; }
+.yd-roomfoul { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink-2); }
+.yd-roomfig {
+  flex: none;
+  min-width: 3.6em;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-s);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* the key */
+.yd-key { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: var(--sp-3) var(--sp-8); margin: 0; padding: 0; list-style: none; color: var(--ink-2); font-size: var(--fs-s); }
+.yd-key li { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: start; gap: var(--sp-3); min-width: 0; }
+.yd-key b { display: flex; align-items: center; min-height: var(--ico-size); color: var(--ink); font-weight: var(--fw-medium); }
+.yd-key-items { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--gap); min-width: 0; min-height: var(--ico-size); }
+.yd-key .dusk-ico { width: auto; min-width: var(--ico-size); padding: 0 3px; font-family: var(--font-mono); font-size: var(--fs-xs); }
+.yd-key-pair { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.yd-key-sw { display: inline-flex; align-items: center; gap: var(--sp-1); font-family: var(--font-mono); font-weight: var(--fw-medium); letter-spacing: var(--track-label); }
+.yd-key-sw svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.yd-key-sw--normal { color: var(--green-ink); }
+.yd-key-sw--reverse { color: var(--amber-ink); }
+.yd-key-line { position: relative; flex: none; display: inline-block; width: 34px; height: 16px; }
+.yd-key-line .yd-foul { left: 15px; top: 1px; bottom: 1px; }
+.yd-key-gap { position: relative; flex: none; display: inline-block; width: 14px; height: 18px; }
+.yd-key-gap::after { content: ""; position: absolute; left: 6px; top: 1px; bottom: 1px; border-left: 2px dotted var(--ink-2); }
+.yd-key-slot { flex: none; display: inline-block; width: 30px; height: 18px; border: 2px dashed var(--lit); border-radius: var(--r-chip); }
+.yd-key-next { flex: none; display: inline-block; width: 26px; height: 14px; margin: 0 3px; border: 1px solid var(--grey-ink); border-radius: var(--r-chip); outline: 2px solid var(--lit); outline-offset: 2px; }
+.yd-sme { color: var(--ink-2); font-size: var(--fs-xs); font-style: normal; white-space: nowrap; }
+.yd-sme::before { content: "("; }
+.yd-sme::after { content: ")"; }
+.yd-refusal { display: grid; gap: var(--sp-3); margin-top: var(--gap); }
+.yd-refusal-sw { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); color: var(--ink-2); font-size: var(--fs-s); }
+.yd-refusal-sw .yd-switch { width: 124px; }
+
+/* ---- 390: stack. No transform and no scaling. ---------------------------------------------------- */
+@media (max-width: 760px) {
+  :root { --yd-spine-x: 13px; --yd-gutter: 32px; --yd-leadin: 84px; --yd-pad: 10px; }
+
+  .yd-table tbody tr {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    grid-template-areas: "sw track state" "cars cars cars" "room room room";
+    align-items: start;
+    gap: var(--sp-2) var(--sp-4);
+    padding: var(--yd-pad) var(--gap) var(--yd-pad) var(--yd-gutter);
+  }
+  .yd-table td,
+  .yd-table td[data-label],
+  .yd-table tr.yd-r-main td { position: static; display: block; padding: 0; }
+  .yd-table td[data-label]::before { content: none; }
+  .yd-table td.yd-c-sw    { grid-area: sw; display: flex; align-self: stretch; padding: 0; }
+  .yd-swbox { position: relative; flex: 1 1 auto; }
+  .yd-table td.yd-c-track { grid-area: track; }
+  .yd-table td.yd-c-state { grid-area: state; }
+  .yd-table td.yd-c-cars  { grid-area: cars; padding-top: var(--yd-headroom); }
+  .yd-table td.yd-c-room  { grid-area: room; display: flex; align-items: center; gap: var(--sp-3); }
+  .yd-table td.yd-c-room[data-label]::before { content: attr(data-label); flex: none; }
+  .yd-room { flex: 1 1 auto; min-width: 0; min-height: 0; }
+  .yd-switch { width: 124px; }
+  .yd-go { min-width: var(--cb-tap); }
+
+  /* the lit row: one wash and one lit line pair for the block, not for each cell */
+  .yd-table tbody tr.dusk-hot { background: var(--wash-4); box-shadow: var(--neon-row); }
+  .yd-table tbody tr.dusk-hot td { background: none; box-shadow: none; }
+
+  /* the spine runs down the left edge of the blocks; it turns into the switch button */
+  .yd-spine { inset: -1px auto 0 0; width: var(--yd-gutter); }
+  .yd-spine i { --y: calc(1px + var(--yd-pad) + var(--yd-car-h) / 2); }
+  .yd-spine i.yd-sp-tail { display: none; }
+
+  /* from the button, the rail drops to the line of cars */
+  .yd-drop {
+    --w: var(--yd-w);
+    --c: var(--ink-3);
+    position: absolute;
+    display: block;
+    left: 10px;
+    width: 12px;
+    top: var(--cb-tap);
+    bottom: calc(-1 * (var(--sp-2) + var(--yd-headroom) + var(--yd-car-h) / 2 + var(--w) / 2));
+    border-left: var(--w) solid var(--c);
+    border-bottom: var(--w) solid var(--c);
+    border-bottom-left-radius: var(--r-window);
+  }
+  .yd-drop.is-lit { --w: var(--yd-w-lit); --c: var(--lit); }
+  .yd-leadin { padding-left: 40px; }
+  .yd-leadin .yd-rail { left: 22px; }
+  .yd-foul { left: 30px; }
+
+  /* the main line */
+  .yd-table tbody tr.yd-r-main { grid-template-columns: minmax(0, 1fr); grid-template-areas: "words"; }
+  .yd-table td.yd-c-void { display: none; }
+  .yd-table td.yd-c-main,
+  .yd-table tr.yd-r-main td.yd-c-sw { grid-area: words; }
+  .yd-sp-top { right: 4px; }
+
+  /* the lead: a stem below the ladder. The car that is nearest to the yard is at the top. */
+  .yd-table tbody tr.yd-r-lead { grid-template-columns: minmax(0, 1fr); grid-template-areas: "lead" "room"; }
+  .yd-table td.yd-c-lead { grid-area: lead; }
+  .yd-table tr.yd-r-lead td.yd-c-sw,
+  .yd-table tr.yd-r-lead td.yd-c-cars { grid-area: lead; height: 0; }
+  .yd-leadbox { flex-direction: row-reverse; justify-content: flex-end; align-items: flex-start; gap: var(--gap); }
+  .yd-leadrow { margin-left: calc(5px - var(--yd-gutter)); }
+  .yd-leadtail,
+  .yd-stub { display: none; }
+  .yd-cars--lead { flex-direction: column-reverse; align-items: flex-start; row-gap: 0; }
+  .yd-cars--lead .yd-car { flex-direction: row-reverse; align-items: center; gap: var(--sp-3); }
+  .yd-cars--lead .yd-car.is-next { margin: var(--sp-1) 0; }
+  .yd-cars--lead .yd-dest { position: static; }
+  .yd-engine { flex-direction: column-reverse; justify-content: center; }
+  .yd-sp-foot { left: calc(var(--yd-spine-x) - var(--w) / 2); width: var(--w); top: 0; bottom: auto; height: calc(var(--yd-pad) + 4px); border: 0; border-radius: 0; background: var(--c); }
+  .yd-leadlabel { padding-top: var(--sp-1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The sketch has no motion of its own. Dusk stops its own transitions. Nothing here goes blank. */
+  .yd-switch { transition: none; }
+}
+</style>
+</head>
+<body>
+<a class="dusk-skip" href="#yard">Skip to the yard</a>
+
+<div class="dusk-stage dusk-stage--app">
+  <section class="dusk-win cb-win" aria-label="Clear Board, The Yard">
+    <header class="dusk-titlebar">
+      <button class="dusk-btn cb-tap" type="button" id="back"></button>
+      <span class="dusk-brand"><span class="dusk-disc" aria-hidden="true"></span>Clear Board</span>
+      <span class="dusk-crumb"><i aria-hidden="true">/</i> <b>The Yard</b></span>
+      <span class="dusk-spacer"></span>
+      <span class="dusk-flag">SKETCH · look B · list</span>
+    </header>
+    <div class="dusk-thread" aria-hidden="true"></div>
+
+    <main class="dusk-main" id="yard">
+      <h1 class="dusk-sr">The Yard</h1>
+
+      <div class="dusk-strip" id="strip"></div>
+
+      <div class="yd-layout">
+        <section class="dusk-panel dusk-panel--framed yd-yard" aria-labelledby="yard-h">
+          <header class="dusk-panel-head">
+            <h2 class="dusk-panel-name" id="yard-h">Yard</h2>
+            <span class="dusk-panel-sub" id="route" role="status"></span>
+            <span class="dusk-spacer"></span>
+            <span class="dusk-count" id="carcount"></span>
+          </header>
+          <div class="dusk-panel-body dusk-panel-body--flush">
+            <table class="dusk-table yd-table" role="table" aria-labelledby="yard-h" aria-describedby="yard-cap">
+              <caption class="dusk-sr" id="yard-cap">One row is one track. The rows run from AS76 at the top to the lead at the bottom. In each row the cars stand in order from the throat.</caption>
+              <thead role="rowgroup">
+                <tr role="row">
+                  <th role="columnheader" scope="col" class="yd-h-track">Track</th>
+                  <th role="columnheader" scope="col" class="yd-h-state">State</th>
+                  <th role="columnheader" scope="col" class="yd-h-switch">Switch</th>
+                  <th role="columnheader" scope="col">Cars <small><i class="yd-foul-mini" aria-hidden="true"></i>foul point · throat ▸</small></th>
+                  <th role="columnheader" scope="col" class="yd-h-room">Room</th>
+                </tr>
+              </thead>
+              <tbody role="rowgroup" id="rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="yd-side">
+          <section class="dusk-panel dusk-panel--framed yd-wo" aria-labelledby="wo-h">
+            <header class="dusk-panel-head"><h2 class="dusk-panel-name" id="wo-h"></h2></header>
+            <div class="dusk-panel-body" id="wo"></div>
+          </section>
+
+          <section class="dusk-panel" aria-label="Call a move">
+            <div class="yd-builder" id="builder"></div>
+          </section>
+
+          <div class="cb-banner" id="msg" role="status" aria-live="polite"></div>
+        </div>
+
+        <section class="dusk-panel dusk-panel--framed yd-keyp" aria-labelledby="key-h">
+          <header class="dusk-panel-head"><h2 class="dusk-panel-name" id="key-h">Key</h2><span class="dusk-panel-sub">A word or a glyph carries each state. Colour is a second cue.</span></header>
+          <div class="dusk-panel-body">
+            <ul class="yd-key" id="key"></ul>
+            <div class="yd-refusal" id="refusal"></div>
+          </div>
+        </section>
+
+        <section class="dusk-panel yd-rules" aria-label="Rules in play">
+          <p class="dusk-lede" id="legend"></p>
+          <ul class="cb-chips" id="rules"></ul>
+        </section>
+
+        <section class="dusk-panel yd-about cb-about" aria-label="About this trainer">
+          <p><strong>What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span>The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span></p>
+          <details class="cb-details">
+            <summary>How to play & why these rules</summary>
+        <p><strong>You are the conductor, not the engineer.</strong> Click a switch target to line it
+        (<span>yellow</span> = lined into the track / diverging,
+        <span>green</span> = normal, straight up the ladder). Then call a move:</p>
+        <ul>
+        <li><strong>PULL n from a track</strong> — back in, couple the near (throat) cut, pull <code>n</code> cars onto the lead.</li>
+        <li><strong>SPOT n to a track</strong> — shove <code>n</code> cars in and leave them.</li>
+        <li><strong>KICK n to a track</strong> — shove and cut away; the cars coast in on their own with no coupling. Only where a special instruction allows it (<span>⚡</span>), only onto a secured 2+ car cut, and only car types that can be kicked.</li>
+        </ul>
+        <p><strong>Score = fewest engine MOVES</strong> — beat or match <em>par</em>. A move is one run of the
+        engine in one direction, so every change of direction counts: a <strong>PULL = 2</strong> (back in, pull
+        out) and a <strong>SPOT = 2</strong> (shove in, pull out) — <em>except the spot that finishes the job is 1</em>,
+        because the engine just leaves the cars and is done (no pull-out). A <strong>KICK = 1</strong> (one shove,
+        the cars coast in by themselves). So <em>pull, pull, spot</em> = 5 moves, and kicking saves the pull-out.
+        <strong>Joints</strong> (couplings) is a second, "also good" stat: lower is cleaner. To reach a
+        track, line <em>its</em> switch reverse and the ones below it normal, or the engineer refuses
+        (<strong>CROR 104</strong>).</p>
+        <p><strong>Securing &amp; kicking.</strong> <strong>Rule 112</strong> — any car left unattended gets a hand brake.
+        A <strong>KICK</strong> (Rule 113.5) needs a <em>secured</em> cut of at least two cars as a <em>backstop</em> to
+        catch the rolling car — and a tank, autorack or centrebeam is never kicked. After coupling, the engineer
+        <em>stretches</em> the joint to confirm the knuckles are locked before moving (<strong>Rule 113.2</strong>).</p>
+          </details>
+        </section>
+      </div>
+    </main>
+
+    <footer class="dusk-status">
+      <span><i class="dusk-led" aria-hidden="true"></i>Sketch. The six switches, Work it and Reset act. The other controls do not act.</span>
+      <span id="scene-note"></span>
+      <span class="dusk-spacer"></span>
+      <span>Dusk 0.2.0</span><span>Tier strict</span>
+    </footer>
+  </section>
+</div>
+
+<script>
+/* The scene. One object, the text of scene.json. The page draws from it and from nothing else. */
+const SCENE = {
+  "schema": "clear-board-yard-scene/1",
+  "purpose": "One real mid-game Yard state for the three look sketches. Every state value is output of the frozen engine. Draw from this file alone.",
+  "producedBy": "R1 scratch script make-scene.mjs (read-only on the repository)",
+  "source": {
+    "files": {
+      "src/stations/yard/geometry.js": "49bc3f5e0703d8dbde31219ce95e86525f8e7fbbf0f027689eef15a9077c13d5",
+      "src/stations/yard/model.js": "144ec68621795ff6c4186335c2129dabcbde41fe12cfae800034563f65ba0ceb",
+      "src/stations/yard/puzzles.js": "633cc6056cdca7df5249508c566ac0891aedbf03ee7b9189d2617b913869bb9b",
+      "src/stations/yard/solver.js": "e547180bca95f723c30e16b89e7af0b4d0595d73764bd8dac1119a38a5bc2215"
+    },
+    "crossCheck": "solver.js replay() of the full opt line: ok=true, moves=6, joints=2; par=6, optJoints=2"
+  },
+  "puzzle": {
+    "id": "p4-peel",
+    "title": "Don’t slam a load into empties",
+    "tier": 4,
+    "tierLabel": "Tier 4 — loads & empties",
+    "par": 6,
+    "optJoints": 2,
+    "hint": "AS73 is a tied, kickable cut of EMPTIES (⚡). Two empty box cars for it sit on AS71 — but a LOADED car is coupled between them, and you must never kick a load onto empties (it damages the light cars). Pull all three, KICK the empties on, and SPOT the loaded car clear in between.",
+    "rules": [
+      "loads",
+      "kickable",
+      "secure",
+      "kick",
+      "line",
+      "speed",
+      "couple",
+      "shove"
+    ],
+    "kickable": [
+      "AS73"
+    ],
+    "kickLimit": {
+      "total": 5,
+      "loaded": 3
+    },
+    "goal": {
+      "track": "AS73",
+      "cars": [
+        "CN 70010",
+        "CN 70028",
+        "CN 70110",
+        "CN 70134"
+      ],
+      "ordered": false,
+      "depart": false
+    },
+    "optLine": [
+      {
+        "act": "pull",
+        "track": "AS71",
+        "n": 3
+      },
+      {
+        "act": "kick",
+        "track": "AS73",
+        "n": 1
+      },
+      {
+        "act": "spot",
+        "track": "AS72",
+        "n": 1
+      },
+      {
+        "act": "kick",
+        "track": "AS73",
+        "n": 1
+      }
+    ],
+    "inbound": null,
+    "listed": null
+  },
+  "replay": {
+    "k": 3,
+    "ofMoves": 4,
+    "movesReplayed": [
+      {
+        "act": "pull",
+        "track": "AS71",
+        "n": 3
+      },
+      {
+        "act": "kick",
+        "track": "AS73",
+        "n": 1
+      },
+      {
+        "act": "spot",
+        "track": "AS72",
+        "n": 1
+      }
+    ],
+    "steps": [
+      {
+        "op": "lineSwitch",
+        "track": "AS71",
+        "result": "reverse"
+      },
+      {
+        "op": "pull",
+        "track": "AS71",
+        "n": 3,
+        "engineSays": "Pulled 3 from AS71.",
+        "movesAfter": 2,
+        "jointsAfter": 1
+      },
+      {
+        "op": "lineSwitch",
+        "track": "AS71",
+        "result": "normal"
+      },
+      {
+        "op": "lineSwitch",
+        "track": "AS73",
+        "result": "reverse"
+      },
+      {
+        "op": "kick",
+        "track": "AS73",
+        "n": 1,
+        "engineSays": "Kicked 1 to AS73.",
+        "movesAfter": 3,
+        "jointsAfter": 1
+      },
+      {
+        "op": "lineSwitch",
+        "track": "AS72",
+        "result": "reverse"
+      },
+      {
+        "op": "lineSwitch",
+        "track": "AS73",
+        "result": "normal"
+      },
+      {
+        "op": "spot",
+        "track": "AS72",
+        "n": 1,
+        "engineSays": "Spotted 1 to AS72.",
+        "movesAfter": 4,
+        "jointsAfter": 2
+      },
+      {
+        "op": "lineSwitch",
+        "track": "AS72",
+        "result": "normal"
+      },
+      {
+        "op": "lineSwitch",
+        "track": "AS73",
+        "result": "reverse"
+      }
+    ],
+    "then": "After move 3 the player lines the route for the next move with lineSwitch(): AS72 to normal, AS73 to reverse. These are the last two steps. They cost no move."
+  },
+  "state": {
+    "moves": 4,
+    "joints": 2,
+    "par": 6,
+    "engineOut": false,
+    "engineOutNote": "model.js keeps \"out\" for move cost only. The present drawing always shows the engine at rest on the lead between moves (render.js:47-49).",
+    "lined": {
+      "AS71": "normal",
+      "AS72": "normal",
+      "AS73": "reverse",
+      "AS74": "normal",
+      "AS75": "normal",
+      "AS76": "normal"
+    },
+    "secured": {
+      "AS71": false,
+      "AS72": false,
+      "AS73": true,
+      "AS74": true,
+      "AS75": true,
+      "AS76": true
+    },
+    "kickable": [
+      "AS73"
+    ],
+    "goalTrack": "AS73",
+    "showSecuredTags": true,
+    "tracks": [
+      {
+        "id": "AS71",
+        "index": 0,
+        "switch": {
+          "x": 370,
+          "y": 320
+        },
+        "y": 320,
+        "trackEndX": 1292,
+        "clearanceX": 400,
+        "lined": "normal",
+        "secured": false,
+        "securementTag": null,
+        "kickable": false,
+        "kickableMark": null,
+        "isGoalTrack": false,
+        "cars": [],
+        "cuts": [],
+        "gaps": [],
+        "derived": {
+          "note": "Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.",
+          "trackLength": 922,
+          "carLengthTotal": 0,
+          "throatGap": 922,
+          "roomBeforeFoul": 892,
+          "roomInBoxCars": 21
+        }
+      },
+      {
+        "id": "AS72",
+        "index": 1,
+        "switch": {
+          "x": 440,
+          "y": 268
+        },
+        "y": 268,
+        "trackEndX": 1292,
+        "clearanceX": 470,
+        "lined": "normal",
+        "secured": false,
+        "securementTag": "LOOSE",
+        "kickable": false,
+        "kickableMark": null,
+        "isGoalTrack": false,
+        "cars": [
+          {
+            "id": "CN 70222",
+            "number": "70222",
+            "type": "box",
+            "typeTag": "BX",
+            "loaded": true,
+            "loadWord": "loaded",
+            "len": 42,
+            "kickableType": true,
+            "isGoalCar": false,
+            "order": 1,
+            "nearEdgeFromSwitch": 668,
+            "x0": 1108,
+            "x1": 1150,
+            "centre": {
+              "x": 1129,
+              "y": 268
+            },
+            "height": 20
+          },
+          {
+            "id": "GATX 8810",
+            "number": "8810",
+            "type": "tank",
+            "typeTag": "TK",
+            "loaded": true,
+            "loadWord": "loaded",
+            "len": 50,
+            "kickableType": false,
+            "isGoalCar": false,
+            "order": 2,
+            "nearEdgeFromSwitch": 752,
+            "x0": 1192,
+            "x1": 1242,
+            "centre": {
+              "x": 1217,
+              "y": 268
+            },
+            "height": 20
+          },
+          {
+            "id": "GATX 8828",
+            "number": "8828",
+            "type": "tank",
+            "typeTag": "TK",
+            "loaded": true,
+            "loadWord": "loaded",
+            "len": 50,
+            "kickableType": false,
+            "isGoalCar": false,
+            "order": 3,
+            "nearEdgeFromSwitch": 802,
+            "x0": 1242,
+            "x1": 1292,
+            "centre": {
+              "x": 1267,
+              "y": 268
+            },
+            "height": 20
+          }
+        ],
+        "cuts": [
+          [
+            "CN 70222"
+          ],
+          [
+            "GATX 8810",
+            "GATX 8828"
+          ]
+        ],
+        "gaps": [
+          {
+            "after": "CN 70222",
+            "before": "GATX 8810",
+            "x0": 1150,
+            "x1": 1192,
+            "len": 42
+          }
+        ],
+        "derived": {
+          "note": "Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.",
+          "trackLength": 852,
+          "carLengthTotal": 142,
+          "throatGap": 668,
+          "roomBeforeFoul": 638,
+          "roomInBoxCars": 15
+        }
+      },
+      {
+        "id": "AS73",
+        "index": 2,
+        "switch": {
+          "x": 510,
+          "y": 216
+        },
+        "y": 216,
+        "trackEndX": 1292,
+        "clearanceX": 540,
+        "lined": "reverse",
+        "secured": true,
+        "securementTag": "TIED",
+        "kickable": true,
+        "kickableMark": "⚡ KICKABLE",
+        "isGoalTrack": true,
+        "cars": [
+          {
+            "id": "CN 70134",
+            "number": "70134",
+            "type": "box",
+            "typeTag": "BX",
+            "loaded": false,
+            "loadWord": "empty",
+            "len": 42,
+            "kickableType": true,
+            "isGoalCar": true,
+            "order": 1,
+            "nearEdgeFromSwitch": 656,
+            "x0": 1166,
+            "x1": 1208,
+            "centre": {
+              "x": 1187,
+              "y": 216
+            },
+            "height": 20
+          },
+          {
+            "id": "CN 70010",
+            "number": "70010",
+            "type": "box",
+            "typeTag": "BX",
+            "loaded": false,
+            "loadWord": "empty",
+            "len": 42,
+            "kickableType": true,
+            "isGoalCar": true,
+            "order": 2,
+            "nearEdgeFromSwitch": 698,
+            "x0": 1208,
+            "x1": 1250,
+            "centre": {
+              "x": 1229,
+              "y": 216
+            },
+            "height": 20
+          },
+          {
+            "id": "CN 70028",
+            "number": "70028",
+            "type": "box",
+            "typeTag": "BX",
+            "loaded": false,
+            "loadWord": "empty",
+            "len": 42,
+            "kickableType": true,
+            "isGoalCar": true,
+            "order": 3,
+            "nearEdgeFromSwitch": 740,
+            "x0": 1250,
+            "x1": 1292,
+            "centre": {
+              "x": 1271,
+              "y": 216
+            },
+            "height": 20
+          }
+        ],
+        "cuts": [
+          [
+            "CN 70134",
+            "CN 70010",
+            "CN 70028"
+          ]
+        ],
+        "gaps": [],
+        "derived": {
+          "note": "Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.",
+          "trackLength": 782,
+          "carLengthTotal": 126,
+          "throatGap": 656,
+          "roomBeforeFoul": 626,
+          "roomInBoxCars": 14
+        }
+      },
+      {
+        "id": "AS74",
+        "index": 3,
+        "switch": {
+          "x": 580,
+          "y": 164
+        },
+        "y": 164,
+        "trackEndX": 1292,
+        "clearanceX": 610,
+        "lined": "normal",
+        "secured": true,
+        "securementTag": "TIED",
+        "kickable": false,
+        "kickableMark": null,
+        "isGoalTrack": false,
+        "cars": [
+          {
+            "id": "SHPX 6610",
+            "number": "6610",
+            "type": "hopper",
+            "typeTag": "HP",
+            "loaded": true,
+            "loadWord": "loaded",
+            "len": 47,
+            "kickableType": true,
+            "isGoalCar": false,
+            "order": 1,
+            "nearEdgeFromSwitch": 618,
+            "x0": 1198,
+            "x1": 1245,
+            "centre": {
+              "x": 1221.5,
+              "y": 164
+            },
+            "height": 20
+          },
+          {
+            "id": "SHPX 6628",
+            "number": "6628",
+            "type": "hopper",
+            "typeTag": "HP",
+            "loaded": true,
+            "loadWord": "loaded",
+            "len": 47,
+            "kickableType": true,
+            "isGoalCar": false,
+            "order": 2,
+            "nearEdgeFromSwitch": 665,
+            "x0": 1245,
+            "x1": 1292,
+            "centre": {
+              "x": 1268.5,
+              "y": 164
+            },
+            "height": 20
+          }
+        ],
+        "cuts": [
+          [
+            "SHPX 6610",
+            "SHPX 6628"
+          ]
+        ],
+        "gaps": [],
+        "derived": {
+          "note": "Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.",
+          "trackLength": 712,
+          "carLengthTotal": 94,
+          "throatGap": 618,
+          "roomBeforeFoul": 588,
+          "roomInBoxCars": 14
+        }
+      },
+      {
+        "id": "AS75",
+        "index": 4,
+        "switch": {
+          "x": 650,
+          "y": 112
+        },
+        "y": 112,
+        "trackEndX": 1292,
+        "clearanceX": 680,
+        "lined": "normal",
+        "secured": true,
+        "securementTag": "TIED",
+        "kickable": false,
+        "kickableMark": null,
+        "isGoalTrack": false,
+        "cars": [
+          {
+            "id": "ETTX 9001",
+            "number": "9001",
+            "type": "autorack",
+            "typeTag": "AR",
+            "loaded": true,
+            "loadWord": "loaded",
+            "len": 75,
+            "kickableType": false,
+            "isGoalCar": false,
+            "order": 1,
+            "nearEdgeFromSwitch": 492,
+            "x0": 1142,
+            "x1": 1217,
+            "centre": {
+              "x": 1179.5,
+              "y": 112
+            },
+            "height": 20
+          },
+          {
+            "id": "ETTX 9020",
+            "number": "9020",
+            "type": "autorack",
+            "typeTag": "AR",
+            "loaded": true,
+            "loadWord": "loaded",
+            "len": 75,
+            "kickableType": false,
+            "isGoalCar": false,
+            "order": 2,
+            "nearEdgeFromSwitch": 567,
+            "x0": 1217,
+            "x1": 1292,
+            "centre": {
+              "x": 1254.5,
+              "y": 112
+            },
+            "height": 20
+          }
+        ],
+        "cuts": [
+          [
+            "ETTX 9001",
+            "ETTX 9020"
+          ]
+        ],
+        "gaps": [],
+        "derived": {
+          "note": "Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.",
+          "trackLength": 642,
+          "carLengthTotal": 150,
+          "throatGap": 492,
+          "roomBeforeFoul": 462,
+          "roomInBoxCars": 11
+        }
+      },
+      {
+        "id": "AS76",
+        "index": 5,
+        "switch": {
+          "x": 720,
+          "y": 60
+        },
+        "y": 60,
+        "trackEndX": 1292,
+        "clearanceX": 750,
+        "lined": "normal",
+        "secured": true,
+        "securementTag": "TIED",
+        "kickable": false,
+        "kickableMark": null,
+        "isGoalTrack": false,
+        "cars": [
+          {
+            "id": "CN 81002",
+            "number": "81002",
+            "type": "box",
+            "typeTag": "BX",
+            "loaded": false,
+            "loadWord": "empty",
+            "len": 42,
+            "kickableType": true,
+            "isGoalCar": false,
+            "order": 1,
+            "nearEdgeFromSwitch": 488,
+            "x0": 1208,
+            "x1": 1250,
+            "centre": {
+              "x": 1229,
+              "y": 60
+            },
+            "height": 20
+          },
+          {
+            "id": "CN 81044",
+            "number": "81044",
+            "type": "box",
+            "typeTag": "BX",
+            "loaded": false,
+            "loadWord": "empty",
+            "len": 42,
+            "kickableType": true,
+            "isGoalCar": false,
+            "order": 2,
+            "nearEdgeFromSwitch": 530,
+            "x0": 1250,
+            "x1": 1292,
+            "centre": {
+              "x": 1271,
+              "y": 60
+            },
+            "height": 20
+          }
+        ],
+        "cuts": [
+          [
+            "CN 81002",
+            "CN 81044"
+          ]
+        ],
+        "gaps": [],
+        "derived": {
+          "note": "Derived by R1 from geometry.js and model.js. The present drawing shows none of these numbers. roomBeforeFoul is the total car length the track still takes: canSpot and canKick refuse a cut whose near edge would land inside CLEAR (model.js:99, 124-126, 183-185). roomInBoxCars is exact for box cars (42 units) only; show a length or a bar, not a car count, when the cars are mixed.",
+          "trackLength": 572,
+          "carLengthTotal": 84,
+          "throatGap": 488,
+          "roomBeforeFoul": 458,
+          "roomInBoxCars": 10
+        }
+      }
+    ],
+    "engine": {
+      "centre": {
+        "x": 120,
+        "y": 372
+      },
+      "angle": 0,
+      "len": 64,
+      "height": 24,
+      "x0": 88,
+      "x1": 152,
+      "restArclength": 440,
+      "headlight": {
+        "x": 93,
+        "y": 372,
+        "radius": 2.6,
+        "note": "At the end away from the cars, toward the departure end of the lead (render.js:161-162)."
+      },
+      "holds": [
+        {
+          "id": "CN 70110",
+          "number": "70110",
+          "type": "box",
+          "typeTag": "BX",
+          "loaded": false,
+          "loadWord": "empty",
+          "len": 42,
+          "kickableType": true,
+          "isGoalCar": true,
+          "order": 1,
+          "nearestLoco": true,
+          "x0": 152,
+          "x1": 194,
+          "centre": {
+            "x": 173,
+            "y": 372
+          },
+          "angle": 0,
+          "height": 20
+        }
+      ],
+      "holdsNote": "holds[0] is the car nearest the engine. A SPOT or KICK takes cars from the far end. A PULL adds cars at the far end.",
+      "leadRoomUnits": 558,
+      "heldLengthUnits": 42
+    },
+    "linedRoute": {
+      "note": "Derived by R1 from the lined map with the logic of model.js:66-75: from the far end of the held cut, along the lead, up the ladder, into the first track whose switch is reverse, to the near edge of its first standing car.",
+      "points": [
+        {
+          "x": 194,
+          "y": 372
+        },
+        {
+          "x": 300,
+          "y": 372
+        },
+        {
+          "x": 370,
+          "y": 320
+        },
+        {
+          "x": 440,
+          "y": 268
+        },
+        {
+          "x": 510,
+          "y": 216
+        },
+        {
+          "x": 1166,
+          "y": 216
+        }
+      ],
+      "reachesTrack": "AS73"
+    },
+    "goalProgress": {
+      "track": "AS73",
+      "wanted": [
+        "CN 70010",
+        "CN 70028",
+        "CN 70110",
+        "CN 70134"
+      ],
+      "onGoalTrackNow": [
+        "CN 70134",
+        "CN 70010",
+        "CN 70028"
+      ],
+      "stillToCome": [
+        "CN 70110"
+      ],
+      "note": "Derived. The present drawing has no goal mark on the canvas; the goal is in the work order words only."
+    }
+  },
+  "words": {
+    "note": "Text as the app shows it. Built here with the same templates as yardSim.js:621-634 and checked against the running app (see the report). Do not change a word.",
+    "workOrder": {
+      "top": "WORK ORDER P4-PEEL · Don’t slam a load into empties",
+      "topParts": {
+        "tag": "WORK ORDER",
+        "id": "P4-PEEL",
+        "title": "Don’t slam a load into empties"
+      },
+      "job": "Build AS73 — gather 70010 · 70028 · 70110 · 70134 onto it (now on AS73, AS71).",
+      "jobBoldParts": [
+        "AS73",
+        "70010 · 70028 · 70110 · 70134"
+      ],
+      "jobDimPart": "(now on AS73, AS71)",
+      "meta": "Target 6 moves (par) — fewest moves wins.",
+      "metaBoldPart": "6 moves",
+      "tip": "AS73 is a tied, kickable cut of EMPTIES (⚡). Two empty box cars for it sit on AS71 — but a LOADED car is coupled between them, and you must never kick a load onto empties (it damages the light cars). Pull all three, KICK the empties on, and SPOT the loaded car clear in between.",
+      "staticNote": "The work order is built from puzzle.start and does not change during play. \"(now on AS73, AS71)\" stays on screen in this mid-game scene."
+    },
+    "picker": {
+      "groupLabel": "Tier 4 — loads & empties",
+      "optionLabel": "Don’t slam a load into empties · par 6",
+      "marks": "\"✓ \" before a completed job, \"→ \" before the recommended next job, \" · your best <n>m\" after a job with a record (yardSim.js:698-703)"
+    },
+    "readout": "Moves 4 / par 6 · Joints 2",
+    "banner": {
+      "text": "Spotted 1 to AS72.",
+      "tone": "ok"
+    },
+    "builder": {
+      "actions": [
+        "PULL",
+        "SPOT",
+        "KICK",
+        "SECURE"
+      ],
+      "countUnitWord": "cars",
+      "tracks": [
+        "AS71",
+        "AS72",
+        "AS73",
+        "AS74",
+        "AS75",
+        "AS76"
+      ],
+      "buttons": [
+        "Work it ▸",
+        "▶ Watch optimal",
+        "Reset",
+        "🔊"
+      ],
+      "hiddenForThisPuzzle": [
+        "Depart ▸"
+      ],
+      "muteButtonNote": "The sound button shows 🔊 when sound is on and 🔇 when it is off (yardSim.js:307, 716). In a fresh profile the app shows 🔇.",
+      "selectTitles": {
+        "picker": "Pick a job",
+        "action": "Action",
+        "count": "How many cars",
+        "track": "Which track",
+        "watchOptimal": "Auto-line and play the fewest-moves line in slow motion",
+        "mute": "Sound"
+      },
+      "backButton": "← Home",
+      "selectedForScene": {
+        "action": "KICK",
+        "count": 1,
+        "track": "AS73"
+      },
+      "countOptionsForScene": [
+        1
+      ]
+    },
+    "legend": "Rules in play — CROR = the national rulebook (applies everywhere) · S.I. = a special instruction, specific to this yard — you must know your yard's.",
+    "canvasLabels": [
+      {
+        "text": "◄ DEPARTURE · LEAD / DRILL",
+        "x": 10,
+        "y": 348,
+        "align": "left",
+        "where": "render.js:92"
+      },
+      {
+        "text": "MAIN LINE → the road",
+        "x": 840,
+        "y": 18,
+        "align": "left",
+        "where": "render.js:93"
+      },
+      {
+        "text": "15 MPH · REDUCED (CROR 105)",
+        "x": 1330,
+        "y": 18,
+        "align": "right",
+        "where": "render.js:94"
+      }
+    ],
+    "trackLabelPlacement": "Track id at x = TRACK_RIGHT + 10, y = track y (render.js:139). TIED or LOOSE under it at y + 16 (render.js:146). ⚡ KICKABLE under that (render.js:150)."
+  },
+  "ruleChips": [
+    {
+      "key": "loads",
+      "kind": "si",
+      "kindWord": "S.I.",
+      "cite": "Loads & empties",
+      "label": "Solid = loaded, hollow = empty. Don’t kick a load into empties; kick ≤5 (≤3 loaded)"
+    },
+    {
+      "key": "kickable",
+      "kind": "si",
+      "kindWord": "S.I.",
+      "cite": "Kickable tracks",
+      "label": "Kick only where the special instruction allows (⚡)"
+    },
+    {
+      "key": "secure",
+      "kind": "cror",
+      "kindWord": "CROR",
+      "cite": "CROR 112",
+      "label": "Unattended equipment gets a hand brake (secured)"
+    },
+    {
+      "key": "kick",
+      "kind": "cror",
+      "kindWord": "CROR",
+      "cite": "CROR 113.4 / 113.5",
+      "label": "Kick only onto a secured 2+ car backstop; tanks/autoracks aren’t kicked"
+    },
+    {
+      "key": "line",
+      "kind": "cror",
+      "kindWord": "CROR",
+      "cite": "CROR 104",
+      "label": "Line & examine the switch for your route"
+    },
+    {
+      "key": "speed",
+      "kind": "cror",
+      "kindWord": "CROR",
+      "cite": "CROR 105",
+      "label": "Yard speed — REDUCED (stop within ½ range of vision); transfers ≤ 15 MPH"
+    },
+    {
+      "key": "couple",
+      "kind": "cror",
+      "kindWord": "CROR",
+      "cite": "CROR 113.0 / 113.2",
+      "label": "Couple, then stretch to verify the joint"
+    },
+    {
+      "key": "shove",
+      "kind": "cror",
+      "kindWord": "CROR",
+      "cite": "CROR 115",
+      "label": "Shove only with the route lined & protected"
+    }
+  ],
+  "nextMove": {
+    "act": "kick",
+    "actWord": "KICK",
+    "track": "AS73",
+    "n": 1,
+    "cars": [
+      "CN 70110"
+    ],
+    "legalInScene": true,
+    "landing": [
+      {
+        "id": "CN 70110",
+        "number": "70110",
+        "x0": 1124,
+        "x1": 1166,
+        "centre": {
+          "x": 1145,
+          "y": 216
+        }
+      }
+    ],
+    "landingNote": "From spotPlan() of model.js. The kicked car couples onto the standing cut.",
+    "asSentence": "KICK 1 to AS73",
+    "afterIt": {
+      "engineSays": "Kicked 1 to AS73.",
+      "moves": 6,
+      "joints": 2,
+      "jobWon": true,
+      "winBanner": "✓ Par! 6 moves — 2 couplings, clean",
+      "readout": "Moves 6 / par 6 · Joints 2"
+    }
+  },
+  "wordsThatBindTheDrawing": [
+    {
+      "rule": "Loaded is solid. Empty is hollow.",
+      "because": "The rule chip says \"Solid = loaded, hollow = empty.\" (puzzles.js:18, frozen). The hint of p4-loads says \"Solid cars are loaded, hollow are empty.\" (puzzles.js:281, frozen)."
+    },
+    {
+      "rule": "The glyph ⚡ marks a kickable track.",
+      "because": "The rule chip says \"(⚡)\" (puzzles.js:17, frozen). Six hints say \"(⚡)\". The canvas tag is \"⚡ KICKABLE\" (render.js:150)."
+    },
+    {
+      "rule": "The words TIED and LOOSE name the securement state of a standing cut of 2 or more cars.",
+      "because": "render.js:146. Hints say \"tied\" and \"tied-down\" (puzzles.js, frozen). model.js says \"tied down\" and \"standing loose\"."
+    },
+    {
+      "rule": "The app text says: yellow = lined into the track / diverging, green = normal.",
+      "because": "yardSim.js:190-191 (How to play). If a look changes these two colours, that sentence becomes false. The owner decides. render.js:2 calls yellow a rule convention; that claim is not verified (T12)."
+    },
+    {
+      "rule": "A track nearer the lead is drawn below a track farther from the lead. AS71 is the lowest track. The ladder runs up.",
+      "because": "The app text says \"line its switch reverse and the ones below it normal\" (yardSim.js:203) and \"green = normal, straight up the ladder\" (yardSim.js:191)."
+    },
+    {
+      "rule": "The app text says \"Click a switch target to line it\".",
+      "because": "yardSim.js:189. Each switch needs a visible target that a pointer can press."
+    },
+    {
+      "rule": "A car is called by its number: the last word of its mark.",
+      "because": "render.js:169. The work order lists numbers only (yardSim.js:627)."
+    }
+  ],
+  "inventoryNotInThisScene": [
+    "Car type centerbeam (tag CB, length 61). It is in geometry.carTypes. Only puzzle p2-types has one.",
+    "A track that holds one car. It shows no TIED or LOOSE tag (render.js:144).",
+    "The arrival cinematic (puzzle p6-road only) and the departure run (depart goals only).",
+    "The switch-list check (puzzle p2-list only).",
+    "A long held cut. The engine backs off the frame to the left: with a cut of 252 units its centre is at x = -14; at the lead limit (558 units) it is at x = -320 (geometry.js:60-62)."
+  ],
+  "refusalExample": {
+    "note": "What the app says if the player calls the next move before relining (AS72 still reverse, AS73 normal). Verbatim output of model.js. Shown in the banner with tone \"bad\" and a \"Look it up →\" button (yardSim.js:644-655). Use it only to show the refusal state. Do not reword it.",
+    "linedThen": {
+      "AS72": "reverse",
+      "AS73": "normal"
+    },
+    "ok": false,
+    "text": "AS73 is lined normal — line its switch reverse for the track (CROR 104).",
+    "lookupButton": "Look it up →"
+  },
+  "geometry": {
+    "note": "Logical units of geometry.js. The present canvas is W x H units, scaled by CSS. x grows right, y grows down. Do not change a number: model.js reads the lengths and clearances.",
+    "W": 1340,
+    "H": 460,
+    "LEAD_Y": 372,
+    "LEAD_LEFT": -320,
+    "FOOT": {
+      "x": 300,
+      "y": 372
+    },
+    "ladderStep": {
+      "x": 70,
+      "y": -52
+    },
+    "NTRACK": 6,
+    "TRACK_IDS": [
+      "AS71",
+      "AS72",
+      "AS73",
+      "AS74",
+      "AS75",
+      "AS76"
+    ],
+    "TRACK_RIGHT": 1292,
+    "MAIN_OUT": {
+      "x": 930,
+      "y": -96
+    },
+    "switches": [
+      {
+        "id": "AS71",
+        "x": 370,
+        "y": 320
+      },
+      {
+        "id": "AS72",
+        "x": 440,
+        "y": 268
+      },
+      {
+        "id": "AS73",
+        "x": 510,
+        "y": 216
+      },
+      {
+        "id": "AS74",
+        "x": 580,
+        "y": 164
+      },
+      {
+        "id": "AS75",
+        "x": 650,
+        "y": 112
+      },
+      {
+        "id": "AS76",
+        "x": 720,
+        "y": 60
+      }
+    ],
+    "trackY": {
+      "AS71": 320,
+      "AS72": 268,
+      "AS73": 216,
+      "AS74": 164,
+      "AS75": 112,
+      "AS76": 60
+    },
+    "trackLength": {
+      "AS71": 922,
+      "AS72": 852,
+      "AS73": 782,
+      "AS74": 712,
+      "AS75": 642,
+      "AS76": 572
+    },
+    "clearanceX": {
+      "AS71": 400,
+      "AS72": 470,
+      "AS73": 540,
+      "AS74": 610,
+      "AS75": 680,
+      "AS76": 750
+    },
+    "CLEAR": 30,
+    "SPOT_CLEAR": 120,
+    "TRACK_HEAD": 120,
+    "LEAD_REST": 120,
+    "S_FOOT": 620,
+    "REST_DEFAULT": 440,
+    "LEAD_CLEAR": 558,
+    "ENGLEN": 64,
+    "CARLEN": 42,
+    "carHeight": 20,
+    "locoHeight": 24,
+    "carTypes": {
+      "box": {
+        "len": 42,
+        "tag": "BX",
+        "kick": true
+      },
+      "hopper": {
+        "len": 47,
+        "tag": "HP",
+        "kick": true
+      },
+      "tank": {
+        "len": 50,
+        "tag": "TK",
+        "kick": false
+      },
+      "centerbeam": {
+        "len": 61,
+        "tag": "CB",
+        "kick": false
+      },
+      "autorack": {
+        "len": 75,
+        "tag": "AR",
+        "kick": false
+      }
+    },
+    "carTypesNote": "geometry.js also holds a fill and an edge colour for each type. They are the old palette. A new drawing takes its colours from Dusk tokens, not from there.",
+    "polylines": {
+      "lead": [
+        {
+          "x": -320,
+          "y": 372
+        },
+        {
+          "x": 300,
+          "y": 372
+        }
+      ],
+      "leadVisible": [
+        {
+          "x": 0,
+          "y": 372
+        },
+        {
+          "x": 300,
+          "y": 372
+        }
+      ],
+      "ladder": [
+        {
+          "x": 300,
+          "y": 372
+        },
+        {
+          "x": 370,
+          "y": 320
+        },
+        {
+          "x": 440,
+          "y": 268
+        },
+        {
+          "x": 510,
+          "y": 216
+        },
+        {
+          "x": 580,
+          "y": 164
+        },
+        {
+          "x": 650,
+          "y": 112
+        },
+        {
+          "x": 720,
+          "y": 60
+        }
+      ],
+      "mainLine": [
+        {
+          "x": 720,
+          "y": 60
+        },
+        {
+          "x": 930,
+          "y": -96
+        }
+      ],
+      "bodyTracks": {
+        "AS71": [
+          {
+            "x": 370,
+            "y": 320
+          },
+          {
+            "x": 1292,
+            "y": 320
+          }
+        ],
+        "AS72": [
+          {
+            "x": 440,
+            "y": 268
+          },
+          {
+            "x": 1292,
+            "y": 268
+          }
+        ],
+        "AS73": [
+          {
+            "x": 510,
+            "y": 216
+          },
+          {
+            "x": 1292,
+            "y": 216
+          }
+        ],
+        "AS74": [
+          {
+            "x": 580,
+            "y": 164
+          },
+          {
+            "x": 1292,
+            "y": 164
+          }
+        ],
+        "AS75": [
+          {
+            "x": 650,
+            "y": 112
+          },
+          {
+            "x": 1292,
+            "y": 112
+          }
+        ],
+        "AS76": [
+          {
+            "x": 720,
+            "y": 60
+          },
+          {
+            "x": 1292,
+            "y": 60
+          }
+        ]
+      },
+      "engineRoute": {
+        "AS71": [
+          {
+            "x": -320,
+            "y": 372
+          },
+          {
+            "x": 300,
+            "y": 372
+          },
+          {
+            "x": 370,
+            "y": 320
+          },
+          {
+            "x": 1292,
+            "y": 320
+          }
+        ],
+        "AS72": [
+          {
+            "x": -320,
+            "y": 372
+          },
+          {
+            "x": 300,
+            "y": 372
+          },
+          {
+            "x": 440,
+            "y": 268
+          },
+          {
+            "x": 1292,
+            "y": 268
+          }
+        ],
+        "AS73": [
+          {
+            "x": -320,
+            "y": 372
+          },
+          {
+            "x": 300,
+            "y": 372
+          },
+          {
+            "x": 510,
+            "y": 216
+          },
+          {
+            "x": 1292,
+            "y": 216
+          }
+        ],
+        "AS74": [
+          {
+            "x": -320,
+            "y": 372
+          },
+          {
+            "x": 300,
+            "y": 372
+          },
+          {
+            "x": 580,
+            "y": 164
+          },
+          {
+            "x": 1292,
+            "y": 164
+          }
+        ],
+        "AS75": [
+          {
+            "x": -320,
+            "y": 372
+          },
+          {
+            "x": 300,
+            "y": 372
+          },
+          {
+            "x": 650,
+            "y": 112
+          },
+          {
+            "x": 1292,
+            "y": 112
+          }
+        ],
+        "AS76": [
+          {
+            "x": -320,
+            "y": 372
+          },
+          {
+            "x": 300,
+            "y": 372
+          },
+          {
+            "x": 720,
+            "y": 60
+          },
+          {
+            "x": 1292,
+            "y": 60
+          }
+        ]
+      },
+      "leadRestRoute": [
+        {
+          "x": -320,
+          "y": 372
+        },
+        {
+          "x": 340,
+          "y": 372
+        }
+      ],
+      "throughRoute": [
+        {
+          "x": 930,
+          "y": -96
+        },
+        {
+          "x": 720,
+          "y": 60
+        },
+        {
+          "x": 650,
+          "y": 112
+        },
+        {
+          "x": 580,
+          "y": 164
+        },
+        {
+          "x": 510,
+          "y": 216
+        },
+        {
+          "x": 440,
+          "y": 268
+        },
+        {
+          "x": 370,
+          "y": 320
+        },
+        {
+          "x": 300,
+          "y": 372
+        },
+        {
+          "x": -320,
+          "y": 372
+        }
+      ]
+    },
+    "ladderAngleDeg": -36.61,
+    "presentStrokeWidths": {
+      "leadAndBodyTracks": 4,
+      "ladderAndMainLine": 3,
+      "clearanceTick": 2,
+      "clearanceTickHalfHeight": 9,
+      "switchDiamondHalfSide": 7,
+      "switchGlowRadius": 13,
+      "headlightRadius": 2.6
+    },
+    "presentSwitchHitRadius": 18
+  }
+};
+</script>
+<script>
+(function () {
+  'use strict';
+  const S = SCENE;
+  const $ = (id) => document.getElementById(id);
+  const TRACK_IDS = S.geometry.TRACK_IDS;
+  const TONE = { box: 'grey', hopper: 'teal', tank: 'violet', centerbeam: 'amber', autorack: 'blue' };
+  const NEXT = S.nextMove;
+  const problems = [];
+  const check = (ok, what) => { if (!ok) problems.push(what); };
+
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v === false || v == null) continue;
+      if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else if (k === 'html') el.innerHTML = v;
+      else if (k === 'vars') for (const [n, val] of Object.entries(v)) el.style.setProperty(n, val);
+      else if (k === 'css') Object.assign(el.style, v);
+      else el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const kid of kids.flat(Infinity)) if (kid != null && kid !== false) el.append(kid);
+    return el;
+  }
+  const SW_ICON = {
+    normal: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2v16"/></svg>',
+    reverse: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 18v-6a4 4 0 0 1 4-4h7M13 5l3 3-3 3"/></svg>',
+  };
+  const SW_WORD = { normal: 'NORMAL', reverse: 'REVERSE' };
+  const plural = (n) => `${n} ${n === 1 ? 'car' : S.words.builder.countUnitWord}`;
+  const pct = (a, b) => `${(100 * a / b).toFixed(2)}%`;
+
+  /* ---- the state of the sketch ---------------------------------------------------------------- */
+  const start = () => ({
+    lined: { ...S.state.lined },
+    sel: { ...S.words.builder.selectedForScene },
+    phase: 'scene',                       // 'scene' or 'won' (after the next move of the scene)
+    banner: { kind: S.words.banner.tone, text: S.words.banner.text },
+    refused: null,
+  });
+  let V = start();
+
+  const reached = () => TRACK_IDS.find((id) => V.lined[id] === 'reverse') || null;   // model.js routeReady: the first reverse switch from AS71
+  const selIsNext = () => V.sel.action === NEXT.actWord && V.sel.count === NEXT.n && V.sel.track === NEXT.track;
+  const showNext = () => V.phase === 'scene' && selIsNext();
+
+  function holdsNow() {
+    if (V.phase !== 'won') return S.state.engine.holds;
+    return S.state.engine.holds.filter((c) => !NEXT.cars.includes(c.id));
+  }
+  function trackNow(t) {
+    if (V.phase !== 'won' || t.id !== NEXT.track) return { cars: t.cars, cuts: t.cuts };
+    const moved = NEXT.landing.map((L) => ({ ...S.state.engine.holds.find((c) => c.id === L.id), nearEdgeFromSwitch: L.x0 - t.switch.x }));
+    // nextMove.landingNote: the kicked car couples onto the standing cut
+    const cuts = t.cuts.length ? [[...moved.map((c) => c.id), ...t.cuts[0]], ...t.cuts.slice(1)] : [moved.map((c) => c.id)];
+    return { cars: [...moved, ...t.cars], cuts };
+  }
+  const goalIds = S.puzzle.goal.cars;
+  const onGoalNow = () => trackNow(S.state.tracks.find((t) => t.id === S.state.goalTrack)).cars.filter((c) => goalIds.includes(c.id)).length;
+
+  /* ---- parts ---------------------------------------------------------------------------------------- */
+  function carTile(car, opts = {}) {
+    const tone = TONE[car.type];
+    const tile = h('span', { class: `dusk-tile dusk-tile--${tone} yd-tile yd-tile--${car.loaded ? 'loaded' : 'empty'}`, vars: { '--yd-len': car.len } },
+      h('span', { class: 'dusk-tile-cap' }, h('span', { class: 'yd-num', text: car.number })),
+      h('span', { class: 'dusk-tile-body' }, h('span', { class: 'yd-tag', text: car.typeTag }), car.loaded ? null : h('span', { class: 'yd-e', text: 'E' })));
+    const wantsGoal = car.isGoalCar && !opts.onGoalTrack;
+    return h('li', { class: `yd-car${opts.next ? ' is-next' : ''}` },
+      wantsGoal ? h('span', { class: 'yd-dest', text: `→ ${S.state.goalTrack}` }) : null,
+      tile,
+      h('span', { class: 'dusk-sr', text: `, ${car.type}, ${car.loadWord}${opts.next ? ', the next move takes this car' : ''}` }));
+  }
+  function engineTile() {
+    return h('li', { class: 'yd-car' },
+      h('span', { class: 'yd-engine', vars: { '--yd-len': S.state.engine.len } }, h('i', { class: 'dusk-eye', 'aria-hidden': 'true' }), 'ENGINE'));
+  }
+  function switchButton(id, lined, extra = {}) {
+    return h('button', {
+      type: 'button', class: `dusk-btn cb-tap yd-switch${extra.refused ? ' is-refused' : ''}`, 'data-track': id, 'data-lined': lined,
+      'aria-pressed': String(lined === 'reverse'), 'aria-label': `${id} switch, lined ${lined}`,
+      html: `${SW_ICON[lined]}<span>${SW_WORD[lined]}</span>`,
+    });
+  }
+  function roomBar(lenUnits, segs, opts) {
+    const maxLen = Math.max(...S.state.tracks.map((t) => t.derived.trackLength));
+    const track = h('span', { class: 'yd-roomtrack', css: { width: pct(lenUnits, maxLen) } },
+      segs.map((s) => h('span', { class: 'dusk-heat', css: { left: pct(s.from, lenUnits), width: pct(s.len, lenUnits) } })),
+      opts.foul != null ? h('i', { class: 'yd-roomfoul', css: { left: pct(opts.foul, lenUnits) } }) : null);
+    const used = segs.reduce((a, s) => a + s.len, 0);
+    return h('div', { class: 'yd-room' },
+      h('span', { class: `yd-roomline${opts.lead ? ' yd-roomline--lead' : ''}`, role: 'img', 'aria-label': `${opts.name}: cars stand on ${Math.round(100 * used / lenUnits)} percent of the length` }, track),
+      h('span', { class: 'yd-roomfig', text: plural(opts.count) }));
+  }
+
+  /* ---- the yard --------------------------------------------------------------------------------------- */
+  function renderYard() {
+    const r = reached();
+    const rIndex = r ? TRACK_IDS.indexOf(r) : -1;
+    const body = $('rows');
+    body.textContent = '';
+    const lab = S.words.canvasLabels;
+
+    // the main line, above the first row
+    body.append(h('tr', { role: 'row', class: 'yd-r-main' },
+      h('td', { role: 'cell', class: 'yd-c-void', colspan: '2' }),
+      h('td', { role: 'cell', class: 'yd-c-sw' }, h('span', { class: 'yd-spine', 'aria-hidden': 'true' }, h('i', { class: 'yd-sp-top' }))),
+      h('td', { role: 'cell', class: 'yd-c-main', colspan: '2' }, h('div', { class: 'yd-mainwords' }, h('span', { text: lab[1].text }), h('span', { text: lab[2].text })))));
+
+    // AS76 at the top, AS71 at the bottom
+    for (const t of [...S.state.tracks].reverse()) {
+      const now = trackNow(t);
+      const lined = V.lined[t.id];
+      const isRoute = t.id === r;
+      const below = rIndex >= 0 && t.index < rIndex;        // the lit part of the spine passes here
+      const lit = (on) => (on ? ' is-lit' : '');
+      const spine = h('span', { class: 'yd-spine', 'aria-hidden': 'true' },
+        lined === 'reverse'
+          ? [h('i', { class: 'yd-sp-up' }), h('i', { class: `yd-sp-turn${lit(isRoute)}` })]
+          : h('i', { class: `yd-sp-thru${lit(below)}` }),
+        h('i', { class: `yd-sp-tail${lit(isRoute)}` }));
+
+      const cars = h('ul', { class: 'yd-cars', 'aria-label': `${t.id}, cars in order from the throat` });
+      if (showNext() && t.id === NEXT.track) {
+        for (const L of NEXT.landing) {
+          const c = S.state.engine.holds.find((x) => x.id === L.id);
+          cars.append(h('li', { class: 'yd-slot', vars: { '--yd-len': c.len } }, h('span', { 'aria-hidden': 'true', text: L.number }), h('span', { class: 'dusk-sr', text: `the next move puts ${L.number} here` })));
+        }
+      }
+      const cutOf = (id) => now.cuts.findIndex((cut) => cut.includes(id));
+      now.cars.forEach((c, k) => {
+        if (k > 0 && cutOf(c.id) !== cutOf(now.cars[k - 1].id)) cars.append(h('li', { class: 'yd-gap' }, h('i', { class: 'yd-rail', 'aria-hidden': 'true' }), h('span', { class: 'dusk-sr', text: 'gap' })));
+        cars.append(carTile(c, { onGoalTrack: t.id === S.state.goalTrack }));
+      });
+
+      const states = h('div', { class: 'yd-states' });
+      if (S.state.showSecuredTags && now.cars.length >= 2 && t.securementTag) states.append(h('span', { class: `dusk-state dusk-state--${t.secured ? 'hold' : 'caution'}`, text: t.securementTag }));
+      if (t.kickableMark) states.append(h('span', { class: 'yd-kick', text: t.kickableMark }));
+      if (t.isGoalTrack) states.append(h('span', {}, h('span', { class: 'yd-build', text: 'BUILD' }), ' ', h('span', { class: 'dusk-count', text: `${onGoalNow()} / ${goalIds.length}` })));
+
+      const segs = now.cuts.map((cut) => {
+        const cs = cut.map((id) => now.cars.find((c) => c.id === id));
+        return { from: cs[0].nearEdgeFromSwitch, len: cs.reduce((a, c) => a + c.len, 0) };
+      });
+
+      const hasDest = t.id !== S.state.goalTrack && now.cars.some((c) => c.isGoalCar);
+      body.append(h('tr', { role: 'row', class: [isRoute ? 'dusk-hot' : '', hasDest ? 'has-dest' : ''].join(' ').trim() || null },
+        h('td', { role: 'rowheader', class: 'yd-c-track', 'data-label': 'Track' }, h('span', { class: 'yd-band yd-id', text: t.id })),
+        h('td', { role: 'cell', class: 'yd-c-state', 'data-label': 'State' }, states),
+        h('td', { role: 'cell', class: 'yd-c-sw', 'data-label': 'Switch' }, spine,
+          h('div', { class: 'yd-swbox' }, switchButton(t.id, lined, { refused: V.refused === t.id }), h('i', { class: `yd-drop${lit(isRoute)}`, 'aria-hidden': 'true' }))),
+        h('td', { role: 'cell', class: 'yd-c-cars', 'data-label': 'Cars' },
+          h('div', { class: 'yd-track' },
+            h('span', { class: 'yd-leadin', 'aria-hidden': 'true' }, h('i', { class: `yd-rail${lit(isRoute)}` }), h('i', { class: 'yd-foul' }), h('span', { class: 'yd-throat', text: 'throat ▸' })),
+            cars)),
+        h('td', { role: 'cell', class: 'yd-c-room', 'data-label': 'Room' }, roomBar(t.derived.trackLength, segs, { foul: S.geometry.CLEAR, name: t.id, count: now.cars.length }))));
+    }
+
+    // the lead, below AS71
+    const holds = holdsNow();
+    const nextIds = showNext() ? NEXT.cars : [];
+    const held = holds.reduce((a, c) => a + c.len, 0);
+    const leadCars = h('ul', { class: 'yd-cars yd-cars--lead', 'aria-label': 'The lead: the engine, then the cars it holds, in order from the engine' },
+      engineTile(), holds.map((c) => carTile(c, { next: nextIds.includes(c.id) })));
+    body.append(h('tr', { role: 'row', class: `yd-r-lead${holds.some((c) => c.isGoalCar) ? ' has-dest' : ''}` },
+      h('td', { role: 'rowheader', class: 'yd-c-lead', colspan: '2', 'data-label': 'Track' },
+        h('div', { class: 'yd-leadbox' },
+          h('span', { class: 'yd-leadlabel', text: lab[0].text }),
+          h('div', { class: 'yd-leadrow' },
+            h('span', { class: 'yd-leadtail', 'aria-hidden': 'true' }, h('i', { class: 'yd-rail' })),
+            leadCars,
+            h('span', { class: 'yd-stub', 'aria-hidden': 'true' }, h('i', { class: `yd-rail${r ? ' is-lit' : ''}` }))))),
+      h('td', { role: 'cell', class: 'yd-c-sw' }, h('span', { class: 'yd-spine', 'aria-hidden': 'true' }, h('i', { class: `yd-sp-foot${r ? ' is-lit' : ''}` }))),
+      h('td', { role: 'cell', class: 'yd-c-cars' }),
+      h('td', { role: 'cell', class: 'yd-c-room', 'data-label': 'Room' },
+        roomBar(S.state.engine.leadRoomUnits, held ? [{ from: S.state.engine.leadRoomUnits - held, len: held }] : [], { lead: true, name: 'The lead', count: holds.length }))));
+
+    $('route').textContent = `Route: LEAD → ${r || 'no track'}`;
+    const total = S.state.tracks.reduce((a, t) => a + t.cars.length, 0) + S.state.engine.holds.length;
+    $('carcount').textContent = plural(total);
+  }
+
+  /* ---- the strip of readings ------------------------------------------------------------------------- */
+  function renderStrip() {
+    const m = /^(\S+) (\d+) \/ (\S+) (\d+) · (\S+) (\d+)$/.exec(S.words.readout);
+    check(!!m && +m[2] === S.state.moves && +m[4] === S.state.par && +m[6] === S.state.joints, 'the readout words do not agree with the state');
+    const won = V.phase === 'won';
+    const moves = won ? NEXT.afterIt.moves : S.state.moves;
+    const joints = won ? NEXT.afterIt.joints : S.state.joints;
+    const cell = (label, value, key) => h('div', { class: `dusk-cell${key ? ' dusk-cell--key' : ''}` }, h('small', { text: label }), h('b', { text: value }));
+    const p = S.words.picker;
+    const strip = $('strip');
+    strip.textContent = '';
+    strip.setAttribute('role', 'group');
+    strip.setAttribute('aria-label', won ? NEXT.afterIt.readout : S.words.readout);
+    strip.append(
+      cell('Job', S.words.workOrder.topParts.id, true),
+      cell(m[1], String(moves)), cell(m[3], String(S.state.par)), cell(m[5], String(joints)),
+      cell('Holding', plural(holdsNow().length)),
+      h('div', { class: 'dusk-strip-end' },
+        h('select', { class: 'cb-select', id: 'picker', title: S.words.builder.selectTitles.picker, 'aria-label': S.words.builder.selectTitles.picker },
+          h('optgroup', { label: p.groupLabel }, h('option', { text: p.optionLabel })))));
+  }
+
+  /* ---- work order, builder, banner, rules --------------------------------------------------------- */
+  function renderWorkOrder() {
+    const w = S.words.workOrder;
+    check(`${w.topParts.tag} ${w.topParts.id} · ${w.topParts.title}` === w.top, 'the work order top line does not agree with its parts');
+    $('wo-h').append(`${w.topParts.tag} `, h('span', { class: 'yd-wo-id', text: w.topParts.id }), ` · ${w.topParts.title}`);
+    const mark = (text, bolds, dim) => {
+      const p = h('p', {});
+      let rest = text;
+      const cuts = [...bolds.map((b) => [b, 'b']), ...(dim ? [[dim, 'dim']] : [])];
+      while (rest) {
+        let first = null;
+        for (const [needle, kind] of cuts) { const at = rest.indexOf(needle); if (at >= 0 && (!first || at < first.at)) first = { at, needle, kind }; }
+        if (!first) { p.append(rest); break; }
+        p.append(rest.slice(0, first.at), first.kind === 'b' ? h('b', { text: first.needle }) : h('span', { class: 'yd-wo-from', text: first.needle }));
+        rest = rest.slice(first.at + first.needle.length);
+        cuts.splice(cuts.findIndex((c) => c[0] === first.needle), 1);
+      }
+      return p;
+    };
+    const job = mark(w.job, w.jobBoldParts, w.jobDimPart); job.className = 'yd-wo-job';
+    const meta = mark(w.meta, [w.metaBoldPart]); meta.className = 'yd-wo-meta';
+    $('wo').append(job, meta, h('p', { class: 'yd-wo-tip', text: w.tip }));
+    check(job.textContent === w.job && meta.textContent === w.meta, 'the work order lines changed');
+  }
+
+  function renderBuilder() {
+    const b = S.words.builder;
+    const box = $('builder');
+    box.textContent = '';
+    const seg = (label, items, cur, key) => h('div', { class: 'dusk-seg cb-seg', role: 'group', 'aria-label': label },
+      items.map((it) => h('button', { type: 'button', 'aria-pressed': String(it === cur), 'data-set': key, 'data-value': it, text: it })));
+    const count = h('select', { class: 'cb-select', id: 'count', title: b.selectTitles.count, 'aria-label': b.selectTitles.count, disabled: V.sel.action === 'SECURE' },
+      b.countOptionsForScene.map((n) => h('option', { text: String(n), selected: n === V.sel.count })));
+    box.append(
+      h('div', { class: 'yd-builder-row' }, seg(b.selectTitles.action, b.actions, V.sel.action, 'action')),
+      h('div', { class: 'yd-builder-row' }, count, h('span', { class: 'yd-unit', text: b.countUnitWord }), seg(b.selectTitles.track, b.tracks, V.sel.track, 'track')),
+      h('div', { class: 'yd-builder-row' },
+        h('button', { type: 'button', class: 'dusk-btn cb-tap yd-go', id: 'work', text: b.buttons[0] }),
+        h('button', { type: 'button', class: 'dusk-btn cb-tap', id: 'optimal', title: b.selectTitles.watchOptimal, text: b.buttons[1] }),
+        h('span', { class: 'dusk-spacer' }),
+        h('button', { type: 'button', class: 'dusk-btn cb-tap', id: 'reset', text: b.buttons[2] }),
+        h('button', { type: 'button', class: 'dusk-btn cb-tap yd-sound', id: 'mute', title: b.selectTitles.mute, 'aria-label': b.selectTitles.mute, text: b.buttons[3] })));
+  }
+
+  function bannerInto(el, banner) {
+    el.textContent = '';
+    if (banner.kind === 'bad') {
+      el.append(h('span', { class: 'dusk-state dusk-state--attn', text: banner.text }),
+        h('button', { type: 'button', class: 'dusk-btn cb-tap', text: S.refusalExample.lookupButton }));
+    } else if (banner.kind === 'win') {
+      el.append(h('span', { class: 'dusk-state dusk-up', text: banner.text }));     // the words hold their own glyph
+    } else if (banner.kind === 'sketch') {
+      el.append(h('span', { class: 'dusk-flag', text: banner.text }));
+    } else {
+      el.append(h('span', { class: 'dusk-state dusk-state--ok', text: banner.text }));
+    }
+  }
+
+  function renderRules() {
+    $('legend').textContent = S.words.legend;
+    $('rules').append(...S.ruleChips.map((r) => h('li', { class: `cb-chip cb-chip--${r.kind}` },
+      r.cite.includes(r.kindWord) ? null : h('span', { class: 'cb-chip-kind', text: r.kindWord }),
+      h('b', { text: r.cite }), h('span', { class: 'cb-chip-label', text: r.label }))));
+  }
+
+  /* ---- the key -------------------------------------------------------------------------------------------- */
+  function renderKey() {
+    const sme = () => h('i', { class: 'yd-sme', text: 'SME to confirm' });
+    const pair = (...kids) => h('span', { class: 'yd-key-pair' }, kids);
+    const types = Object.entries(S.geometry.carTypes).map(([name, t]) => pair(h('span', { class: `dusk-ico dusk-ico--solid dusk-ico--${TONE[name]}`, 'aria-hidden': 'true', text: t.tag }), h('span', { text: `${t.tag} ${name}` })));
+    const sw = (k) => h('span', { class: `yd-key-sw yd-key-sw--${k}`, html: `${SW_ICON[k]}<span>${SW_WORD[k]}</span>` });
+    const line = (cls, kid) => h('span', { class: 'yd-key-line', 'aria-hidden': 'true' }, h('i', { class: `yd-rail ${cls}` }), kid || null);
+    const goal = `→ ${S.state.goalTrack}`;
+    const row = (label, ...items) => h('li', {}, h('b', { text: label }), h('div', { class: 'yd-key-items' }, items));
+    $('key').append(
+      row('Car type', types, pair('The colour is a category.', sme())),
+      row('Load',
+        pair(h('span', { class: 'dusk-ico dusk-ico--solid dusk-ico--grey', 'aria-hidden': 'true' }), 'solid: loaded'),
+        pair(h('span', { class: 'dusk-ico dusk-ico--grey', 'aria-hidden': 'true', text: 'E' }), 'hollow and E: empty')),
+      row('Switch', sw('normal'), sw('reverse'), sme()),
+      row('Route', pair(line('is-lit'), 'the lined route'), pair(line(''), 'a track that is not lined'), sme()),
+      row('Track',
+        pair(line('', h('i', { class: 'yd-foul' })), 'foul point'),
+        pair(h('span', { text: 'throat ▸' }), 'the end that a PULL takes'),
+        pair(h('span', { class: 'yd-key-gap', 'aria-hidden': 'true' }), 'a gap between two cuts')),
+      row('Cut', pair('2 or more cars:'), h('span', { class: 'dusk-state dusk-state--hold', text: 'TIED' }), h('span', { class: 'dusk-state dusk-state--caution', text: 'LOOSE' }),
+        S.state.tracks.filter((t) => t.kickableMark).slice(0, 1).map((t) => pair(h('span', { class: 'yd-kick', text: t.kickableMark }), 'a kickable track'))),
+      row('Goal',
+        pair(h('span', { class: 'yd-build', text: 'BUILD' }), h('span', { class: 'dusk-count', text: `${onGoalNow()} / ${goalIds.length}` }), 'the goal track and its count'),
+        pair(h('span', { class: 'yd-dest', css: { position: 'static' }, text: goal }), 'a goal car that is not there')),
+      row('Next move',
+        pair(h('span', { class: 'yd-key-next', 'aria-hidden': 'true' }), 'the car that the move takes'),
+        pair(h('span', { class: 'yd-key-slot', 'aria-hidden': 'true' }), 'the place where it lands')));
+
+
+    // the refusal example of the scene file, as a still picture
+    const ex = S.refusalExample;
+    const cause = TRACK_IDS.find((id) => ex.text.startsWith(id));
+    const msg = h('div', { class: 'cb-banner' });
+    bannerInto(msg, { kind: 'bad', text: ex.text });
+    msg.querySelector('button').id = 'lookup-sample';
+    $('refusal').append(
+      h('p', { class: 'dusk-rule' }, h('b', { text: 'Refusal' }), h('span', { text: `Example from the scene file: ${Object.entries(ex.linedThen).map(([id, v]) => `${id} ${v}`).join(', ')}, and the call ${NEXT.asSentence}. Red is for a refusal only.` })),
+      h('div', { class: 'yd-refusal-sw' }, h('span', { inert: true, 'aria-hidden': 'true' }, switchButton(cause, ex.linedThen[cause], { refused: true })), h('span', { text: `The switch that causes the refusal gets a red edge and the glyph ?.` })),
+      msg);
+  }
+
+  /* ---- actions ---------------------------------------------------------------------------------------------- */
+  function renderLive(focusTrack) {
+    renderStrip(); renderYard(); renderBuilder(); bannerInto($('msg'), V.banner);
+    if (focusTrack) { const b = $('rows').querySelector(`button[data-track="${focusTrack}"]`); if (b) b.focus(); }
+  }
+  function workIt() {
+    const sketch = (text) => { V.banner = { kind: 'sketch', text }; V.refused = null; };
+    if (V.phase === 'won' || !selIsNext()) return sketch(`Sketch: the scene file holds the engine answer for ${NEXT.asSentence} only.`);
+    if (V.lined[NEXT.track] !== 'reverse') {            // model.js routeReady, first test. The words are the scene's refusal example.
+      V.banner = { kind: 'bad', text: S.refusalExample.text }; V.refused = NEXT.track; return;
+    }
+    if (reached() !== NEXT.track) return sketch('Sketch: the scene file holds no engine answer for this lining.');
+    V.phase = 'won'; V.refused = null;
+    V.banner = { kind: 'win', text: NEXT.afterIt.winBanner };
+  }
+  document.addEventListener('click', (ev) => {
+    const b = ev.target.closest('button');
+    if (!b || b.closest('[inert]')) return;
+    if (b.matches('#rows .yd-switch')) {
+      const id = b.dataset.track;
+      V.lined[id] = V.lined[id] === 'reverse' ? 'normal' : 'reverse';      // model.js lineSwitch
+      if (V.refused === id) V.refused = null;
+      renderLive(id);
+    } else if (b.dataset.set) {
+      V.sel[b.dataset.set] = b.dataset.value;
+      renderLive(); $('builder').querySelector(`button[data-set="${b.dataset.set}"][data-value="${b.dataset.value}"]`).focus();
+    } else if (b.id === 'work') { workIt(); renderLive(); $('work').focus(); }
+    else if (b.id === 'reset') { V = start(); renderLive(); $('reset').focus(); }
+  });
+
+  /* ---- first draw, and the checks that the page agrees with the scene ---------------------------------- */
+  $('back').textContent = S.words.builder.backButton;
+  $('scene-note').textContent = `Scene ${S.puzzle.id}, after ${S.replay.k} of ${S.replay.ofMoves} moves`;
+  renderWorkOrder(); renderRules(); renderLive(); renderKey();
+
+  check(reached() === S.state.linedRoute.reachesTrack, 'the route of the page is not the route of the scene');
+  check(onGoalNow() === S.state.goalProgress.onGoalTrackNow.length, 'the goal count of the page is not the goal count of the scene');
+  for (const t of S.state.tracks) {
+    check(t.cars.reduce((a, c) => a + c.len, 0) === t.derived.carLengthTotal, `${t.id}: the car lengths do not add up`);
+    const last = t.cars[t.cars.length - 1];
+    check(!last || last.nearEdgeFromSwitch + last.len === t.derived.trackLength, `${t.id}: the last car does not stand at the end of the track`);
+    check(t.lined === S.state.lined[t.id], `${t.id}: two lined values`);
+  }
+  check(S.state.engine.holds.reduce((a, c) => a + c.len, 0) === S.state.engine.heldLengthUnits, 'the held length does not add up');
+  check(NEXT.cars.every((id) => S.state.engine.holds.some((c) => c.id === id)), 'the next move takes a car that the engine does not hold');
+  for (const p of problems) console.error('scene check: ' + p);
+  window.__ydProblems = problems;
+})();
+</script>
+</body>
+</html>
