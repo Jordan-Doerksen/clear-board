@@ -8,6 +8,19 @@ Step zero result, 2026-11-20, commit `86cfef2`: `npm ci`, `npm run check` and `n
 on a clean clone. The six files in `src/styles/dusk/` match `src/styles/dusk.lock.json`, and they match
 `styles/` in the Dusk repository at commit `1f7f971`.
 
+Corrections that Wave 1 found. The handoff text below stays unchanged; read it with these notes.
+
+- **T4 is wrong in direction.** With "Reduce motion" on, a Yard move is about 6 times slower, not
+  faster: `anim.js` line 17 multiplies each duration by the factor that `yardSim.js` line 228 sets
+  to 6. Measured: about 9.0 s against 1.6 s for one move (R2, R5, R6 agree). Motion does not stop.
+- **T1 counts, measured (R3):** shell 22 raw colours, Yard inline CSS 44, Yard canvas 22, Radio 45.
+- **T5 is not complete (R6):** `public/icons.svg` is also a Vite template file. It is dead, shipped
+  and cached. `public/favicon.svg` is the Vite template logo, byte for byte (create-vite 9.3.4).
+- **T13 is older than stated (R6):** the same failing step is also on `2b7adb3`.
+- **Job file lists that are too narrow (R3, R6):** `radioSim.js` holds 29 raw colours outside its
+  style rules, so "style rules only" for B3 cannot meet fence rule 4. The lead settles this in the
+  Wave 2 briefs.
+
 ---
 
 ## 3. Dusk 0.2.0 — where it is, and the rule that matters most
