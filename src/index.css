@@ -4,12 +4,12 @@
 html,body{ margin:0 }
 html{ font-size:var(--fs) }   /* "Bigger text" sets --fs → drives rem → scales the whole app */
 body{ background:var(--bg); color:var(--ink); font-family:var(--font); font-size:1rem; line-height:var(--space); -webkit-font-smoothing:antialiased; }
-a{ color:var(--focus) }
+a{ color:var(--cb-link) }
 .wrap{ max-width:var(--maxw); margin:0 auto; padding:20px 18px 80px }
 .muted{ color:var(--muted) }
 :focus-visible{ outline:3px solid var(--focus); outline-offset:2px; border-radius:6px }
-/* interaction-state polish: AA contrast — skip-link ink #062 on #3fb950 measured 2.83:1; #00340f measures 5.52:1 (same green hue) */
-.skip{ position:absolute; left:-999px; top:0; background:var(--clear); color:#00340f; padding:8px 12px; border-radius:0 0 8px 0; z-index:50 }
+/* The skip link: dark ink on the green ground. The ink is the Dusk well colour. */
+.skip{ position:absolute; left:-999px; top:0; background:var(--clear); color:var(--well); padding:8px 12px; border-radius:0 0 8px 0; z-index:50 }
 .skip:focus{ left:0 }
 
 header.top{ display:flex; align-items:center; gap:14px; padding:6px 0 18px; border-bottom:1px solid var(--line); margin-bottom:22px }
@@ -30,7 +30,7 @@ h2.section{ font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; co
 .stage{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap }
 .stage b{ font-size:1.05rem } .stage span{ color:var(--muted); font-size:.85rem }
 .bar{ height:12px; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; overflow:hidden; margin-top:12px }
-.bar > i{ display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--clear),#6fd17f); transition:width .6s ease }
+.bar > i{ display:block; height:100%; width:0%; background:var(--green); transition:width .6s ease }
 html[data-reduce="1"] .bar > i{ transition:none }
 
 .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px }
@@ -52,10 +52,10 @@ button.card:hover{ border-color:var(--clear) }
 
 footer{ margin-top:40px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:.82rem }
 footer .tip{ display:inline-block; border:1px solid var(--caution); color:var(--caution); border-radius:999px; padding:6px 13px; margin-bottom:10px; text-decoration:none; min-height:auto }
-footer .tip:hover{ background:rgba(210,153,34,.12) }
+footer .tip:hover{ background:var(--rowwash-amber) }
 
 /* ---- station views ---- */
-.back{ background:none; border:0; color:var(--focus); font:inherit; cursor:pointer; padding:6px 0; min-height:44px }
+.back{ background:none; border:0; color:var(--cb-link); font:inherit; cursor:pointer; padding:6px 0; min-height:44px }
 .view-title{ font-size:1.3rem; margin:.2em 0 .1em }
 .search{ width:100%; background:var(--surface-2); border:1px solid var(--line); color:var(--ink); border-radius:10px; padding:12px 14px; font:inherit; margin:8px 0 16px }
 .ref-list{ display:flex; flex-direction:column; gap:8px }
@@ -65,7 +65,7 @@ footer .tip:hover{ background:rgba(210,153,34,.12) }
 .ref-detail h3{ margin:0 0 6px } .ref-detail .plain{ font-size:1.05rem }
 .badge{ display:inline-block; font-size:.72rem; border-radius:999px; padding:2px 9px; margin-bottom:8px }
 .badge.clear{ color:var(--clear); border:1px solid var(--clear) } .badge.caution{ color:var(--caution); border:1px solid var(--caution) }
-details{ margin:10px 0 } summary{ cursor:pointer; color:var(--focus) }
+details{ margin:10px 0 } summary{ cursor:pointer; color:var(--cb-link) }
 blockquote{ margin:10px 0 0; padding:10px 14px; border-left:3px solid var(--line); background:var(--surface-2); border-radius:0 8px 8px 0; color:var(--ink) }
 .cite{ margin-top:10px; font-size:.8rem; color:var(--muted) }
 
@@ -81,8 +81,8 @@ blockquote{ margin:10px 0 0; padding:10px 14px; border-left:3px solid var(--line
 /* interaction-state polish: after answering, options are disabled — mark the cursor and dim the non-feedback ones (keep .right/.wrong at full strength so the answer stays readable) */
 .opt:disabled{ cursor:not-allowed }
 .opt:disabled:not(.right):not(.wrong){ opacity:.55 }
-.opt.right{ border-color:var(--clear); background:rgba(63,185,80,.16) }
-.opt.wrong{ border-color:var(--stop); background:rgba(248,81,73,.14) }
+.opt.right{ border-color:var(--clear); background:var(--rowwash-green) }
+.opt.wrong{ border-color:var(--stop); background:var(--rowwash-red) }
 .feedback{ margin-top:16px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px; display:flex; flex-direction:column; gap:8px }
 .fb-ok{ color:var(--clear) } .fb-no{ color:var(--stop) }
 .feedback .next{ align-self:flex-start; margin-top:6px }
@@ -90,7 +90,7 @@ blockquote{ margin:10px 0 0; padding:10px 14px; border-left:3px solid var(--line
 
 /* ---- settings ---- */
 dialog#settings{ background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:var(--r); max-width:440px; width:92%; padding:0 }
-dialog#settings::backdrop{ background:rgba(0,0,0,.6) }
+dialog#settings::backdrop{ background:var(--cb-scrim) }
 .set-h{ display:flex; justify-content:space-between; align-items:center; padding:16px 18px; border-bottom:1px solid var(--line) }
 .set-h h2{ margin:0; font-size:1.05rem }
 .set-body{ padding:8px 18px 18px }
@@ -105,7 +105,7 @@ dialog#settings::backdrop{ background:rgba(0,0,0,.6) }
 .sw input{ position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer }
 .sw i{ position:absolute; inset:0; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; transition:.2s }
 .sw i::after{ content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--muted); transition:.2s }
-.sw input:checked + i{ background:rgba(63,185,80,.25); border-color:var(--clear) }
+.sw input:checked + i{ background:var(--rowwash-green); border-color:var(--clear) }
 .sw input:checked + i::after{ left:25px; background:var(--clear) }
 html[data-reduce="1"] .sw i, html[data-reduce="1"] .sw i::after{ transition:none }
 /* Radio — mode switch (guided vs. call it yourself) + the test-mode readout */
