@@ -295,3 +295,143 @@
 }
 .cb-btn--attn:hover { background: var(--rowwash-red); }
 .cb-btn--attn:active { background: var(--wash-1); }
+
+/* ---- G9: the message banner --------------------------------------------------------------------
+   One changing message. The text is ink, not red text. Red is on the edge and on the mark of a
+   refusal only. The least height is 44 px, so that the page does not jump when a message comes. */
+.cb-banner {
+  min-height: var(--cb-target);
+  padding: var(--sp-4) var(--sp-5);
+  border-radius: var(--r-control);
+  background-color: var(--well);
+  box-shadow: var(--ring-well);
+  color: var(--ink-2);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
+.cb-banner--ok { color: var(--ink); }
+.cb-banner--bad {
+  background-image: linear-gradient(var(--rowwash-red), var(--rowwash-red));
+  box-shadow: var(--rowneon-red);
+  color: var(--ink);
+}
+.cb-banner--win {
+  background-image: linear-gradient(var(--rowwash-green), var(--rowwash-green));
+  box-shadow: var(--rowneon-green);
+  color: var(--ink);
+}
+
+/* ---- G13: the chip with its own glyph ----------------------------------------------------------
+   Not a control. The words and the glyph of the app carry the state. The chip adds no second
+   glyph. The dashed edge is a second carrier for caution. */
+.cb-chip {
+  display: inline-block;
+  padding: 1px var(--sp-3);
+  border: 1px solid var(--hair-2);
+  border-radius: var(--r-chip);
+  background: var(--well);
+  color: var(--ink-2);
+  font-size: var(--fs-s);
+  line-height: var(--lh-base);
+}
+.cb-chip--ok {
+  border-color: var(--green-ink);
+  color: var(--cb-ok-ink);
+}
+.cb-chip--caution {
+  border-color: var(--amber-ink);
+  border-style: dashed;
+  color: var(--cb-caution-ink);
+}
+.cb-chip--info {
+  border-color: var(--teal-ink);
+  color: var(--cb-info-ink);
+}
+
+/* ---- G14: the result word ----------------------------------------------------------------------
+   The word is the carrier. The marks are in the mark block. */
+.cb-result { font-weight: var(--fw-bold); }
+.cb-result--ok { color: var(--cb-ok-ink); }
+.cb-result--no { color: var(--cb-attn-ink); }
+
+/* ---- G15: the disclosure and the quote ---------------------------------------------------------
+   Markup: details.cb-disclosure > summary. The native marker stays. */
+.cb-disclosure > summary {
+  min-height: var(--cb-target);
+  padding: var(--sp-4) 0;
+  color: var(--cb-link);
+  line-height: var(--lh-base);
+  cursor: pointer;
+}
+.cb-disclosure > summary:hover { text-decoration: underline; }
+.cb-quote {
+  max-width: var(--measure);
+  margin: 0;
+  padding: var(--sp-4) var(--sp-6);
+  border-left: 3px solid var(--lit-line);
+  border-radius: 0 var(--r-control) var(--r-control) 0;
+  background: var(--well);
+  color: var(--ink);
+}
+
+/* ---- G16: the transcript line and the call box --------------------------------------------------
+   Not a control. The speaker label says the speaker in words. The left edge of a line of the
+   engineer is a green, because the screen says that green lines are the engineer. */
+.cb-tx {
+  padding: var(--sp-3) var(--sp-5);
+  border-left: 3px solid var(--blue);
+  border-radius: 0 var(--r-control) var(--r-control) 0;
+  background: var(--well);
+  color: var(--ink);
+}
+.cb-tx--eng { border-left-color: var(--green); }
+.cb-who {
+  display: block;
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+}
+.cb-call {
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px dashed var(--blue-ink);
+  border-radius: var(--r-control);
+  background: var(--well);
+  color: var(--ink);
+}
+
+/* ---- G17: reading text --------------------------------------------------------------------------
+   Dusk type is for a dense desk tool. A rule, a prompt and an answer are reading text. */
+.cb-prose {
+  max-width: var(--measure);
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
+.cb-prose--lead { font-size: 1.1rem; }
+.cb-sub {
+  color: var(--ink-2);
+  font-size: var(--fs-base);
+}
+/* inside a Dusk row the sub-line keeps its size and its ink against the Dusk rule for small text */
+.cb-app .dusk-row .cb-sub {
+  display: block;
+  color: var(--ink-2);
+  font-size: var(--fs-base);
+}
+/* a link inside a sentence */
+.cb-prose a,
+.cb-sub a {
+  color: var(--cb-link);
+  text-decoration: underline;
+}
+
+/* ---- G18: code ----------------------------------------------------------------------------------- */
+.cb-code {
+  padding: 1px var(--sp-2);
+  border-radius: var(--r-chip);
+  background: var(--well);
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
