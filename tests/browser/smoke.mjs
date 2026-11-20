@@ -6,7 +6,8 @@
 // Use: node tests/browser/smoke.mjs [options]
 //   --only <text>     Run only the cases whose name holds this text.
 //   --dist <folder>   Serve this folder and not `dist/` of the repository.
-//   --port <number>   Serve on this port. With no option the system gives a free port.
+//   --port <number>   Serve on this port, or on the port of the variable CB_PORT. With no
+//                     option and no variable the system gives a free port.
 //   --record-tape     Record the word tape of the guided Radio, and run no case.
 //                     It needs --commit <commit>: the commit of the build that is served.
 //
@@ -39,7 +40,7 @@ const flag = (name) => argv.includes(name);
 const option = (name) => { const i = argv.indexOf(name); return i !== -1 ? argv[i + 1] : undefined; };
 const only = option('--only')?.toLowerCase();
 const distDir = resolve(option('--dist') ?? join(root, 'dist'));
-const port = Number(option('--port') ?? 0);
+const port = Number(option('--port') ?? process.env.CB_PORT ?? 0);
 
 function stop(message) {
   console.error(`smoke: ${message}`);

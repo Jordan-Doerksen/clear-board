@@ -17,7 +17,8 @@
 //   --only <text>     Take only the shots whose name holds this text.
 //   --dist <folder>   Serve this folder and not `dist/` of the repository.
 //   --out <folder>    The output folder. With no option: `.look/` in the repository root.
-//   --port <number>   Serve on this port. With no option the system gives a free port.
+//   --port <number>   Serve on this port, or on the port of the variable CB_PORT. With no
+//                     option and no variable the system gives a free port.
 //
 // The output folder holds `baseline/`, `current/`, `diff/` and the report page `report.html`.
 // It is not committed.
@@ -107,7 +108,7 @@ const server = createServer((request, response) => {
   response.writeHead(200, { 'content-type': MIME[extname(file)] ?? 'application/octet-stream', 'cache-control': 'no-store' });
   response.end(readFileSync(file));
 });
-await new Promise((done, fail) => { server.once('error', fail); server.listen(Number(option('--port') ?? 0), '127.0.0.1', done); })
+await new Promise((done, fail) => { server.once('error', fail); server.listen(Number(option('--port') ?? process.env.CB_PORT ?? 0), '127.0.0.1', done); })
   .catch((err) => stop(`the server did not start: ${err.message}`));
 const base = `http://127.0.0.1:${server.address().port}`;
 
