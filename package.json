@@ -16,7 +16,9 @@
     "check:names": "node tools/name-check.mjs",
     "typecheck": "tsc -b",
     "test:unit": "node --import ./tests/ts-resolve.mjs --test \"tests/unit/**/*.test.ts\"",
-    "test:browser": "node tests/browser/smoke.mjs"
+    "test:browser": "node tests/browser/smoke.mjs",
+    "look:baseline": "node tools/look/look.mjs baseline --config tools/look/cb.config.json",
+    "look:compare": "node tools/look/look.mjs compare --config tools/look/cb.config.json"
   },
   "engines": {
     "node": ">=22.18 <23"
