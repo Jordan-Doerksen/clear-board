@@ -1,0 +1,127 @@
+/* clear-board.tokens.css - the bridge between the app and Dusk 0.2.0.
+   This file loads after the five Dusk layers and before each other sheet of the app.
+   Each value is a Dusk token, a length, a number or a font stack. No colour is typed here.
+   Only this file declares a name that Dusk declares, and only in blocks 2, 4 and 5.
+   Each new name of the app starts with --cb- or --yard-. */
+
+/* ---- Block 1: the old shell names -----------------------------------------------------------
+   Only src/index.css reads these names. A new rule does not read them: it reads the Dusk token.
+   --ink and --focus are not here. They are Dusk names with the same meaning. */
+:root {
+  --bg: var(--glass);
+  --surface: var(--panel-hi);
+  --surface-2: var(--head);
+  --line: var(--lit-rule);
+  --muted: var(--ink-2);
+  --clear: var(--green-ink);
+  --caution: var(--amber-ink);
+  --stop: var(--red-ink);
+  --r: var(--r-tile);
+  --space: var(--lh-base);
+  --font: var(--font-ui);
+  --maxw: 920px;
+  --fs: 16px; /* the app writes this name on the html element: 16px or 18.5px */
+}
+
+/* ---- Block 2: Dusk names that are declared again on purpose ---------------------------------
+   The seven Dusk type sizes in rem, equal to the Dusk px sizes at a root of 16 px. A Dusk part
+   then follows the text scale. The line height of reading text is 1.5. */
+:root {
+  --fs-xs: .6875rem;
+  --fs-s: .75rem;
+  --fs-data: .8125rem;
+  --fs-base: .875rem;
+  --fs-l: .9375rem;
+  --fs-title: 1.25rem;
+  --fs-num: 1.6875rem;
+  --lh-base: 1.5;
+}
+
+/* ---- Block 3: new names of the app ---------------------------------------------------------- */
+:root {
+  --cb-link: var(--lit); /* a link and a text button */
+  --cb-edge: var(--lit-line); /* the edge of a field, a select, a toggle track and a bar track */
+  --cb-ok-ink: var(--green-ink);
+  --cb-caution-ink: var(--amber-ink);
+  --cb-attn-ink: var(--red-ink);
+  --cb-info-ink: var(--teal-ink);
+  --cb-target: 44px; /* the smallest side of a control */
+  --cb-scrim: color-mix(in srgb, var(--ground-0) 72%, transparent); /* the ground behind a dialog */
+}
+
+/* ---- Block 4: the dyslexia type mode -------------------------------------------------------- */
+html[data-dys="1"] {
+  --font-ui: "Atkinson Hyperlegible", "Comic Sans MS", Verdana, sans-serif;
+  --font-mono: var(--font-ui);
+  --lh-base: 1.8;
+  --track-label: .03em;
+  letter-spacing: .02em;
+  word-spacing: .08em;
+}
+
+/* ---- Block 5: the high-contrast mode --------------------------------------------------------
+   Each Dusk token gets the value of a brighter Dusk token. A tile cap becomes one flat colour. */
+html[data-contrast="1"] {
+  --ink: var(--on-tile);
+  --ink-3: var(--ink-2);
+  --hair: var(--hair-2);
+  --lit-rule: var(--lit-line);
+  --cb-edge: var(--lit);
+  --cb-ok-ink: var(--ink);
+  --cb-caution-ink: var(--ink);
+  --cb-attn-ink: var(--ink);
+  --cb-info-ink: var(--ink);
+  --tile-red-hi: var(--tile-red-lo);
+  --tile-amber-hi: var(--tile-amber-lo);
+  --tile-green-hi: var(--tile-green-lo);
+  --tile-down-hi: var(--tile-down-lo);
+  --tile-teal-hi: var(--tile-teal-lo);
+  --tile-blue-hi: var(--tile-blue-lo);
+  --tile-violet-hi: var(--tile-violet-lo);
+  --tile-grey-hi: var(--tile-grey-lo);
+}
+
+/* ---- Block 6: the palette of the Yard drawing -----------------------------------------------
+   No rule reads these names in Wave 2a. The Yard drawing job owns this block from Wave 2b. */
+/* yard:start */
+:root {
+  --yard-floor: var(--glass);
+  --yard-ballast: var(--panel-hi);
+  --yard-tie: var(--hair-2);
+  --yard-rail: var(--ink-3);
+  --yard-rail-lined: var(--ink);
+  --yard-route: var(--lit);
+  --yard-goal: var(--lit);
+  --yard-engine: var(--head);
+  --yard-engine-edge: var(--lit);
+  --yard-engine-lamp: var(--disc-hi);
+  --yard-foul: var(--ink-2);
+  --yard-normal: var(--green-ink);
+  --yard-reverse: var(--amber-ink);
+  --yard-reverse-fill: var(--amber);
+  --yard-tied: var(--ink-2);
+  --yard-loose: var(--amber-ink);
+  --yard-kickable: var(--ink-2);
+  --yard-refusal: var(--red-ink);
+  --yard-car-empty: var(--well);
+  --yard-on-car: var(--on-tile);
+  --yard-box-hi: var(--tile-grey-hi);
+  --yard-box-lo: var(--tile-grey-lo);
+  --yard-box-ink: var(--grey-ink);
+  --yard-hopper-hi: var(--tile-teal-hi);
+  --yard-hopper-lo: var(--tile-teal-lo);
+  --yard-hopper-ink: var(--teal-ink);
+  --yard-tank-hi: var(--tile-violet-hi);
+  --yard-tank-lo: var(--tile-violet-lo);
+  --yard-tank-ink: var(--violet-ink);
+  --yard-centerbeam-hi: var(--tile-amber-hi);
+  --yard-centerbeam-lo: var(--tile-amber-lo);
+  --yard-centerbeam-ink: var(--amber-ink);
+  --yard-autorack-hi: var(--tile-blue-hi);
+  --yard-autorack-lo: var(--tile-blue-lo);
+  --yard-autorack-ink: var(--blue-ink);
+  --yard-car-shadow: drop-shadow(0 2px 2px var(--ground-0));
+  --yard-lit-glow: drop-shadow(0 0 3px var(--lit));
+  --yard-refusal-glow: drop-shadow(0 0 4px var(--red));
+}
+/* yard:end */
