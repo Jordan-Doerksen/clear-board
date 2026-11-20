@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <!-- Clear Board icon sketch, concept "the yard ladder", the form for 16 px and 32 px. Drawn on the 16 px grid. -->
+  <defs>
+    <clipPath id="tile">
+      <rect width="16" height="16" rx="3"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect width="16" height="16" fill="#0d0b14"/>
+    <g fill="none" stroke-width="2">
+      <path d="M7 9H16M10 6L13 3H16" stroke="#7d8494"/>
+      <path d="M0 12H4L10 6H16" stroke="#3fbf7a"/>
+    </g>
+  </g>
+</svg>

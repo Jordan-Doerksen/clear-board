@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" role="img" aria-label="Clear Board">
+  <!-- Clear Board icon concept: the monogram. The 16 px drawing: no glow, a 3 px line, a 4 px board. See icon-mark.notes.md. -->
+  <rect width="16" height="16" rx="3" fill="#0a0810"/>
+  <path d="M13.5 6V5.5L10.5 2.5H5.5L2.5 5.5V10.5L5.5 13.5H10.5L13.5 10.5V10" fill="none" stroke="#f2c27a" stroke-width="3" stroke-linejoin="miter"/>
+  <rect x="6" y="6" width="4" height="4" fill="#3fbf7a"/>
+</svg>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Clear Board icon sketch, concept "the yard ladder". Colours are Dusk 0.2.0 token values; see icon-ladder.notes.md. -->
+  <defs>
+    <linearGradient id="floor" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="512">
+      <stop offset="0" stop-color="#13101b"/>
+      <stop offset="1" stop-color="#0d0b14"/>
+    </linearGradient>
+    <clipPath id="tile">
+      <rect width="512" height="512" rx="96"/>
+    </clipPath>
+    <filter id="halo" filterUnits="userSpaceOnUse" x="-96" y="0" width="704" height="512">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect id="ground" width="512" height="512" fill="url(#floor)"/>
+    <!-- decoration: the glow of the lit route -->
+    <path id="glow" d="M-64 376H136L296 216H576" fill="none" stroke="#3fbf7a" stroke-opacity="0.55" stroke-width="48" filter="url(#halo)"/>
+    <!-- idle body tracks: track 1 below the route, the ladder and track 3 above it -->
+    <g id="idle" fill="#7d8494">
+      <path d="M242.9 320H512V272H290.9Z"/>
+      <path d="M298.1 180L366.1 112H512V160H385.9L365.9 180Z"/>
+    </g>
+    <!-- the lit route: lead, ladder, track 2 -->
+    <path id="route" d="M0 376H136L296 216H512" fill="none" stroke="#3fbf7a" stroke-width="48"/>
+    <!-- the lit edge of the panel. A maskable export removes this element and sets the tile radius to 0. -->
+    <rect id="edge" x="5" y="5" width="502" height="502" rx="91" fill="none" stroke="#f2c27a" stroke-width="10"/>
+  </g>
+</svg>
