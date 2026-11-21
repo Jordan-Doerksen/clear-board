@@ -121,6 +121,15 @@ function ok(condition, message) {
   if (!condition) throw new CaseFailure(message);
 }
 
+// The sideways overflow of the page and of `main`, in px. The window of the shell clips its
+// content sideways, so content that is wider than the window does not make the page scroll
+// sideways. `main` does not clip, so its overflow shows that content.
+const overflowOf = (page) => page.evaluate(() => {
+  const root = document.documentElement;
+  const main = document.querySelector('main');
+  return { page: Math.max(0, root.scrollWidth - root.clientWidth), main: main ? Math.max(0, main.scrollWidth - main.clientWidth) : 0 };
+});
+
 // Open one page in a new context, run `body`, then make the common checks.
 // Options: width (390 or 1440, or another width), seed, serviceWorker, settings (stored before
 // the page loads), reduce (the device flag for reduced motion).
@@ -472,20 +481,18 @@ const GATE_CASES = [
       });
     }
   } },
-];
 
-// ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after
-// the closing commit of the G1 line makes it one.
-const reportPage = (options, body) => withPage({ common: false, ...options }, body);
-
-const REPORT_CASES = [
-  // The floor is 44 px, not 43.5 px (ruling TARGETS-44). The case becomes a gate when its count
-  // is 0, in a later wave.
-  { name: 'targets', owner: 'P-05: B1, B2, B3, Y3', what: 'controls under 44 by 44 px, on the six routes and the Settings dialog, at 390 and 1440', async run() {
-    let small = 0;
-    const measure = (page) => page.evaluate(() => {
+  // Cases 13 and 14 were report-only cases in Wave 2a. Their owners are merged after Wave 2b and
+  // each case passes, so the closing commit of the G1 line made each one a gate.
+  { name: '13 targets', async run() {
+    // Each enabled button, link, select, summary and input is 44 by 44 px or more, on the six
+    // routes and in the Settings dialog, at 390 and 1440. The floor is 44 px, not 43.5 px (ruling
+    // TARGETS-44). An input in a label is measured by the larger box of the two. While a dialog is
+    // open, only the controls in the dialog are measured.
+    const small = (page) => page.evaluate(() => {
       const shown = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden'; };
-      let n = 0;
+      const name = (el) => (el.getAttribute('aria-label') || el.innerText || el.getAttribute('placeholder') || (el.id ? `#${el.id}` : '')).replace(/\s+/g, ' ').trim().slice(0, 40);
+      const found = [];
       for (const el of document.querySelectorAll('button, a, select, summary, input')) {
         if (el.disabled || !shown(el)) continue;
         const dialog = document.querySelector('dialog[open]');
@@ -493,34 +500,45 @@ const REPORT_CASES = [
         let r = el.getBoundingClientRect();
         const label = el.tagName === 'INPUT' ? el.closest('label') : null;
         if (label) { const l = label.getBoundingClientRect(); if (l.width * l.height > r.width * r.height) r = l; }
-        if (r.width < 44 || r.height < 44) n++;
+        if (r.width < 44 || r.height < 44) found.push(`${el.tagName.toLowerCase()} "${name(el)}" ${Math.round(r.width * 100) / 100} by ${Math.round(r.height * 100) / 100} px`);
       }
-      return n;
+      return found;
     });
+    const found = [];
     for (const width of [390, 1440]) {
       for (const r of ROUTES) {
-        small += await reportPage({ width }, async (page) => { await open(page, r.route); await r.check(page); return measure(page); });
+        const list = await withPage({ width }, async (page) => { await open(page, r.route); await r.check(page); return small(page); });
+        found.push(...list.map((s) => `${r.name} at ${width}: ${s}`));
       }
-      small += await reportPage({ width }, async (page) => {
+      const list = await withPage({ width }, async (page) => {
         await open(page, '/');
         await page.locator(hook('settings-open')).first().click();
         await page.locator('dialog#settings[open]').waitFor();
-        return measure(page);
+        return small(page);
       });
+      found.push(...list.map((s) => `settings dialog at ${width}: ${s}`));
     }
-    return small;
+    ok(found.length === 0, `${found.length} controls are under 44 by 44 px: ${found.slice(0, 8).join('; ')}${found.length > 8 ? '; ...' : ''}`);
   } },
 
-  { name: 'yard at 320', owner: 'P-11: Y3', what: 'px of sideways scroll on the Yard at 320 px wide', async run() {
-    return reportPage({ width: 320 }, async (page) => {
+  { name: '14 yard at 320', async run() {
+    // On the Yard at 320 px wide, the page does not scroll sideways, and no content is wider than
+    // main. The case waits for the frame of the Yard drawing first, as the route case does.
+    await withPage({ width: 320 }, async (page) => {
       await open(page, '/yard');
-      await page.locator('#picker').waitFor();
-      return page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth));
+      await ROUTES.find((r) => r.route === '/yard').check(page);
+      const over = await overflowOf(page);
+      ok(over.page === 0, `the Yard at 320 px wide scrolls sideways by ${over.page} px`);
+      ok(over.main === 0, `on the Yard at 320 px wide, the content of main is ${over.main} px wider than main. The window clips it, so the page does not scroll sideways.`);
     });
   } },
+];
 
+// ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after
+// the closing commit of the G1 line makes it one.
+const REPORT_CASES = [
   { name: 'type modes in the islands', owner: 'P-06: Y1, Y3, B3', what: 'text elements of the Yard and the guided Radio that are not larger with "Bigger text" on', async run() {
-    const sizes = (big, route, ready) => reportPage({ settings: { ...allOff, big } }, async (page) => {
+    const sizes = (big, route, ready) => withPage({ common: false, settings: { ...allOff, big } }, async (page) => {
       await open(page, route);
       await page.locator(ready).first().waitFor();
       return page.evaluate(() => [...document.querySelectorAll('main *')]
