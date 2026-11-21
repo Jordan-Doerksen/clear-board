@@ -115,20 +115,33 @@ STEPS region now:        dc38610359f800ba7e336c981e038d629e0c541d60f11da7722f2ad
 
 After the handoff the lead fixed F-1, F-3, F-4, F-5 and K-2 on the same branch (section 5.1 marks each one). The gates stayed green: check 12 of 12 with 81 unit tests, build, smoke 22 of 22, frozen files equal.
 
-### 5.1 The last review of the whole wave (not finished)
+### 5.1 The last review of the whole wave (finished)
 
-Four independent reviewers started on `dc88b14`: learner journeys, accessibility, the fence and
-safety, and code correctness. Only the journeys review finished before the account ended. Its five
-findings are below. Their independent verification did not finish. The raw output is
-`specs/handoff/final-review-partial.json`. The next session runs the other three reviews again.
+Four independent reviewers worked on `dc88b14`: learner journeys, accessibility, the fence and
+safety, and code correctness. An independent verifier tried to refute each finding: 20 were
+confirmed and 2 refuted. The raw output is `specs/handoff/final-review.json` (each finding with its
+steps, cause, fix and verdict). The reviewers found the fence whole: the frozen files and the
+`STEPS` region equal, no raw colour, no new rule text, no timer, server or analytics, and the stored
+data, U-01, the grading guard and MASTERY-NOW correct.
 
-| # | Severity | Finding | Cause and fix size |
+The confirmed findings, with the same defect found twice shown once:
+
+| # | Severity | Finding | State |
 |---|---|---|---|
-| F-1 | high | **Fixed in `3076815`** (two unit tests over 350 seeds; both fail on the code before it). In the review of the misses, a signal question can offer a definition term ("FIXED SIGNAL", "ADVANCE SIGNAL", "BLOCK", "INTERLOCKING", "CONTROLLED SIGNAL") as an option, and marks it wrong with "Safety-critical — lock this one in." The entry of FIXED SIGNAL is true of each signal. Seeded model: 171 of 11,808 review signal questions. | `src/core/drill.ts` lines 175 to 181: with fewer than three other signals among the misses, the distractors come from the pool of the misses, which holds other kinds. Fix: a signal question takes its distractors from the signal items of the library. Small. This is ruling `WEAK-REVIEW` with a new fact: it is now a defect to fix. |
-| F-2 | medium | "Continue" beside "N due now" asks mostly new items: on a test profile with 33 items due, a session asked 1.9 due items and 8.1 new items on average. | `src/core/drill.ts` line 239 with `src/core/sr.ts` line 30: an item with no state counts as due, so new items land in the first bucket. The comment of the same function says due items come first. Small, but it changes the selection: the owner rules first. |
-| F-3 | medium | **Fixed in `5a7f3fc`** (probe of the lead: a reset while the Yard is open clears the open picker; the restart of the Drill and of the Radio test after a load is not probed in the running app). After Reset or Load in Settings, an open Yard keeps its old job marks, and an open Drill or Radio session counts the loaded progress as its own gain. | `yardSim.js` builds the job picker at mount and after a win only; the Drill and the Radio test read their start values once. Small: refresh on a change of the stored profile. |
-| F-4 | medium | **Fixed in `62cedd7`** (probe of the lead, 1440 and 390 px). The look-up dialog stays open over the next route after a browser Back, and closing it drops focus to the page body. | `src/components/LookUp.tsx` does not watch the route. Small: a change of route closes the dialog. |
-| F-5 | medium | **Fixed in `62cedd7`** (probe of the lead, 1440 and 390 px). Reference says "No match. Try another word." while the library still loads (7.3 s on a slow network; 0.1 to 0.2 s on each direct load). | `src/stations/Reference.tsx` lines 103 to 105. Small: show "Loading…" as the other stations do. |
+| F-1 | high | In the review of the misses, a signal question could offer a term of another kind ("FIXED SIGNAL", or "Rule 405" for the drawing of 405) and mark it wrong as safety-critical. | **Fixed in `3076815`** (two unit tests over 350 seeds; both fail on the code before it). |
+| F-2 | medium | "Continue" beside "N due now" asks mostly new items, so the due items wait (`src/core/drill.ts` line 239 with `src/core/sr.ts` line 30). | Open: the owner rules first (it changes the selection). |
+| F-3 | medium | After Reset or Load in Settings, an open station shows the old progress. | **Fixed in `5a7f3fc`.** |
+| F-4 | medium | The look-up dialog stays open after a browser Back, and its close drops focus to the page body. | **Fixed in `62cedd7`.** |
+| F-5 | medium | Reference says "No match" while the library loads. | **Fixed in `62cedd7`.** |
+| F-6 | medium | Settings: the sticky head of the dialog hides the control that has focus when focus moves up (`clear-board.parts.css`, the rule of `.cb-dialog > .dusk-panel-head`). Fix: `scroll-padding-top` on `.cb-dialog`. | See the top of this section. |
+| F-7 | medium | After a "Try again" that works, focus falls to the page body and no result is said (`src/App.tsx`, `src/components/LookUp.tsx`). | See the top of this section. |
+| F-8 | medium | "Reload" of the notice "A new version is ready" does nothing on a page that no service worker controls (`src/App.tsx` lines 87 to 90). Fix: reload the page when no worker waits. | See the top of this section. |
+| F-9 | medium | The guided Radio: the end summary is not announced (`src/stations/radioSim.js` line 79, outside `STEPS`). Fix: put the done box in a `role="status"` region. | See the top of this section. |
+| F-10 | low | Forced colours: the selected Radio mode, the stepper controls that cannot act and the Key button lose their marks. | Open. |
+| F-11 | low | The Yard stepper with Reduce motion: "Play all" announces only the last step (`src/stations/yardSim.js` near line 495). | Open. |
+| F-12 | low | LEARN-GAP: the learn card of a twin item (the rule item and the signal item of one CROR rule) can come right before a question about the other, and holds its answer (`src/core/drill.ts` lines 107 to 131). A question for the SME too. | Open. |
+| F-13 | low | Comments and one document line that Wave 2c made untrue: `ARCHITECTURE.md` near line 397 (the report case of C7 is now gate case 21), `src/stations/yard/view.ts` lines 5 to 8, `src/App.tsx` lines 127 and 128. | See the top of this section. |
+| F-14 | low | The headings of the Drill and Reference carry their icon in the accessible name; the Yard and the Radio do not. | Open: one verifier refuted it (brief B2 asked for "📖 Reference" as the heading). |
 
 ### 5.2 Small known items for the same final fix job
 
