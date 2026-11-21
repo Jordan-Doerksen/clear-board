@@ -96,7 +96,7 @@ export function RadioTest({ active = true }: { active?: boolean }) {
       <>
         <div className="dusk-tile dusk-tile--teal cb-radio-done">
           <div className="dusk-tile-cap">
-            <h2 className="dusk-tile-lab">{focus ? 'Review done' : 'Session done'}</h2>
+            <h3 className="dusk-tile-lab">{focus ? 'Review done' : 'Session done'}</h3>
           </div>
           <div className="dusk-tile-body">
             <p className="dusk-tile-num">{score} / {order.length}</p>
