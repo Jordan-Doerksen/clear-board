@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { freshProfile, keepProfileCopy, loadContent, mergeProfileInto, mergeStoredProfile, PROFILE_KEY, readStoredProfile, recomputeMastery, repairProfile, saveProfile, SETTINGS_KEY, YARD_SOUND_KEY } from '../core/store';
+import { freshProfile, keepProfileCopy, loadContent, mergeProfileInto, mergeStoredProfile, PROFILE_COPY_KEY, PROFILE_KEY, readStoredProfile, recomputeMastery, repairProfile, saveProfile, SETTINGS_KEY, YARD_SOUND_KEY } from '../core/store';
 import { grade } from '../core/sr';
 import { answerCounts } from '../core/drill';
 import type { Content, ContentItem, Profile, Settings } from '../core/types';
@@ -262,10 +262,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [content]);
 
-  // "Reset my progress" also removes the stored sound choice of the Yard (U-36, 2c-plan C8).
+  // "Reset my progress" also removes the stored sound choice of the Yard (U-36, 2c-plan C8) and the
+  // copy of an older profile under the second key (RESET-COPY): the copy holds old progress.
   const resetProgress = useCallback(() => {
     try {
       localStorage.removeItem(PROFILE_KEY);
+      localStorage.removeItem(PROFILE_COPY_KEY);
       localStorage.removeItem(YARD_SOUND_KEY);
     } catch { /* storage blocked: nothing is stored */ }
     setProfile(() => {
