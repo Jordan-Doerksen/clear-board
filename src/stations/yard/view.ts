@@ -94,7 +94,7 @@ const YARD_HTML = `
 
     <div class="yd-workorder" id="workorder"></div>
 
-    <div class="yd-yardframe" data-cb="yard-drawing"></div>
+    <div class="yd-yardframe dusk-panel dusk-panel--framed" data-cb="yard-drawing"></div>
 
     <div class="yd-bar">
       <select id="act" title="Action">

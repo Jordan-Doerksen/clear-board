@@ -19,11 +19,11 @@
 }
 .yard-wrap button.yd-back:hover { border-color: var(--lit); }
 .yard-wrap button.yd-back:active { transform: translateY(1px); }
-/* The frame of the drawing fills the reading column. */
-.yard-wrap .yd-yardframe {
-  width: 100%; margin: 12px 0 14px; border: 1px solid var(--lit-rule); border-radius: 12px;
-  background: var(--well); overflow: hidden;
-}
+/* The frame of the drawing is a Dusk panel with no padding: the lit edge, the corner and the fill
+   come from the parts. It takes the full width of .yard-wrap and the height of the drawing.
+   This file sets no width, height, padding or side margin on it, and no rule for an element
+   inside it: the drawing job owns each element inside the frame (contract D.6). */
+.yard-wrap .yd-yardframe { margin: 12px 0 14px; overflow: hidden; }
 .yard-wrap .yd-workorder {
   margin-top: 10px; padding: 12px 16px; border-radius: 10px;
   background: var(--panel-fill);
