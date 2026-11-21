@@ -1,7 +1,9 @@
 // yardSim.js — the controller of the Yard station.
 //
 // It holds the game state, the move logic, the records, the sound calls and the event wiring.
-// It exports mount(root, ctx) and unmount(), and nothing else. It works with these files in ./yard/:
+// It exports mount(root, ctx), unmount() and profileChanged(), and nothing else. The bridge calls
+// profileChanged() when a Reset or a Load in Settings replaces the profile (finding F-3). It works
+// with these files in ./yard/:
 //   view.ts            each markup string, each class name and each DOM write of the chrome
 //   yard.css           the style of the chrome
 //   draw.ts            the drawing: the picture, the hit test of a click and the one draw call
