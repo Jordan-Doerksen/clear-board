@@ -168,14 +168,14 @@ export function Drill({ domain }: { domain?: string }) {
     if (q && (q.kind === 'rule' || q.kind === 'text')) speak(q.promptText);
   }, [q, speak]);
 
-  if (!content || !built) return <p className="muted">Loading…</p>;
+  if (!content || !built) return <div className="cb-drill-view"><p className="muted">Loading…</p></div>;
 
   if (built.slots.length < (focusIds ? 1 : 4)) {
     return (
-      <>
+      <div className="cb-drill-view">
         <button className="back" onClick={() => navigate('/')}>← Home</button>
         <p className="muted">Not enough verified content to drill yet.</p>
-      </>
+      </div>
     );
   }
 
@@ -188,7 +188,7 @@ export function Drill({ domain }: { domain?: string }) {
       return `${name}: ${delta >= 0 ? '+' : ''}${delta}% → ${Math.round(end * 100)}%`;
     }).join(' · ');
     return (
-      <>
+      <div className="cb-drill-view">
         <button className="back" onClick={() => navigate('/')}>← Home</button>
         <h2 className="view-title">{focusIds ? 'Review done' : 'Session done'}</h2>
         <p className="big-score">{score} / {built.slots.length}</p>
@@ -202,7 +202,7 @@ export function Drill({ domain }: { domain?: string }) {
           <button className="opt" onClick={() => { setFocusIds(null); setSessionKey(k => k + 1); }}>Drill again</button>
           <button className="opt" onClick={() => navigate('/')}>Back to the path</button>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -220,7 +220,7 @@ export function Drill({ domain }: { domain?: string }) {
   }
 
   return (
-    <>
+    <div className="cb-drill-view">
       <button className="back" onClick={() => navigate('/')}>← Home</button>
       <div className="drill-top"><span className="muted">Question {idx + 1} of {built.slots.length}</span><span className="muted">{score} correct</span></div>
       <h2 className="view-title">{q.heading}</h2>
@@ -247,6 +247,6 @@ export function Drill({ domain }: { domain?: string }) {
           </button>
         </div>
       )}
-    </>
+    </div>
   );
 }

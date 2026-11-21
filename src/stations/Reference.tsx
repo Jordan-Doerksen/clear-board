@@ -42,7 +42,7 @@ export function Reference() {
   }, [items, q]);
 
   return (
-    <>
+    <div className="cb-reference-view">
       <button className="back" onClick={() => navigate('/')}>← Home</button>
       <h2 className="view-title">📖 Reference</h2>
       <p className="muted">Look anything up. Plain words first — the rule text is one tap deeper, always cited.</p>
@@ -61,7 +61,7 @@ export function Reference() {
 
       {selected && <Detail key={selected.id} item={selected} audio={settings.audio} onSpeak={speak}
         onDrillSignals={() => navigate('/signals')} />}
-    </>
+    </div>
   );
 }
 
