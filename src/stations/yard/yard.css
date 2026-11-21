@@ -182,8 +182,8 @@
 .yard-wrap .yd-demo-call { font-weight: var(--fw-bold); overflow-wrap: anywhere; }
 /* The control "Show the arrival" of the work order (R7-P5): a Dusk button under the meta line. */
 .yard-wrap .yd-arrival { margin-top: var(--sp-4); }
-/* The head bar of the frame of the picture (R7-P10): a Dusk panel head over the picture. It shows
-   while the picture shows a past state of the move log, with the words of that state. */
+/* The words of a past state of the move log in the head bar of the picture (R7-P10), for example
+   "Before move 3": an information state of the parts, with its word. */
 .yard-wrap .yd-yardhead { gap: var(--sp-1) var(--sp-4); }
 .yard-wrap .yd-viewlabel { font-size: var(--fs-data); }
 /* The move log (R7-P10): a framed Dusk panel under the message. One line for each call of the run:
@@ -203,3 +203,11 @@
   .yard-wrap .yd-log-line { grid-template-columns: 1.5em minmax(0, 1fr); }
   .yard-wrap .yd-log-ctl { grid-column: 2; justify-content: flex-start; }
 }
+/* The head bar of the yard panel (YARD-HEAD, ROUTE-WORDS): the route words at the left, the words of a
+   past state of the move log beside them, and BUILD with the goal track and its count at the right,
+   in the gold of the goal of the picture. The route words keep the width of their longest form,
+   "Route: LEAD → MAIN LINE", so that a throw does not move the head bar or the picture under it. */
+.yard-wrap .yd-route { min-width: 15.5em; font-size: var(--fs-data); }
+.yard-wrap .yd-headgoal { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.yard-wrap .yd-headgoal-word { color: var(--yard-goal); font-size: var(--fs-s); font-weight: var(--fw-bold); letter-spacing: var(--track-label); }
+.yard-wrap .yd-headgoal-count { padding: 0 var(--sp-1); font-size: var(--fs-s); }

@@ -11,7 +11,7 @@
 // The status region repeats the words of the banner and the readout. A refusal of the model is
 // frozen text: the region says it as it is and does not change it.
 
-import { yardFacts } from './drawing/bodies.ts';
+import { yardFacts, routeReaches } from './drawing/bodies.ts';
 import type { ModelState, ModelPuzzle, TrackFact, CarFact, Lining } from './drawing/bodies.ts';
 import type { SwitchBox } from './draw.ts';
 
@@ -35,6 +35,19 @@ function trackLine(t: TrackFact, lin: Lining): string {
   return parts.join(' ');
 }
 
+/**
+ * The route words of the lining (ROUTE-WORDS, C2-WORDS): "LEAD → AS73" to the track of the first
+ * reverse switch from AS71, or "LEAD → MAIN LINE" when each switch is lined normal (bodies.ts,
+ * routeReaches, with the logic of model.js).
+ */
+export const routeWords = (lined: Record<string, Lining>): string => `LEAD → ${routeReaches(lined) ?? 'MAIN LINE'}`;
+
+/** The goal of a job with a goal track: the track, the goal cars on it now and the goal cars in all (BUILD k / m). */
+export function goalOf(state: object, puzzle: object): { track: string; have: number; want: number } | null {
+  const t = yardFacts(state as ModelState, puzzle as ModelPuzzle).tracks.find((x) => x.goal);
+  return t && t.goal ? { track: t.id, have: t.goal.have, want: t.goal.want } : null;
+}
+
 /** What the mirror needs to know besides the state of the model. */
 export interface MirrorOptions {
   /** The train has departed out the lead (R7-P14): the engine line says so, with its cars. */
@@ -47,7 +60,7 @@ export function mirrorLines(state: ModelState, puzzle: ModelPuzzle, opts: Mirror
   const engine = opts.departed
     ? `ENGINE departed out the lead with ${carList(F.engine.held, 'from the engine')}`
     : `ENGINE holding ${carList(F.engine.held, 'from the engine')}`;
-  return [engine, ...F.tracks.map((t) => trackLine(t, F.lined[t.id]))];
+  return [`${engine} Route: ${routeWords(F.lined)}.`, ...F.tracks.map((t) => trackLine(t, F.lined[t.id]))];
 }
 
 /** The text mirror: a list with one item for each line. */

@@ -118,6 +118,11 @@ export interface YardView {
    * (R7-P10). `null` hides them: the picture shows the yard now.
    */
   setViewLabel(text: string | null): void;
+  /**
+   * The head bar of the picture (YARD-HEAD, ROUTE-WORDS): the route words of the state that the
+   * picture shows, and BUILD with the goal track and its count, for a job with a goal track.
+   */
+  setYardHead(data: { route: string; goal: { track: string; have: number; want: number } | null }): void;
   /** Shows or hides the control "Show the arrival" of the work order (R7-P5). */
   setArrival(shown: boolean): void;
   /** The handler of the control "Show the arrival". */
@@ -146,7 +151,7 @@ const YARD_HTML = `
     <div class="yd-workorder dusk-panel dusk-panel--framed" id="workorder"></div>
 
     <div class="yd-yardframe dusk-panel dusk-panel--framed" data-cb="yard-drawing">
-      <div class="yd-yardhead dusk-panel-head" id="yard-head" hidden><span class="yd-viewlabel dusk-state dusk-state--info" id="yard-view-label"></span></div>
+      <div class="yd-yardhead dusk-panel-head" id="yard-head"><span class="dusk-panel-name yd-route" id="yard-route"></span><span class="yd-viewlabel dusk-state dusk-state--info" id="yard-view-label" hidden></span><span class="dusk-spacer"></span><span class="yd-headgoal" id="yard-goal" hidden><span class="yd-headgoal-word" id="yard-goal-word"></span> <span class="dusk-count yd-headgoal-count" id="yard-goal-count"></span></span></div>
     </div>
 
     <ul class="yd-mirror dusk-sr" id="yard-mirror" role="list"></ul>
@@ -501,9 +506,16 @@ export function createView(root: HTMLElement): YardView {
     onLog(handler) { logHandler = handler; },
 
     setViewLabel(text) {
-      at('yard-head').hidden = !text;
       const label = at('yard-view-label');
+      label.hidden = !text;
       if (label.textContent !== (text || '')) label.textContent = text || '';
+    },
+
+    setYardHead({ route, goal }) {
+      const put = (id: string, text: string): void => { const e = at(id); if (e.textContent !== text) e.textContent = text; };
+      put('yard-route', `Route: ${route}`);
+      at('yard-goal').hidden = !goal;
+      if (goal) { put('yard-goal-word', `BUILD ${goal.track}`); put('yard-goal-count', `${goal.have} / ${goal.want}`); }
     },
 
     bindDemo({ back, next, play }) {

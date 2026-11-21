@@ -27,7 +27,7 @@ import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
 import './yard/yard.css';
 import { createView } from './yard/view.ts';
 import { createDrawing } from './yard/draw.ts';
-import { createMirror, createLive, createSwitchButtons } from './yard/access.ts';
+import { createMirror, createLive, createSwitchButtons, routeWords, goalOf } from './yard/access.ts';
 
 // --- Clear Board: map the engine's rule chips → the content-library items a puzzle
 // exercises, so a genuine win feeds the SAME switching/securement mastery the Drill grades
@@ -141,6 +141,9 @@ export function mount(root, ctx) {
     if (!anim && !cine) {
       mirror.update(state, puzzle, { departed }); switches.setLining(state.lined);
       view.setArrival(canArrive());
+      // The head bar says the route and the goal of the state that the picture shows.
+      const shown = past ? pastState : state;
+      view.setYardHead({ route: routeWords(shown.lined), goal: goalOf(shown, puzzle) });
     }
   }
 
@@ -189,7 +192,7 @@ export function mount(root, ctx) {
       const r = routeReady(state, refusal.id);
       if (r.ok || r.msg !== refusal.msg) banner('', '');
     }
-    live.say(`${id} switch, lined ${state.lined[id]}`);
+    live.say(`${id} switch, lined ${state.lined[id]}. Route: ${routeWords(state.lined)}.`);
   }
 
   // --- the move builder ----------------------------------------------------
