@@ -51,16 +51,17 @@ export function Home() {
         })}
       </div>
 
+      {/* U-35: no Exam row. The plan has no Exam station. */}
       <h2 className="dusk-rule"><b>Ways to learn</b></h2>
       <div className="dusk-rows cb-home-stations">
         {STATIONS.map(s => (
           <button key={s.go} className="dusk-row" data-cb="station" onClick={() => navigate(s.go)}><span className="dusk-ico" aria-hidden="true">{s.icon}</span><span><b>{s.name}</b><small>{s.sub}</small></span></button>
         ))}
-        <button className="dusk-row" data-cb="station" disabled><span className="dusk-ico" aria-hidden="true">📝</span><span><b>Exam</b><small>Coming soon</small></span></button>
       </div>
 
       <footer>
-        <a className="dusk-btn" href="https://ko-fi.com/jordandoerksen" target="_blank" rel="noopener"><span aria-hidden="true">☕</span> Tip jar — if it helped you get there</a>
+        {/* U-42: the link says that it opens a new tab, and it sends no page address. */}
+        <a className="dusk-btn" href="https://ko-fi.com/jordandoerksen" target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer"><span aria-hidden="true">☕</span> Tip jar — if it helped you get there (opens a new tab)</a>
         <p className="cb-sub dusk-measure">An independent study tool. Cites the <b>Canadian Rail Operating Rules</b> (a public document)
           and flags CN operating practice (GOI) as not-a-rule. Not affiliated with CN, Transport Canada,
           or the RAC. Built for the people the book failed.</p>

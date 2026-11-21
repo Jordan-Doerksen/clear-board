@@ -38,3 +38,5 @@ No line here states, corrects or cites a rule. The words were not checked by the
 | U-31 | Settings, the row "Read aloud", a second line when the browser has no voice | none | No voice on this device. |
 | U-31 | The spoken confirmation when Read aloud turns on | the same words, not spoken (the call came before the setting was on) | Read aloud is on. Definitions, rules and questions will be read to you. (no change of words; it is now spoken) |
 | U-30 | Settings, the row "Dyslexia-friendly text" | Clearer font + looser spacing | no change: the face that the mode names now ships with the app, so the words are true on each device |
+| U-35 | Home, the list "Ways to learn" | 📝 Exam · Coming soon (a disabled row) | the row goes |
+| U-42 | Home, the tip link | ☕ Tip jar — if it helped you get there | ☕ Tip jar — if it helped you get there (opens a new tab) |

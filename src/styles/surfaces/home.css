@@ -110,3 +110,5 @@
 }
 .cb-app .cb-home-view footer .dusk-btn,
 .cb-app .cb-home-view footer .cb-sub { font-size: .82rem; }
+/* The words of the tip link wrap on a narrow screen (U-42 makes them longer). */
+.cb-app .cb-home-view footer .dusk-btn { line-height: var(--lh-base); }
