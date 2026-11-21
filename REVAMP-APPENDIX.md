@@ -277,7 +277,7 @@ So "one brain, not panels" is true for **content** (one library, one `recordAnsw
 
 **Trust safety (works — keep).** `gradable`/`drillable` filter `trust==='verified'`; the 4 `needs-review` signals (410/418/433A/440 per D-0009) are correctly barred from Drill and only `drillable` rules (those with an authored question) are eligible. F1 mitigation is real and must survive any change I propose: **anything I add that grades MUST route through `drillable`/`gradable`, never raw `byDomain`.**
 
-**My slice's job, concretely:** (1) make The Yard, Radio, and the Signal reader write to the ONE mastery model as scenario/skill items, so `switching`/`radio` domains stop reading 0; (2) turn the flat random-10 into a tier-aware, due-first, breadth-respecting selector that ramps; (3) turn `path` from a label into a real (but gentle, never-locking) breadth+retention gate that points the next step; (4) specify — not ship — the deferred test-ready/Exam retention bar so Jordan+SME can set the number later.
+**My slice's job, concretely:** (1) make The Yard, Radio, and the Signal reader write to the ONE mastery model as scenario/skill items, so `switching`/`radio` domains stop reading 0; (2) turn the flat random-10 into a tier-aware, due-first, breadth-respecting selector that ramps; (3) turn `path` from a label into a real (but gentle, never-locking) breadth+retention gate that points the next step; (4) specify — not ship — the deferred test-ready/Exam retention bar so the SME can set the number later.
 
 ## Research checklist
 
@@ -425,7 +425,7 @@ Clear Board has **one mastery brain** fed by several error sources. My slice tur
 - Signal Reader: enumerate the high-consequence signal confusions (CLEAR vs CLEAR-TO-LIMITED vs CLEAR-TO-SLOW; STOP vs STOP-AND-PROCEED vs RESTRICTING) and make those the targeted distractors [verify aspect encodings vs CROR/SME].
 - Remediation: define the priority re-queue — an S3 miss re-shows same session AND jumps ahead of SM-2 due dates until one clean recall; an S2 miss follows normal reset; an S1 is advisory only and never re-queued.
 - Anti-false-mastery: confirm an item that was failed on a SAFETY dimension cannot reach fam high enough to count as 'mastered' until it survives spaced recall (F2) — and domain mastery only counts VERIFIED items.
-- Feedback copy: write every correction in plain language FIRST, citation one tap deeper, in Jordan's calm non-shaming voice (the audience is people the rulebook already failed) — no 'WRONG!', no exclamation, no blame.
+- Feedback copy: write every correction in plain language FIRST, citation one tap deeper, in a calm, non-shaming voice (the audience is people the rulebook already failed) — no 'WRONG!', no exclamation, no blame.
 - Accessibility of feedback: refusal/correction must be screen-reader announced (aria-live polite for S1, assertive for S3), not color-only (icon+text for unsafe vs inefficient), and read-aloud capable (Web Speech).
 - Audit the FOUR absorbed apps for duplicate/contradictory explanations of the same rule (CN Conductor Trainer quiz vs training-assistant reference vs cror-signals) — one canonical explain per ruleId, others removed.
 - Define what feedback shows when the SWITCH-LIST itself is wrong (p2-list trust-the-marks puzzles): the correct behavior is to VERIFY by markings, so 'trusting the bad list' must be a coached S2 error, not a hidden softlock.
@@ -496,7 +496,7 @@ Clear Board has **one mastery brain** fed by several error sources. My slice tur
 - Mis-lining feedback names the specific offending switch and the track it would divert into for at least the tier-1 dig-out and tier-2 puzzles.
 - p2-list (trust-the-marks) puzzles produce a COACHED S2 correction teaching verify-by-markings, never a silent unsolvable state — solver confirms a legal solution exists.
 - Accessibility: feedback is announced via aria-live (polite S1 / assertive S3), conveys unsafe-vs-inefficient without relying on color, meets 44px targets, and is read-aloud capable; prefers-reduced-motion suppresses any failure animation.
-- Voice/tone review: every correction string reads in Jordan's calm, non-shaming voice — no exclamation marks, no 'WRONG', cause-then-fix — checked against the audience (people the rulebook failed).
+- Voice/tone review: every correction string reads in a calm, non-shaming voice — no exclamation marks, no 'WRONG', cause-then-fix — checked against the audience (people the rulebook failed).
 - Softlock test: every shipped puzzle either always has a legal recovery move or surfaces undo/reset-to-last-safe; no state leaves the learner with zero legal actions.
 - Inefficiency numbers are solver-proven: every 'par is N' shown to the learner matches tools/solve.mjs output for that puzzle; no efficiency claim is hand-set.
 

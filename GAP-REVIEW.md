@@ -59,7 +59,7 @@ The solver is a throwaway, uncommitted script; there's no described gate where v
 ## Triage (how each is being resolved) — added 2026-06-23
 - **Resolve in SPEC (no decision needed):** B1 (migrate with honest flags; unverified → `needs-review`, reference-only), B3 (richer citation: GOI + `relatedRef`), B4 (specify SM-2-lite with numbers), B6 (write per-source mapping), B9 (commit the solver as a checked-in test harness + pre-ship checklist), N12–N15.
 - **Scope out of V1:** B5 + the Exam station (no test-ready claim ships in V1).
-- **Resolved at gate (confirmed by Jordan 2026-06-23):** B2 (Jordan = SME verifier, D-0008), B7 (fresh start + redirect at parity, D-0011), **B8 — CROR is a public document, so verbatim text DOES ship in V1 (D-0010); the PDF is still never committed**, N16 (four cards collapse to one Clear Board entry, D-0011).
+- **Resolved at gate (confirmed by the owner 2026-06-23):** B2 (the SME is the verifier, D-0008), B7 (fresh start + redirect at parity, D-0011), **B8 — CROR is a public document, so verbatim text DOES ship in V1 (D-0010); the PDF is still never committed**, N16 (four cards collapse to one Clear Board entry, D-0011).
 
 ## Re-review verdict (2026-06-23)
 B1–B9 all resolved (specified or safely scoped out of V1). Two revision-introduced items fixed:
