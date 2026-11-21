@@ -3,6 +3,16 @@
    attribute where a rule needs one. The guided island keeps its own rules in radioSim.js (RADIO_CSS). A rule here sets no
    transition, no animation and no transform other than transform: none. Each size keeps the size of today at a root of 16 px. */
 
+/* ---- the view: a column in the middle of the window ------------------------------------------------
+   The column is at most --maxw (920 px) wide and sits in the middle of the window, which fills the
+   browser (SURFACE-COLUMN). Both modes are in it: the guided island and "Call it yourself". A box,
+   a panel, a control and the scene of the island take the width of the column. On a narrow screen
+   the column takes the full width. */
+.cb-app .cb-radio-view {
+  max-width: var(--maxw);
+  margin-inline: auto;
+}
+
 /* ---- the mode tabs (part G10) ---------------------------------------------------------------------
    The sub-line keeps 12.16 px (the part gives 12 px). The tabs keep the space of today above and below. */
 .cb-app .cb-radio-view .cb-tabs { margin: 10px 0 16px; }
