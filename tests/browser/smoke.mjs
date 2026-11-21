@@ -26,7 +26,7 @@
 // A report-only case prints PENDING with a count and the job that owns the fix. It does not
 // change the exit code. A count of 0 means that the case passes on this build. The closing
 // commit of the G1 line turns a report-only case into a gate when its owner is merged and the
-// case passes.
+// case passes. After Wave 2c no case is report-only.
 //
 // An element is selected by "the hook, or the old selector" (the table HOOKS), so that a later
 // job can replace an old class and put the hook on the same element, with no edit of this file.
@@ -998,23 +998,18 @@ const GATE_CASES = [
     return notes.join('. ');
   } },
 
-];
-
-// ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after
-// the closing commit of the G1 line makes it one. Each report-only case of Wave 2a is a gate now
-// (cases 11 to 15). A report-only case returns its count, or an object with the count and the list
-// of what it found.
-const REPORT_CASES = [
-  { name: 'c7 focus after a change of route', owner: 'U1-D (ruling C7-DRILL)', what: 'the count of routes and widths where focus is not on the first h2 of #view after a change of route', async run() {
-    // 2c-plan C7: after a change of route, focus is on the first h2 of #view. The case opens another
-    // route first, changes the route in the page, and waits for the first screen of the route with
-    // no press, and for the end of the wait of the shell (it holds focus on #view while the heading
-    // of an island is not there).
+  { name: '21 focus after a change of route', async run() {
+    // 2c-plan C7 (rows U-29, A11Y-22, A11Y-23): after a change of route, focus is on the first h2 of
+    // #view, on each route at 390 and 1440. This was the report case of G1-2. Job U1-D made the Drill
+    // and Signals keep their heading (ruling C7-DRILL), so it is a gate now. The case opens another
+    // route first, changes the route in the page, and waits for the first screen of the route with no
+    // press, and for the end of the wait of the shell (it holds focus on #view while the heading of an
+    // island is not there).
     const misses = [];
     for (const width of [390, 1440]) {
       for (const r of ROUTES) {
         const from = ROUTES.find((x) => x.route === (r.route === '/' ? '/reference' : '/'));
-        const found = await withPage({ width, common: false }, async (page) => {
+        const found = await withPage({ width }, async (page) => {
           await open(page, from.route);
           await from.check(page);
           await page.evaluate((route) => { location.hash = `#${route}`; }, r.route);
@@ -1031,9 +1026,16 @@ const REPORT_CASES = [
         if (found) misses.push(`${r.name} at ${width}: focus is on ${found}`);
       }
     }
-    return { count: misses.length, found: misses };
+    ok(misses.length === 0, `after a change of route, focus is not on the first h2 of #view on ${misses.length} routes and widths: ${misses.join('; ')}`);
   } },
+
 ];
+
+// ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after the
+// closing commit of the G1 line makes it one. After Wave 2c no case is report-only: the report case
+// of contract C7 is gate case 21. A report-only case returns its count, or an object with the count
+// and the list of what it found, and has the fields `owner` and `what`.
+const REPORT_CASES = [];
 
 // ---- The words of the shell notices (rows U-10 and U-07, job U1-B).
 const UPDATE_NOTICE = 'A new version is ready.';
@@ -1130,7 +1132,7 @@ try {
         console.log(`PENDING  ${c.name}  count not known  ${seconds(Date.now() - t0)}  (report only; owner ${c.owner}; the case did not run: ${String(err.message).split('\n')[0]})`);
       }
     }
-    console.log(`\nsmoke: ${ran - failed} of ${ran} gate cases passed in ${seconds(Date.now() - started)}. A report-only case does not change the result.`);
+    console.log(`\nsmoke: ${ran - failed} of ${ran} gate cases passed in ${seconds(Date.now() - started)}.${REPORT_CASES.length ? ' A report-only case does not change the result.' : ''}`);
     if (ran === 0 && !REPORT_CASES.some(wanted)) { console.log(`smoke: no case has "${only}" in its name.`); exitCode = 2; }
     if (failed) exitCode = 1;
   }
