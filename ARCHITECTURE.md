@@ -8,7 +8,35 @@ Sources: [`specs/briefs/00-contracts.md`](specs/briefs/00-contracts.md) (names, 
 - **Today** means: read from the code on 2026-11-20. Outside `specs/`, `DECISIONS.md` and this file, the tree is equal to commit `86cfef2` (`git diff --stat`). Each line number is a line of that tree.
 - **Planned** means: Wave 2, not built. Each planned statement comes from the contract. The lead accepted each file row of it (`FILES`).
 - **PENDING RULING `NAME`** means: the owner or the SME has not answered. Until an answer, each job keeps the behaviour of today. Section 10 lists each one that changes this map. **Not verified** means: no check was made (section 11).
-- State: Wave 1 is complete. Gate A is closed: the owner answered the four questions (D-0031 to D-0035) and the lead ruled (D-0037). Wave 2 has not started.
+- State: Wave 1 is complete. Gate A is closed (D-0031 to D-0035, D-0037), and the owner answered 19 more picks (D-0038). **Wave 2a is built and merged** on `claude/cb2-wave-2a` (section 0). Wave 2b and 2c are planned.
+
+
+## 0. State after Wave 2a (the lead, 2026-11-21)
+
+Wave 2a is merged on the wave branch at `beb3d14`. Sections 2 to 4 still describe the tree of
+`86cfef2`; the job D1 writes the final map in Wave 2c. What Wave 2a added or changed:
+
+- **The gates (G1).** `npm run check` runs 11 steps through `tools/check.mjs`: the frozen-file hash
+  gate (`tools/frozen-check.mjs`, `tools/frozen.lock.json`), the Dusk lock check
+  (`tools/dusk-lock-check.mjs`), the raw-colour lint, a ratchet (`tools/colour-lint.mjs`,
+  `tools/token-lint.baseline.json`), the name check (`tools/name-check.mjs`,
+  `tools/name-check.allow.json`), lint, the type check, 44 unit tests (`tests/unit/`), and the four
+  earlier scripts. On request: the browser smoke test (`tests/browser/smoke.mjs`, with the word tape
+  of the guided Radio) and the look harness (`tools/look/look.mjs`). `.github/workflows/check.yml`
+  runs the check on each branch and pull request. Node is pinned (`.nvmrc`). The tools follow the
+  owner's reskin tools with the owner's leave (D-0039).
+- **The skin floor (S1).** `src/main.tsx` imports five Dusk layers, the bridge
+  (`src/styles/clear-board.tokens.css`), the parts file (`src/styles/clear-board.parts.css`), six
+  surface sheets (`src/styles/surfaces/`) and the app sheet. `body` has the class `cb-app`; `html`
+  has `data-tier="strict"`. The browser bar colour and the manifest colour are read from `--glass`
+  at build time. The icons are the monogram (`public/favicon.svg`, `public/icon.svg`). The template
+  files are gone.
+- **The Yard split (Y1).** `src/stations/yardSim.js` is the controller. `yard/view.ts` holds the
+  markup and each write to the page; `yard/draw.ts` is the drawing adapter, with the canvas inside
+  until Y2; `yard/yard.css` and `yard/drawing/drawing.css` hold the style on bridge tokens.
+  `imperativeStation.ts` exports the type `StationCtx`. The reading modes reach the Yard text.
+- **Left, as planned:** the Yard drawing (`render.js`, 22 raw colours) and the guided Radio
+  (`radioSim.js`, 45) keep their old colours until Y2 and B3 in Wave 2b.
 
 ## 1. What the app is
 1. Clear Board is a free trainer for the conductor qualification under the Canadian Rail Operating Rules (CROR).
@@ -19,7 +47,7 @@ Sources: [`specs/briefs/00-contracts.md`](specs/briefs/00-contracts.md) (names, 
 
 Page law tier: STRICT
 
-The line above is also line 5 of `DECISIONS.md` (D-0030). The owner has not picked OPEN. One question is open: a written exception, that the Yard drawing can show travel of equipment after a learner action (PENDING RULING `TIER`). Until an answer the page has no exception. Planned: S1 writes `data-tier="strict"` on `html`. With no attribute a page is also STRICT (Dusk `README.md`, step 3, checked).
+The line above is also line 5 of `DECISIONS.md` (D-0030). The owner kept STRICT and approved one written exception (D-0038): the Yard drawing can show travel of equipment after a learner action. Reduced motion stops it.
 
 ## 2. The file map, today
 ```
@@ -184,7 +212,7 @@ No edit, no reformat, no move (fence rule 1). No job owns a frozen file in any w
 - Frozen does not mean correct. Open items for the SME stay open (plan T11). A finding about content is a note for the SME, never an edit.
 - Locked, and not part of the frozen set: the six files in `src/styles/dusk/` and `src/styles/dusk.lock.json`. No job edits them. On 2026-11-20 each file hash was equal to the lock.
 
-## 5. The style layers (planned)
+## 5. The style layers (built in Wave 2a)
 Today there is one sheet (`src/index.css`) and two `<style>` elements that the islands add. Each statement below is planned.
 
 ### 5.1 Files and load order
@@ -232,7 +260,7 @@ Rules for each app sheet: no raw colour; a new custom property has the prefix `-
 - Dusk reads three attributes only: `data-tier`, `data-ambient`, and `data-label` on a table cell. A new attribute on `html` needs the lead.
 - Dusk stops its motion on the device flag only. The three rules in the parts file repeat that stop under `data-reduce` (R3 5.4).
 
-## 6. The Yard (planned)
+## 6. The Yard (the split is built in Wave 2a; the drawing is planned for Wave 2b)
 ```
 Yard.tsx ─► yardSim.js  THE CONTROLLER ─► yard/view.ts    THE VIEW (2a) ─► yard/yard.css
                                        ─► yard/draw.ts    THE DRAWING ADAPTER (2a) ─► yard/drawing/layout.ts, bodies.ts, svg.ts (2b), drawing.css
@@ -269,7 +297,7 @@ Yard.tsx ─► yardSim.js  THE CONTROLLER ─► yard/view.ts    THE VIEW (2a) 
 
 **File type (row U-46, approved).** `view`, `draw` and `access` are TypeScript files, and the three drawing files of Y2 follow the same row. `yardSim.js` stays a `.js` file at its path and imports `./yard/view.ts` and `./yard/draw.ts` by the full path. `imperativeStation.ts` exports a named type for the bridge object, `StationCtx`; the view object and the drawing object have the types `YardView` and `YardDrawing` (the three names are set in the contract, C.4, and the lead can change them). `tools/solve.mjs` and `tools/securement-check.mjs` import frozen `.js` modules only, so they run unchanged.
 
-## 7. The gates (planned)
+## 7. The gates (built in Wave 2a)
 After G1, `npm run check` is `node tools/check.mjs`. It runs each offline step in order, prints PASS or FAIL for each step, runs the remaining steps after a failure, and exits non-zero if one step failed. It needs no network, no `dist/` and no browser (contract B.4; R6 section 5).
 
 | Step | npm script | Proves |
@@ -328,16 +356,20 @@ The contract, Part E, has the state of each ruling, with the options and the rea
 | `MOTION-STOP-OWNER`, `SOUND-OWNER`, `UNMOUNT`, `SWITCH-BUTTONS` | Y4. Y2 keeps a pointer path in 2b. | 6 |
 | `TAURI`, `DOCS-WRITER`, `ARCH-UPDATE`, `ARCH-GATE` | `src-tauri/**` waits. D1 writes the root documents; the lead writes `DECISIONS.md` and this file at each wave merge. No new gate for the "must not contain" columns. | 5.2, 6, 9 |
 
-**Open: each row is a PENDING RULING.** Until an answer, each job keeps the behaviour of today.
+**Ruled by the owner after Gate A (D-0038).** The owner took the recommended option of each of
+the 19 picks of `specs/briefs/lead-rulings.md`, section 3: the written exception for travel in the
+Yard drawing; one window that fills the browser; the app sizes for reading text; one tone for each
+live domain; gold for the route, the engine and the goal; the form of the drawing kept for a job;
+the C2 words as sketched; version `2.0.0`; and the R7 picks for motion, sound and the controls.
 
-| Name | Who | Recommended | What changes in this file after an answer |
-|---|---|---|---|
-| `TIER`, the exception only | the owner | One written exception for travel of equipment in the Yard drawing | Section 1; the motion form of section 6. |
-| `PAGE-WIDTH` | the owner | One window that fills the browser | The width that the Yard drawing gets; `--maxw` in block 1 of the bridge. |
-| `GOLD`, `FORM-CHANGE`, `C2-WORDS` | the owner | Gold for the route, the engine and the goal; the form is kept for a job; the words as written | Section 6, the drawing. |
-| `TEXT-SIZE`, `TILE-TONE`, `VERSION` | the owner | The app sizes stay; one tone for each live domain; `2.0.0` | No section of this file. |
-| The R7 picks `R7-P2`, `R7-P4`, `R7-P5`, `R7-P8` to `R7-P12` and `R7-P14` to `R7-P16` (R7-P3 is the pick of row U-13, which is ruled) | the owner | The contract, E.1 | Section 6: motion, sound and the controls during motion. |
-| `MIRROR-WORDS`, `YELLOW-WORD`, `FLASH`, `R7-P6`, `R7-P7`, `R7-P13` | the SME | — | Section 6. The lamp flash of `signal.ts` stays as today. |
+**Open for the SME.** Until an answer, each job keeps the behaviour of today.
+
+| Name | What stays as today | Section |
+|---|---|---|
+| `FLASH` | The lamp flash of `signal.ts`. | 6 |
+| `YELLOW-WORD` | The word "yellow" in the Yard help. | 6 |
+| `MIRROR-WORDS` | Y4 builds the text mirror from words the app has today; the SME reads it before the change reaches `main`. | 6 |
+| `R7-P6`, `R7-P7`, `R7-P13` | Where the engine rests after a spot, the picture of a kick, the sound of a spot. | 6 |
 
 ## 11. Not verified
 1. Each planned statement. Nothing of Wave 2 is built. The marks of `specs/briefs/00-contracts.md`, Part F, stay in force.

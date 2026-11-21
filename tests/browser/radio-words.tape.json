@@ -1,0 +1,82 @@
+{
+  "note": "The word tape of the guided Radio. tests/browser/smoke.mjs recorded it and compares the page with it. A record is the SHA-256 and the word count of the visible text of .radio-wrap, with each run of white space made one space: before the first press of the key control (press 0) and after each of the 14 presses. The text is read as the markup writes it: text-transform is off while it is read. The file holds no text of the page. A build job does not edit this file.",
+  "commit": "c2fb637c8e2e6869c6c42d7d12acbacd44784cf3",
+  "selector": ".radio-wrap",
+  "records": [
+    {
+      "press": 0,
+      "sha256": "aaf15e3d9a87cdefcf8d488587e01ce8149aa1852adfe205980a5a26eaa5f615",
+      "words": 162
+    },
+    {
+      "press": 1,
+      "sha256": "7f492d004510270a29aff0278628539d00521c1b6eec80e7d179d56216d117a8",
+      "words": 204
+    },
+    {
+      "press": 2,
+      "sha256": "a0b276af5cc1b9573d21d9dc5bee033d7342937f3f6dc11088655047ad0bbfc3",
+      "words": 231
+    },
+    {
+      "press": 3,
+      "sha256": "9bc80b6a1ddc79aab4228b018391713a854f985b6fc9e57898f50925363aafdc",
+      "words": 235
+    },
+    {
+      "press": 4,
+      "sha256": "477a805f94a547685f0480a1353c76ffb746ee4e1f6c774c48365fcc92ac90e6",
+      "words": 231
+    },
+    {
+      "press": 5,
+      "sha256": "40e4fc45ca16eb883dab898b699b4635622a8d02c427c6cfd9670b25389b8385",
+      "words": 248
+    },
+    {
+      "press": 6,
+      "sha256": "e966fb8861acdcde55126b3fdf63bbab43eec1c05b05c93f9b3aa6794b826665",
+      "words": 262
+    },
+    {
+      "press": 7,
+      "sha256": "e4bf0b868fd69aca41c8d16047b620b28befa6d5078f73daf6bfd60974c5a207",
+      "words": 277
+    },
+    {
+      "press": 8,
+      "sha256": "3b0cb1399c13a7d84d01423592b33611e30f5ba72521280d62f7f6508d181d15",
+      "words": 269
+    },
+    {
+      "press": 9,
+      "sha256": "2489503040db3ddc37838609f3a353abee39726ac6310caec6a99e2bba9f00eb",
+      "words": 265
+    },
+    {
+      "press": 10,
+      "sha256": "0851caac44d3b3f9a7437416fdca093e292d37d39ceeca43fe65f393252d2331",
+      "words": 266
+    },
+    {
+      "press": 11,
+      "sha256": "a455f9612604d460fa286e101c5815236049019e38f30e970e195bee8091f18d",
+      "words": 331
+    },
+    {
+      "press": 12,
+      "sha256": "321449981fc1e69fd6697f9c29cb303075dbdf6290352da75ee0cb81f43992f5",
+      "words": 359
+    },
+    {
+      "press": 13,
+      "sha256": "e4d3e29091078afd5fcb9ec7f2bc6178276bfc14b67878e32fac3d94a311346a",
+      "words": 366
+    },
+    {
+      "press": 14,
+      "sha256": "e0f17770c25f9b048453fb40287b80cd2861dde4a4b50863ecda0185ca438fb1",
+      "words": 439
+    }
+  ]
+}

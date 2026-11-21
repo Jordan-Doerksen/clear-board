@@ -1090,6 +1090,12 @@ Each other row is ruled or closed.
 
 ## E.1 The owner rules, or the SME answers first
 
+**Closed (2026-11-21, D-0038).** The owner answered each open row of this table with the
+recommended option ("yes to all recommended"). The rows `UPGRADE-LIST`, `U-46`, `U-45`, `U-04`,
+`U-10`, `U-13`, `U-17`, `U-30`, `U-42` and `U-41` were closed at Gate A (D-0035). `FLASH`,
+`YELLOW-WORD`, `MIRROR-WORDS`, `R7-P6`, `R7-P7` and `R7-P13` wait for the SME. The table below is the
+record of the options; `lead-rulings.md` has the answers.
+
 | Name | State | The question, and the source | Options | Recommended, with the reason | Jobs that wait | 2a |
 |---|---|---|---|---|---|---|
 | `UPGRADE-LIST` | **Ruled** (the owner, Gate A question 4; D-0035). Rows U-01 to U-46: yes. Rows U-47 to U-51: no. U1 and the named jobs of 2b and 2c carry the rows. Built in 2a: row U-46 (Y1), the icon files of row U-45 (G1), the build-time read that row U-45 names (S1). G1-2 carries the G1 part of rows U-01, U-43 and U-44 in 2c. Rows U-11, U-24, U-25, U-27, U-33, U-37 and U-40 come back to the owner for the exact words before they ship. | Yes or no for each of the 51 rows (Gate A question 4; `upgrade-list.md` section 2) | Yes or no for each row | As the list recommends: 46 yes, 5 no. The list gives a reason for each row. | U1 (all rows); G1 and G1-2 (U-43, U-44, U-45, U-47); Y4 (U-09, U-12, U-20); B1, B2 (U-41) | No. The plan says: build nothing before the owner has answered. |
@@ -1456,3 +1462,25 @@ one. Where it and an older record differ, this record and the text above are the
 4. F item 16 stays not verified: a control can get 1 px smaller with the face change on the Linux
    test machine. It can show at the merge check of S1, in the look compare. The S1 brief
    (requirement 16) says what S1 does then.
+
+---
+
+# Part H. Updates after D-0038, D-0039 and the 2b briefs (the lead, 2026-11-21)
+
+This part wins over each earlier line of this contract where the two disagree.
+
+1. **D-0038 closed the 19 owner picks.** B.3, B.5, D.4 point 10 and the rows of E.1 that call them
+   open or PENDING are history. `data-tier` stays `"strict"`, with the written exception for travel
+   in the Yard drawing. Gold marks the lined route, the engine and the goal (B.5). The travel legs
+   are `--yard-run-in` (840 ms) and `--yard-run-out` (420 ms) (B.5, `LEG-ROLE`).
+2. **D-0039 changed `TOOLS`.** The gate tools of G1 can follow the owner's reskin tools.
+3. **C.2, line numbers.** On the wave branch after S1, the press rule of `src/index.css` is on
+   lines 127 to 128 and the reduced-motion block on lines 131 to 139 (they were 136 to 137 and 140
+   to 148 at `c2fb637`).
+4. **B.2 against C.4.** `.yard-wrap` comes first in each Yard selector (`YARD-SCOPE`). It meets
+   the namespace check of G1.
+5. **B.6.** The hook `data-cb="prompt"` joins the list at G1-close (`PROMPT-HOOK`).
+6. **The lead's rulings on the open points of the 2b briefs** are in `lead-rulings.md`, section 2.3.
+7. **After G1-close, the base of each 2b job** is the head of the wave branch `claude/cb2-wave-2a`
+   at the end of 2a. The lead names the commit in the start note of each job.
+

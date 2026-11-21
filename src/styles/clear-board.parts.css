@@ -1,0 +1,560 @@
+/* clear-board.parts.css - the page-local parts of Clear Board, on Dusk 0.2.0.
+   This file loads after the five Dusk layers and the bridge, and before the app sheet.
+   Each part has the prefix cb-. Each rule reads Dusk tokens and --cb- names only.
+   A rule that names a Dusk class has the app class .cb-app or .cb-win in front. One rule has a
+   part class in front: the lamp of the home mark, .cb-mark .dusk-led.
+   The file declares no custom property that Dusk declares. */
+
+/* ---- the app root ---------------------------------------------------------------------------
+   body has the class cb-app. The app window has the class cb-win.
+   A Dusk window has a sidebar column. The app has no sidebar, so the content takes each column. */
+.cb-win > .dusk-main { grid-column: 1 / -1; }
+
+/* ---- G20: the 44 px floor -------------------------------------------------------------------
+   Each Dusk control is lower than 44 px. Three selectors, each with the app class in front. */
+.cb-app .dusk-btn,
+.cb-app .dusk-seg button,
+.cb-app .dusk-row { min-height: var(--cb-target); }
+
+.cb-app .dusk-btn,
+.cb-app .dusk-seg button { min-width: var(--cb-target); }
+
+/* the word of a button rises to the base size, and stays in the middle of a wide button */
+.cb-app .dusk-btn {
+  justify-content: center;
+  font-size: var(--fs-base);
+}
+
+/* ---- G7: a Dusk tile or a Dusk row that is a button -----------------------------------------
+   Dusk writes the tile and the row for a link and for a block. On a button the border, the
+   padding, the centred text and the grey fill of the browser stay. This reset has no weight
+   (it is inside :where), so each Dusk rule wins and a lit row keeps its wash. */
+:where(.cb-app button.dusk-tile, .cb-app button.dusk-row) {
+  border: 0;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+:where(.cb-app button.dusk-row) {
+  background: none;
+  padding: var(--sp-1) var(--sp-3);
+}
+
+/* a disabled row: the name is one level lower, no hover wash. The words carry the state. */
+.cb-app button.dusk-row[disabled] { cursor: not-allowed; }
+.cb-app button.dusk-row[disabled]:hover { background: none; }
+.cb-app button.dusk-row[disabled] b { color: var(--ink-2); }
+
+/* ---- G2: the edge of a bar track -------------------------------------------------------------
+   An empty Dusk bar is a well on a panel, and a learner at 0 % sees no bar. The track gets the
+   edge of a control. The fill has no width transition. */
+.cb-app .dusk-bar { border: 1px solid var(--cb-edge); }
+
+/* ---- G1: the answer option -------------------------------------------------------------------
+   An answer is reading text: ink on a head fill, not the gold word of a Dusk button.
+   States: rest, hover, press, selected (aria-pressed), right, wrong, disabled. A right and a
+   wrong option differ by fill, edge and mark. The marks are in the mark block. No opacity. */
+.cb-opts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.cb-opt {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: var(--sp-5) var(--sp-6);
+  border: 1px solid var(--lit-rule);
+  border-radius: var(--r-control);
+  background-color: var(--head);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  line-height: var(--lh-base);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--m-confirm) var(--ease), box-shadow var(--m-confirm) var(--ease);
+}
+.cb-opt:hover:not(:disabled) {
+  background-image: linear-gradient(var(--wash-1), var(--wash-1));
+  box-shadow: var(--neon-ctl);
+}
+.cb-opt[aria-pressed="true"]:not(:disabled) {
+  background-image: linear-gradient(var(--wash-2), var(--wash-2));
+  box-shadow: var(--neon-ctl);
+}
+.cb-opt:active:not(:disabled) {
+  background-image: linear-gradient(var(--wash-2), var(--wash-2));
+  box-shadow: var(--neon-ctl-on);
+}
+.cb-opt:disabled {
+  background-color: var(--well);
+  color: var(--ink-2);
+  cursor: not-allowed;
+}
+.cb-opt.cb-opt--right {
+  background-color: var(--head);
+  background-image: linear-gradient(var(--rowwash-green), var(--rowwash-green));
+  box-shadow: var(--rowneon-green);
+  color: var(--ink);
+}
+.cb-opt.cb-opt--wrong {
+  background-color: var(--head);
+  background-image: linear-gradient(var(--rowwash-red), var(--rowwash-red));
+  box-shadow: var(--rowneon-red);
+  color: var(--ink);
+}
+
+/* ---- G4: the toggle ---------------------------------------------------------------------------
+   Markup: span.cb-toggle > input[type=checkbox] + i. The checkbox is not seen and covers a box of
+   56 by 44 px. The track is 50 by 28 px and the knob is 20 by 20 px. On: the knob is at the right,
+   and the track has a wash and a lit edge. The knob changes place at once. It does not slide.
+   The focus ring is on the track. The knob has a border with no colour, so that a forced-colours
+   mode draws it. No pill and no circle. */
+.cb-toggle {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 56px;
+  height: var(--cb-target);
+}
+.cb-toggle input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.cb-toggle i {
+  position: absolute;
+  top: 8px;
+  left: 3px;
+  width: 50px;
+  height: 28px;
+  border: 1px solid var(--cb-edge);
+  border-radius: var(--r-control);
+  background-color: var(--well);
+  pointer-events: none;
+}
+.cb-toggle i::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border: 1px solid transparent;
+  border-radius: var(--r-chip);
+  background-color: var(--ink-3);
+}
+.cb-toggle input:hover + i { background-image: linear-gradient(var(--wash-1), var(--wash-1)); }
+.cb-toggle input:checked + i {
+  background-image: linear-gradient(var(--wash-2), var(--wash-2));
+  box-shadow: var(--neon-ctl);
+}
+.cb-toggle input:checked + i::after {
+  left: 25px;
+  background-color: var(--lit);
+}
+.cb-toggle input:focus-visible + i {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---- G5 and G6: the text field and the select ------------------------------------------------
+   One skin for both. The native arrow and the native list of a select stay. */
+.cb-input,
+.cb-select {
+  min-height: var(--cb-target);
+  padding: var(--sp-2) var(--sp-5);
+  border: 1px solid var(--cb-edge);
+  border-radius: var(--r-control);
+  background-color: var(--well);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  transition: border-color var(--m-confirm) var(--ease);
+}
+.cb-input { width: 100%; }
+.cb-select { min-width: var(--cb-target); }
+.cb-input::placeholder {
+  color: var(--ink-3);
+  opacity: 1;
+}
+.cb-input:hover:not(:disabled),
+.cb-select:hover:not(:disabled) { border-color: var(--lit); }
+.cb-input:disabled,
+.cb-select:disabled {
+  border-color: var(--hair-2);
+  color: var(--ink-2);
+  cursor: not-allowed;
+}
+
+/* ---- G10: the tabs -----------------------------------------------------------------------------
+   Markup: .cb-tabs[role=tablist] > button.cb-tab[role=tab][aria-selected]. A tab holds a name and
+   a sub-line in a small element. The selected tab reads aria-selected. It is gold: chrome. */
+.cb-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--r-control);
+  background: var(--well);
+  box-shadow: var(--ring-well);
+}
+.cb-tab {
+  display: flex;
+  flex: 1 1 220px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--cb-target);
+  padding: var(--sp-3) var(--sp-5);
+  border: 0;
+  border-radius: var(--r-chip);
+  background: none;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-base);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--m-confirm) var(--ease), box-shadow var(--m-confirm) var(--ease);
+}
+.cb-tab small {
+  color: var(--ink-2);
+  font-size: var(--fs-s);
+  font-weight: 400;
+}
+.cb-tab:hover { background: var(--wash-1); }
+.cb-tab[aria-selected="true"] {
+  background: var(--wash-2);
+  box-shadow: var(--neon-ctl);
+  color: var(--lit);
+}
+
+/* ---- G11: the plain button and the link --------------------------------------------------------
+   A second-rank action: the word in the link colour, no fill. The plain button gets an underline
+   on hover. The link has an underline at each time. */
+.cb-btn--plain,
+.cb-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-width: var(--cb-target);
+  min-height: var(--cb-target);
+  padding: var(--sp-2) var(--sp-3);
+  border: 0;
+  border-radius: var(--r-control);
+  background: none;
+  color: var(--cb-link);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--m-confirm) var(--ease);
+}
+.cb-link { text-decoration: underline; }
+.cb-btn--plain:hover,
+.cb-link:hover {
+  background: var(--wash-1);
+  text-decoration: underline;
+}
+.cb-btn--plain:active,
+.cb-link:active { background: var(--wash-2); }
+.cb-btn--plain:disabled {
+  background: none;
+  color: var(--ink-2);
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
+/* ---- G12: the attention button ------------------------------------------------------------------
+   Red is on this one control. The word carries the meaning. */
+.cb-btn--attn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-width: var(--cb-target);
+  min-height: var(--cb-target);
+  padding: var(--sp-2) var(--gap);
+  border: 1px solid var(--red-ink);
+  border-radius: var(--r-control);
+  background: none;
+  color: var(--cb-attn-ink);
+  font: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: background-color var(--m-confirm) var(--ease);
+}
+.cb-btn--attn:hover { background: var(--rowwash-red); }
+.cb-btn--attn:active { background: var(--wash-1); }
+
+/* ---- G9: the message banner --------------------------------------------------------------------
+   One changing message. The text is ink, not red text. Red is on the edge and on the mark of a
+   refusal only. The least height is 44 px, so that the page does not jump when a message comes. */
+.cb-banner {
+  min-height: var(--cb-target);
+  padding: var(--sp-4) var(--sp-5);
+  border-radius: var(--r-control);
+  background-color: var(--well);
+  box-shadow: var(--ring-well);
+  color: var(--ink-2);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
+.cb-banner--ok { color: var(--ink); }
+.cb-banner--bad {
+  background-image: linear-gradient(var(--rowwash-red), var(--rowwash-red));
+  box-shadow: var(--rowneon-red);
+  color: var(--ink);
+}
+.cb-banner--win {
+  background-image: linear-gradient(var(--rowwash-green), var(--rowwash-green));
+  box-shadow: var(--rowneon-green);
+  color: var(--ink);
+}
+
+/* ---- G13: the chip with its own glyph ----------------------------------------------------------
+   Not a control. The words and the glyph of the app carry the state. The chip adds no second
+   glyph. The dashed edge is a second carrier for caution. */
+.cb-chip {
+  display: inline-block;
+  padding: 1px var(--sp-3);
+  border: 1px solid var(--hair-2);
+  border-radius: var(--r-chip);
+  background: var(--well);
+  color: var(--ink-2);
+  font-size: var(--fs-s);
+  line-height: var(--lh-base);
+}
+.cb-chip--ok {
+  border-color: var(--green-ink);
+  color: var(--cb-ok-ink);
+}
+.cb-chip--caution {
+  border-color: var(--amber-ink);
+  border-style: dashed;
+  color: var(--cb-caution-ink);
+}
+.cb-chip--info {
+  border-color: var(--teal-ink);
+  color: var(--cb-info-ink);
+}
+
+/* ---- G14: the result word ----------------------------------------------------------------------
+   The word is the carrier. The marks are in the mark block. */
+.cb-result { font-weight: var(--fw-bold); }
+.cb-result--ok { color: var(--cb-ok-ink); }
+.cb-result--no { color: var(--cb-attn-ink); }
+
+/* ---- G15: the disclosure and the quote ---------------------------------------------------------
+   Markup: details.cb-disclosure > summary. The native marker stays. */
+.cb-disclosure > summary {
+  min-height: var(--cb-target);
+  padding: var(--sp-4) 0;
+  color: var(--cb-link);
+  line-height: var(--lh-base);
+  cursor: pointer;
+}
+.cb-disclosure > summary:hover { text-decoration: underline; }
+.cb-quote {
+  max-width: var(--measure);
+  margin: 0;
+  padding: var(--sp-4) var(--sp-6);
+  border-left: 3px solid var(--lit-line);
+  border-radius: 0 var(--r-control) var(--r-control) 0;
+  background: var(--well);
+  color: var(--ink);
+}
+
+/* ---- G16: the transcript line and the call box --------------------------------------------------
+   Not a control. The speaker label says the speaker in words. The left edge of a line of the
+   engineer is a green, because the screen says that green lines are the engineer. */
+.cb-tx {
+  padding: var(--sp-3) var(--sp-5);
+  border-left: 3px solid var(--blue);
+  border-radius: 0 var(--r-control) var(--r-control) 0;
+  background: var(--well);
+  color: var(--ink);
+}
+.cb-tx--eng { border-left-color: var(--green); }
+.cb-who {
+  display: block;
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+}
+.cb-call {
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px dashed var(--blue-ink);
+  border-radius: var(--r-control);
+  background: var(--well);
+  color: var(--ink);
+}
+
+/* ---- G17: reading text --------------------------------------------------------------------------
+   Dusk type is for a dense desk tool. A rule, a prompt and an answer are reading text. */
+.cb-prose {
+  max-width: var(--measure);
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
+.cb-prose--lead { font-size: 1.1rem; }
+.cb-sub {
+  color: var(--ink-2);
+  font-size: var(--fs-base);
+}
+/* inside a Dusk row the sub-line keeps its size and its ink against the Dusk rule for small text */
+.cb-app .dusk-row .cb-sub {
+  display: block;
+  color: var(--ink-2);
+  font-size: var(--fs-base);
+}
+/* a link inside a sentence */
+.cb-prose a,
+.cb-sub a {
+  color: var(--cb-link);
+  text-decoration: underline;
+}
+
+/* ---- G18: code ----------------------------------------------------------------------------------- */
+.cb-code {
+  padding: 1px var(--sp-2);
+  border-radius: var(--r-chip);
+  background: var(--well);
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+
+/* ---- G3: the dialog and its rows ---------------------------------------------------------------
+   A native dialog element. The rule sets no display value, so a closed dialog stays closed.
+   Never put the Dusk window class on a dialog: it shows the closed dialog.
+   A floating surface has a lit edge. The head is a Dusk panel head. */
+.cb-dialog {
+  width: min(92%, 440px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-window);
+  background: var(--glass);
+  box-shadow: var(--neon);
+  color: var(--ink);
+}
+.cb-dialog::backdrop { background: var(--cb-scrim); }
+.cb-setrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-6);
+  min-height: var(--cb-target);
+  padding: var(--sp-3) 0;
+}
+.cb-setrow + .cb-setrow { border-top: 1px solid var(--hair); }
+.cb-setrow small {
+  display: block;
+  color: var(--ink-2);
+  font-size: var(--fs-s);
+}
+
+/* ---- G8: the signal frame -----------------------------------------------------------------------
+   A sunk frame with no glow, no gold and no tone: no light and no colour beside a lamp of the
+   drawing. The frame does not touch the drawing inside it. */
+.cb-signal {
+  display: inline-flex;
+  align-items: flex-end;
+  padding: var(--sp-6);
+  border-radius: var(--r-tile);
+  background: var(--well);
+  box-shadow: var(--ring-well);
+}
+
+/* ---- G19: the home mark -------------------------------------------------------------------------
+   A button of 44 by 44 px with a Dusk lamp inside: i.dusk-led.dusk-led--ok. The lamp is the mark
+   of the app here, not a state. The name of the app is beside it. */
+.cb-mark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--cb-target);
+  height: var(--cb-target);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-control);
+  background-color: var(--well);
+  box-shadow: var(--ring-well);
+  cursor: pointer;
+  transition: box-shadow var(--m-confirm) var(--ease);
+}
+.cb-mark:hover {
+  background-image: linear-gradient(var(--wash-1), var(--wash-1));
+  box-shadow: var(--neon-ctl);
+}
+.cb-mark:active { background-image: linear-gradient(var(--wash-2), var(--wash-2)); }
+.cb-mark .dusk-led {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+
+/* ---- the marks of G1, G9 and G14 -----------------------------------------------------------------
+   A mark is CSS content with an empty spoken form, as Dusk writes its own glyphs. It is a second
+   carrier of the state beside the colour. One deletion of this block removes each mark, and no
+   other rule changes. */
+/* css-mark:start */
+.cb-opt--right::before,
+.cb-result--ok::before {
+  content: "✔\00a0";
+  content: "✔\00a0" / "";
+  color: var(--cb-ok-ink);
+}
+.cb-opt--wrong::before,
+.cb-banner--bad::before,
+.cb-result--no::before {
+  content: "✕\00a0";
+  content: "✕\00a0" / "";
+  color: var(--cb-attn-ink);
+}
+/* css-mark:end */
+
+/* ---- the reading modes ----------------------------------------------------------------------------
+   The bridge sets the tokens of each mode. These rules do the work that a token cannot do. */
+
+/* High contrast: a tile cap becomes one flat, darker colour, and the edge of an icon square reads
+   the same token. The edge gets the edge of a container, so that the square still shows. */
+html[data-contrast="1"] .cb-app .dusk-ico { border-color: var(--lit-line); }
+
+/* Dyslexia type: a browser does not pass the letter spacing and the word spacing of the page into
+   a form control. This rule carries both. */
+html[data-dys="1"] button,
+html[data-dys="1"] input,
+html[data-dys="1"] select {
+  letter-spacing: inherit;
+  word-spacing: inherit;
+}
+
+/* Reduced motion: Dusk stops its transitions and its tile lift on the device flag only. These
+   three rules do the same on the setting of the app. The brighter edge, the washes and the focus
+   ring stay, so each state still shows with no movement. A rule in a later sheet that sets a
+   transition with more weight than rule 3 must stop it under the same attribute. */
+html[data-reduce="1"] .cb-app .dusk-tile,
+html[data-reduce="1"] .cb-app .dusk-btn,
+html[data-reduce="1"] .cb-app .dusk-seg button,
+html[data-reduce="1"] .cb-app .dusk-row { transition: none; }
+
+html[data-reduce="1"] .cb-app .dusk-tile:hover,
+html[data-reduce="1"] .cb-app .dusk-tile:focus-within { transform: none; }
+
+html[data-reduce="1"] [class*="cb-"] {
+  transition: none;
+  animation: none;
+}

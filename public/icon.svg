@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Clear Board">
+  <!-- Clear Board icon: the monogram, the master drawing. It is the manifest icon. Use it at 32 px and larger.
+       Each colour is a copied value of a Dusk 0.2.0 token: glass, lit, wall-3 and green. An icon file cannot read a style sheet. -->
+  <defs>
+    <filter id="lineGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+    <filter id="boardGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="20"/>
+    </filter>
+    <clipPath id="floorClip">
+      <rect width="512" height="512" rx="96"/>
+    </clipPath>
+  </defs>
+
+  <!-- the floor -->
+  <rect width="512" height="512" rx="96" fill="#0a0810"/>
+
+  <!-- the glow of the lit line and of the board, on the floor. Decoration only: the drawing reads without it. -->
+  <g clip-path="url(#floorClip)">
+    <path d="M388 208V188L324 124H188L124 188V324L188 388H324L388 324V304" fill="none" stroke="#e0864a" stroke-opacity="0.50" stroke-width="32" filter="url(#lineGlow)"/>
+    <rect x="208" y="208" width="96" height="96" rx="12" fill="#3fbf7a" fill-opacity="0.55" filter="url(#boardGlow)"/>
+  </g>
+
+  <!-- the letter C: one line, one weight, straight runs and 45 degree corners, as on a track diagram -->
+  <path d="M388 208V188L324 124H188L124 188V324L188 388H324L388 324V304" fill="none" stroke="#f2c27a" stroke-width="56" stroke-linejoin="miter"/>
+
+  <!-- the board that the C holds: as high as the mouth of the C, one line weight clear of the line -->
+  <rect x="208" y="208" width="96" height="96" rx="12" fill="#3fbf7a"/>
+</svg>

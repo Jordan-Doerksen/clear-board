@@ -1,6 +1,6 @@
 # Clear Board — DECISIONS
 
-*ADR-style. Each real call: what was chosen, what else was weighed, why. Last updated 2026-11-20.*
+*ADR-style. Each real call: what was chosen, what else was weighed, why. Last updated 2026-11-21.*
 
 Page law tier: STRICT
 
@@ -575,6 +575,46 @@ because that repository is private and this one is public. The Files line of B3 
 plan: B3 can change each colour in `radioSim.js` and no word. `src-tauri/**` waits for a session
 that can make the Windows build. Pictures of a job are committed at scale 1.
 **Until the owner answers an open question,** each job keeps the behaviour of today for it.
+
+### D-0038 — The owner's picks for Wave 2b and 2c, and the written exception to STRICT
+**Chosen (the owner, 2026-11-21, the words "yes to all recommended" and "yes"):** the recommended
+option of each of the 19 picks of `specs/briefs/lead-rulings.md`, section 3.
+**The written exception to STRICT:** the tier line stays `Page law tier: STRICT`. The Yard drawing
+can show travel of equipment after a learner action: a move, a kick, the arrival when the learner
+asks for it, and the departure. Nothing else on a page moves except a state change. Reduced motion
+stops each travel effect, and the end state shows at once with its words.
+**The page:** one window that fills the browser; lines of text stay capped. The app sizes stay for
+reading text; the small Dusk sizes are for labels and counts. A domain tile has one tone when the
+domain is live and grey when it is not.
+**The Yard drawing (look C2):** gold marks the lined route, the engine and the goal (Dusk: gold is
+chrome and selection). The form of the drawing is selected when a job starts and kept for that job.
+The new words of the C2 legend and the six labels are approved as sketched; the SME confirms the
+rail terms. A travel leg takes 840 ms in and 420 ms out. A still trace shows the last move.
+**The Yard controls:** the sound is off by default, with its own switch that holds the choice. The
+arrival plays on request only. The watched optimal line is a stepper (Next, Back, Play all, Stop).
+Secure, flag and certify get one new confirmation sound. A move log has "Play again". A new input
+ends a running effect. The cost of a move is said in words; the SME checks the words. After Depart
+the lead shows empty and the job is closed until Reset. A switch throw clears a refusal that is no
+longer true.
+**The version:** the first version of Clear Board 2 is `2.0.0`.
+**Still open for the SME, not built:** the flashing lamp under reduced motion, the word "yellow",
+the wording of the Yard text mirror (Y4 builds it from words the app has today; the SME reads it
+before the change reaches `main`), where the engine rests after a spot, the picture of a kick, the
+sound of a spot.
+
+### D-0039 — The gate tools may follow the owner's reskin tools (changes the TOOLS ruling of D-0037)
+**Chosen (the owner, 2026-11-21, "Yes, publish it"):** the code of the gate tools of job G1 can be
+published in this public repository as it is. `tools/colour-lint.mjs` follows the structure of the
+owner's reskin tool `token-lint.mjs` closely, with other names. The uses check of
+`tools/dusk-lock-check.mjs` follows `dusk-sync.mjs`, and two helpers of `tools/look/look.mjs` follow
+`visual-regress.mjs`. The reskin tools stay in their own private repository; no file of them is
+copied whole.
+**Why the question came up:** the lead had ruled that G1 copies no code from the private
+repository (TOOLS, option c), because the owner had not said that it could be published. The
+independent review of G1 found the close match. The lead checked the files: they hold no private
+name, path or project reference.
+**Correction:** the message of one unpushed commit said that no code of the reskin tools is in the
+repository. The lead corrected that message before the first push. The trees did not change.
 
 ---
 *V1. Edit as decisions are made or reversed.*

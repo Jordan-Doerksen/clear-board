@@ -1,0 +1,8 @@
+{
+  "note": "The allow file of the name check (tools/name-check.mjs). A build job does not edit this file. The closing commit of the G1 line removes each entry that no file needs. No entry is added to turn the gate green.",
+  "collisions": [],
+  "legacy": {
+    "src/styles/clear-board.tokens.css": ["--bg", "--surface", "--surface-2", "--line", "--muted", "--clear", "--caution", "--stop", "--r", "--maxw", "--fs", "--space", "--font"],
+    "src/stations/radioSim.js": ["--rbg", "--rcard", "--rcard2", "--rline", "--rink", "--rmuted", "--ryellow", "--rblue", "--rgreen", "--rorange"]
+  }
+}

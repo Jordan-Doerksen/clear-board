@@ -1,0 +1,47 @@
+# The gates of Clear Board, on each branch and each pull request.
+# No secret, no timer, no Pages permission. The deploy workflow is a different file.
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # The full history: the frozen-file hash gate compares its lock with the baseline commit.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check          # the 11 offline gate steps; the frozen-file hash gate is step 1
+      - run: npm run build
+      - run: npx playwright install chromium
+      - run: npm run test:browser
+      # A report only: this step does not fail the run. The baseline is the build of the merge base,
+      # made on this runner. A baseline is compared only with pictures from the same machine.
+      - name: Look compare against the merge base, as a report
+        continue-on-error: true
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          base="$(git merge-base HEAD "origin/${BASE_REF:-main}")"
+          npm run look:baseline -- --ref "$base"
+          npm run look:compare -- --look --gate
+      - name: Upload the look output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: look
+          path: .look/
+          include-hidden-files: true
+          if-no-files-found: ignore

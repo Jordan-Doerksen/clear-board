@@ -1,0 +1,7 @@
+{
+  "note": "The baseline of the raw-colour lint (tools/colour-lint.mjs): the count of raw colours of each file on the day of the baseline. A value only goes down. A build job does not edit this file. The closing commit of the G1 line writes it again after each wave merge.",
+  "files": {
+    "src/stations/radioSim.js": 45,
+    "src/stations/yard/render.js": 22
+  }
+}

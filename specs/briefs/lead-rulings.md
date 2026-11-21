@@ -86,13 +86,61 @@ The job that applied the rulings set a default where a ruling gave no name. The 
 | The items of contract E.5 | Each one stands as written. |
 | A control that is 1 px smaller at the merge check of S1 | The lead rules when S1 reports it. |
 
-## 3. Open: the owner rules
+### 2.2 Rulings after the review of G1 (2026-11-21)
 
-Each row keeps the behaviour of today until the owner answers. Wave 2a can start without each one.
+| Name | The ruling | The reason |
+|---|---|---|
+| `TOOLS` | Changed by the owner (D-0039): the gate tools can follow the owner's reskin tools. | The owner's answer. |
+| `G1-LIB` | Accept `tools/lib/js-scan.mjs` and `tools/lib/css-scan.mjs`. They belong to G1, as each file of `tools/**`. | One scanner for three tools. |
+| `TAPE-CASE` | At G1-close, the word tape of the guided Radio reads the words as the markup writes them (letter case from a style is off while it reads), as the look harness does after commit `b6ee6c4`. G1-close records the tape again from the build of `c2fb637` in that form. | A style that changes the letter case changes no word. B3 can change each style value of `radioSim.js` (`B3-LINE`). |
+| `TARGETS-44` | When G1-close turns the report case "targets" into a gate, its floor is 44 px, not 43.5 px. | Fence rule 8. |
+| `YARD-WRAP` | At G1-close, `yard-wrap` leaves the list `classesMayGo` of `tools/look/cb.config.json`. | The contract keeps `.yard-wrap` (B.2, B.6). A lost `.yard-wrap` must fail. |
+| `LOOK-MODE` | A reskin job proves its look with `look.mjs compare --look --gate`: a pixel difference is listed and does not fail; a lost word, control or id, a smaller text and a sideways scroll fail. | A reskin changes pixels by design. |
 
-| Name | The question | Recommended | Jobs that wait |
+### 2.3 Rulings on the open points of the Wave 2b briefs (2026-11-21)
+
+The check of the five 2b briefs merged the open points into 18. The lead takes the recommended
+option of each. A brief that says "open for the lead" for one of these names follows this table.
+
+| Name | The ruling |
+|---|---|
+| `TEXT-READING` | Each reading text keeps its size of today. A label or a count takes its Dusk size only when that size is not smaller. One form in all five briefs. |
+| `TEXT-CAP` | B2 and B3 cap each block of reading text at `--measure` under their scope class. Controls and containers keep the full width. |
+| `PROMPT-HOOK` | At G1-close, the G1 line adds the hook `data-cb="prompt"` to contract B.6 and lets the smoke case read the hook or the class `.prompt`. B2 then puts the hook on the prompt body. |
+| `B3-BACK` | B3 can swap the class `back` of the island's "← Home" (`radioSim.js:135`) for `cb-btn--plain`, in a commit of its own. No word changes. |
+| `ISLAND-COMMENT` | Widened: B3 corrects the comment on lines 2 and 3 of `Radio.tsx` and the comment at `RadioTest.tsx:60-61`. Comments only. |
+| `RULE-LINE-TONE` | The rule line of the Radio stays green (`--green-ink`). `TILE-TONE` names the domain tiles only. |
+| `TILE-TONE` (the tone) | Teal for each live domain tile and for the path bar; grey for a domain that is not live. In Dusk, teal is information and never a state. |
+| `FORM-KEEP` | Y2 selects the form when a job starts, from the width of the frame and the measured text over each state of the authored line and its routes, and keeps it for the job. If the learner's own moves reach a state that the kept wide form cannot draw with no defect, the drawing changes to the tall form one time and keeps it for the rest of the job. The lead tells the owner this case. |
+| `LEG-ROLE` | `anim.js` maps the first and the last 600 ms step of a move to `--yard-run-in` and `--yard-run-out`. Each other step keeps its time. Y4 passes a role for each step in 2c. |
+| `LANDING` | No landing place in 2b. Y2 adds the optional `builder` field of the paint call for Y4. |
+| `ROUTE-WORDS`, `YARD-HEAD` | "Route: LEAD → …" and the head bar of the yard panel are not shown in 2b. Y4 shows them in 2c from the facts that `bodies.ts` exports. |
+| `Y2-MERGE`, `Y3-MERGE` | No merge of the wave branch in 2b. Each job proves its lines on its own branch. The lead takes the Yard at 1440 and 1280 at the 2b merge check. |
+| `TRACE-WORDS` | No legend line for the trace in 2b. The lead brings one line to the owner before the change reaches `main`. |
+| `TEXT-FLOOR` | 12 px is the smallest size of each word of the Yard drawing and its legend (plan item P-04). |
+| `TURN-MARK` | A coupler mark shows on both sides of a row turn that falls inside a coupled cut. |
+| `YARD-SCOPE` | `.yard-wrap` comes first in each Yard selector. It meets the namespace check. |
+| B1, section 7.5 | Each of the ten points is accepted as the brief writes it after its check: teal for `TILE-TONE`; a 180 px `apple-touch-icon.png` (the usual size; not verified); the emoji of today in the Dusk icon square, with no new glyph (the owner sees the squares at the look gate); a "control is smaller" line of the look compare is not a failure when the control stays 44 by 44 px or more, and the report lists each one with both sizes; a 6 px corner on a tile that is a button; `role="banner"` on the title bar and no name on the window section; `display: block` on `main#view`; the common `TEXT-READING` form; the letter case of today; the scope class names of the brief. |
+| Y3, section 7.5 | Each of the seven points is accepted as the brief writes it. |
+| The contract | Part H of `00-contracts.md` records these rulings and the D-0038 updates of B.3, B.5, C.2, D.4 and E.1. |
+
+### 2.4 Rulings at the start of Wave 2b (2026-11-21)
+
+| Name | The ruling | The reason |
+|---|---|---|
+| `2B-BASE` | Each 2b job starts from the head of the Wave 2a branch, `1590be5`. Its look baseline is built from that commit (`npm run look:baseline -- --ref 1590be5…`). Its compare runs in look mode (`--look --gate`). | Wave 2a is merged, checked and green at that commit. |
+| `PICTURES-CAP` | A committed picture is at device scale factor 1. A picture taller than 6000 px is committed as its first 6000 px; the full picture stays in the uncommitted `.look/` folder. | The full Reference pages are about 20,000 px high and 2.5 MB each. The committed pictures are for the owner's look, and the top of a long page carries the look. |
+
+## 3. Closed by the owner after Gate A
+
+The owner answered the sheet of these 19 picks on 2026-11-21 with the words "yes to all
+recommended" and "yes" (D-0038). Each row takes the option in the column "The answer". The text
+"Until an answer" in a row is history. Where a row says that the SME confirms or checks words, that
+check stays open and is in the final report.
+
+| Name | The question | The answer (the recommended option) | Jobs that carry it |
 |---|---|---|---|
-| `TIER` | The page-law tier. | STRICT, with one written exception: the Yard drawing can show travel of equipment after a learner action. Until an answer: `Page law tier: STRICT`, with no exception. | Y2, Y4 |
+| `TIER` | The page-law tier. | STRICT, with one written exception: the Yard drawing can show travel of equipment after a learner action. The tier line stays `Page law tier: STRICT`. | Y2, Y4 |
 | `PAGE-WIDTH` | The page width. | One window that fills the browser. Text lines stay capped. | B1, Y3, Y2 |
 | `TEXT-SIZE` | The size of reading text. | The app sizes stay for reading text. | B1, B2, B3, Y3 |
 | `TILE-TONE` | The colour of a domain tile. | One tone for each live domain, grey for a domain that is not live. | B1 |
