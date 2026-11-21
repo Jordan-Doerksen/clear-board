@@ -125,6 +125,11 @@ export interface YardView {
    * picture shows, and BUILD with the goal track and its count, for a job with a goal track.
    */
   setYardHead(data: { route: string; goal: { track: string; have: number; want: number } | null }): void;
+  /**
+   * The tracks where the cars of the job stand now, off the goal track (lead ruling FROM-NOW). The
+   * work order says "(now on ...)" and the words stay true after each move; an empty list hides them.
+   */
+  setCarsNow(tracks: string[]): void;
   /** Shows or hides the control "Show the arrival" of the work order (R7-P5). */
   setArrival(shown: boolean): void;
   /** The handler of the control "Show the arrival". */
@@ -394,7 +399,7 @@ export function createView(root: HTMLElement): YardView {
       const from = data.from.map((t) => `<span class="dusk-num">${t}</span>`).join(', ');
       const job = data.depart
         ? `<div class="yd-wo-job cb-prose">Build the outbound${data.ordered ? ' in order' : ''} — gather <b class="dusk-num">${nums.join(' · ')}</b> onto your train${data.from.length ? ` <span class="yd-wo-from">(set out on ${from})</span>` : ''}, then <b>Depart ▸</b>.</div>`
-        : `<div class="yd-wo-job cb-prose">Build ${mark(data.goalTrack as string)} — gather <b class="dusk-num">${nums.join(' · ')}</b> onto it${data.from.length ? ` <span class="yd-wo-from">(now on ${from})</span>` : ''}.</div>`;
+        : `<div class="yd-wo-job cb-prose">Build ${mark(data.goalTrack as string)} — gather <b class="dusk-num">${nums.join(' · ')}</b> onto it<span class="yd-wo-from" data-now${data.from.length ? '' : ' hidden'}> (now on ${from})</span>.</div>`;
       const arrival = data.arrival
         ? `<button type="button" class="yd-go dusk-btn yd-arrival" id="yard-arrival"><span aria-hidden="true">▶</span> Show the arrival</button>`
         : '';
@@ -516,6 +521,15 @@ export function createView(root: HTMLElement): YardView {
       const label = at('yard-view-label');
       label.hidden = !text;
       if (label.textContent !== (text || '')) label.textContent = text || '';
+    },
+
+    setCarsNow(tracks) {
+      const now = root.querySelector<HTMLElement>('.yd-wo-from[data-now]');
+      if (!now) return;
+      // With no car of the job off the goal track, the words go: the span is hidden and empty.
+      const html = tracks.length ? ` (now on ${tracks.map((t) => `<span class="dusk-num">${t}</span>`).join(', ')})` : '';
+      now.hidden = tracks.length === 0;
+      if (now.innerHTML !== html) now.innerHTML = html;
     },
 
     setYardHead({ route, goal }) {

@@ -155,6 +155,7 @@ export function mount(root, ctx) {
     if (!anim && !cine) {
       mirror.update(state, puzzle, { departed }); switches.setLining(state.lined);
       view.setArrival(canArrive());
+      if (!puzzle.goal.depart) view.setCarsNow(carsNow());
     }
   }
 
@@ -351,7 +352,12 @@ export function mount(root, ctx) {
     }
     const chk = precheck(kind, id, n);
     if (!chk.ok) {
-      sfx.refuse(); refusalBanner(chk.msg);
+      sfx.refuse();
+      // A job that is done keeps its words (lead ruling WIN-HOLD). With nothing locked during motion
+      // (R7-P11), a second press of the call that won the job comes to a done job; its refusal is said
+      // in the status region and does not replace "Job done." on the screen.
+      if (!puzzle.goal.depart && checkWin(state, puzzle)) { live.say(chk.msg); return; }
+      refusalBanner(chk.msg);
       // Keep the call when its refusal is about the lining of the route (routeReady of the model).
       const r = kind === 'secure' ? null : routeReady(state, id);
       if (r && !r.ok && r.msg === chk.msg) refusal = { id, msg: chk.msg };
@@ -778,6 +784,17 @@ export function mount(root, ctx) {
       goalTrack: puzzle.goal.track, par: puzzle.par,
       lines: puzzle.listed.map((e) => ({ mark: e.trueMark, track: e.trueTrack, corrected: !!e.error })),
     });
+  }
+
+  // The tracks where the cars of the job stand now, off the goal track, in the order of the cars of
+  // the goal (lead ruling FROM-NOW). A car that the engine holds is on no track. The work order says
+  // "(now on ...)", and these words must stay true after a move (fence item 15).
+  function carsNow() {
+    const g = puzzle.goal, on = [];
+    for (const car of g.cars)
+      for (const [trk, marks] of Object.entries(state.tracks))
+        if (trk !== g.track && marks.includes(car) && !on.includes(trk)) on.push(trk);
+    return on;
   }
 
   // The job, stated like a switch list — derived from the puzzle goal.
