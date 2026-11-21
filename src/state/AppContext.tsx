@@ -276,6 +276,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const replaceProgress = useCallback((next: Profile, nextSettings: Settings | null) => {
     const p = structuredClone(next);
+    // A load replaces the progress on this device, also when the file holds a copy of this same
+    // profile. The loaded profile gets a new createdAt, so another open copy of the app replaces its
+    // profile with it and does not merge its older answers back into it (U-34).
+    p.createdAt = new Date().toISOString();
     if (content) recomputeMastery(p, content);
     saveProfile(p);
     setProfile(p);
