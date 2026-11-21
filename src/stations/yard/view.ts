@@ -145,6 +145,12 @@ export interface YardView {
   setMuted(muted: boolean): void;
 }
 
+// The words of "Watch optimal" when no line plays. The sign ▶ is decoration: aria-hidden keeps it
+// out of the spoken name, so a screen reader says "Watch optimal" (row U-41, ruling SIGN-NAME). The
+// button is an inline flex box with a gap. One outer span holds the sign and the words, so the
+// button keeps one flex item, and the screen shows the text and the space of before.
+const WATCH_OPTIMAL = '<span><span aria-hidden="true">▶</span> Watch optimal</span>';
+
 // The body of the Yard page. The station wrapper (../Yard.tsx) draws "← Home" and the heading above
 // the host, so this markup starts with the strip.
 const YARD_HTML = `
@@ -174,7 +180,7 @@ const YARD_HTML = `
       <label class="yd-unit cb-sub yd-move-part" for="count">cars</label>
       <div class="yd-field yd-move-part"><label class="yd-label" for="track">Which track</label><select class="cb-select" id="track"></select></div>
       <button class="yd-go dusk-btn yd-move-part" id="work">Work it ▸</button>
-      <button class="yd-go dusk-btn" id="optimal" title="Auto-line and show the fewest-moves line, one step at a time">▶ Watch optimal</button>
+      <button class="yd-go dusk-btn" id="optimal" title="Auto-line and show the fewest-moves line, one step at a time">${WATCH_OPTIMAL}</button>
       <button type="button" class="yd-go dusk-btn yd-demo-part" id="yard-back" hidden><span aria-hidden="true">◂</span> Back</button>
       <button type="button" class="yd-go dusk-btn yd-demo-part" id="yard-next" hidden>Next <span aria-hidden="true">▸</span></button>
       <button type="button" class="yd-go dusk-btn yd-demo-part" id="yard-play" hidden></button>
@@ -446,7 +452,7 @@ export function createView(root: HTMLElement): YardView {
 
     setWatching(on) {
       const b = at<HTMLButtonElement>('optimal');
-      b.textContent = on ? 'Stop watching' : '▶ Watch optimal';
+      b.innerHTML = on ? 'Stop watching' : WATCH_OPTIMAL;
       if (on) b.removeAttribute('title'); else b.title = watchTitle;
     },
 
