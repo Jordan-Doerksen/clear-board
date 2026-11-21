@@ -35,8 +35,9 @@
 // `compare` fails on these facts: an element id that is gone (an id of `idsMayGo` gives a
 // warning only); a class name that is gone (a class of `classesMayGo` gives a warning only; an
 // entry can end with `*`); a new script error; more sideways scroll; a smaller smallest text;
-// a word or a number that is gone or new; a control that is gone or smaller. With no `--look`
-// a pixel difference fails also. The pixels are counted with no package: the SHA-256 of the
+// a word or a number that is gone or new; a control that is gone or smaller. A word and the name
+// of a control are read as the markup writes them: a letter case that a style sets (text-transform)
+// changes the picture only. With no `--look` a pixel difference fails also. The pixels are counted with no package: the SHA-256 of the
 // two files is compared, and where they differ both are decoded in a browser page.
 //
 // A baseline is compared only with pictures from the same machine.
@@ -146,16 +147,26 @@ function collectFacts() {
     const px = parseFloat(getComputedStyle(el).fontSize);
     if (!smallest || px < smallest.px) smallest = { px, where: `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ''}: ${collapse(el.textContent).slice(0, 40)}` };
   }
+  // The words and the names of the controls are read as the markup writes them. A rule with
+  // text-transform changes the look of a word, not the word: the picture shows that change.
+  // So text-transform is off while the text is read, and on again before a control is measured.
+  const asWritten = document.createElement('style');
+  asWritten.textContent = '*, *::first-letter, *::first-line { text-transform: none !important; }';
+  document.head.append(asWritten);
   const words = {};
   for (const word of collapse(document.body.innerText).split(' ')) if (word) words[word] = (words[word] ?? 0) + 1;
-  const controls = [];
+  const named = [];
   for (const el of document.querySelectorAll('button, a[href], select, input, textarea, summary, [role="tab"], [role="button"]')) {
     if (!shown(el)) continue;
     const tag = el.tagName.toLowerCase();
     const name = collapse(el.getAttribute('aria-label')) || (tag === 'select' ? '' : collapse(el.innerText)) || collapse(el.getAttribute('placeholder')) || collapse(el.getAttribute('title')) || (el.id ? `#${el.id}` : '');
-    const box = el.getBoundingClientRect();
-    controls.push({ key: `${tag} "${name}"`, width: Math.round(box.width * 100) / 100, height: Math.round(box.height * 100) / 100 });
+    named.push({ el, key: `${tag} "${name}"` });
   }
+  asWritten.remove();
+  const controls = named.map(({ el, key }) => {
+    const box = el.getBoundingClientRect();
+    return { key, width: Math.round(box.width * 100) / 100, height: Math.round(box.height * 100) / 100 };
+  });
   const page = document.documentElement;
   return { ids, classes, smallestText: smallest, words, controls, sidewaysScroll: Math.max(0, page.scrollWidth - page.clientWidth), pageWidth: page.scrollWidth, pageHeight: page.scrollHeight };
 }
