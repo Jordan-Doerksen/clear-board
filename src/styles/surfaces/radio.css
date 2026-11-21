@@ -13,6 +13,24 @@
   margin-inline: auto;
 }
 
+/* ---- the station heading (row U-29, contract C7) ------------------------------------------------------
+   One h2 for both modes, in the form of the Reference title: 20.8 px at a 16 px root. The station icon
+   sits in the Dusk icon square, before the word, on the line of the word; the glyph keeps the size of
+   the heading. With the dyslexia type the heading takes the spacing of the mode, as the Reference title. */
+.cb-app .cb-radio-view .cb-radio-title {
+  margin-top: var(--sp-3);
+  font-size: 1.3rem;
+}
+.cb-app .cb-radio-view .cb-radio-title .dusk-ico {
+  display: inline-grid;
+  vertical-align: middle;
+  width: 1.6em;
+  height: 1.6em;
+  font-size: 1em;
+}
+html[data-dys="1"] .cb-app .cb-radio-view .cb-radio-title { letter-spacing: inherit; }
+html[data-dys="1"] .cb-app .cb-radio-view .cb-radio-title .dusk-ico { line-height: var(--lh-base); }
+
 /* ---- the mode tabs (part G10) ---------------------------------------------------------------------
    The sub-line keeps 12.16 px (the part gives 12 px). The tabs keep the space of today above and below. */
 .cb-app .cb-radio-view .cb-tabs { margin: 10px 0 16px; }
