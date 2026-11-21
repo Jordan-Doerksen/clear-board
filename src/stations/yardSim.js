@@ -15,15 +15,14 @@
 // an element by its id or through a view function. This file draws only through the drawing
 // object: it does not import render.js.
 //
-// This file runs no statement of its own when it is imported. Its imports have two effects:
-// the two style files go into the page (yard.css, and drawing/drawing.css through draw.ts),
-// and sound.js reads the stored mute value. The station wrapper (Yard.tsx) also imports yard.css,
-// so the build puts that file in the sheet of the app.
+// This file runs no statement of its own when it is imported. Its imports have one effect: the two
+// style files go into the page (yard.css, and drawing/drawing.css through draw.ts). The station
+// wrapper (Yard.tsx) also imports yard.css, so the build puts that file in the sheet of the app.
 
 import { TRACK_IDS, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
 import { freshState, lineSwitch, routeReady, canPull, canSpot, canKick, canSecure, spotPlan, pull, spot, kick, secure, checkWin, unsecuredGoal, grade } from './yard/model.js';
 import { play, setSpeed } from './yard/anim.js';
-import { sfx, resume, toggleMute, isMuted } from './yard/sound.js';
+import { sfx, resume, toggleMute, loadMuted } from './yard/sound.js';
 import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
 import './yard/yard.css';
 import { createView } from './yard/view.ts';
@@ -186,7 +185,7 @@ export function mount(root, ctx) {
   });
   $('depart').addEventListener('click', () => { resume(); departOut(); });
   $('reset').addEventListener('click', () => { if (!busy) load(puzzle, true); });
-  $('mute').addEventListener('click', () => { view.setMuted(toggleMute()); });
+  $('mute').addEventListener('click', () => { resume(); view.setMuted(toggleMute()); });
 
   // Full validation up front (lining + count + foul/clearance) so a fouling move is
   // refused before the engine ever moves.
@@ -625,9 +624,11 @@ export function mount(root, ctx) {
     });
   });
 
-  // sound default: start muted if Clear Board's audio setting is off.
-  if (ctx.settings && !ctx.settings.audio && !isMuted()) toggleMute();
-  view.setMuted(isMuted());
+  // The sound (R7-P2, U-36, 2c-plan C8): off by default, with its own switch that holds the choice.
+  // The Yard reads the stored choice at each mount, so that a reset of the progress (it removes the
+  // key) shows at the next visit. The Yard does not change the choice at mount, and "Read aloud" does
+  // not set it.
+  view.setMuted(loadMuted());
   load(PUZZLES[0]);
 
   // The teardown (UNMOUNT). A move, the watched line and the arrival stop at once: the new gen ends

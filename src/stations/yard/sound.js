@@ -1,21 +1,28 @@
 // sound.js — synthesized Web Audio sfx (no asset files). Lazy context resumed on
 // first gesture; mute persisted in localStorage. SPEC §9.
 //
-// The key sl_muted holds the stored choice (2c-plan C8). Each read and each write of it is guarded:
-// a browser can refuse storage, and then the read throws. With storage refused, the choice holds for
-// this visit only, and the Yard still loads and plays (U-07).
+// The key sl_muted holds the stored choice (2c-plan C8): '0' is sound on, '1' is sound off. The
+// sound is off by default (R7-P2): with no stored value the Yard is silent. The controller reads the
+// stored choice at each mount (loadMuted), so that a reset of the progress, which removes the key,
+// shows at the next visit with no reload. Nothing here reads storage when the module loads.
+//
+// Each read and each write of the key is guarded: a browser can refuse storage, and then the call
+// throws. With storage refused, the choice of this page holds until the page is closed, and the Yard
+// still loads and plays (U-07).
 
+const KEY = 'sl_muted';
 let ctx = null;
-let muted = readMuted();
+let muted = true;
 
-function readMuted() {
-  try { return localStorage.getItem('sl_muted') === '1'; } catch { return false; }
+/** Reads the stored choice and returns true when the sound is off. With no stored value it is off. */
+export function loadMuted() {
+  try { muted = localStorage.getItem(KEY) !== '0'; } catch { /* storage refused: the choice of this page holds */ }
+  return muted;
 }
 
-export function isMuted() { return muted; }
 export function toggleMute() {
   muted = !muted;
-  try { localStorage.setItem('sl_muted', muted ? '1' : '0'); } catch { /* storage refused: the choice holds for this visit */ }
+  try { localStorage.setItem(KEY, muted ? '1' : '0'); } catch { /* storage refused: the choice holds for this page */ }
   return muted;
 }
 export function resume() {
