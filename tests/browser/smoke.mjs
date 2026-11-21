@@ -966,13 +966,14 @@ const GATE_CASES = [
         ok(await notice.isVisible(), 'the notice went away on a change of route');
         // 2. The learner presses the control: the page reloads on the second build.
         await reloads(page, reload, `copy A, the notice "${UPDATE_NOTICE}"`);
-        await yardRoute.check(page);
+        await yardRoute.check(page).catch((err) => { throw new CaseFailure(`copy A after its "Reload": the Yard did not draw: ${err.message.split('\n')[0]}`); });
         ok(await page.evaluate(() => window.__cbSmokeOpen) === undefined, 'the page did not reload after the control was pressed');
         ok(await page.evaluate(() => document.querySelector('meta[name="cb-smoke-build"]')?.getAttribute('content')) === '2', 'after the reload the page does not show the second build');
         ok((await loadedChunks(page)).some(isNew), `after the reload the Yard did not load the new chunk ${second.newYard}`);
         ok(await page.getByText(UPDATE_NOTICE, { exact: true }).count() === 0, `the notice "${UPDATE_NOTICE}" still shows after the reload on the new build`);
         // 3. Copy B still runs the first build. Wait until the new worker controls B and is activated:
-        // its activation takes the files of the first build out of the cache. Then open the Yard in B.
+        // its activation takes each file that the second build does not hold out of the cache. Then
+        // open the Yard in B.
         const taken = await other.waitForFunction(() => {
           const worker = navigator.serviceWorker.controller;
           return worker !== null && worker !== window.__cbFirstWorker && worker.state === 'activated';
