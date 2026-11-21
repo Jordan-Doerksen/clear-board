@@ -98,8 +98,8 @@ export function RadioTest() {
     if (step) speak(step.pre ? step.pre : (step.read || step.status || ''));
   }, [step, speak]);
 
-  if (!content || !allSteps) return <p className="muted">Loading…</p>;
-  if (!items.length) return <p className="muted">The radio script hasn't loaded.</p>;
+  if (!content || !allSteps) return <p className="dusk-lede">Loading…</p>;
+  if (!items.length) return <p className="dusk-lede">The radio script hasn't loaded.</p>;
 
   // ── Run finished ──
   if (item === undefined || step === undefined) {
@@ -108,27 +108,33 @@ export function RadioTest() {
     const delta = Math.round((end - startRef.current) * 100);
     return (
       <>
-        <h2 className="view-title">{focus ? 'Review done' : 'Run done'}</h2>
-        <p className="big-score">{score} / {order.length}</p>
-        <p className="muted">
-          {gradedCount} of those {order.length} calls carry a verified CROR citation and moved your
-          Radio mastery: {delta >= 0 ? '+' : ''}{delta}% → {Math.round(end * 100)}%. The rest are real
-          practice with no rule to cite — they're never scored against you.
-        </p>
-        <div className="opts">
+        <div className="dusk-tile dusk-tile--teal cb-radio-done">
+          <div className="dusk-tile-cap">
+            <h2 className="dusk-tile-lab">{focus ? 'Review done' : 'Run done'}</h2>
+          </div>
+          <div className="dusk-tile-body">
+            <p className="dusk-tile-num">{score} / {order.length}</p>
+            <p className="dusk-tile-sub">
+              {gradedCount} of those {order.length} calls carry a verified CROR citation and moved your
+              Radio mastery: {delta >= 0 ? '+' : ''}{delta}% → {Math.round(end * 100)}%. The rest are real
+              practice with no rule to cite — they're never scored against you.
+            </p>
+          </div>
+        </div>
+        <div className="cb-radio-actions">
           {missedRef.current.size > 0 && (
-            <button className="opt" onClick={() => {
+            <button className="dusk-btn" onClick={() => {
               setFocus([...missedRef.current]); missedRef.current = new Set();
               setPos(0); setPicked(null); setScore(0); setRunKey(k => k + 1);
             }}>
               Practice the {missedRef.current.size} you missed →
             </button>
           )}
-          <button className="opt" onClick={() => {
+          <button className="dusk-btn" onClick={() => {
             setFocus(null); missedRef.current = new Set();
             setPos(0); setPicked(null); setScore(0); setRunKey(k => k + 1);
           }}>Run it again</button>
-          <button className="opt" onClick={() => navigate('/')}>Back to the path</button>
+          <button className="dusk-btn" onClick={() => navigate('/')}>Back to the path</button>
         </div>
       </>
     );
