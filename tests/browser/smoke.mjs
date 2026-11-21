@@ -331,7 +331,7 @@ const waitText = (page, selector, text, when) => page.waitForFunction(([s, t]) =
 // One action on a control: a click, a tap or the choice of an option. When the control does not take
 // it in the time of the page (it does not show, it is off, or another element covers it), the case
 // fails with a sentence that names the control and the reason that the browser gives.
-async function act(what, action) {
+async function onControl(what, action) {
   try {
     await action();
   } catch (err) {
@@ -340,7 +340,7 @@ async function act(what, action) {
     throw new CaseFailure(`${what} did not reach its control in the time of the page${reason ? `: ${reason}` : ''}`);
   }
 }
-const click = (page, selector) => act(`a click on ${selector}`, () => page.locator(selector).click());
+const click = (page, selector) => onControl(`a click on ${selector}`, () => page.locator(selector).click());
 
 // ---- The Yard (Y4a, Y4b). The six switch buttons have the hook data-sw and a name that says the
 // lining, for example "AS73 switch, lined reverse" (ruling SW-NAME). The move builder is the selects
@@ -393,12 +393,12 @@ async function tabTo(page, selector, max = 80) {
 // counts of the inputs of the page show this way and no other.
 const TOUCH = {
   name: 'touch', width: 390, touch: true,
-  press: (page, selector) => act(`a tap on ${selector}`, () => page.locator(selector).tap()),
+  press: (page, selector) => onControl(`a tap on ${selector}`, () => page.locator(selector).tap()),
   // The list of a select is a part of the system, not of the page. The case taps the select, and then
   // picks the option as that list does: selectOption sets the option and sends input and change.
   async choose(page, selector, value) {
-    await act(`a tap on ${selector}`, () => page.locator(selector).tap());
-    await act(`the choice of the option "${value}" of ${selector}`, () => page.locator(selector).selectOption(value));
+    await onControl(`a tap on ${selector}`, () => page.locator(selector).tap());
+    await onControl(`the choice of the option "${value}" of ${selector}`, () => page.locator(selector).selectOption(value));
   },
   only: (seen) => seen.touch > 0 && seen.keys + seen.mouse + seen.pen + seen.other === 0,
 };
@@ -910,7 +910,7 @@ const GATE_CASES = [
     // A press of a control "Reload" that must reload the page; with no reload in 15 s the case fails.
     const reloads = async (page, control, what) => {
       const loaded = page.waitForEvent('load', { timeout: 15000 }).then(() => true, () => false);
-      await act(`${what}: a click on "Reload"`, () => control.click());
+      await onControl(`${what}: a click on "Reload"`, () => control.click());
       ok(await loaded, `${what}: the control "Reload" did not reload the page in 15 s`);
     };
     try {
@@ -1183,13 +1183,13 @@ const GATE_CASES = [
               carded.add(item.id);
               last = { kind: 'card', item };
               const words0 = words(await page.locator(LEARN_CARD).textContent());
-              await act(`${where}, screen ${k}: a click on ${LEARN_NEXT}`, () => page.locator(LEARN_NEXT).click());
+              await onControl(`${where}, screen ${k}: a click on ${LEARN_NEXT}`, () => page.locator(LEARN_NEXT).click());
               await page.waitForFunction(([s, w]) => { const el = document.querySelector(s); return !el || el.textContent.replace(/\s+/g, ' ').trim() !== w; }, [LEARN_CARD, words0])
                 .catch(() => { throw new CaseFailure(`${where}, screen ${k}: the control ${LEARN_NEXT} did not move the page on`); });
               continue;
             }
             // A question: answer it, and read the item from its feedback.
-            await act(`${where}, screen ${k}: a click on an answer option`, () => page.locator(hook('opt')).first().click());
+            await onControl(`${where}, screen ${k}: a click on an answer option`, () => page.locator(hook('opt')).first().click());
             const feedback = page.locator(hook('feedback')).first();
             await feedback.waitFor().catch(() => { throw new CaseFailure(`${where}, screen ${k}: no feedback showed after an answer`); });
             const item = itemOfFeedback(await feedback.textContent());
@@ -1197,7 +1197,7 @@ const GATE_CASES = [
             ok(!(last?.kind === 'card' && last.item.id === item.id), `${where}, screen ${k}: the question about ${item.id} comes right after its learn card`);
             asked.add(item.id);
             last = { kind: 'question', item };
-            await act(`${where}, screen ${k}: a click on "Next →" or "Finish"`, () => feedback.getByRole('button', { name: /^(Next →|Finish)$/ }).click());
+            await onControl(`${where}, screen ${k}: a click on "Next →" or "Finish"`, () => feedback.getByRole('button', { name: /^(Next →|Finish)$/ }).click());
             await feedback.waitFor({ state: 'detached' }).catch(() => { throw new CaseFailure(`${where}, screen ${k}: the feedback stays after its control "Next →" or "Finish"`); });
           }
           ok(carded.size > 0, `${where}: the session shows no learn card`);
