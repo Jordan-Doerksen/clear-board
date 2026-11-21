@@ -56,6 +56,18 @@
   height: 170px;
 }
 
+/* ---- the words on an answered option (U-06): a line under the answer text -------------------------
+   "Correct answer" on the right option and "Your answer" on a picked wrong option. The words carry
+   the state; the ink of the mark is a second carrier. */
+.cb-app .cb-drill-view .cb-drill-tag {
+  display: block;
+  margin-top: var(--sp-2);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+}
+.cb-app .cb-drill-view .cb-opt--right .cb-drill-tag { color: var(--cb-ok-ink); }
+.cb-app .cb-drill-view .cb-opt--wrong .cb-drill-tag { color: var(--cb-attn-ink); }
+
 /* ---- the feedback: a Dusk panel. Each part is on its own line, in the order of today ------------ */
 .cb-app .cb-drill-view .cb-drill-feedback {
   display: flex;

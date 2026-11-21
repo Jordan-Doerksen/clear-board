@@ -101,6 +101,10 @@ export function Drill({ domain }: { domain?: string }) {
   const answered = picked !== null;
   const ok = picked === q.correct;
   const c = item.citation;
+  const explain = q.explain || item.plain || c.verbatim;
+  // U-06: after a miss the feedback names the right answer. The line of the title and the
+  // explanation names it already for a signal and a term; for a rule question it can miss it.
+  const namesAnswer = `${item.title} — ${explain ?? ''}`.includes(q.correct);
 
   function choose(value: string) {
     if (picked !== null) return;
@@ -126,14 +130,24 @@ export function Drill({ domain }: { domain?: string }) {
       </div>
       <div className="cb-opts">
         {q.options.map((o, i) => {
-          const cls = answered ? (o === q.correct ? 'cb-opt cb-opt--right' : (o === picked ? 'cb-opt cb-opt--wrong' : 'cb-opt')) : 'cb-opt';
-          return <button key={i} className={cls} data-cb="opt" disabled={answered} onClick={() => choose(o)}>{o}</button>;
+          // U-06: after an answer the right option and the picked wrong option carry words, not only a colour.
+          const right = answered && o === q.correct;
+          const wrong = answered && !right && o === picked;
+          const cls = right ? 'cb-opt cb-opt--right' : wrong ? 'cb-opt cb-opt--wrong' : 'cb-opt';
+          return (
+            <button key={i} className={cls} data-cb="opt" disabled={answered} onClick={() => choose(o)}>
+              {o}
+              {right && <>{' '}<span className="cb-drill-tag">Correct answer</span></>}
+              {wrong && <>{' '}<span className="cb-drill-tag">Your answer</span></>}
+            </button>
+          );
         })}
       </div>
       {answered && (
         <div className="dusk-panel cb-drill-feedback" data-cb="feedback" aria-live="polite">
           <b className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{ok ? 'Right.' : 'Not quite.'}</b>
-          <span><b>{item.title}</b> — {q.explain || item.plain || c.verbatim}</span>
+          {!ok && !namesAnswer && <span className="cb-drill-answer">Correct answer: <b>{q.correct}</b></span>}
+          <span><b>{item.title}</b> — {explain}</span>
           {!ok && severityOf(item) !== 'S1' && (
             <span className="cb-drill-severity">{severityOf(item) === 'S3' ? 'Safety-critical — lock this one in.' : 'Worth nailing.'} Review your misses at the end.</span>
           )}

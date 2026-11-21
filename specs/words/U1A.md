@@ -11,3 +11,6 @@ app counts.
 | U-37 (words) | Reference, the entry of a signal, the button under the drawings | "Drill these aspects →" | "Open the Signals drill →" |
 | U-29 | the Drill, the top of each state, under "← Home": a new station heading (`h2`) | none | "🎯 Drill" |
 | U-29 | Signals (the route `/signals`), the top of each state, under "← Home": a new station heading (`h2`) | none | "🚦 Signals" |
+| U-06 | the Drill and Signals, after an answer: a line under the text of the right option | none (a green edge and a mark only) | "Correct answer" |
+| U-06 | the Drill and Signals, after a wrong answer: a line under the text of the picked option | none (a red edge and a mark only) | "Your answer" |
+| U-06 | the Drill and Signals, the feedback after a wrong answer, under "Not quite.", only when the next line does not hold the right answer (a rule question can miss it) | none | "Correct answer: <the text of the right option>" |
