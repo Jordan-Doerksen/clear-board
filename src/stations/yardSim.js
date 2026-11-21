@@ -611,10 +611,7 @@ export function mount(root, ctx) {
     const y = ctx.profile.yard;
     let dirty = false;
 
-    if (!y.completed.includes(puzzle.id)) {
-      y.completed.push(puzzle.id); dirty = true;
-      buildPicker();   // ✓ / → move as you play instead of going stale until the station re-mounts
-    }
+    if (!y.completed.includes(puzzle.id)) { y.completed.push(puzzle.id); dirty = true; }
 
     // Per-puzzle best record (#14).
     const prev = y.best[puzzle.id];
@@ -626,7 +623,9 @@ export function mount(root, ctx) {
     const better = !prev || now.moves < prev.moves || (now.moves === prev.moves && now.joints < prev.joints);
     if (better) { y.best[puzzle.id] = now; dirty = true; }
 
-    if (dirty) ctx.save();
+    // The picker shows the marks ✓ and → and the record as you play, not only after the station
+    // mounts again, so it is made again after the record is written.
+    if (dirty) { ctx.save(); buildPicker(); }
 
     // One brain: a genuine player win feeds the SAME rule mastery the Drill grades. AppContext only
     // writes verified, currently-due items.
@@ -634,13 +633,13 @@ export function mount(root, ctx) {
   }
 
   // "Beat your best" (#14): compare against the record BEFORE this win is folded in. A first
-  // clear says nothing (there is no best yet) rather than claiming a record.
+  // clear says nothing (there is no best yet) rather than claiming a record. The record reads in the
+  // form "5 moves, 2 couplings" (U-23).
   function bestSuffix(prev, st) {
     if (!prev) return '';
-    if (st.moves < prev.moves || (st.moves === prev.moves && st.joints < prev.joints)) {
-      return ` · new best (was ${prev.moves}m/${prev.joints}j)`;
-    }
-    return ` · your best: ${prev.moves}m/${prev.joints}j`;
+    const rec = `${prev.moves} move${prev.moves === 1 ? '' : 's'}, ${prev.joints} coupling${prev.joints === 1 ? '' : 's'}`;
+    if (st.moves < prev.moves || (st.moves === prev.moves && st.joints < prev.joints)) return ` · new best (was ${rec})`;
+    return ` · your best: ${rec}`;
   }
 
   // Shows the win of the state `st`, puts it into the profile and returns its text. The caller plays
@@ -649,7 +648,8 @@ export function mount(root, ctx) {
     const g = grade(st, puzzle);
     const prev = bestRecord();
     const clean = st.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
-    const text = `${g.beatPar ? '✓ ' : ''}${g.head}${clean}${bestSuffix(prev, st)}`;
+    // Each finish starts with "Job done." (U-23): a finish above par says that the job is done too.
+    const text = `Job done. ${g.beatPar ? '✓ ' : ''}${g.head}${clean}${bestSuffix(prev, st)}`;
     banner(text, g.beatPar ? 'win' : 'ok');
     recordWin(st);
     return text;
@@ -664,7 +664,7 @@ export function mount(root, ctx) {
     const prev = bestRecord();
     sfx.win();
     const clean = state.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
-    const text = `✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev, state)}`;
+    const text = `Job done. ✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev, state)}`;
     banner(text, g.beatPar ? 'win' : 'ok'); live.say(text);   // win registered now
     recordWin(state);
     view.setDepart({ shown: true, enabled: false });

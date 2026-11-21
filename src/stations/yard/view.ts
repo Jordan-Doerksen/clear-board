@@ -140,7 +140,7 @@ const YARD_HTML = `
     <div class="yd-bar yd-strip dusk-strip">
       <div class="yd-field yd-field--job"><label class="yd-label" for="picker">Pick a job</label><select class="cb-select" id="picker"></select></div>
       <span class="dusk-spacer"></span>
-      <div class="dusk-cell"><b class="yd-readout" id="readout">Moves 0 / par 0 · Joints 0</b></div>
+      <div class="dusk-cell"><b class="yd-readout" id="readout">Moves 0 / par 0 · Couplings 0</b></div>
     </div>
 
     <div class="yd-workorder dusk-panel dusk-panel--framed" id="workorder"></div>
@@ -223,7 +223,7 @@ const YARD_HTML = `
       out) and a <strong>SPOT = 2</strong> (shove in, pull out) — <em>except the spot that finishes the job is 1</em>,
       because the engine just leaves the cars and is done (no pull-out). A <strong>KICK = 1</strong> (one shove,
       the cars coast in by themselves). So <em>pull, pull, spot</em> = 5 moves, and kicking saves the pull-out.
-      <strong>Joints</strong> (couplings) is a second, "also good" stat: lower is cleaner. To reach a
+      <strong>Couplings</strong> are a second, "also good" stat: lower is cleaner. To reach a
       track, line <em>its</em> switch reverse and the ones below it normal, or the engineer refuses
       (<strong>CROR 104</strong>).</p>
       <p><strong>Securing &amp; kicking.</strong> <strong>Rule 112</strong> — any car left unattended gets a hand brake.
@@ -296,8 +296,10 @@ export function createView(root: HTMLElement): YardView {
     el,
     drawHost,
 
+    // One name for one thing (U-23, U-40, 2c-plan C6): the readout says "Couplings", as the banner of
+    // the model does.
     setReadout({ moves, par, joints }) {
-      const text = `Moves ${moves} / par ${par} · Joints ${joints}`;
+      const text = `Moves ${moves} / par ${par} · Couplings ${joints}`;
       at('readout').textContent = text;
       return text;
     },
@@ -414,7 +416,7 @@ export function createView(root: HTMLElement): YardView {
         g.label = t.label;
         for (const p of t.options) {
           const mark = p.state === 'done' ? '✓ ' : (p.state === 'next' ? '→ ' : '');
-          const yours = p.best ? ` · your best ${p.best.moves}m` : '';
+          const yours = p.best ? ` · your best ${p.best.moves} move${p.best.moves === 1 ? '' : 's'}` : '';
           const o = document.createElement('option');
           o.value = String(p.value);
           o.textContent = `${mark}${p.title} · par ${p.par}${yours}`;
