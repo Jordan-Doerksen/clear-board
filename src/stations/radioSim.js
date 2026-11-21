@@ -177,8 +177,14 @@ export function mount(root, ctx) {
       $('againBtn').addEventListener('click', reset);
     }
   }
+  // renderNext writes a new button in place of the one that was pressed. When the pressed button had
+  // the focus, the focus goes to the new button, so that it stays in the task (row U-14).
+  function keepFocus(had) {
+    if (had) { const b = $(idx < STEPS.length ? 'keyBtn' : 'againBtn'); if (b) b.focus(); }
+  }
   function transmit() {
     if (idx >= STEPS.length) return;
+    const had = document.activeElement === $('keyBtn');
     const s = STEPS[idx];
     if (s.pre) log.push({ who: 'Eng', text: s.pre });
     log.push({ who: 'You', text: s.call });
@@ -195,13 +201,16 @@ export function mount(root, ctx) {
       // The old profile.radio.done boolean was retired with D-0025: it graded attendance and could
       // never decay. Radio mastery now comes from "Call it yourself" through the one SM-2 model.
     }
+    keepFocus(had);
   }
   function reset() {
+    const had = document.activeElement === $('againBtn');
     idx = 0; log = [];
     applyReadout({ feet: 500, read: '10 cars to the joint' });
     logEl.innerHTML = ''; doneEl.className = 'done';
     noteBody.innerHTML = 'Make your first call to begin.';
     renderNext();
+    keepFocus(had);
   }
 
   applyReadout({ feet: 500, read: '10 cars to the joint' });
