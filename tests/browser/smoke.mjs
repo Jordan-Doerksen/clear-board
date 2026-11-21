@@ -38,7 +38,7 @@ import { tmpdir } from 'node:os';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
-import { LEARN_CARD, passLearnCards } from '../../tools/lib/learn-card.mjs';
+import { LEARN_CARD, LEARN_NEXT, passLearnCards } from '../../tools/lib/learn-card.mjs';
 // The engine of the Yard, frozen (fence item 1). The case of a win reads the job and its optimal line
 // from the data, and the numbers that the readout must show from the model. It changes no file.
 import { PUZZLES } from '../../src/stations/yard/puzzles.js';
@@ -157,6 +157,26 @@ const overflowOf = (page) => page.evaluate(() => {
   const root = document.documentElement;
   const main = document.querySelector('main');
   return { page: Math.max(0, root.scrollWidth - root.clientWidth), main: main ? Math.max(0, main.scrollWidth - main.clientWidth) : 0 };
+});
+
+// The controls of the page that are under 44 by 44 px (fence item 8): each enabled button, link,
+// select, summary and input that shows. The floor is 44 px, not 43.5 px (ruling TARGETS-44). An input
+// in a label is measured by the larger box of the two. While a dialog is open, only the controls in
+// the dialog are measured. Returns one line for each small control.
+const smallControls = (page) => page.evaluate(() => {
+  const shown = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden'; };
+  const name = (el) => (el.getAttribute('aria-label') || el.innerText || el.getAttribute('placeholder') || (el.id ? `#${el.id}` : '')).replace(/\s+/g, ' ').trim().slice(0, 40);
+  const found = [];
+  for (const el of document.querySelectorAll('button, a, select, summary, input')) {
+    if (el.disabled || !shown(el)) continue;
+    const dialog = document.querySelector('dialog[open]');
+    if (dialog && !dialog.contains(el)) continue;
+    let r = el.getBoundingClientRect();
+    const label = el.tagName === 'INPUT' ? el.closest('label') : null;
+    if (label) { const l = label.getBoundingClientRect(); if (l.width * l.height > r.width * r.height) r = l; }
+    if (r.width < 44 || r.height < 44) found.push(`${el.tagName.toLowerCase()} "${name(el)}" ${Math.round(r.width * 100) / 100} by ${Math.round(r.height * 100) / 100} px`);
+  }
+  return found;
 });
 
 // The inputs that reach a page, from its first script on: the count of key presses and the count of
@@ -750,35 +770,18 @@ const GATE_CASES = [
   // each case passes, so the closing commit of the G1 line made each one a gate.
   { name: '13 targets', async run() {
     // Each enabled button, link, select, summary and input is 44 by 44 px or more, on the six
-    // routes and in the Settings dialog, at 390 and 1440. The floor is 44 px, not 43.5 px (ruling
-    // TARGETS-44). An input in a label is measured by the larger box of the two. While a dialog is
-    // open, only the controls in the dialog are measured.
-    const small = (page) => page.evaluate(() => {
-      const shown = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden'; };
-      const name = (el) => (el.getAttribute('aria-label') || el.innerText || el.getAttribute('placeholder') || (el.id ? `#${el.id}` : '')).replace(/\s+/g, ' ').trim().slice(0, 40);
-      const found = [];
-      for (const el of document.querySelectorAll('button, a, select, summary, input')) {
-        if (el.disabled || !shown(el)) continue;
-        const dialog = document.querySelector('dialog[open]');
-        if (dialog && !dialog.contains(el)) continue;
-        let r = el.getBoundingClientRect();
-        const label = el.tagName === 'INPUT' ? el.closest('label') : null;
-        if (label) { const l = label.getBoundingClientRect(); if (l.width * l.height > r.width * r.height) r = l; }
-        if (r.width < 44 || r.height < 44) found.push(`${el.tagName.toLowerCase()} "${name(el)}" ${Math.round(r.width * 100) / 100} by ${Math.round(r.height * 100) / 100} px`);
-      }
-      return found;
-    });
+    // routes and in the Settings dialog, at 390 and 1440 (smallControls).
     const found = [];
     for (const width of [390, 1440]) {
       for (const r of ROUTES) {
-        const list = await withPage({ width }, async (page) => { await open(page, r.route); await r.check(page); return small(page); });
+        const list = await withPage({ width }, async (page) => { await open(page, r.route); await r.check(page); return smallControls(page); });
         found.push(...list.map((s) => `${r.name} at ${width}: ${s}`));
       }
       const list = await withPage({ width }, async (page) => {
         await open(page, '/');
         await page.locator(hook('settings-open')).first().click();
         await page.locator('dialog#settings[open]').waitFor();
-        return small(page);
+        return smallControls(page);
       });
       found.push(...list.map((s) => `settings dialog at ${width}: ${s}`));
     }
@@ -1093,6 +1096,105 @@ const GATE_CASES = [
     ok(misses.length === 0, `after a change of route, focus is not on the first h2 of #view on ${misses.length} routes and widths: ${misses.join('; ')}`);
   } },
 
+  { name: '22 learn card', async run() {
+    // Row U-28 (ruling LEARN-GAP, 2c-plan C11): the Drill shows a new item one time, on a learn card,
+    // before the first question about it. For a new profile on #/drill and #/signals, at 390 and 1440:
+    // the first screen is a learn card with the hooks of C11 (the card and its one control); its heading
+    // is the title of an item of the data, and the card holds the plain words of that item as the data
+    // holds them (a signal: its drawings, each one different); each control of the screen is 44 by 44 px
+    // or more. At 1440 the case walks the whole session: no question about the item of a card comes
+    // right after its card; no item gets two cards; no question about the item of a card comes before
+    // its card; and each item of a card gets a question later in the session. The item of a question
+    // is the item that its feedback names ("<title> — <words>"). The case reads no rule text: the
+    // titles and the plain words come from the content files of the build.
+    const items = [];
+    for (const file of ['definitions.json', 'signals.json', 'rules.json', 'radio-script.json']) items.push(...JSON.parse(readFileSync(join(distDir, 'data', file), 'utf8')));
+    const byTitle = new Map(items.map((i) => [i.title, i]));
+    const words = (text) => (text ?? '').replace(/\s+/g, ' ').trim();
+    // The item that a feedback names: the title that comes first in the feedback with " — " after it
+    // (the words of the item come after the title); of two such titles at one place, the longer one.
+    const itemOfFeedback = (text) => items
+      .map((i) => ({ i, at: text.indexOf(`${i.title} — `) }))
+      .filter((m) => m.at !== -1)
+      .sort((a, b) => a.at - b.at || b.i.title.length - a.i.title.length)[0]?.i ?? null;
+    const notes = [];
+    for (const route of ['/drill', '/signals']) {
+      for (const width of [390, 1440]) {
+        const where = `${route} at ${width}`;
+        const note = await withPage({ width }, async (page) => {
+          await open(page, route);
+          await firstScreen(page);
+          // The card of the first screen: the hooks, the item of the data, the controls.
+          const checkCard = async (k) => {
+            const card = page.locator(LEARN_CARD);
+            ok(await card.count() === 1 && await card.isVisible(), `${where}, screen ${k}: ${await card.count()} learn cards (${LEARN_CARD}) show, and 1 is expected`);
+            const next = page.locator(LEARN_NEXT);
+            ok(await next.count() === 1 && await next.isVisible() && await next.isEnabled(), `${where}, screen ${k}: the learn card has ${await next.count()} controls ${LEARN_NEXT}, and 1 that shows is expected`);
+            ok(await count(page, hook('opt')) === 0, `${where}, screen ${k}: an answer option shows with the learn card`);
+            const title = words(await card.getByRole('heading').first().textContent());
+            const item = byTitle.get(title);
+            ok(item, `${where}, screen ${k}: the heading of the learn card is "${title}", and no item of the data has this title`);
+            const text = words(await card.textContent());
+            ok(text.includes(words(item.plain)), `${where}, screen ${k}: the learn card of ${item.id} does not hold the plain words of the item as the data holds them`);
+            if (item.type === 'signal') {
+              const drawings = await card.locator('svg').evaluateAll((els) => els.map((el) => el.outerHTML));
+              const aspects = item.payload?.aspects?.length ?? 0;
+              ok(drawings.length >= 1 && drawings.length <= aspects, `${where}, screen ${k}: the learn card of the signal ${item.id} shows ${drawings.length} drawings, and 1 to ${aspects} are expected`);
+              ok(new Set(drawings).size === drawings.length, `${where}, screen ${k}: the learn card of the signal ${item.id} shows one drawing two times`);
+            }
+            const small = await smallControls(page);
+            ok(small.length === 0, `${where}, screen ${k}: ${small.length} controls of the learn card screen are under 44 by 44 px: ${small.join('; ')}`);
+            return item;
+          };
+          const first = await checkCard(1);
+          if (width !== 1440) return null;
+          // The walk of the session.
+          const carded = new Set();
+          const asked = new Set();
+          let last = null;
+          let screens = 0;
+          for (let k = 1; k <= 60; k++) {
+            const state = await page.waitForFunction(([cardSel, optSel]) => {
+              const shows = (s) => [...document.querySelectorAll(s)].some((el) => el.getClientRects().length > 0);
+              if (shows(cardSel)) return 'card';
+              if (shows(optSel)) return 'question';
+              return document.querySelector('#view h3') && !shows(cardSel) && !shows(optSel) ? 'end' : false;
+            }, [LEARN_CARD, hook('opt')]).then((h) => h.jsonValue());
+            if (state === 'end') break;
+            screens = k;
+            if (state === 'card') {
+              const item = k === 1 ? first : await checkCard(k);
+              ok(!carded.has(item.id), `${where}, screen ${k}: the item ${item.id} gets a second learn card`);
+              ok(!asked.has(item.id), `${where}, screen ${k}: the learn card of ${item.id} comes after a question about it`);
+              carded.add(item.id);
+              last = { kind: 'card', item };
+              const words0 = words(await page.locator(LEARN_CARD).textContent());
+              await page.locator(LEARN_NEXT).click();
+              await page.waitForFunction(([s, w]) => { const el = document.querySelector(s); return !el || el.textContent.replace(/\s+/g, ' ').trim() !== w; }, [LEARN_CARD, words0]);
+              continue;
+            }
+            // A question: answer it, and read the item from its feedback.
+            await page.locator(hook('opt')).first().click();
+            const feedback = page.locator(hook('feedback')).first();
+            await feedback.waitFor();
+            const item = itemOfFeedback(await feedback.textContent());
+            ok(item, `${where}, screen ${k}: the feedback names no item of the data: "${words(await feedback.textContent())}"`);
+            ok(!(last?.kind === 'card' && last.item.id === item.id), `${where}, screen ${k}: the question about ${item.id} comes right after its learn card`);
+            asked.add(item.id);
+            last = { kind: 'question', item };
+            await feedback.getByRole('button', { name: /^(Next →|Finish)$/ }).click();
+            await feedback.waitFor({ state: 'detached' }).catch(() => { throw new CaseFailure(`${where}, screen ${k}: the feedback stays after its control "Next →" or "Finish"`); });
+          }
+          ok(carded.size > 0, `${where}: the session shows no learn card`);
+          const unasked = [...carded].filter((id) => !asked.has(id));
+          ok(unasked.length === 0, `${where}: the items ${unasked.join(', ')} get a learn card and no question in the session`);
+          return `${where}: ${screens} screens, ${carded.size} learn cards, ${asked.size} items asked`;
+        });
+        if (note) notes.push(note);
+      }
+    }
+    return notes.join('; ');
+  } },
 ];
 
 // ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after the
