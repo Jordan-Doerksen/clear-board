@@ -105,9 +105,9 @@ headless Chromium.
 - The emoji of a control is hidden from a screen reader. (U-41) What a screen reader says: not
   verified.
 - The guided Radio: "← Home" first, one heading, mode tabs that move with the arrow keys, Home and
-  End, and a log that is a Tab stop and announces each new line. The distance or the status shows
-  as page text above the next call, with the words of the scene. Bigger text, the dyslexia type
-  and higher contrast reach the text of the scene. (U-21, U-22, P-06)
+  End, and a log that is a Tab stop with the role "log". The distance or the status shows as page
+  text above the next call, with the words of the scene. Bigger text, the dyslexia type and higher
+  contrast reach the text of the scene. (U-21, U-22, P-06) What a screen reader says: not verified.
 - Settings: each toggle shows a focus ring, its state shows with forced colours, and each checkbox
   is tied to its second line. "Reset my progress" is plain text. (P-08, P-09, P-13)
 - "Reduce motion" follows the device setting live. "Higher contrast" starts from the device
