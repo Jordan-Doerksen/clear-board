@@ -225,6 +225,46 @@ test('buildSession: a review round keeps the order of the severity classes, S3 f
   }
 });
 
+// ---- The options of a review round (finding F-1 of the last review of Wave 2c; ruling WEAK-REVIEW)
+
+test('buildSession: a review round of few misses offers signal names only on a signal question, with no repeat, over 300 seeds', () => {
+  const defs = FROZEN.items.filter((i) => i.type === 'definition' && i.citation.trust === 'verified').slice(0, 4).map((i) => i.id);
+  const sig = signalItems.find((i) => i.citation.trust === 'verified' && askableAspects(i, FROZEN).length > 0)!;
+  const signalTitles = new Set(signalItems.map((i) => i.title));
+  let signalQuestions = 0;
+  for (let seed = 1; seed <= 300; seed++) {
+    const profile = fresh();
+    for (const id of [sig.id, ...defs]) profile.items[id] = sr();
+    const { slots } = buildSession({ content: FROZEN, profile, focusIds: [sig.id, ...defs] }, seeded(seed));
+    for (const s of slots) {
+      assert.equal(new Set(s.q.options).size, s.q.options.length, `seed ${seed}: an option repeats: ${JSON.stringify(s.q.options)}`);
+      assert.ok(s.q.options.includes(s.q.correct), `seed ${seed}: the right answer is not an option`);
+      if (s.q.kind !== 'signal') continue;
+      signalQuestions++;
+      assert.equal(s.q.options.length, 4, `seed ${seed}: a signal question has ${s.q.options.length} options`);
+      for (const o of s.q.options) assert.ok(signalTitles.has(o), `seed ${seed}: the option "${o}" is not the name of a signal item`);
+    }
+  }
+  assert.ok(signalQuestions >= 300, `signal questions: ${signalQuestions}`);
+});
+
+test('buildSession: a review round of one missed item still offers four options', () => {
+  const def = FROZEN.items.find((i) => i.type === 'definition' && i.citation.trust === 'verified')!;
+  const sig = signalItems.find((i) => i.citation.trust === 'verified' && askableAspects(i, FROZEN).length > 0)!;
+  for (const id of [def.id, sig.id]) {
+    // The item was seen before, so the round asks it with no learn card (a new item alone gets a
+    // card and no question: ruling LEARN-GAP).
+    const profile = fresh();
+    profile.items[id] = sr();
+    let asked = 0;
+    for (let seed = 1; seed <= 50; seed++) {
+      const { slots } = buildSession({ content: FROZEN, profile, focusIds: [id] }, seeded(seed));
+      for (const s of slots) { asked++; assert.equal(s.q.options.length, 4, `${id}, seed ${seed}: ${JSON.stringify(s.q.options)}`); }
+    }
+    assert.ok(asked >= 50, `${id}: ${asked} questions asked`);
+  }
+});
+
 // ---- answerCounts: the guard of the grading
 
 test('answerCounts: an item that is not verified never counts', () => {

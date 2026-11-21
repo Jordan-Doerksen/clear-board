@@ -176,7 +176,19 @@ export function distractors(item: ContentItem, pool: ContentItem[], byType: Reco
   fieldFn: (o: ContentItem) => string, rng: Rng = Math.random): string[] {
   const same = (byType[item.type] || pool).filter(o => o.id !== item.id);
   let opts = shuffle(same, rng).slice(0, 3).map(fieldFn);
-  if (opts.length < 3) opts = opts.concat(shuffle(pool.filter(o => o.id !== item.id), rng).slice(0, 3 - opts.length).map(fieldFn));
+  // With fewer than three others of its kind, a question takes options of another kind, each one
+  // time. A signal question never does: a term of another kind (FIXED SIGNAL, for example) can be
+  // true of each signal, and the Drill must not mark it wrong (finding F-1 of the last review of
+  // Wave 2c; ruling WEAK-REVIEW).
+  if (opts.length < 3 && item.type !== 'signal') {
+    const have = new Set([fieldFn(item), ...opts]);
+    for (const o of shuffle(pool.filter(x => x.id !== item.id && x.type !== item.type), rng)) {
+      if (opts.length >= 3) break;
+      const v = fieldFn(o);
+      if (!v || have.has(v)) continue;
+      have.add(v); opts.push(v);
+    }
+  }
   return opts;
 }
 
@@ -234,8 +246,19 @@ export function buildSession({ content, profile: stored, domain, focusIds }: Ses
   // must never draw them (they'd fall to the text branch and ask nonsense).
   items = items.filter(i => i.type !== 'radio-script');
 
+  // The options of a question come from the library of its kind (finding F-1 of the last review of
+  // Wave 2c; ruling WEAK-REVIEW). A review round holds the misses only, so it takes its options from
+  // the items of each live domain, as a session of each domain does; a session of the library takes
+  // them from its own items, as before.
+  let optionItems = items;
+  if (focusIds) {
+    optionItems = [];
+    for (const d of DOMAINS.filter(d => d.live)) optionItems.push(...drillable(content.byDomain[d.id], content));
+    optionItems = optionItems.filter(i => i.type !== 'radio-script' && (i.type !== 'signal' || askableAspects(i, content).length > 0));
+    for (const i of items) if (!optionItems.includes(i)) optionItems.push(i);
+  }
   const byType: Record<string, ContentItem[]> = {};
-  for (const i of items) (byType[i.type] ||= []).push(i);
+  for (const i of optionItems) (byType[i.type] ||= []).push(i);
   const due = items.filter(i => isDue(profile.items[i.id]));
 
   // Tier-aware seeding (#8): a fresh profile (nothing seen) starts gentle — tier-1 only — so the
@@ -245,7 +268,7 @@ export function buildSession({ content, profile: stored, domain, focusIds }: Ses
   const mast = cand.reduce((s, d) => s + (profile.domains[d]?.mastery || 0), 0) / Math.max(1, cand.length);
   const ceiling = focusIds ? Infinity : !seenAny ? 1 : mast < 0.15 ? 1 : mast < 0.45 ? 2 : 3;   // a review round includes every miss, any tier
   const tierOK = (i: ContentItem) => itemTier(i, content) <= ceiling;
-  const ctx: QuestionContext = { pool: items, byType, ceiling };
+  const ctx: QuestionContext = { pool: optionItems, byType, ceiling };
 
   // Priority: due & in-band → in-band (not-due, fills a fresh session) → due but harder → the rest.
   const order = [
