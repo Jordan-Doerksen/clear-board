@@ -16,7 +16,8 @@
 //
 // This file runs no statement of its own when it is imported. Its imports have two effects:
 // the two style files go into the page (yard.css, and drawing/drawing.css through draw.ts),
-// and sound.js reads the stored mute value.
+// and sound.js reads the stored mute value. The station wrapper (Yard.tsx) also imports yard.css,
+// so the build puts that file in the sheet of the app.
 
 import { TRACK_IDS, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
 import { freshState, lineSwitch, canPull, canSpot, canKick, canSecure, spotPlan, pull, spot, kick, secure, checkWin, unsecuredGoal, grade } from './yard/model.js';
@@ -62,11 +63,9 @@ export function unmount() {
 
 export function mount(root, ctx) {
   unmount();                          // one Yard at a time
-  // The view puts the scoped markup into the container Clear Board gave us.
+  // The view puts the scoped markup into the container Clear Board gave us. The way back to Home and
+  // the heading are drawn by the station wrapper (Yard.tsx).
   const view = createView(root);
-
-  // Back button → Clear Board home.
-  view.onGo((route) => ctx.go(route));
 
   // Reduced motion (P-01, MOTION-STOP-OWNER). The setting is read at the time of each effect, not at
   // mount, so that a change in Settings acts on the next effect (2c-plan C4: the app sets the value).

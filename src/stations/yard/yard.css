@@ -13,6 +13,9 @@
    (the text takes the ink and the face of the body), no side padding, no width and no side margin.
    It keeps the type size of today. */
 .yard-wrap { display: block; padding: 4px 0 20px; font-size: var(--fs-l); }
+/* The top of the station: "← Home" and the heading. Yard.tsx draws them in a .yard-wrap of their own,
+   above the host of the island (2c-plan C7). The island below keeps its own top room. */
+.yard-wrap.yd-top { padding-bottom: 0; }
 /* The back control is a plain button of the parts: the word in the link colour, no fill at rest, a
    wash and an underline on hover, a fill change when pressed. It keeps its text of 14 px, weight 600,
    and the box of today: a side padding of 12 px and a 1 px border with no colour. */
@@ -20,6 +23,13 @@
   margin-bottom: 10px; padding-inline: 12px; border: 1px solid transparent;
   font-size: var(--fs-base); font-weight: var(--fw-medium);
 }
+/* The heading has the form of the Reference title: 20.8 px, the station icon in the Dusk icon square
+   on the line of the word, the glyph at the size of the heading (U-29). In the dyslexia mode it takes
+   the letter spacing and the line height of the mode, as the Reference title does. */
+.yard-wrap .yd-title { font-size: 1.3rem; }
+.yard-wrap .yd-title .dusk-ico { display: inline-grid; vertical-align: middle; width: 1.6em; height: 1.6em; font-size: 1em; }
+.yard-wrap .yd-title:where(html[data-dys="1"] *) { letter-spacing: inherit; }
+.yard-wrap .yd-title .dusk-ico:where(html[data-dys="1"] *) { line-height: var(--lh-base); }
 /* The frame of the drawing is a Dusk panel with no padding: the lit edge, the corner and the fill
    come from the parts. It takes the full width of .yard-wrap and the height of the drawing.
    This file sets no width, height, padding or side margin on it, and no rule for an element

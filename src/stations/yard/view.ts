@@ -90,15 +90,12 @@ export interface YardView {
   /** Closes the question with the answer No, if it is open. */
   closeAsk(): void;
   setMuted(muted: boolean): void;
-  /** `fn` gets the `data-go` value of the back button when the learner presses it. */
-  onGo(fn: (route: string | undefined) => void): void;
 }
 
-// The body of the Yard page. The app has its own header, so this markup starts with a back button.
+// The body of the Yard page. The station wrapper (../Yard.tsx) draws "← Home" and the heading above
+// the host, so this markup starts with the strip.
 const YARD_HTML = `
   <div class="yard-wrap">
-    <button class="yd-back cb-btn--plain" data-go="">← Home</button>
-
     <div class="yd-bar yd-strip dusk-strip">
       <div class="yd-field yd-field--job"><label class="yd-label" for="picker">Pick a job</label><select class="cb-select" id="picker"></select></div>
       <span class="dusk-spacer"></span>
@@ -368,10 +365,6 @@ export function createView(root: HTMLElement): YardView {
     // The sound button says its state in words (U-20). The glyph is decoration (U-41).
     setMuted(muted) {
       at('mute').innerHTML = `<span aria-hidden="true">${muted ? '🔇' : '🔊'}</span> Sound ${muted ? 'off' : 'on'}`;
-    },
-
-    onGo(fn) {
-      root.querySelectorAll<HTMLElement>('[data-go]').forEach((b) => b.addEventListener('click', () => fn(b.dataset.go)));
     },
   };
 }
