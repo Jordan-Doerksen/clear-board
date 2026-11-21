@@ -532,29 +532,84 @@ const GATE_CASES = [
       ok(over.main === 0, `on the Yard at 320 px wide, the content of main is ${over.main} px wider than main. The window clips it, so the page does not scroll sideways.`);
     });
   } },
+
+  // Case 15 was a report-only case in Wave 2a. Its owners are merged after Wave 2b and the case
+  // passes, so the closing commit of the G1 line made it a gate.
+  { name: '15 type modes in the islands', async run() {
+    // With "Bigger text" on, each text element in main on the Yard and on the guided Radio has a
+    // larger computed font size than with it off, at 390 and 1440. A text element is an element
+    // with a text node of its own. Each setting gets its own page load.
+    //
+    // The two loads are matched by a key, not by the order of the elements. The Yard drawing lays
+    // out again with the larger text and can change its form, so elements come and go and the
+    // order changes. The key of an element with an id is the id. The key of each other element
+    // is the nearest element at or above it with an id or a data-cb hook, then its tag, its class
+    // names and its own text. The key holds no position, no size and no order. The elements of
+    // one key are compared as a group: each one with the setting on must be larger than each one
+    // with the setting off.
+    //
+    // An element with no partner under the other setting cannot be compared. Inside the Yard
+    // drawing this is expected: a plate of one form or a break mark of one layout. The case lists
+    // each one. Outside the drawing each text element must have a partner, else the case fails.
+    const DRAWING = '[data-cb="yard-drawing"]';
+    const textKeys = (page) => page.evaluate(() => {
+      const found = [];
+      for (const el of document.querySelectorAll('main *')) {
+        const text = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(' ').replace(/\s+/g, ' ').trim();
+        if (!text) continue;
+        let anchor = 'main';
+        for (let e = el; e && e.tagName !== 'MAIN'; e = e.parentElement) {
+          if (e.id) { anchor = `#${e.id}`; break; }
+          if (e.dataset?.cb) { anchor = `[data-cb="${e.dataset.cb}"]`; break; }
+        }
+        const key = el.id ? anchor : `${anchor} ${el.tagName.toLowerCase()}${[...el.classList].sort().map((c) => `.${c}`).join('')} "${text}"`;
+        found.push({ key, px: parseFloat(getComputedStyle(el).fontSize) });
+      }
+      return found;
+    });
+    const group = (list) => {
+      const map = new Map();
+      for (const { key, px } of list) map.set(key, [...(map.get(key) ?? []), px]);
+      return map;
+    };
+    const notLarger = [];
+    const alone = [];
+    const lost = [];
+    let compared = 0;
+    for (const width of [390, 1440]) {
+      for (const [route, ready] of [['/yard', '#picker'], ['/radio', '#keyBtn']]) {
+        const where = `${route} at ${width}`;
+        const load = (big) => withPage({ width, settings: { ...allOff, big } }, async (page) => {
+          await open(page, route);
+          await page.locator(ready).first().waitFor();
+          const fs = await page.evaluate(() => document.documentElement.style.getPropertyValue('--fs').trim());
+          ok(fs === (big ? '18.5px' : '16px'), `${where}: --fs is "${fs}" with "Bigger text" ${big ? 'on' : 'off'}`);
+          return group(await textKeys(page));
+        });
+        const off = await load(false);
+        const on = await load(true);
+        let matched = 0;
+        for (const [key, offPx] of off) {
+          const onPx = on.get(key);
+          if (!onPx) { (key.startsWith(DRAWING) ? alone : lost).push(`${where}, off only: ${key}`); continue; }
+          matched += offPx.length;
+          if (!(Math.min(...onPx) > Math.max(...offPx))) notLarger.push(`${where}: ${key}: ${Math.max(...offPx)} px off, ${Math.min(...onPx)} px on`);
+        }
+        for (const key of on.keys()) if (!off.has(key)) (key.startsWith(DRAWING) ? alone : lost).push(`${where}, on only: ${key}`);
+        ok(matched > 0, `${where}: no text element has a partner under the other setting`);
+        compared += matched;
+      }
+    }
+    ok(lost.length === 0, `${lost.length} text elements outside the Yard drawing have no partner under the other setting: ${lost.slice(0, 6).join('; ')}${lost.length > 6 ? '; ...' : ''}`);
+    ok(notLarger.length === 0, `with "Bigger text" on, ${notLarger.length} keys of text elements are not larger: ${notLarger.slice(0, 6).join('; ')}${notLarger.length > 6 ? '; ...' : ''}`);
+    return `${compared} text elements compared, each one larger with "Bigger text" on. ${alone.length} text elements of the Yard drawing have no partner under the other setting and are not compared${alone.length ? `: ${alone.join('; ')}` : ''}.`;
+  } },
 ];
 
 // ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after
-// the closing commit of the G1 line makes it one.
-const REPORT_CASES = [
-  { name: 'type modes in the islands', owner: 'P-06: Y1, Y3, B3', what: 'text elements of the Yard and the guided Radio that are not larger with "Bigger text" on', async run() {
-    const sizes = (big, route, ready) => withPage({ common: false, settings: { ...allOff, big } }, async (page) => {
-      await open(page, route);
-      await page.locator(ready).first().waitFor();
-      return page.evaluate(() => [...document.querySelectorAll('main *')]
-        .filter((el) => [...el.childNodes].some((node) => node.nodeType === 3 && node.textContent.trim()))
-        .map((el) => parseFloat(getComputedStyle(el).fontSize)));
-    });
-    let notLarger = 0;
-    for (const [route, ready] of [['/yard', '#picker'], ['/radio', '#keyBtn']]) {
-      const off = await sizes(false, route, ready);
-      const on = await sizes(true, route, ready);
-      if (off.length !== on.length) throw new Error(`${route}: ${off.length} text elements with the setting off and ${on.length} with it on`);
-      notLarger += off.filter((size, i) => !(on[i] > size)).length;
-    }
-    return notLarger;
-  } },
-];
+// the closing commit of the G1 line makes it one. Each report-only case of Wave 2a is a gate now
+// (cases 11 to 15). A later wave can add a report-only case to this list.
+const REPORT_CASES = [];
 
 // ---- Record the tape, or run the cases.
 const seconds = (ms) => `${(ms / 1000).toFixed(2)} s`;
@@ -582,8 +637,10 @@ try {
       const t0 = Date.now();
       ran++;
       try {
-        await c.run();
+        // A case can return a note. The note says what the case did not compare.
+        const note = await c.run();
         console.log(`PASS  ${c.name}  ${seconds(Date.now() - t0)}`);
+        if (typeof note === 'string' && note) console.log(`      ${note}`);
       } catch (err) {
         failed++;
         console.log(`FAIL  ${c.name}  ${seconds(Date.now() - t0)}\n      ${err instanceof CaseFailure ? err.message : String(err.stack ?? err).split('\n').slice(0, 4).join('\n      ')}`);
