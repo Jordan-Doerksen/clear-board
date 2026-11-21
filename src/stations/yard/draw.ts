@@ -6,8 +6,9 @@
 //
 // The pointer path (SWITCH-BUTTONS, option a): one click listener on the root of the picture. A
 // click inside the 44 px box of a switch calls onPick with the id of that switch; a click elsewhere
-// in the picture calls onPick(null). The boxes are the places of the switch buttons of a later job
-// (switchBoxes, onLayout, and the empty layer .yd-view-controls).
+// in the picture calls onPick(null). The boxes are the places of the six switch buttons of the
+// access layer (../access.ts): switchBoxes() gives each box, onLayout() tells when a box moved, and
+// the layer `controls` holds the buttons over the picture.
 
 import './drawing/drawing.css';
 import { createRenderer } from './drawing/svg.ts';
@@ -62,8 +63,13 @@ export interface YardDrawing {
   paint(state: YardState, puzzle: YardPuzzle, opts: PaintOptions): void;
   /** Six boxes, in the order AS71 to AS76: the 44 px box of each switch, where a press lines it. */
   switchBoxes(): SwitchBox[];
-  /** `fn` is called after each layout that moves a box or changes the size of the picture. */
+  /**
+   * `fn` is called after the first layout of the picture and after each layout that moves a box or
+   * changes the size of the picture. It is not called at registration.
+   */
   onLayout(fn: () => void): void;
+  /** The layer over the picture that holds the switch buttons. It covers the picture; a child takes pointer events. */
+  readonly controls: HTMLElement;
   /** Stops the observers and removes the click listener. */
   destroy(): void;
 }
@@ -254,9 +260,8 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
     R.clearProbe();
     const key = JSON.stringify([lay.w, h, boxesOf(lay)]);
     if (key !== boxesKey) {
-      const first = boxesKey === '';
       boxesKey = key;
-      if (!first) for (const f of layoutFns) f();
+      for (const f of layoutFns) f();
     }
   }
 
@@ -334,6 +339,8 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
     },
 
     onLayout(fn) { layoutFns.push(fn); },
+
+    controls: R.controls,
 
     destroy() {
       ro.disconnect();

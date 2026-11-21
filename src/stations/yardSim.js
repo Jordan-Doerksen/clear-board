@@ -26,7 +26,7 @@ import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
 import './yard/yard.css';
 import { createView } from './yard/view.ts';
 import { createDrawing } from './yard/draw.ts';
-import { createMirror, createLive } from './yard/access.ts';
+import { createMirror, createLive, createSwitchButtons } from './yard/access.ts';
 
 // --- Clear Board: map the engine's rule chips → the content-library items a puzzle
 // exercises, so a genuine win feeds the SAME switching/securement mastery the Drill grades
@@ -81,6 +81,9 @@ export function mount(root, ctx) {
   // the result of each move and the words of each refusal, with the words of the banner as they are.
   const mirror = createMirror(view.el('yard-mirror'));
   const live = createLive(view.el('yard-live'));
+  // The six switch buttons (P-02): a press, Enter or Space throws the switch through onPick, the path
+  // of a click on the picture. The buttons move with each layout of the picture.
+  const switches = createSwitchButtons(drawing, view.drawHost, TRACK_IDS, onPick);
 
   let puzzle, state, anim = null, busy = false, fromDemo = false;
   let gen = 0, stopAnim = null;       // gen invalidates in-flight loops on (re)load; stopAnim aborts the live tween
@@ -112,10 +115,10 @@ export function mount(root, ctx) {
     arrivalCinematic();
   }
 
-  // The mirror states the state of the model at each paint with no motion frame.
+  // The mirror and the names of the switch buttons state the model at each paint with no motion frame.
   function paint() {
     drawing.paint(state, puzzle, { anim, cine });
-    if (!anim && !cine) mirror.update(state, puzzle);
+    if (!anim && !cine) { mirror.update(state, puzzle); switches.setLining(state.lined); }
   }
 
   // Inbound road train (only on `inbound` puzzles): in off the main, STOP, set out a
@@ -141,6 +144,7 @@ export function mount(root, ctx) {
   // --- input: line a switch by clicking its target -------------------------
   // The drawing adapter calls this for each click on the drawing: with the track id of the
   // switch that was hit, or with null. A click that hits no switch still resumes the sound.
+  // A switch button calls it with its track id.
   function onPick(id) {
     if (busy || cine) return;
     resume();

@@ -1,7 +1,7 @@
 // svg.ts — the one inline SVG of the Yard picture, its plate layer and its control layer.
 //
 // The root is div.yd-view. It holds one <svg> (aria-hidden), a plate layer with the words as DOM
-// text (aria-hidden), and an empty control layer for the switch buttons of a later job. The drawing
+// text (aria-hidden), and a control layer that holds the six switch buttons of ../access.ts. The drawing
 // makes each element one time and then updates it: a paint writes an attribute, a style value or a
 // text only when its value changed (requirement 31), and a layout never empties the root.
 // The script writes classes and data attributes. Each colour is in drawing.css, on --yard- names.
