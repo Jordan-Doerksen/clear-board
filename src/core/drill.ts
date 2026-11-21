@@ -5,6 +5,7 @@
 import { DOMAINS, drillable } from './store';
 import { isDue } from './sr';
 import { severityOf, SEV_RANK } from './severity';
+import { drawSignal } from './signal';
 import type { Content, ContentItem, Profile, Question, SignalAspect } from './types';
 
 export type Rng = () => number;
@@ -20,6 +21,50 @@ export function itemTier(item: ContentItem, content: Content): number {
   if (item.type !== 'rule') return 1;
   const tiers = (content.questionsByRule[item.id] || []).map(qq => qq.tier ?? 1);
   return tiers.length ? Math.min(...tiers) : 1;
+}
+
+// ---- Row U-01: a drawing of two or more signal items is not asked ------------------------------
+// signals.json is frozen, and two of its drawings belong to two items each (note S-01 for the SME).
+// A question with such a drawing has two right names. The Drill does not ask it: the Drill never
+// decides which name is right. Two drawings are the same when the frozen drawing function gives the
+// same SVG text for them.
+const svgOfAspect = new WeakMap<SignalAspect, string>();
+export function drawingOf(aspect: SignalAspect): string {
+  let svg = svgOfAspect.get(aspect);
+  if (svg === undefined) { svg = drawSignal(aspect); svgOfAspect.set(aspect, svg); }
+  return svg;
+}
+
+// For each drawing of the library: the ids of the signal items that hold it.
+const ownersOfContent = new WeakMap<Content, Map<string, Set<string>>>();
+function drawingOwners(content: Content): Map<string, Set<string>> {
+  let owners = ownersOfContent.get(content);
+  if (!owners) {
+    owners = new Map();
+    for (const i of content.items) {
+      if (i.type !== 'signal') continue;
+      for (const a of i.payload?.aspects || []) {
+        const svg = drawingOf(a);
+        const ids = owners.get(svg) ?? new Set<string>();
+        ids.add(i.id);
+        owners.set(svg, ids);
+      }
+    }
+    ownersOfContent.set(content, owners);
+  }
+  return owners;
+}
+
+// Each drawing that belongs to two or more signal items, with the ids of those items.
+export interface SharedDrawing { svg: string; itemIds: string[] }
+export function sharedDrawings(content: Content): SharedDrawing[] {
+  return [...drawingOwners(content)].filter(([, ids]) => ids.size > 1).map(([svg, ids]) => ({ svg, itemIds: [...ids] }));
+}
+
+// The aspects of a signal item that the Drill can ask: each one whose drawing no other item holds.
+export function askableAspects(item: ContentItem, content: Content): SignalAspect[] {
+  const owners = drawingOwners(content);
+  return (item.payload?.aspects || []).filter(a => (owners.get(drawingOf(a))?.size ?? 0) <= 1);
 }
 
 export type DrillQuestion =
@@ -54,7 +99,7 @@ export function buildQuestion(item: ContentItem, content: Content, ctx: Question
     return { kind: 'rule', heading: 'What does the rule say?', promptText: Q.stem, correct: Q.answer, options: shuffle(Q.choices.slice(), rng), explain: Q.explain };
   }
   if (item.type === 'signal') {
-    const aspects = item.payload?.aspects || [];
+    const aspects = askableAspects(item, content);   // U-01: no drawing that another item holds
     const aspect = aspects[Math.floor(rng() * aspects.length)];
     const correct = item.title;
     return { kind: 'signal', heading: 'What signal is this?', aspect, correct, options: shuffle([correct, ...distractors(item, ctx.pool, ctx.byType, o => o.title, rng)], rng) };
@@ -79,7 +124,7 @@ export function buildSession({ content, profile, domain, focusIds }: SessionInpu
   if (focusIds) items = focusIds.map(id => content.byId[id]).filter((i): i is ContentItem => !!i);   // misses-review round
   else if (domain) items = drillable(content.byDomain[domain], content);
   else for (const d of DOMAINS.filter(d => d.live)) items.push(...drillable(content.byDomain[d.id], content));
-  items = items.filter(i => i.type !== 'signal' || (i.payload?.aspects?.length ?? 0) > 0);
+  items = items.filter(i => i.type !== 'signal' || askableAspects(i, content).length > 0);   // U-01
   // radio-script items are graded in the Radio station's "Call it yourself" mode, where the
   // question is "which call comes next" — they have no term↔definition reading, so the Drill
   // must never draw them (they'd fall to the text branch and ask nonsense).
