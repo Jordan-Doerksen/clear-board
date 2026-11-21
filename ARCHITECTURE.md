@@ -19,7 +19,7 @@ Sources: [`specs/briefs/00-contracts.md`](specs/briefs/00-contracts.md) (names, 
 
 Page law tier: STRICT
 
-The line above is also line 5 of `DECISIONS.md` (D-0030). The owner has not picked OPEN. One question is open: a written exception, that the Yard drawing can show travel of equipment after a learner action (PENDING RULING `TIER`). Until an answer the page has no exception. Planned: S1 writes `data-tier="strict"` on `html`. With no attribute a page is also STRICT (Dusk `README.md`, step 3, checked).
+The line above is also line 5 of `DECISIONS.md` (D-0030). The owner kept STRICT and approved one written exception (D-0038): the Yard drawing can show travel of equipment after a learner action. Reduced motion stops it.
 
 ## 2. The file map, today
 ```
@@ -328,16 +328,20 @@ The contract, Part E, has the state of each ruling, with the options and the rea
 | `MOTION-STOP-OWNER`, `SOUND-OWNER`, `UNMOUNT`, `SWITCH-BUTTONS` | Y4. Y2 keeps a pointer path in 2b. | 6 |
 | `TAURI`, `DOCS-WRITER`, `ARCH-UPDATE`, `ARCH-GATE` | `src-tauri/**` waits. D1 writes the root documents; the lead writes `DECISIONS.md` and this file at each wave merge. No new gate for the "must not contain" columns. | 5.2, 6, 9 |
 
-**Open: each row is a PENDING RULING.** Until an answer, each job keeps the behaviour of today.
+**Ruled by the owner after Gate A (D-0038).** The owner took the recommended option of each of
+the 19 picks of `specs/briefs/lead-rulings.md`, section 3: the written exception for travel in the
+Yard drawing; one window that fills the browser; the app sizes for reading text; one tone for each
+live domain; gold for the route, the engine and the goal; the form of the drawing kept for a job;
+the C2 words as sketched; version `2.0.0`; and the R7 picks for motion, sound and the controls.
 
-| Name | Who | Recommended | What changes in this file after an answer |
-|---|---|---|---|
-| `TIER`, the exception only | the owner | One written exception for travel of equipment in the Yard drawing | Section 1; the motion form of section 6. |
-| `PAGE-WIDTH` | the owner | One window that fills the browser | The width that the Yard drawing gets; `--maxw` in block 1 of the bridge. |
-| `GOLD`, `FORM-CHANGE`, `C2-WORDS` | the owner | Gold for the route, the engine and the goal; the form is kept for a job; the words as written | Section 6, the drawing. |
-| `TEXT-SIZE`, `TILE-TONE`, `VERSION` | the owner | The app sizes stay; one tone for each live domain; `2.0.0` | No section of this file. |
-| The R7 picks `R7-P2`, `R7-P4`, `R7-P5`, `R7-P8` to `R7-P12` and `R7-P14` to `R7-P16` (R7-P3 is the pick of row U-13, which is ruled) | the owner | The contract, E.1 | Section 6: motion, sound and the controls during motion. |
-| `MIRROR-WORDS`, `YELLOW-WORD`, `FLASH`, `R7-P6`, `R7-P7`, `R7-P13` | the SME | — | Section 6. The lamp flash of `signal.ts` stays as today. |
+**Open for the SME.** Until an answer, each job keeps the behaviour of today.
+
+| Name | What stays as today | Section |
+|---|---|---|
+| `FLASH` | The lamp flash of `signal.ts`. | 6 |
+| `YELLOW-WORD` | The word "yellow" in the Yard help. | 6 |
+| `MIRROR-WORDS` | Y4 builds the text mirror from words the app has today; the SME reads it before the change reaches `main`. | 6 |
+| `R7-P6`, `R7-P7`, `R7-P13` | Where the engine rests after a spot, the picture of a kick, the sound of a spot. | 6 |
 
 ## 11. Not verified
 1. Each planned statement. Nothing of Wave 2 is built. The marks of `specs/briefs/00-contracts.md`, Part F, stay in force.

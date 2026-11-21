@@ -1090,6 +1090,12 @@ Each other row is ruled or closed.
 
 ## E.1 The owner rules, or the SME answers first
 
+**Closed (2026-11-21, D-0038).** The owner answered each open row of this table with the
+recommended option ("yes to all recommended"). The rows `UPGRADE-LIST`, `U-46`, `U-45`, `U-04`,
+`U-10`, `U-13`, `U-17`, `U-30`, `U-42` and `U-41` were closed at Gate A (D-0035). `FLASH`,
+`YELLOW-WORD`, `MIRROR-WORDS`, `R7-P6`, `R7-P7` and `R7-P13` wait for the SME. The table below is the
+record of the options; `lead-rulings.md` has the answers.
+
 | Name | State | The question, and the source | Options | Recommended, with the reason | Jobs that wait | 2a |
 |---|---|---|---|---|---|---|
 | `UPGRADE-LIST` | **Ruled** (the owner, Gate A question 4; D-0035). Rows U-01 to U-46: yes. Rows U-47 to U-51: no. U1 and the named jobs of 2b and 2c carry the rows. Built in 2a: row U-46 (Y1), the icon files of row U-45 (G1), the build-time read that row U-45 names (S1). G1-2 carries the G1 part of rows U-01, U-43 and U-44 in 2c. Rows U-11, U-24, U-25, U-27, U-33, U-37 and U-40 come back to the owner for the exact words before they ship. | Yes or no for each of the 51 rows (Gate A question 4; `upgrade-list.md` section 2) | Yes or no for each row | As the list recommends: 46 yes, 5 no. The list gives a reason for each row. | U1 (all rows); G1 and G1-2 (U-43, U-44, U-45, U-47); Y4 (U-09, U-12, U-20); B1, B2 (U-41) | No. The plan says: build nothing before the owner has answered. |

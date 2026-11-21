@@ -1,19 +1,8 @@
 // sr-vectors.mjs — golden-vector pin for the SM-2-lite retention engine (src/core/sr.ts).
 // The anti-false-confidence engine must keep meaning exactly what the docs say; this fails the gate
-// if the schedule / ease math ever silently drifts (REVAMP rec #11). No test runner needed — we
-// transpile sr.ts with the installed tsc (types erased) and import the result.
-import ts from 'typescript';
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-
-const srcUrl = new URL('../src/core/sr.ts', import.meta.url);
-const outDir = new URL('../.gate/', import.meta.url);
-const outUrl = new URL('../.gate/sr.mjs', import.meta.url);
-mkdirSync(outDir, { recursive: true });
-const js = ts.transpileModule(readFileSync(srcUrl, 'utf8'), {
-  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
-}).outputText;
-writeFileSync(outUrl, js);
-const sr = await import(outUrl.href);
+// if the schedule / ease math ever silently drifts (REVAMP rec #11). No test runner needed: Node 22
+// removes the types of sr.ts when it imports the file. The script writes no file.
+const sr = await import(new URL('../src/core/sr.ts', import.meta.url).href);
 
 console.log('═══ GATE 0: sr-vectors.mjs — SM-2-lite schedule ═══');
 let failed = 0;

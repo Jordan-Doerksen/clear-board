@@ -86,13 +86,27 @@ The job that applied the rulings set a default where a ruling gave no name. The 
 | The items of contract E.5 | Each one stands as written. |
 | A control that is 1 px smaller at the merge check of S1 | The lead rules when S1 reports it. |
 
-## 3. Open: the owner rules
+### 2.2 Rulings after the review of G1 (2026-11-21)
 
-Each row keeps the behaviour of today until the owner answers. Wave 2a can start without each one.
+| Name | The ruling | The reason |
+|---|---|---|
+| `TOOLS` | Changed by the owner (D-0039): the gate tools can follow the owner's reskin tools. | The owner's answer. |
+| `G1-LIB` | Accept `tools/lib/js-scan.mjs` and `tools/lib/css-scan.mjs`. They belong to G1, as each file of `tools/**`. | One scanner for three tools. |
+| `TAPE-CASE` | At G1-close, the word tape of the guided Radio reads the words as the markup writes them (letter case from a style is off while it reads), as the look harness does after commit `b6ee6c4`. G1-close records the tape again from the build of `c2fb637` in that form. | A style that changes the letter case changes no word. B3 can change each style value of `radioSim.js` (`B3-LINE`). |
+| `TARGETS-44` | When G1-close turns the report case "targets" into a gate, its floor is 44 px, not 43.5 px. | Fence rule 8. |
+| `YARD-WRAP` | At G1-close, `yard-wrap` leaves the list `classesMayGo` of `tools/look/cb.config.json`. | The contract keeps `.yard-wrap` (B.2, B.6). A lost `.yard-wrap` must fail. |
+| `LOOK-MODE` | A reskin job proves its look with `look.mjs compare --look --gate`: a pixel difference is listed and does not fail; a lost word, control or id, a smaller text and a sideways scroll fail. | A reskin changes pixels by design. |
 
-| Name | The question | Recommended | Jobs that wait |
+## 3. Closed by the owner after Gate A
+
+The owner answered the sheet of these 19 picks on 2026-11-21 with the words "yes to all
+recommended" and "yes" (D-0038). Each row takes the option in the column "The answer". The text
+"Until an answer" in a row is history. Where a row says that the SME confirms or checks words, that
+check stays open and is in the final report.
+
+| Name | The question | The answer (the recommended option) | Jobs that carry it |
 |---|---|---|---|
-| `TIER` | The page-law tier. | STRICT, with one written exception: the Yard drawing can show travel of equipment after a learner action. Until an answer: `Page law tier: STRICT`, with no exception. | Y2, Y4 |
+| `TIER` | The page-law tier. | STRICT, with one written exception: the Yard drawing can show travel of equipment after a learner action. The tier line stays `Page law tier: STRICT`. | Y2, Y4 |
 | `PAGE-WIDTH` | The page width. | One window that fills the browser. Text lines stay capped. | B1, Y3, Y2 |
 | `TEXT-SIZE` | The size of reading text. | The app sizes stay for reading text. | B1, B2, B3, Y3 |
 | `TILE-TONE` | The colour of a domain tile. | One tone for each live domain, grey for a domain that is not live. | B1 |
