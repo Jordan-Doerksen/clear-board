@@ -52,9 +52,10 @@ function masteryItemsFor(puzzle) {
 // The teardown of the Yard that is mounted now, or null (UNMOUNT, 2c-plan C2).
 let teardown = null;
 
-// Stops each timer, each animation frame, each loop and each listener of the mounted Yard, so that
-// nothing of the Yard runs after the learner leaves. The bridge calls it before it empties the host.
-// A second call does nothing. A sound that sound.js started before the call plays to its end.
+// Stops each timer, each animation frame, each loop and each listener of the mounted Yard. The bridge
+// calls it before it empties the host. A second call does nothing. One limit: sound.js holds the
+// timers of the notes of the win melody, so a note that has not played yet still starts after the
+// call, the last one at most 270 ms after the win.
 export function unmount() {
   if (!teardown) return;
   const stop = teardown;
