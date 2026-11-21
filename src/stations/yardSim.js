@@ -531,10 +531,12 @@ export function mount(root, ctx) {
 
   // A refused move is a teaching moment: keep the cited rule, add a one-tap link to its
   // plain-language Reference entry (cause → rule → correct action; REVAMP §6).
+  // "Look it up" opens the entry in a dialog on top of the Yard (U-17, 2c-plan C1): the job, the moves
+  // and the drawing stay, and the close of the dialog returns focus to the control.
   // The region says the refusal as the model wrote it, unless the caller says it in a longer message.
   function refusalBanner(msg, say = true) {
     const id = ruleItemFromMsg(msg);
-    view.setRefusal(msg, id && ctx && typeof ctx.go === 'function' ? () => ctx.go(`reference?focus=${id}`) : null);
+    view.setRefusal(msg, id && ctx && typeof ctx.lookUp === 'function' ? () => ctx.lookUp(id) : null);
     if (say) live.say(msg);
   }
   // "…(CROR 113.4/113.5(a)(v))" → rule.113.4; special-instruction-only refusals have no CROR item.
