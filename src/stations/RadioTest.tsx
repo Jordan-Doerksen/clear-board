@@ -87,7 +87,7 @@ export function RadioTest() {
       <>
         <div className="dusk-tile dusk-tile--teal cb-radio-done">
           <div className="dusk-tile-cap">
-            <h2 className="dusk-tile-lab">{focus ? 'Review done' : 'Run done'}</h2>
+            <h2 className="dusk-tile-lab">{focus ? 'Review done' : 'Session done'}</h2>
           </div>
           <div className="dusk-tile-body">
             <p className="dusk-tile-num">{score} / {order.length}</p>
@@ -111,7 +111,7 @@ export function RadioTest() {
             setFocus(null); missedRef.current = new Set();
             setPos(0); setPicked(null); setScore(0); setRunKey(k => k + 1);
           }}>Run it again</button>
-          <button className="dusk-btn" onClick={() => navigate('/')}>Back to the path</button>
+          <button className="dusk-btn" onClick={() => navigate('/')}>← Home</button>
         </div>
       </>
     );
