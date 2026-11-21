@@ -237,7 +237,7 @@ The trust rule:
 | 4 | `check:names` | `tools/name-check.mjs`, `tools/name-check.allow.json` | Only the bridge declares a Dusk name. Each other custom property of the app has the prefix `--cb-` or `--yard-`. No file declares `--lanes`. |
 | 5 | `lint` | `oxlint`, `.oxlintrc.json` | At most 1 warning (`tools/check.mjs`). One warning remains (`AppContext.tsx`, `react(only-export-components)`; `LINT-ONE`). |
 | 6 | `typecheck` | `tsc -b` | The types. |
-| 7 | `test:unit` | `tests/unit/*.test.ts` | 79 tests of `sr`, `store`, `severity`, `drill`, `radio` and the signal drawing. |
+| 7 | `test:unit` | `tests/unit/*.test.ts` | 88 tests of `sr`, `store`, `severity`, `drill`, `radio` and the signal drawing. |
 | 8 | `sr-vectors` | `tools/sr-vectors.mjs` | 7 checks on `grade` and `newState`. |
 | 9 | `solve` | `tools/solve.mjs` | 19 of 19 jobs: the authored line wins in exactly par moves, the solver finds no shorter line, `optJoints` is true. |
 | 10 | `content-check` | `tools/content-check.mjs` | 9 checks, A to I, on the five content files and on the calls of `radioSim.js`, which it reads as text. |
