@@ -26,19 +26,23 @@
 // A report-only case prints PENDING with a count and the job that owns the fix. It does not
 // change the exit code. A count of 0 means that the case passes on this build. The closing
 // commit of the G1 line turns a report-only case into a gate when its owner is merged and the
-// case passes.
+// case passes. After Wave 2c no case is report-only.
 //
 // An element is selected by "the hook, or the old selector" (the table HOOKS), so that a later
 // job can replace an old class and put the hook on the same element, with no edit of this file.
 // No case states a rule. The tape holds a hash and a word count of the page text, not the text.
 import { createHash } from 'node:crypto';
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
-import { LEARN_CARD, passLearnCards } from '../../tools/lib/learn-card.mjs';
+import { LEARN_CARD, LEARN_NEXT, passLearnCards } from '../../tools/lib/learn-card.mjs';
+// The engine of the Yard, frozen (fence item 1). The case of a win reads the job and its optimal line
+// from the data, and the numbers that the readout must show from the model. It changes no file.
+import { PUZZLES } from '../../src/stations/yard/puzzles.js';
+import { freshState, kick, pull, secure, spot, checkWin } from '../../src/stations/yard/model.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
@@ -155,11 +159,43 @@ const overflowOf = (page) => page.evaluate(() => {
   return { page: Math.max(0, root.scrollWidth - root.clientWidth), main: main ? Math.max(0, main.scrollWidth - main.clientWidth) : 0 };
 });
 
+// The controls of the page that are under 44 by 44 px (fence item 8): each enabled button, link,
+// select, summary and input that shows. The floor is 44 px, not 43.5 px (ruling TARGETS-44). An input
+// in a label is measured by the larger box of the two. While a dialog is open, only the controls in
+// the dialog are measured. Returns one line for each small control.
+const smallControls = (page) => page.evaluate(() => {
+  const shown = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden'; };
+  const name = (el) => (el.getAttribute('aria-label') || el.innerText || el.getAttribute('placeholder') || (el.id ? `#${el.id}` : '')).replace(/\s+/g, ' ').trim().slice(0, 40);
+  const found = [];
+  for (const el of document.querySelectorAll('button, a, select, summary, input')) {
+    if (el.disabled || !shown(el)) continue;
+    const dialog = document.querySelector('dialog[open]');
+    if (dialog && !dialog.contains(el)) continue;
+    let r = el.getBoundingClientRect();
+    const label = el.tagName === 'INPUT' ? el.closest('label') : null;
+    if (label) { const l = label.getBoundingClientRect(); if (l.width * l.height > r.width * r.height) r = l; }
+    if (r.width < 44 || r.height < 44) found.push(`${el.tagName.toLowerCase()} "${name(el)}" ${Math.round(r.width * 100) / 100} by ${Math.round(r.height * 100) / 100} px`);
+  }
+  return found;
+});
+
+// The inputs that reach a page, from its first script on: the count of key presses and the count of
+// pointer presses of each kind (touch, mouse, pen). A case of one kind of input proves with it that
+// it used no other kind. It runs before each page script.
+function countInputs() {
+  const seen = { keys: 0, touch: 0, mouse: 0, pen: 0, other: 0 };
+  Object.defineProperty(window, '__cbInputs', { value: seen });
+  addEventListener('keydown', () => { seen.keys++; }, true);
+  addEventListener('pointerdown', (e) => { seen[['touch', 'mouse', 'pen'].includes(e.pointerType) ? e.pointerType : 'other']++; }, true);
+}
+const inputsOf = (page) => page.evaluate(() => ({ ...window.__cbInputs }));
+
 // Open one page in a new context, run `body`, then make the common checks.
 // Options: width (390 or 1440, or another width), seed, serviceWorker, settings (stored before
 // the page loads), reduce (the device flag for reduced motion), storage (false: the browser refuses
-// the storage of the site), expectedError (a function of the text and the address of a console
-// error: true for an error that the case causes on purpose), common (false: no common checks).
+// the storage of the site), touch (true: a phone with a touch screen), expectedError (a function of
+// the text and the address of a console error: true for an error that the case causes on purpose),
+// common (false: no common checks).
 async function withPage(options, body) {
   const size = SIZES[options.width ?? 1440] ?? { width: options.width, height: 800 };
   const context = await browser.newContext({
@@ -169,6 +205,7 @@ async function withPage(options, body) {
     timezoneId: 'America/Winnipeg',
     reducedMotion: options.reduce ? 'reduce' : 'no-preference',
     serviceWorkers: options.serviceWorker ? 'allow' : 'block',
+    ...(options.touch ? { hasTouch: true, isMobile: true } : {}),
   });
   const errors = [];
   try {
@@ -285,6 +322,193 @@ async function walkGuidedRadio(page, each) {
     await page.locator('#log .tx').nth(press - 1).waitFor();
     await each(press, await radioText(page));
   }
+}
+
+// Wait until the text of an element is `text`. On a time-out the case fails with a sentence.
+const waitText = (page, selector, text, when) => page.waitForFunction(([s, t]) => document.querySelector(s)?.textContent === t, [selector, text])
+  .catch(async () => { throw new CaseFailure(`${when}: ${selector} says "${await page.locator(selector).textContent().catch(() => '(not in the page)')}", and "${text}" is expected`); });
+
+// One action on a control: a click, a tap or the choice of an option. When the control does not take
+// it in the time of the page (it does not show, it is off, or another element covers it), the case
+// fails with a sentence that names the control, and the reason when the log of the browser gives one
+// (for example "<div> intercepts pointer events"). The log has colour codes of the terminal: they go.
+const COLOUR_CODE = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g');
+const ROUTINE = /^- (waiting|retrying|attempting|scrolling|done scrolling|locator resolved|element is visible, enabled and stable)/;
+async function onControl(what, action) {
+  try {
+    await action();
+  } catch (err) {
+    if (err instanceof CaseFailure) throw err;
+    const reason = String(err.message).replace(COLOUR_CODE, '').split('\n').map((l) => l.trim())
+      .filter((l) => l.startsWith('- ') && !ROUTINE.test(l)).at(-1)?.slice(2) ?? '';
+    throw new CaseFailure(`${what} did not reach its control in the time of the page${reason ? `: ${reason}` : ''}`);
+  }
+}
+const click = (page, selector) => onControl(`a click on ${selector}`, () => page.locator(selector).click());
+
+// ---- The Yard (Y4a, Y4b). The six switch buttons have the hook data-sw and a name that says the
+// lining, for example "AS73 switch, lined reverse" (ruling SW-NAME). The move builder is the selects
+// #act, #count and #track and the button #work. The text mirror #yard-mirror says the yard in words.
+// It changes at the end paint of a move and not during the motion, so a case waits on it and not on
+// time. The status region #yard-live says the result of each call; the banner #msg shows it.
+const YARD_JOB = PUZZLES[0];                      // p0-1, the first job of the picker
+const READOUT = (moves, par, couplings) => `Moves ${moves} / par ${par} · Couplings ${couplings}`;
+const mirrorText = (page) => page.locator('#yard-mirror').evaluate((el) => el.textContent);
+const mirrorChange = (page, before, what) => page.waitForFunction((was) => document.querySelector('#yard-mirror')?.textContent !== was, before, { timeout: 15000 })
+  .catch(async () => { throw new CaseFailure(`${what} did not end: the text mirror did not change in 15 s. The banner says "${await page.locator('#msg').textContent()}"`); });
+const callWords = ([act, track, n]) => (act === 'secure' ? `SECURE ${track}` : `${act.toUpperCase()} ${n} ${act === 'pull' ? 'from' : 'to'} ${track}`);
+
+// The counters of the model along the optimal line of a job: entry k is the state after call k. Each
+// call is made on the lining that the case makes: the switch of the track of the call reverse and
+// each other switch normal. The case states no rule: the model (frozen) gives the numbers.
+function lineStates(job) {
+  const st = freshState(job);
+  const states = [{ moves: st.moves, joints: st.joints, won: false }];
+  for (const call of job.opt) {
+    const [act, track, n] = call;
+    if (act !== 'secure') for (const id of Object.keys(st.lined)) st.lined[id] = id === track ? 'reverse' : 'normal';
+    const r = act === 'secure' ? secure(st, track) : { pull, spot, kick }[act](st, track, n);
+    if (!r.ok) throw new CaseFailure(`the model refuses the call ${callWords(call)} of the optimal line of ${job.id}: ${r.msg}`);
+    states.push({ moves: st.moves, joints: st.joints, won: checkWin(st, job) });
+  }
+  return states;
+}
+
+// Press Tab, or Shift+Tab, until the control of `selector` has the focus. The direction is the order
+// of the document, which is the order of Tab in the Yard (no positive tabindex).
+async function tabTo(page, selector, max = 80) {
+  for (let presses = 0; presses <= max; presses++) {
+    const where = await page.evaluate((s) => {
+      const target = document.querySelector(s);
+      const active = document.activeElement;
+      if (!target) return 'none';
+      if (active === target) return 'here';
+      if (!active || active === document.body) return 'after';
+      return active.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_FOLLOWING ? 'after' : 'before';
+    }, selector);
+    if (where === 'here') return;
+    if (where === 'none') throw new CaseFailure(`the control ${selector} is not in the page`);
+    await page.keyboard.press(where === 'after' ? 'Tab' : 'Shift+Tab');
+  }
+  throw new CaseFailure(`the keyboard did not reach the control ${selector} in ${max} presses of Tab`);
+}
+
+// The two ways to play. `press` presses a button and `choose` sets a select. `only` is true when the
+// counts of the inputs of the page show this way and no other.
+const TOUCH = {
+  name: 'touch', width: 390, touch: true,
+  press: (page, selector) => onControl(`a tap on ${selector}`, () => page.locator(selector).tap()),
+  // The list of a select is a part of the system, not of the page. The case taps the select, and then
+  // picks the option as that list does: selectOption sets the option and sends input and change.
+  async choose(page, selector, value) {
+    await onControl(`a tap on ${selector}`, () => page.locator(selector).tap());
+    await onControl(`the choice of the option "${value}" of ${selector}`, () => page.locator(selector).selectOption(value));
+  },
+  only: (seen) => seen.touch > 0 && seen.keys + seen.mouse + seen.pen + seen.other === 0,
+};
+const KEYBOARD = {
+  name: 'keyboard', width: 1440, touch: false,
+  // Space presses a switch button, and Enter each other button.
+  async press(page, selector) {
+    await tabTo(page, selector);
+    await page.keyboard.press(selector.startsWith('[data-sw') ? 'Space' : 'Enter');
+  },
+  // A closed select of the browser changes its option with the arrow keys.
+  async choose(page, selector, value) {
+    await tabTo(page, selector);
+    const values = await page.locator(`${selector} option`).evaluateAll((els) => els.map((o) => o.value));
+    ok(values.includes(value), `the select ${selector} has no option "${value}": ${values.join(', ')}`);
+    for (let k = 0; k < values.length; k++) {
+      const now = await page.locator(selector).inputValue();
+      if (now === value) break;
+      await page.keyboard.press(values.indexOf(value) > values.indexOf(now) ? 'ArrowDown' : 'ArrowUp');
+    }
+    const now = await page.locator(selector).inputValue();
+    ok(now === value, `the arrow keys did not move the select ${selector} to "${value}": it is on "${now}"`);
+  },
+  only: (seen) => seen.keys > 0 && seen.touch + seen.mouse + seen.pen + seen.other === 0,
+};
+
+// A control that the case is about to use must have its role and a name with a letter or a digit, and
+// must be 44 by 44 px or more (fence item 8; the floor of ruling TARGETS-44). So a control that loses
+// its name or its size fails the case, also in a state of the job that case 13 does not reach.
+async function usable(page, selector, role, where) {
+  const named = await page.locator(selector).and(page.getByRole(role, { name: /[A-Za-z0-9]/ })).count();
+  ok(named === 1, `${where}: the control ${selector} is not a ${role} with a name`);
+  const box = await page.locator(selector).boundingBox();
+  const size = box ? `${Math.round(box.width * 100) / 100} by ${Math.round(box.height * 100) / 100} px` : 'not in the layout';
+  ok(box && box.width >= 44 && box.height >= 44, `${where}: the control ${selector} is ${size}, and 44 by 44 px or more is expected`);
+}
+
+// One press of a switch button, and a wait until its name says the lining `want`.
+async function throwSwitch(page, how, id, want, where) {
+  const selector = `[data-sw="${id}"]`;
+  const name = `${id} switch, lined ${want}`;
+  await usable(page, selector, 'button', where);
+  await how.press(page, selector);
+  await page.waitForFunction(([s, n]) => document.querySelector(s)?.getAttribute('aria-label') === n, [selector, name])
+    .catch(async () => { throw new CaseFailure(`${where}: after a press the switch button ${id} is named "${await page.locator(selector).getAttribute('aria-label')}", and "${name}" is expected`); });
+}
+
+// Play the first job to a win along its optimal line, one way. The case first presses each of the six
+// switch buttons two times. For each call it lines the switches, sets the move builder, presses "Work
+// it" and waits for the end paint of the move; the readout must then show the counters of the model.
+// Each control must have its name and its size when the case uses it (usable).
+// At the end it checks the win words, the readout at par, the status region and the done mark, and
+// that the page got the inputs of this way only. Returns a note.
+async function playToWin(how) {
+  const job = YARD_JOB;
+  const states = lineStates(job);
+  const where = `${job.id} by ${how.name} at ${how.width}`;
+  ok(states.at(-1).won && states.at(-1).moves === job.par, `the optimal line of ${job.id} does not win at par in the model`);
+  return withPage({ width: how.width, touch: how.touch }, async (page, context) => {
+    await context.addInitScript(countInputs);
+    await open(page, '/yard');
+    await page.locator('#work').waitFor();
+    ok(await page.evaluate(() => document.documentElement.dataset.reduce) === '0', `${where}: "Reduce motion" is not off`);
+    ok(await page.locator('#picker').inputValue() === String(PUZZLES.indexOf(job)), `${where}: the picker is not on the first job`);
+    await waitText(page, '#readout', READOUT(0, job.par, 0), `${where}, at the start`);
+    const ids = await page.locator('[data-sw]').evaluateAll((els) => els.map((el) => el.dataset.sw));
+    ok(ids.length === 6, `${where}: the Yard has ${ids.length} switch buttons, and 6 are expected`);
+    for (const id of ids) for (const want of ['reverse', 'normal']) await throwSwitch(page, how, id, want, where);
+    for (const [k, call] of job.opt.entries()) {
+      const [act, track, n] = call;
+      if (act !== 'secure') {
+        for (const id of ids) {
+          const want = id === track ? 'reverse' : 'normal';
+          if (!(await page.locator(`[data-sw="${id}"]`).getAttribute('aria-label')).endsWith(want)) await throwSwitch(page, how, id, want, where);
+        }
+      }
+      for (const [selector, value] of [['#act', act], ['#track', track], ...(act !== 'secure' ? [['#count', String(n)]] : [])]) {
+        await usable(page, selector, 'combobox', where);
+        await how.choose(page, selector, value);
+      }
+      await usable(page, '#work', 'button', where);
+      const before = await mirrorText(page);
+      await how.press(page, '#work');
+      await mirrorChange(page, before, `${where}: the call ${callWords(call)}`);
+      await waitText(page, '#readout', READOUT(states[k + 1].moves, job.par, states[k + 1].joints), `${where}: after the call ${callWords(call)}`);
+    }
+    // The win words, the readout at par, the status region and the done mark.
+    const banner = (await page.locator('#msg').textContent()).trim();
+    ok(banner.startsWith('Job done.'), `${where}: after the last call the banner says "${banner}", and the win words "Job done." are expected`);
+    const readout = READOUT(job.par, job.par, states.at(-1).joints);
+    await waitText(page, '#readout', readout, `${where}, at the win`);
+    const region = page.locator('#yard-live');
+    ok(await region.getAttribute('role') === 'status', `${where}: #yard-live is not a status region`);
+    const said = await region.textContent();
+    ok(said.includes('Job done.') && said.includes(readout), `${where}: the status region says "${said}"; it must hold "Job done." and "${readout}"`);
+    const option = `#picker option[value="${PUZZLES.indexOf(job)}"]`;
+    ok((await page.locator(option).textContent()).startsWith('✓'), `${where}: after the win the picker shows "${await page.locator(option).textContent()}", with no done mark ✓`);
+    ok((await storedJson(page, PROFILE_KEY))?.yard?.completed?.includes(job.id), `${where}: after the win ${PROFILE_KEY} holds no done mark for ${job.id}`);
+    const seen = await inputsOf(page);
+    ok(how.only(seen), `${where}: the page got inputs of another way: ${JSON.stringify(seen)}`);
+    // The done mark stays after a reload.
+    await page.reload();
+    await page.locator('#picker').waitFor();
+    ok((await page.locator(option).textContent()).startsWith('✓'), `${where}: after a reload the picker shows "${await page.locator(option).textContent()}", with no done mark ✓`);
+    return `${where}: ${how.touch ? `${seen.touch} taps` : `${seen.keys} key presses`}, "${banner}"`;
+  });
 }
 
 // ---- The gate cases.
@@ -427,16 +651,53 @@ const GATE_CASES = [
   } },
 
   { name: '8 yard', async run() {
+    // The watched line of the first job (R7-P8, U-04): "▶ Watch optimal" opens a stepper at step 0 in
+    // the place of the move builder. Next plays one step, Back shows the yard after the step before,
+    // and "▶ Play all" plays each step to the end. The readout says "Couplings" (U-23). "Reduce motion"
+    // is off, so a step moves the engine: each wait is on the state of the page. The numbers of the
+    // readout after each step come from the model. A watched line gets no done mark.
+    const job = YARD_JOB;
+    const states = lineStates(job);
+    const n = job.opt.length;
+    const at = (k) => READOUT(states[k].moves, job.par, states[k].joints);
     await withPage({}, async (page) => {
       await open(page, '/yard');
       await page.locator('#optimal').waitFor();
       ok(await page.evaluate(() => document.documentElement.dataset.reduce) === '0', '"Reduce motion" is not off');
-      ok(await page.locator('#picker').evaluate((el) => el.selectedIndex) === 0, 'the picker is not on the first job');
-      const start = await page.locator('#readout').textContent();
-      ok(start.startsWith('Moves 0 / par 5'), `the readout of the first job starts as "${start}", and "Moves 0 / par 5" is expected`);
-      await page.locator('#optimal').click();
-      await page.waitForFunction(() => document.querySelector('#readout').textContent.startsWith('Moves 5 / par 5'), null, { timeout: 30000 })
-        .catch(async () => { throw new CaseFailure(`after 30 s the readout is "${await page.locator('#readout').textContent()}", and "Moves 5 / par 5" is expected`); });
+      ok(await page.locator('#picker').inputValue() === String(PUZZLES.indexOf(job)), `the picker is not on the first job ${job.id}`);
+      await waitText(page, '#readout', at(0), `the first job ${job.id} at its start`);
+      // The stepper opens at step 0, and the move builder goes.
+      await click(page, '#optimal');
+      await page.locator('#yard-next').waitFor();
+      await waitText(page, '#yard-demo-count', `0 / ${n}`, 'after "▶ Watch optimal"');
+      await waitText(page, '#readout', at(0), 'after "▶ Watch optimal"');
+      ok(await page.locator('#work').isHidden(), 'the control "Work it" shows while the optimal line is watched');
+      ok((await page.locator('#yard-live').textContent()).includes(`Step 0 of ${n}`), `after "▶ Watch optimal" the status region does not say "Step 0 of ${n}"`);
+      // Next plays step 1. The words and the readout say its end state at its start; the text mirror
+      // changes at its end paint.
+      const before = await mirrorText(page);
+      await click(page, '#yard-next');
+      await waitText(page, '#yard-demo-count', `1 / ${n}`, 'after Next');
+      await waitText(page, '#readout', at(1), 'after Next');
+      await mirrorChange(page, before, 'step 1 of the optimal line after Next');
+      // Back shows the yard at step 0.
+      await click(page, '#yard-back');
+      await waitText(page, '#yard-demo-count', `0 / ${n}`, 'after Back');
+      await waitText(page, '#readout', at(0), 'after Back');
+      // "▶ Play all" plays each step on its own, and then the control says "Play all" again and is off.
+      await click(page, '#yard-play');
+      await page.waitForFunction((count) => {
+        const play = document.querySelector('#yard-play');
+        return document.querySelector('#yard-demo-count')?.textContent === count && /Play all/.test(play?.textContent ?? '') && play?.getAttribute('aria-disabled') === 'true';
+      }, `${n} / ${n}`, { timeout: 30000 }).catch(async () => {
+        throw new CaseFailure(`after "▶ Play all" and 30 s the stepper is at "${await page.locator('#yard-demo-count').textContent()}" and its control says "${(await page.locator('#yard-play').textContent()).trim()}"; "${n} / ${n}" and "▶ Play all" (off) are expected`);
+      });
+      await waitText(page, '#readout', at(n), 'at the end of "▶ Play all"');
+      const banner = await page.locator('#msg').textContent();
+      ok(banner.includes(`Step ${n} of ${n}`), `at the end of "▶ Play all" the banner says "${banner}", and "Step ${n} of ${n}" is expected`);
+      ok(!/Joints/.test(await page.locator('#readout').textContent()), 'the readout says "Joints"');
+      const option = await page.locator(`#picker option[value="${PUZZLES.indexOf(job)}"]`).textContent();
+      ok(!option.startsWith('✓'), `a watched line gave the job ${job.id} the done mark: "${option}"`);
     });
   } },
 
@@ -542,35 +803,18 @@ const GATE_CASES = [
   // each case passes, so the closing commit of the G1 line made each one a gate.
   { name: '13 targets', async run() {
     // Each enabled button, link, select, summary and input is 44 by 44 px or more, on the six
-    // routes and in the Settings dialog, at 390 and 1440. The floor is 44 px, not 43.5 px (ruling
-    // TARGETS-44). An input in a label is measured by the larger box of the two. While a dialog is
-    // open, only the controls in the dialog are measured.
-    const small = (page) => page.evaluate(() => {
-      const shown = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden'; };
-      const name = (el) => (el.getAttribute('aria-label') || el.innerText || el.getAttribute('placeholder') || (el.id ? `#${el.id}` : '')).replace(/\s+/g, ' ').trim().slice(0, 40);
-      const found = [];
-      for (const el of document.querySelectorAll('button, a, select, summary, input')) {
-        if (el.disabled || !shown(el)) continue;
-        const dialog = document.querySelector('dialog[open]');
-        if (dialog && !dialog.contains(el)) continue;
-        let r = el.getBoundingClientRect();
-        const label = el.tagName === 'INPUT' ? el.closest('label') : null;
-        if (label) { const l = label.getBoundingClientRect(); if (l.width * l.height > r.width * r.height) r = l; }
-        if (r.width < 44 || r.height < 44) found.push(`${el.tagName.toLowerCase()} "${name(el)}" ${Math.round(r.width * 100) / 100} by ${Math.round(r.height * 100) / 100} px`);
-      }
-      return found;
-    });
+    // routes and in the Settings dialog, at 390 and 1440 (smallControls).
     const found = [];
     for (const width of [390, 1440]) {
       for (const r of ROUTES) {
-        const list = await withPage({ width }, async (page) => { await open(page, r.route); await r.check(page); return small(page); });
+        const list = await withPage({ width }, async (page) => { await open(page, r.route); await r.check(page); return smallControls(page); });
         found.push(...list.map((s) => `${r.name} at ${width}: ${s}`));
       }
       const list = await withPage({ width }, async (page) => {
         await open(page, '/');
         await page.locator(hook('settings-open')).first().click();
         await page.locator('dialog#settings[open]').waitFor();
-        return small(page);
+        return smallControls(page);
       });
       found.push(...list.map((s) => `settings dialog at ${width}: ${s}`));
     }
@@ -664,12 +908,32 @@ const GATE_CASES = [
   // Cases 16, 17 and 18 are the trials of R6 ENG-01 and ENG-02 as browser tests (P-22). They enter
   // the gate with rows U-10 and U-07, which Wave 2c-1 merged.
   { name: '16 update', async run() {
-    // Row U-10 (R6 ENG-01): an open app that gets a new build shows "A new version is ready." with
-    // one control, keeps the first build until the control is pressed, and then reloads on the new
-    // build. The server serves a first build, then a second build with one changed file.
+    // Row U-10 and the trial of R6 ENG-01 in full. The server serves a first build, then a second build
+    // in which the station chunk of the Yard has a new name and the old chunk is gone (secondBuild).
+    // Two copies of the app are open on the first build: A and B. B is on Home and has not opened the
+    // Yard. Then:
+    //   1. A gets the new build: A shows "A new version is ready." with one control "Reload", and keeps
+    //      the first build. A opens the Yard: the Yard draws from the old chunk, which the cache of the
+    //      first build holds, although the server no longer holds it.
+    //   2. The learner presses "Reload" in A: A reloads on the second build, and the Yard draws from the
+    //      new chunk. The new worker now controls each copy, and the old chunk is in no cache.
+    //   3. B opens the Yard: the old chunk does not load. B says "This station did not load." with a
+    //      control "Reload", and does not go blank. Its "Reload" loads the second build, and the Yard
+    //      draws.
+    // A control "Reload" that does nothing fails the case with a sentence.
     const second = secondBuild(distDir);
+    const yardRoute = ROUTES.find((r) => r.route === '/yard');
+    const isOld = (url) => url.endsWith(`/assets/${second.oldYard}`);
+    const isNew = (url) => url.endsWith(`/assets/${second.newYard}`);
+    const loadedChunks = (page) => page.evaluate(() => performance.getEntriesByType('resource').map((e) => e.name));
+    // A press of a control "Reload" that must reload the page; with no reload in 15 s the case fails.
+    const reloads = async (page, control, what) => {
+      const loaded = page.waitForEvent('load', { timeout: 15000 }).then(() => true, () => false);
+      await onControl(`${what}: a click on "Reload"`, () => control.click());
+      ok(await loaded, `${what}: the control "Reload" did not reload the page in 15 s`);
+    };
     try {
-      await withPage({ serviceWorker: true }, async (page) => {
+      return await withPage({ serviceWorker: true }, async (page, context) => {
         await open(page, '/');
         await page.locator(hook('domain-card')).first().waitFor();
         await workerReady(page);
@@ -678,12 +942,28 @@ const GATE_CASES = [
         await page.locator(hook('domain-card')).first().waitFor();
         await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
         await page.evaluate(() => { window.__cbSmokeOpen = 'first build'; });
+        // Copy B, on Home with the first build. Its page errors and console errors fail the case,
+        // except the failed request of the old Yard chunk in step 3.
+        const other = await context.newPage();
+        other.setDefaultTimeout(10000);
+        const otherErrors = [];
+        let oldMissing = 0;
+        other.on('pageerror', (err) => otherErrors.push(`page error: ${err.message}`));
+        other.on('console', (message) => {
+          if (message.type() !== 'error') return;
+          if (isOld(message.location().url ?? '')) oldMissing++;
+          else otherErrors.push(`console error: ${message.text()}`);
+        });
+        await open(other, '/');
+        await other.locator(hook('domain-card')).first().waitFor();
+        await other.waitForFunction(() => navigator.serviceWorker.controller !== null);
+        await other.evaluate(() => { window.__cbSmokeOpen = 'first build'; window.__cbFirstWorker = navigator.serviceWorker.controller; });
         const stillOpen = async (when) => ok(await page.evaluate(() => window.__cbSmokeOpen) === 'first build', `the page reloaded ${when}, before the control of the notice was pressed`);
         const notice = page.getByText(UPDATE_NOTICE, { exact: true });
-        // The server now holds the second build. The learner comes back to the open app: the app
+        // 1. The server now holds the second build. The learner comes back to the open app: the app
         // asks for a new version on that event of the page (App.tsx). The app adds its listener when
         // the worker is registered, so the event is sent again until the notice shows.
-        served.dir = second;
+        served.dir = second.dir;
         let shown = false;
         for (let tries = 0; tries < 10 && !shown; tries++) {
           await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
@@ -695,24 +975,53 @@ const GATE_CASES = [
         ok(await reload.count() === 1, `the notice "${UPDATE_NOTICE}" has no control "Reload"`);
         await stillOpen('when the notice showed');
         ok(await page.evaluate(() => document.querySelector('meta[name="cb-smoke-build"]') === null), 'the page shows the second build before the control was pressed');
-        // The open app keeps the first build: a station draws from its cache, and the page does not
+        // The open app keeps the first build: the Yard draws from the old chunk, and the page does not
         // reload on a change of route.
+        ok(!existsSync(join(second.dir, 'assets', second.oldYard)), `the second build still holds the old Yard chunk ${second.oldYard}`);
         await page.evaluate(() => { location.hash = '#/yard'; });
-        await ROUTES.find((r) => r.route === '/yard').check(page);
+        await yardRoute.check(page).catch((err) => { throw new CaseFailure(`the open app with the first build, after the server held the second build: the Yard did not draw: ${err.message.split('\n')[0]}`); });
+        ok((await loadedChunks(page)).some(isOld), `the open app did not load the old Yard chunk ${second.oldYard}`);
         await stillOpen('on a change of route');
         ok(await notice.isVisible(), 'the notice went away on a change of route');
-        // The learner presses the control: the page reloads on the second build.
-        const loaded = page.waitForEvent('load', { timeout: 15000 });
-        await reload.click();
-        await loaded;
-        await ROUTES.find((r) => r.route === '/yard').check(page);
+        // 2. The learner presses the control: the page reloads on the second build.
+        await reloads(page, reload, `copy A, the notice "${UPDATE_NOTICE}"`);
+        await yardRoute.check(page).catch((err) => { throw new CaseFailure(`copy A after its "Reload": the Yard did not draw: ${err.message.split('\n')[0]}`); });
         ok(await page.evaluate(() => window.__cbSmokeOpen) === undefined, 'the page did not reload after the control was pressed');
         ok(await page.evaluate(() => document.querySelector('meta[name="cb-smoke-build"]')?.getAttribute('content')) === '2', 'after the reload the page does not show the second build');
+        ok((await loadedChunks(page)).some(isNew), `after the reload the Yard did not load the new chunk ${second.newYard}`);
         ok(await page.getByText(UPDATE_NOTICE, { exact: true }).count() === 0, `the notice "${UPDATE_NOTICE}" still shows after the reload on the new build`);
+        // 3. Copy B still runs the first build. Wait until the new worker controls B and is activated:
+        // its activation takes each file that the second build does not hold out of the cache. Then
+        // open the Yard in B.
+        const taken = await other.waitForFunction(() => {
+          const worker = navigator.serviceWorker.controller;
+          return worker !== null && worker !== window.__cbFirstWorker && worker.state === 'activated';
+        }, null, { timeout: 15000 }).then(() => true, () => false);
+        ok(taken, 'copy B: 15 s after the reload of copy A, the worker of the second build does not control copy B');
+        const oldUrl = new URL(`assets/${second.oldYard}`, `${base}/`).href;
+        ok(await other.evaluate(async (url) => (await caches.match(url)) === undefined, oldUrl), `after the worker of the second build took control, a cache still holds the old Yard chunk ${second.oldYard}`);
+        ok(await other.evaluate(() => window.__cbSmokeOpen) === 'first build', 'copy B reloaded before its learner pressed a control');
+        await other.evaluate(() => { location.hash = '#/yard'; });
+        const failed = other.locator('.yard-host [role="alert"]');
+        await failed.waitFor().catch(async () => {
+          const shows = (await other.locator('main').innerText().catch(() => '')).replace(/\s+/g, ' ').trim().slice(0, 160);
+          throw new CaseFailure(`copy B with the first build opened the Yard after the old chunk was gone: the Yard shows no alert that it did not load. The view shows: "${shows}"`);
+        });
+        const said = (await failed.innerText()).replace(/\s+/g, ' ').trim();
+        ok(said.startsWith('This station did not load.'), `copy B: the alert of the Yard says "${said}", and "This station did not load." is expected`);
+        ok((await other.locator('main h2').first().innerText()).includes('The Yard'), 'copy B: the view of the Yard has no heading');
+        const otherReload = failed.getByRole('button', { name: 'Reload', exact: true });
+        ok(await otherReload.count() === 1, 'copy B: the alert of the Yard has no control "Reload"');
+        // B's "Reload" loads the second build, and the Yard draws.
+        await reloads(other, otherReload, 'copy B, the alert of the Yard');
+        await yardRoute.check(other).catch((err) => { throw new CaseFailure(`copy B after its "Reload": the Yard did not draw: ${err.message.split('\n')[0]}`); });
+        ok(await other.evaluate(() => document.querySelector('meta[name="cb-smoke-build"]')?.getAttribute('content')) === '2', 'copy B after its "Reload" does not show the second build');
+        ok(otherErrors.length === 0, `copy B: ${otherErrors.join('; ')}`);
+        return `the Yard chunk ${second.oldYard} became ${second.newYard} (${second.renamed.length} files renamed); copy A drew the Yard from the old chunk, then from the new one; copy B said "${said}" (${oldMissing} failed requests of the old chunk), then drew the Yard after its "Reload"`;
       });
     } finally {
       served.dir = distDir;
-      rmSync(second, { recursive: true, force: true });
+      rmSync(second.dir, { recursive: true, force: true });
     }
   } },
 
@@ -778,23 +1087,30 @@ const GATE_CASES = [
     ok(total <= CACHE_BUDGET, `the offline cache is ${total} bytes in ${list.length} files, over the budget of ${CACHE_BUDGET} bytes (5 MB). The largest files: ${largest}`);
     return `the offline cache is ${total} bytes (${(total / 1024).toFixed(2)} KiB) in ${list.length} files: ${(100 * total / CACHE_BUDGET).toFixed(1)} % of the budget of ${CACHE_BUDGET} bytes (5 MB). The largest files: ${largest}.`;
   } },
-];
 
-// ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after
-// the closing commit of the G1 line makes it one. Each report-only case of Wave 2a is a gate now
-// (cases 11 to 15). A report-only case returns its count, or an object with the count and the list
-// of what it found.
-const REPORT_CASES = [
-  { name: 'c7 focus after a change of route', owner: 'U1-D (ruling C7-DRILL)', what: 'the count of routes and widths where focus is not on the first h2 of #view after a change of route', async run() {
-    // 2c-plan C7: after a change of route, focus is on the first h2 of #view. The case opens another
-    // route first, changes the route in the page, and waits for the first screen of the route with
-    // no press, and for the end of the wait of the shell (it holds focus on #view while the heading
-    // of an island is not there).
+  // The cases from 20 on enter the gate at the closing commit of the G1 line after Wave 2c-2.
+  { name: '20 yard to a win', async run() {
+    // Gate A, question 2 (D-0033): a learner plays a job to a win at phone width. The first job is
+    // played to a win along its optimal line two times: at 390 by 844 px by touch only (taps on the
+    // six switch buttons and on the move builder), and at 1440 by 900 px by the keyboard only (Tab and
+    // Shift+Tab, Space and Enter, and the arrow keys in a select). See playToWin.
+    const notes = [];
+    for (const how of [TOUCH, KEYBOARD]) notes.push(await playToWin(how));
+    return notes.join('. ');
+  } },
+
+  { name: '21 focus after a change of route', async run() {
+    // 2c-plan C7 (rows U-29, A11Y-22, A11Y-23): after a change of route, focus is on the first h2 of
+    // #view, on each route at 390 and 1440. This was the report case of G1-2. Job U1-D made the Drill
+    // and Signals keep their heading (ruling C7-DRILL), so it is a gate now. The case opens another
+    // route first, changes the route in the page, and waits for the first screen of the route with no
+    // press, and for the end of the wait of the shell (it holds focus on #view while the heading of an
+    // island is not there).
     const misses = [];
     for (const width of [390, 1440]) {
       for (const r of ROUTES) {
         const from = ROUTES.find((x) => x.route === (r.route === '/' ? '/reference' : '/'));
-        const found = await withPage({ width, common: false }, async (page) => {
+        const found = await withPage({ width }, async (page) => {
           await open(page, from.route);
           await from.check(page);
           await page.evaluate((route) => { location.hash = `#${route}`; }, r.route);
@@ -811,30 +1127,165 @@ const REPORT_CASES = [
         if (found) misses.push(`${r.name} at ${width}: focus is on ${found}`);
       }
     }
-    return { count: misses.length, found: misses };
+    ok(misses.length === 0, `after a change of route, focus is not on the first h2 of #view on ${misses.length} routes and widths: ${misses.join('; ')}`);
+  } },
+
+  { name: '22 learn card', async run() {
+    // Row U-28 (ruling LEARN-GAP, 2c-plan C11): the Drill shows a new item one time, on a learn card,
+    // before the first question about it. For a new profile on #/drill and #/signals, at 390 and 1440:
+    // the first screen is a learn card with the hooks of C11 (the card and its one control); its heading
+    // is the title of an item of the data, and the card holds the plain words of that item as the data
+    // holds them (a signal: its drawings, each one different); each control of the screen is 44 by 44 px
+    // or more. At 1440 the case walks the whole session: no question about the item of a card comes
+    // right after its card; no item gets two cards; no question about the item of a card comes before
+    // its card; and each item of a card gets a question later in the session. The item of a question
+    // is the item that its feedback names ("<title> — <words>"). The case reads no rule text: the
+    // titles and the plain words come from the content files of the build.
+    const items = [];
+    for (const file of ['definitions.json', 'signals.json', 'rules.json', 'radio-script.json']) items.push(...JSON.parse(readFileSync(join(distDir, 'data', file), 'utf8')));
+    const byTitle = new Map(items.map((i) => [i.title, i]));
+    const words = (text) => (text ?? '').replace(/\s+/g, ' ').trim();
+    // The item that a feedback names: the title that comes first in the feedback with " — " after it
+    // (the words of the item come after the title); of two such titles at one place, the longer one.
+    const itemOfFeedback = (text) => items
+      .map((i) => ({ i, at: text.indexOf(`${i.title} — `) }))
+      .filter((m) => m.at !== -1)
+      .sort((a, b) => a.at - b.at || b.i.title.length - a.i.title.length)[0]?.i ?? null;
+    const notes = [];
+    for (const route of ['/drill', '/signals']) {
+      for (const width of [390, 1440]) {
+        const where = `${route} at ${width}`;
+        const note = await withPage({ width }, async (page) => {
+          await open(page, route);
+          await firstScreen(page).catch(() => { throw new CaseFailure(`${where}: the first screen shows no learn card and no answer option`); });
+          // The card of the first screen: the hooks, the item of the data, the controls.
+          const checkCard = async (k) => {
+            const card = page.locator(LEARN_CARD);
+            ok(await card.count() === 1 && await card.isVisible(), `${where}, screen ${k}: ${await card.count()} learn cards (${LEARN_CARD}) show, and 1 is expected`);
+            const next = page.locator(LEARN_NEXT);
+            ok(await next.count() === 1 && await next.isVisible() && await next.isEnabled(), `${where}, screen ${k}: the learn card has ${await next.count()} controls ${LEARN_NEXT}, and 1 that shows is expected`);
+            ok(await count(page, hook('opt')) === 0, `${where}, screen ${k}: an answer option shows with the learn card`);
+            const title = words(await card.getByRole('heading').first().textContent());
+            const item = byTitle.get(title);
+            ok(item, `${where}, screen ${k}: the heading of the learn card is "${title}", and no item of the data has this title`);
+            const text = words(await card.textContent());
+            ok(text.includes(words(item.plain)), `${where}, screen ${k}: the learn card of ${item.id} does not hold the plain words of the item as the data holds them`);
+            if (item.type === 'signal') {
+              const drawings = await card.locator('svg').evaluateAll((els) => els.map((el) => el.outerHTML));
+              const aspects = item.payload?.aspects?.length ?? 0;
+              ok(drawings.length >= 1 && drawings.length <= aspects, `${where}, screen ${k}: the learn card of the signal ${item.id} shows ${drawings.length} drawings, and 1 to ${aspects} are expected`);
+              ok(new Set(drawings).size === drawings.length, `${where}, screen ${k}: the learn card of the signal ${item.id} shows one drawing two times`);
+            }
+            const small = await smallControls(page);
+            ok(small.length === 0, `${where}, screen ${k}: ${small.length} controls of the learn card screen are under 44 by 44 px: ${small.join('; ')}`);
+            return item;
+          };
+          const first = await checkCard(1);
+          if (width !== 1440) return null;
+          // The walk of the session.
+          const carded = new Set();
+          const asked = new Set();
+          let last = null;
+          let screens = 0;
+          let ended = false;
+          for (let k = 1; k <= 60; k++) {
+            const state = await page.waitForFunction(([cardSel, optSel]) => {
+              const shows = (s) => [...document.querySelectorAll(s)].some((el) => el.getClientRects().length > 0);
+              if (shows(cardSel)) return 'card';
+              if (shows(optSel)) return 'question';
+              return document.querySelector('#view h3') && !shows(cardSel) && !shows(optSel) ? 'end' : false;
+            }, [LEARN_CARD, hook('opt')]).then((h) => h.jsonValue(), () => { throw new CaseFailure(`${where}, screen ${k}: no learn card, no question and no end of the session showed`); });
+            if (state === 'end') { ended = true; break; }
+            screens = k;
+            if (state === 'card') {
+              const item = k === 1 ? first : await checkCard(k);
+              ok(!carded.has(item.id), `${where}, screen ${k}: the item ${item.id} gets a second learn card`);
+              ok(!asked.has(item.id), `${where}, screen ${k}: the learn card of ${item.id} comes after a question about it`);
+              carded.add(item.id);
+              last = { kind: 'card', item };
+              const words0 = words(await page.locator(LEARN_CARD).textContent());
+              await onControl(`${where}, screen ${k}: a click on ${LEARN_NEXT}`, () => page.locator(LEARN_NEXT).click());
+              await page.waitForFunction(([s, w]) => { const el = document.querySelector(s); return !el || el.textContent.replace(/\s+/g, ' ').trim() !== w; }, [LEARN_CARD, words0])
+                .catch(() => { throw new CaseFailure(`${where}, screen ${k}: the control ${LEARN_NEXT} did not move the page on`); });
+              continue;
+            }
+            // A question: answer it, and read the item from its feedback.
+            await onControl(`${where}, screen ${k}: a click on an answer option`, () => page.locator(hook('opt')).first().click());
+            const feedback = page.locator(hook('feedback')).first();
+            await feedback.waitFor().catch(() => { throw new CaseFailure(`${where}, screen ${k}: no feedback showed after an answer`); });
+            const item = itemOfFeedback(await feedback.textContent());
+            ok(item, `${where}, screen ${k}: the feedback names no item of the data: "${words(await feedback.textContent())}"`);
+            ok(!(last?.kind === 'card' && last.item.id === item.id), `${where}, screen ${k}: the question about ${item.id} comes right after its learn card`);
+            asked.add(item.id);
+            last = { kind: 'question', item };
+            await onControl(`${where}, screen ${k}: a click on "Next →" or "Finish"`, () => feedback.getByRole('button', { name: /^(Next →|Finish)$/ }).click());
+            await feedback.waitFor({ state: 'detached' }).catch(() => { throw new CaseFailure(`${where}, screen ${k}: the feedback stays after its control "Next →" or "Finish"`); });
+          }
+          ok(ended, `${where}: the session did not end in 60 screens`);
+          ok(carded.size > 0, `${where}: the session shows no learn card`);
+          const unasked = [...carded].filter((id) => !asked.has(id));
+          ok(unasked.length === 0, `${where}: the items ${unasked.join(', ')} get a learn card and no question in the session`);
+          return `${where}: ${screens} screens, ${carded.size} learn cards, ${asked.size} items asked`;
+        });
+        if (note) notes.push(note);
+      }
+    }
+    return notes.join('; ');
   } },
 ];
+
+// ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after the
+// closing commit of the G1 line makes it one. After Wave 2c no case is report-only: the report case
+// of contract C7 is gate case 21. A report-only case returns its count, or an object with the count
+// and the list of what it found, and has the fields `owner` and `what`.
+const REPORT_CASES = [];
 
 // ---- The words of the shell notices (rows U-10 and U-07, job U1-B).
 const UPDATE_NOTICE = 'A new version is ready.';
 const FAILED_NOTICE = 'Part of the library did not load.';
 
-// ---- The second build of the update case. It is a copy of the build with one changed file: the
-// page of the app holds one more meta element. The precache list of sw.js names the new revision of
-// that page (the MD5 of the file, as Workbox writes it), so sw.js changes too, and the browser finds
-// a new worker. The copy is in the folder of temporary files and is removed after the case.
+// ---- The second build of the update case, as a release that changes the sources of the Yard gives
+// it (the trial of R6 ENG-01). It is a copy of the build with these changes:
+//   - The station chunk of the Yard (assets/yardSim-*.js) gets a new name. The old file is not in the
+//     copy, so the server no longer holds it.
+//   - A file of assets/ whose text names a renamed file changes, and a build gives a changed file of
+//     assets/ a new name. So each such file gets a new name too, until no more file changes: today the
+//     main chunk, which imports the Yard chunk. Each name in index.html, in sw.js and in assets/ is
+//     changed to the new name.
+//   - The page of the app holds one more meta element, so that a case can see which build shows.
+//   - The precache list of sw.js names the new files, and the new revision of the page (the MD5 of the
+//     file, as Workbox writes it). So sw.js changes, and the browser finds a new worker.
+// The copy is in the folder of temporary files and is removed after the case. Returns the folder and
+// the old and new name of the Yard chunk.
 function secondBuild(dir) {
   const copy = mkdtempSync(join(tmpdir(), 'cb-smoke-second-build-'));
   cpSync(dir, copy, { recursive: true });
-  const page = readFileSync(join(copy, 'index.html'), 'utf8');
+  const assets = join(copy, 'assets');
+  const files = readdirSync(assets).filter((f) => /\.(js|css)$/.test(f));
+  const yard = files.filter((f) => /^yardSim-[\w-]+\.js$/.test(f));
+  if (yard.length !== 1) throw new CaseFailure(`the second build cannot be made: the build holds ${yard.length} station chunks of the Yard (assets/yardSim-*.js), and 1 is expected`);
+  const newName = (name) => name.replace(/-[\w-]+\.(js|css)$/, (m, ext) => `-${createHash('sha256').update(`second build ${name}`).digest('base64url').slice(0, 8)}.${ext}`);
+  const renamed = new Map();
+  const queue = [yard[0]];
+  while (queue.length) {
+    const name = queue.shift();
+    if (renamed.has(name)) continue;
+    renamed.set(name, newName(name));
+    for (const f of files) if (!renamed.has(f) && readFileSync(join(assets, f), 'utf8').includes(name)) queue.push(f);
+  }
+  const rename = (text) => [...renamed].reduce((t, [from, to]) => t.split(from).join(to), text);
+  for (const f of files) writeFileSync(join(assets, f), rename(readFileSync(join(assets, f), 'utf8')));
+  for (const [from, to] of renamed) renameSync(join(assets, from), join(assets, to));
+  const page = rename(readFileSync(join(copy, 'index.html'), 'utf8'));
   if (!page.includes('</head>')) throw new CaseFailure('the second build cannot be made: index.html has no </head>');
   const changed = page.replace('</head>', '<meta name="cb-smoke-build" content="2"></head>');
   writeFileSync(join(copy, 'index.html'), changed);
-  const sw = readFileSync(join(copy, 'sw.js'), 'utf8');
+  const sw = rename(readFileSync(join(copy, 'sw.js'), 'utf8'));
   const entry = /\{url:"index\.html",revision:"[0-9a-f]+"\}/;
   if (!entry.test(sw)) throw new CaseFailure('the second build cannot be made: the precache list of sw.js has no entry of index.html with a revision');
+  for (const to of renamed.values()) if (!sw.includes(`assets/${to}`)) throw new CaseFailure(`the second build cannot be made: the precache list of sw.js does not name assets/${to}`);
   writeFileSync(join(copy, 'sw.js'), sw.replace(entry, `{url:"index.html",revision:"${createHash('md5').update(changed).digest('hex')}"}`));
-  return copy;
+  return { dir: copy, oldYard: yard[0], newYard: renamed.get(yard[0]), renamed: [...renamed.keys()] };
 }
 
 // ---- The precache list of the service worker of a build: the address of each file, from the
@@ -910,7 +1361,7 @@ try {
         console.log(`PENDING  ${c.name}  count not known  ${seconds(Date.now() - t0)}  (report only; owner ${c.owner}; the case did not run: ${String(err.message).split('\n')[0]})`);
       }
     }
-    console.log(`\nsmoke: ${ran - failed} of ${ran} gate cases passed in ${seconds(Date.now() - started)}. A report-only case does not change the result.`);
+    console.log(`\nsmoke: ${ran - failed} of ${ran} gate cases passed in ${seconds(Date.now() - started)}.${REPORT_CASES.length ? ' A report-only case does not change the result.' : ''}`);
     if (ran === 0 && !REPORT_CASES.some(wanted)) { console.log(`smoke: no case has "${only}" in its name.`); exitCode = 2; }
     if (failed) exitCode = 1;
   }
