@@ -1,7 +1,7 @@
 // Home — the qualification path. Mastery bars per domain + the ways to learn. (vanilla renderHome)
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
-import { DOMAINS, drillable, overallPercent, stageFor, STATIONS } from '../core/store';
+import { DOMAINS, drillable, dueNow, overallPercent, stageFor, STATIONS } from '../core/store';
 
 export function Home() {
   const { content, contentFailed, profile } = useApp();
@@ -9,6 +9,10 @@ export function Home() {
   if (!content) return <p className="muted">Loading…</p>;
 
   const pct = overallPercent(profile);
+  // U-27: one main control. A learner with no graded item starts; each other learner continues,
+  // with the count of items due now from the stored due dates (U-26).
+  const started = Object.keys(profile.items).length > 0;
+  const due = dueNow(profile, content);
 
   return (
     <div className="cb-home-view">
@@ -26,6 +30,10 @@ export function Home() {
         <div className="cb-home-stage"><b>{stageFor(profile)}</b><span className="dusk-num">{pct}% mastered</span></div>
         <div className="dusk-bar" role="progressbar" aria-label="Overall mastery" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
           <i className="dusk-fill dusk-fill--teal" style={{ width: `${pct}%` }} />
+        </div>
+        <div className="cb-home-next">
+          <button className="dusk-btn cb-home-main" onClick={() => navigate('/drill')}>{started ? 'Continue' : 'Start here'}</button>
+          {started && <span className="cb-home-due">{due > 0 ? `${due} due now` : 'Nothing due now'}</span>}
         </div>
       </div>
 

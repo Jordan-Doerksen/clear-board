@@ -44,6 +44,24 @@
 }
 .cb-app .cb-home-view .cb-home-stage + .dusk-bar { margin-top: var(--sp-5); }
 
+/* U-27 and U-26: the one main control of Home, under the bar, and the count of items due now
+   beside it. The control is a Dusk button with the word at the reading size. */
+.cb-home-next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3) var(--sp-6);
+  margin-top: var(--sp-6);
+}
+.cb-app .cb-home-view .cb-home-main {
+  padding-inline: var(--sp-7);
+  font-size: 1rem;
+}
+.cb-home-due {
+  color: var(--ink-2);
+  font-size: .85rem;
+}
+
 /* ---- the domain tiles ------------------------------------------------------------------------
    A live domain is a teal Dusk tile and a button. A domain that is not live is a grey Dusk tile
    and not a control (D-0038, TILE-TONE). Each tile has the corner of a control. */

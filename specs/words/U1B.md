@@ -44,3 +44,6 @@ No line here states, corrects or cites a rule. The words were not checked by the
 | U-25 (words) | Home, one line under the lede | none | Practice, not the official test. |
 | U-25 (words) | index.html, the page description | Clear Board — a free trainer that takes you from first day to job-ready as a CN conductor. Built for the people a rulebook failed. | Clear Board — a free trainer for the job of a CN conductor, from your first day. Practice, not the official test. Built for the people a rulebook failed. |
 | U-25 (words) | The web app manifest, the description | A free CROR conductor-qualification trainer — first day to job-ready, built for the people a rulebook failed. | A free CROR conductor-qualification trainer — practice from your first day, not the official test. Built for the people a rulebook failed. |
+| U-27 (words) | Home, under the path: the one main control, for a learner with no graded item | none | Start here |
+| U-27 (words) | Home, the same control, for each other learner | none | Continue |
+| U-26 | Home, beside "Continue": the count of Drill items due now, from the stored due dates | none | N due now (for example "3 due now"), or "Nothing due now" |

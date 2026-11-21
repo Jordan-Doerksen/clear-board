@@ -1,6 +1,6 @@
 // Clear Board — profile + content library (SPEC schemas). Local-first; one profile, one library.
 // Ported from the vanilla core/store.js — same logic + safety filters, now typed.
-import { decayedFam } from './sr';
+import { decayedFam, isDue } from './sr';
 import type { Content, ContentItem, DomainDef, DomainState, Profile, Question, Settings, SRState, YardBest } from './types';
 
 export const DOMAINS: DomainDef[] = [
@@ -345,6 +345,19 @@ export function recomputeMastery(profile: Profile, content: Content): void {
     profile.domains[d.id] = profile.domains[d.id] || { mastery: 0, lastDrill: null };
     profile.domains[d.id].mastery = mastery;
   }
+}
+
+// The count of items that the Drill can ask and that are due now, from the stored due dates (U-26,
+// U-27). An item counts when the learner was graded on it, it is drillable today, and its due time
+// has come. The Radio calls are graded in the Radio test, not in the Drill: they do not count here.
+export function dueNow(profile: Profile, content: Content): number {
+  let n = 0;
+  for (const [id, state] of Object.entries(profile.items)) {
+    const item = content.byId[id];
+    if (!item || item.type === 'radio-script' || drillable([item], content).length === 0) continue;
+    if (isDue(state)) n++;
+  }
+  return n;
 }
 
 // The mean mastery of the live domains, as the whole percent that Home shows.
