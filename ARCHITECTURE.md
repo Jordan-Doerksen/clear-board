@@ -62,11 +62,13 @@ Wave 2b is merged on the wave branch `claude/cb2-wave-2b`. What it added or chan
 
 ## 0c. State after Wave 2c (job D1, 2026-11-21)
 
-Steps 2c-1 and 2c-2 of Wave 2c are merged on `claude/cb2-wave-2c`. Step 2c-1: U1-A, U1-C, Y4a and
-U1-B (head `6d74633`). Step 2c-2: G1-2, U1-D, Y4b and two commits of the lead (head `c3bc4db`).
-Step 2c-3 (the G1 close and job D1) is not merged in this tree. The notes of
-the lead are `specs/briefs/2c-1-merge-notes.md` and `specs/briefs/2c-2-merge-notes.md`. The
-decisions are D-0040 to D-0044. What Wave 2c added or changed:
+Each step of Wave 2c is merged on `claude/cb2-wave-2c`. Step 2c-1: U1-A, U1-C, Y4a and U1-B (head
+`6d74633`). Step 2c-2: G1-2, U1-D, Y4b and two commits of the lead (head `c3bc4db`). Step 2c-3: the
+G1 close and job D1, then the documents of the lead (head `dc88b14`). After the last review of the
+wave: the fixes of the lead, their second reader, and fix round 2 (jobs F2-A to F2-D, head
+`06c9fa5`; `specs/briefs/2c-F2-plan.md`). The notes of the lead are
+`specs/briefs/2c-1-merge-notes.md` and `specs/briefs/2c-2-merge-notes.md`, and `HANDOFF.md`. The
+decisions are D-0040 to D-0048. What Wave 2c added or changed:
 
 - **The Yard (Y4a, Y4b).** The access layer `yard/access.ts`: six native switch buttons, a text
   mirror of the yard (`#yard-mirror`) and a status region (`#yard-live`). The controller exports
@@ -83,7 +85,7 @@ decisions are D-0040 to D-0044. What Wave 2c added or changed:
   profile and the recompute of the mastery at a change of route. The learn card. The update
   prompt. A page title and a focus target for each route. The dyslexia face as two font files.
   Sections 2 and 3.
-- **The gates (G1-2).** Step 12 of the check (`tools/shared-drawings.mjs`), 79 unit tests, smoke
+- **The gates (G1-2).** Step 12 of the check (`tools/shared-drawings.mjs`), 79 unit tests (88 after fix round 2), smoke
   cases 16 to 19 and one report case for contract C7, the learn-card helper
   (`tools/lib/learn-card.mjs`), the register of allowed changes in `tools/look/cb.config.json`, and
   the package `clear-board` 2.0.0. Section 7.
@@ -93,14 +95,15 @@ decisions are D-0040 to D-0044. What Wave 2c added or changed:
   drives the stepper of the watched line. The look register is exact and tied to its baseline
   (`LOOK-EXACT`). The lint limit is 1 (`LINT-ONE`). Section 7.
 - **The documents (D1).** `SPEC.md`, `README.md`, `CHANGELOG.md` (the entry 2.0.0), this file and
-  `DECISIONS.md` (D-0040 to D-0046) say what is true after Wave 2c, and they name roles, not
+  `DECISIONS.md` (D-0040 to D-0048) say what is true after Wave 2c, and they name roles, not
   persons (D-0046). D-0045 lists the corrections of the drift rows of R6 section 11.
 - **The page law.** The tier line stays `Page law tier: STRICT` (section 1), with the one written
   exception of D-0038: the Yard drawing shows travel of equipment after a learner action, and
   reduced motion stops it.
-- **Measured by the lead after the last merge of Wave 2c, 2026-11-21.** `npm run check`: 12 of 12
-  steps pass (lint: 1 warning, limit 1). `npm run build` is green. The offline cache: 17 files,
-  805,685 bytes, 15.4 % of the budget of 5 MB. `npm run test:browser`: 22 of 22 gate cases pass.
+- **Measured by the lead after fix round 2 of Wave 2c (`06c9fa5`), 2026-11-21.** `npm run check`:
+  12 of 12 steps pass (88 unit tests; lint: 1 warning, limit 1). `npm run build` is green. The
+  offline cache: 17 files, 810,071 bytes, 15.5 % of the budget of 5 MB. `npm run test:browser`:
+  24 of 24 gate cases pass. The look gate: 0 of 25 shots fail against the baseline of `49d3ba0`.
   The ten frozen files and the `STEPS` region are equal to `94a41c5`.
 - **Left after Wave 2c:** the open items for the SME (section 10); the items of the final report of the lead (`NOTICE-TWICE`,
   `RETRY-RESTART`, `TAG-HOME`, `SESSION-LENGTH`, `P16-NIT`, `PICKER-CUT`; `WEAK-REVIEW` is fixed by `3076815`, finding F-1); and
@@ -283,7 +286,7 @@ another open copy ── storage event ─► merge (the same createdAt) or repl
 | F2, due | `answerCounts` | A correct answer on an item that is not due writes nothing. A miss always writes. |
 | Signals cap | `recomputeMastery` (`store.ts`) | The signals mastery stays at 0.33 or less until one signal item has a correct answer. |
 | Drill filter | `buildSession` (`drill.ts`) | The Drill draws no radio item, and no signal item with no drawing that it can ask. A drawing that two signal items hold is not asked (row U-01). |
-| Learn card | `withLearnCards` (`drill.ts`) | A card grades nothing. The first question about the item comes after one other screen or more (`LEARN-GAP`). |
+| Learn card | `withLearnCards` (`drill.ts`) | A card grades nothing. The first question about the item comes after one other screen or more (`LEARN-GAP`). Items that share a `citation.ref` that names one rule count as one item for the gap (`LEARN-TWIN`). |
 | Yard map | `RULE_ITEMS` (`yardSim.js`) | A win grades only the content items that `RULE_ITEMS` names for the rule chips of the job. |
 | Watched line | `recordWin` (`yardSim.js`) | A watched line writes no done mark, no best record and no mastery (row U-04). The done marks of an older profile stay. |
 | No "test-ready" claim | `stageFor` (`store.ts`) | The stage names make no such claim (D-0013). No code sets `testReady` to true: `freshProfile` sets it to false. |
@@ -477,7 +480,7 @@ The 28 notes for the SME of `specs/research/upgrade-list.md`, section 10, stay o
 5. What a screen reader says for the text mirror, the status regions and the names of the controls.
 6. Each number that this file takes from a report and did not measure: the contrast pairs of the reskin jobs, and the timings of D-0032.
 
-Measured for this file on 2026-11-21, on this tree: the item and trust counts of the five content files (a Node script); `npm run check` (12 of 12), `npm run build`, and `npm run test:browser` (18 of 19 before the G1 close, case 8 by design; 22 of 22 after the last merge, measured by the lead); the list and the sizes of `dist/` and the precache list of `sw.js`; the importers of each module of `src/core` and of the Yard engine (`git grep`); the lines of the `STEPS` region.
+Measured for this file on 2026-11-21, on this tree: the item and trust counts of the five content files (a Node script); `npm run check` (12 of 12), `npm run build`, and `npm run test:browser` (18 of 19 before the G1 close, case 8 by design; 22 of 22 after the last merge; 24 of 24 after fix round 2, measured by the lead); the list and the sizes of `dist/` and the precache list of `sw.js`; the importers of each module of `src/core` and of the Yard engine (`git grep`); the lines of the `STEPS` region.
 
 Opened and read for this file: `package.json`, `vite.config.ts`, `index.html`, `.gitignore`, `.github/workflows/check.yml` and `deploy.yml`, `src/main.tsx`, `src/App.tsx`, `src/index.css`, each file in `src/core`, `src/state` and `src/components` (`signal.ts` in the parts cited), each file in `src/stations` (`yardSim.js`, `radioSim.js` and `RadioTest.tsx` in the parts cited), the heads and the exports of each file in `src/stations/yard`, the heads of the tools of `npm run check`, the head of `tests/browser/smoke.mjs` and its cases 13 and 19, `tests/unit/signal.test.ts` (its head), the bridge (blocks 1 to 3, the heads of 4 to 6), the heads of the parts of the parts file, `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml` (its head), `src-tauri/src/lib.rs`, `src-tauri/capabilities/default.json`, `src/styles/dusk.lock.json` and `tools/frozen.lock.json`.
 

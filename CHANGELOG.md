@@ -137,8 +137,9 @@ headless Chromium.
   "Look it up". (U-17)
 - A learn card shows a new item one time before its first question: the title, the chip "New item",
   the plain words and each different drawing. One other screen comes between the card and the
-  question. The mastery model does not change. A first session can hold up to 10 learn cards and 10
-  questions. (U-28, `LEARN-GAP`, `SESSION-LENGTH`)
+  question. One other screen also comes between a learn card and a question about an item with the
+  same rule reference. The mastery model does not change. A first session can hold up to 10 learn
+  cards and 10 questions. (U-28, `LEARN-GAP`, `LEARN-TWIN`, `SESSION-LENGTH`)
 - The end of a session gives progress in words: the right answers, the new items started and when
   the items come back. The note "This session was practice only" shows only when no answer of the
   session counted. The review button counts its items and its questions. The Radio test says "did
@@ -182,6 +183,28 @@ headless Chromium.
   The page never reloads by itself. (U-10)
 - The shell calls `unmount()` of a station island before it empties the host. (`UNMOUNT`)
 
+### Fixed after the last review of Wave 2c
+- The review of the misses offers four different options of one kind: a signal question offers
+  signal names only. (F-1)
+- A Reset or a Load in Settings updates an open station: the job picker of the Yard, the Drill and
+  the Radio test start again with the new progress. (F-3)
+- A change of route closes the look-up dialog. Reference says "Loading…" while the library loads.
+  (F-4, F-5)
+- A dialog keeps the control that has focus below its sticky head, and focus on a control of the
+  head does not scroll the dialog. (F-6, R-5)
+- After a "Try again" that takes a notice away, focus goes to the heading of the view or of the
+  look-up dialog. When the control that opened the look-up dialog is gone, closing the dialog moves
+  focus to the heading of the view. Each look-up opens on "Close". (F-7, R-1, R-2, R-4)
+- "Reload" in the notice "A new version is ready." reloads at the first press, also on a first
+  visit and with two open copies. (F-8, R-3)
+- The end summary of the guided Radio is in a status region. (F-9) What a screen reader says: not
+  verified.
+- With Reduce motion, one press of "Play all" sends one message to the status region with each step
+  that it played, in order. (F-11, `PLAY-ALL-ONE`)
+- With forced colours, the selected Radio tab has a heavier edge, a control that cannot act shows
+  `GrayText`, the Key button and the Radio panels have an edge, and the Radio scene takes the
+  system colours. (F-10, `FORCED-MARKS`)
+
 ### The gates
 - `npm run check` runs 12 steps through `tools/check.mjs`: the frozen-file hash gate (baseline
   `94a41c5`), the Dusk lock check, the raw-colour lint, the name check, lint, the type check, the
@@ -194,10 +217,12 @@ headless Chromium.
   `U44-GUARDS`)
 - `npm run test:browser` runs 24 gate cases in Chromium: among them an update with a renamed station
   chunk, a failed load, refused storage, the 44 px targets, the reading modes, the offline cache
-  budget of 5 MB (U-43), the focus of a route, the learn card, and a Yard job played to a win by
-  touch at 390 px and by keyboard at 1440 px. A word tape (a SHA-256 and a word count) guards the words of the guided Radio. The
+  budget of 5 MB (U-43), the focus of a route, the learn card and the gap of a twin item, a Yard job
+  played to a win by touch at 390 px and by keyboard at 1440 px, one message for "Play all" with
+  Reduce motion, and the 44 px targets of the Yard stepper and of a win (`GATE-44`). A word tape (a SHA-256 and a word count) guards the words of the guided Radio. The
   look harness compares pictures and page facts with a baseline build and names the row of each
-  allowed change.
+  allowed change. The register of changes holds no item text: it names the parts of a page whose
+  words come from the content files (`REGISTER-FORM`).
 - `.github/workflows/check.yml` runs the check, the build and the browser test on each pull request
   and on each push to a branch other than `main`. `.nvmrc` holds Node 22.23.5. (P-18, P-19)
 - The package is `clear-board`, version 2.0.0. `src-tauri/tauri.conf.json` still holds 0.1.0: the

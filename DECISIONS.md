@@ -773,5 +773,31 @@ the cost of a move (R7-P12), the labels of the four radio calls with the source 
 the other notes of the words files. The record of the answer is `specs/briefs/lead-rulings.md`,
 section 3.1.
 
+### D-0048 — Fix round 2 after the last review of Wave 2c (`HEAD-ONE`, `SIGN-NAME`, `FORCED-MARKS`, `PLAY-ALL-ONE`, `GATE-44`, `LEARN-TWIN`, `REGISTER-FORM`)
+**Chosen (the lead, 2026-11-21):** fix each open finding of the last review of Wave 2c that needs
+no ruling of the owner, in four jobs with an independent review each (`specs/briefs/2c-F2-plan.md`),
+and give the fixes of the lead a second reader. The rulings:
+- `HEAD-ONE`: the icon of a station heading is decoration; the spoken name is the station name.
+- `SIGN-NAME`: the sign ▶ of "▶ Watch optimal" and "Key the radio ▶", and the trust signs ✓ ⚠ ●,
+  are decoration for a screen reader (row U-41).
+- `FORCED-MARKS`: with forced colours each state and edge stays visible; with forced colours off
+  nothing changes.
+- `PLAY-ALL-ONE`: with Reduce motion, one press of "Play all" sends one message with each step.
+- `GATE-44`: a gate case measures the controls of the Yard stepper and of a win.
+- `LEARN-TWIN`: items that share a `citation.ref` that names one rule count as one item for the gap
+  of `LEARN-GAP`. "CROR Definitions" names a section of the book, so it is not a key. The ref is a
+  key only: no rule text is read.
+- `REGISTER-FORM`: the look register holds no item text (`TAPE-FORM`).
+**Weighed:** wait for the owner on each finding; fix in the lead's own commits only.
+**Why:** each fix follows an approved row or a fence item, and changes no rule text, no number of
+the engine and no learner-facing word. The second reader confirmed seven fixes of the lead, and
+the lead repaired the six items that it found (`c276de5`).
+**Still open:** F-2 (the owner rules: it changes the selection); the message part of F-7 and the
+Radio tip "Green lines are the engineer" with forced colours (new words: the owner approves them
+first); a question right after the question of its twin, and whether one other screen is enough
+(the SME); register entry U-21 holds five readout words of the Radio walkthrough; no gate reads the
+spoken names or measures "Depart ▸". The record is `specs/briefs/lead-rulings.md`, section 2.8, and
+`HANDOFF.md`, section 5.
+
 ---
 *V1. Edit as decisions are made or reversed.*

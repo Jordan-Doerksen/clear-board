@@ -18,7 +18,8 @@ The owner runs no command (fence rule 13): section 8 is for the next session, no
   #1, #2, #3, #4. `main` has not moved: it is still at `86cfef2`. `main` moves only on the owner's
   typed word (fence rule 12).
 - The GitHub check (`check.yml`: the check, the build and the browser test) passed on each head of
-  #4 on 2026-11-21, the last one `b92d1e6` included.
+  #4 on 2026-11-21 that the lead read, the last one `52ba708` included. Look at the pull request for
+  the result on a later head.
 - **A live preview** of `claude/cb2-wave-2c` at `b92d1e6` is at https://clear-board-2-preview.vercel.app
   (the Vercel project `clear-board-2-preview` of the owner's Vercel account, made on 2026-11-21 at the
   owner's request). It is a project of its own: the owner's live site and `main` did not change. A
@@ -31,7 +32,7 @@ The owner runs no command (fence rule 13): section 8 is for the next session, no
 | 1. Each wave branch pushed, one draft pull request for each wave | Done: #1 to #4. |
 | 2. `npm run check` and `npm run build` green on the last branch, with the output | Done: section 3. |
 | 3. The hash gate proves that no frozen file changed since `94a41c5` | Done: section 3. |
-| 4. `DECISIONS.md`, `ARCHITECTURE.md`, `SPEC.md`, `README.md`, `CHANGELOG.md` say what is true | Done at `dc88b14` (job D1, then the lead). D-0040 to D-0047 are the decisions of Wave 2c. |
+| 4. `DECISIONS.md`, `ARCHITECTURE.md`, `SPEC.md`, `README.md`, `CHANGELOG.md` say what is true | Done at `dc88b14` (job D1, then the lead), and kept true through the fixes and fix round 2. D-0040 to D-0048 are the decisions of Wave 2c. |
 | 5. One final report | This file. The last review of the whole wave finished (section 5.1). |
 
 ## 3. The gates on `claude/cb2-wave-2c` at `dc88b14`, run by the lead on 2026-11-21
@@ -101,6 +102,19 @@ sha256sum -c specs/handoff/frozen-files-94a41c5.sha256   -> each frozen file equ
 STEPS region at 94a41c5 and now: dc38610359f800ba... (equal)
 ```
 
+### 3.2 The gates after fix round 2, at `06c9fa5` (2026-11-21)
+
+The lead ran these after the last merge of the round (job F2-D):
+
+```
+sha256sum -c specs/handoff/frozen-files-94a41c5.sha256   -> 10 of 10 frozen files equal
+STEPS region of src/stations/radioSim.js: dc38610359f800ba... (equal to 94a41c5)
+check: 12 of 12 steps passed in 26.59 s        (88 unit tests; lint 1 warning, limit 1)
+npm run build                                  (exit 0; the offline cache: 17 files, 810,071 bytes, 15.5 % of 5 MB)
+smoke: 24 of 24 gate cases passed in 55.35 s.
+look: baseline of 25 pictures from the build of 49d3ba0; compare --look: 0 shots fail
+```
+
 ## 4. What landed
 
 - **Wave 1.** The research R1 to R7, the upgrade list (51 rows), Gate A: look C2 for the Yard, full
@@ -123,7 +137,7 @@ STEPS region at 94a41c5 and now: dc38610359f800ba... (equal)
 
 ## 5. What is open
 
-After the handoff the lead fixed F-1, F-3, F-4, F-5, F-6, F-8, F-9, F-13 and K-2, and the focus part of F-7, on the same branch (section 5.1 marks each one). The gates stayed green: check 12 of 12 with 81 unit tests, build, smoke 22 of 22, frozen files and the `STEPS` region equal (section 3.1). A second reader then checked these fixes (section 5.1.1), and the lead repaired what it found in `c276de5`. Fix round 2 (`specs/briefs/2c-F2-plan.md`) builds the rest of section 5.1 and 5.2 that needs no ruling of the owner.
+**Fix round 2 is done** (section 5.1.2): F-10, F-11, F-12, F-14, K-1, K-3 and K-4 are fixed, each by a job with an independent review. Before it, the lead fixed F-1, F-3, F-4, F-5, F-6, F-8, F-9, F-13 and K-2, and the focus part of F-7, on the same branch (section 5.1 marks each one). The gates stayed green: check 12 of 12 with 81 unit tests, build, smoke 22 of 22, frozen files and the `STEPS` region equal (section 3.1). A second reader then checked these fixes (section 5.1.1), and the lead repaired what it found in `c276de5`. Fix round 2 (`specs/briefs/2c-F2-plan.md`) builds the rest of section 5.1 and 5.2 that needs no ruling of the owner.
 
 ### 5.1 The last review of the whole wave (finished)
 
@@ -149,7 +163,7 @@ The confirmed findings, with the same defect found twice shown once:
 | F-9 | medium | The guided Radio: the end summary is not announced (`src/stations/radioSim.js` line 79, outside `STEPS`). Fix: put the done box in a `role="status"` region. | **Fixed in `b0c70f3`.** The `STEPS` region stays equal; the gaps round the box stay 10 px. |
 | F-10 | low | Forced colours: the selected Radio mode, the stepper controls that cannot act and the Key button lose their marks. | **Fixed by job F2-B** (merge `6f7ccf1`; ruling `FORCED-MARKS`), and the lead gave the Radio panels an edge too (`7379e18`). Open: the Radio tip "Green lines are the engineer" is not true with forced colours (no line is green); a fix needs new words, so the owner approves them first. |
 | F-11 | low | The Yard stepper with Reduce motion: "Play all" announces only the last step (`src/stations/yardSim.js` near line 495). | **Fixed by job F2-C** (merge `4a40fdf`; ruling `PLAY-ALL-ONE`). Gate case 23 checks it. |
-| F-12 | low | LEARN-GAP: the learn card of a twin item (the rule item and the signal item of one CROR rule) can come right before a question about the other, and holds its answer (`src/core/drill.ts` lines 107 to 131). A question for the SME too. | Open. |
+| F-12 | low | LEARN-GAP: the learn card of a twin item (the rule item and the signal item of one CROR rule) can come right before a question about the other, and holds its answer (`src/core/drill.ts` lines 107 to 131). A question for the SME too. | **Fixed by job F2-D** (merge `06c9fa5`; ruling `LEARN-TWIN`): in 20,000 first sessions on `/signals`, 416 such cases before and 0 after. Open for the SME: a question can still come right after the question (and the feedback) of its twin, 45 of 20,000 first Signals sessions; a fix changes `buildSession`. |
 | F-13 | low | Comments and one document line that Wave 2c made untrue: `ARCHITECTURE.md` near line 397 (the report case of C7 is now gate case 21), `src/stations/yard/view.ts` lines 5 to 8, `src/App.tsx` lines 127 and 128. | **Fixed in `b0c70f3`.** |
 | F-14 | low | The headings of the Drill and Reference carry their icon in the accessible name; the Yard and the Radio do not. | **Fixed by job F2-A** (merge `012eb07`; ruling `HEAD-ONE`): each station heading speaks the station name. |
 
@@ -168,13 +182,31 @@ each one in `c276de5` and ran the reader's probes again on that build:
 | R-5 | The F-6 offset scrolled a dialog to its top when focus reached "Done" or "Close". | **Fixed in `c276de5`.** |
 | R-6 | Comments and document lines that the fixes left untrue. | **Fixed in `c276de5`**, except line 4 of `src/stations/yardSim.js` (it does not name `profileChanged()`): it waits for job F2-C, which owns that file in fix round 2. |
 
+#### 5.1.2 Fix round 2 (2026-11-21)
+
+The plan is `specs/briefs/2c-F2-plan.md`; the rulings are in `specs/briefs/lead-rulings.md`, section
+2.8, and D-0048. Each job had an independent review, and each review said "ready".
+
+| Job | What it fixed | Merge | Open after its review |
+|---|---|---|---|
+| F2-A | F-14 (`HEAD-ONE`), K-1 (`SIGN-NAME`): the spoken names of the station headings and of the signs. | `012eb07` | No gate reads the spoken names. Other signs stay in spoken names ("← Home", "Next →", "Look it up →", "Work it ▸" and others; the full list is in the review report of F2-A). |
+| F2-B | F-10 (`FORCED-MARKS`): the marks with forced colours. The lead added edges to the Radio panels (`7379e18`). | `6f7ccf1` | The Radio tip "Green lines are the engineer" is not true with forced colours (new words: the owner). No gate case keeps the forced-colours marks. |
+| F2-C | F-11 (`PLAY-ALL-ONE`), K-4 (`GATE-44`): one message for "Play all" with Reduce motion; gate cases 23 and 24. | `4a40fdf` | No gate case measures "Depart ▸" of job p6-road. |
+| F2-D | F-12 (`LEARN-TWIN`), K-3 (`REGISTER-FORM`): the learn card of a twin item; a register with no item text. | `06c9fa5` | A question right after the question of its twin (the SME); entry U-21 of the register. |
+
+Notes of the reviews for the look harness (the G1 line): Playwright 1.63 drops the forced colours of
+a page after one full-page picture, so a future forced-colours shot must take viewport pictures;
+the shots `home-dys`, `home-big`, `home-contrast` and `yard` at 390 px were sometimes not stable in
+the baseline of `49d3ba0` (a second take was stable). Three commit messages of F2-A say what a
+screen reader says; that was not verified with a screen reader.
+
 ### 5.2 Small known items for the same final fix job
 
 | # | Item |
 |---|---|
 | K-1 | Row U-41 (an icon in a control is decoration) is not complete: the sign ▶ of "▶ Watch optimal" (`src/stations/yard/view.ts` lines 177 and 449) and of "Key the radio ▶" (`src/stations/radioSim.js` line 174, outside `STEPS`), and the trust signs ✓ ⚠ ● of the Reference rows (`src/components/Entry.tsx`), are part of the accessible name. Hide each sign with `aria-hidden`, and add the name changes to the look register with row U-41. **Fixed by job F2-A** (merge `012eb07`; ruling `SIGN-NAME`). The register needs no entry: the look harness reads `innerText`, which keeps the hidden sign. Open: no gate reads the spoken names (a change of `tools/look/look.mjs` to read the accessibility tree), and a list of other signs in spoken names for the lead (the review report of F2-A: "← Home", "Next →", "Look it up →", "Work it ▸" and others). |
 | K-2 | **Fixed in `62cedd7`.** Comments that are no longer true: `tsconfig.app.json` line 9, `index.html` line 5, `src/stations/Reference.tsx` near line 52. (`deploy.yml` stays as it is: fence rule 12.) |
-| K-3 | The register entry of the look shot `drill-learn` (`tools/look/cb.config.json`) holds word counts of the plain text of one signal item. Replace it with a form that holds no item text (ruling `TAPE-FORM` keeps content words out of the gates). |
+| K-3 | The register entry of the look shot `drill-learn` (`tools/look/cb.config.json`) holds word counts of the plain text of one signal item. Replace it with a form that holds no item text (ruling `TAPE-FORM` keeps content words out of the gates). **Fixed by job F2-D** (merge `06c9fa5`; ruling `REGISTER-FORM`): the register key `contentParts`. Open: entry U-21 (page `radio`) holds five readout words of the Radio walkthrough ("10 cars to the joint"), which are not item text of `public/data`; the lead decides whether `TAPE-FORM` covers them. |
 | K-4 | No gate case measures the controls of the Yard stepper and of the win state (44 px). A probe found no defect; add the case. **Fixed by job F2-C** (merge `4a40fdf`; ruling `GATE-44`): gate case 24. Open: no gate case measures "Depart ▸" of job p6-road (a probe measured 82.61 by 44 px). |
 
 ### 5.3 Known items, ruled, that stay as they are
@@ -231,7 +263,7 @@ and any test with a learner. Each measurement is from headless Chromium on Linux
 - `specs/briefs/lead-rulings.md`: each ruling of the lead and each answer of the owner.
 - `specs/briefs/2c-plan.md`, `2c-1-merge-notes.md`, `2c-2-merge-notes.md`: the jobs and the contracts
   of Wave 2c. `specs/briefs/*.md`: the brief of each job.
-- `DECISIONS.md` (D-0030 to D-0047), `ARCHITECTURE.md` (section 0c: the state after Wave 2c),
+- `DECISIONS.md` (D-0030 to D-0048), `ARCHITECTURE.md` (section 0c: the state after Wave 2c),
   `CHANGELOG.md` (2.0.0).
 - `specs/words/*.md`: the approved words. `specs/handoff/words-sheet.html`: the same words as one
   page, screen by screen (open the file in a browser).
@@ -245,16 +277,19 @@ and any test with a learner. Each measurement is from headless Chromium on Linux
 3. Read the fence (plan, section 4) and keep it. The frozen files and the `STEPS` region must stay
    equal to `94a41c5`: `specs/handoff/lead-merge-check.sh` checks them with
    `specs/handoff/frozen-files-94a41c5.sha256`.
-4. Fix round 2 builds F-10, F-11, F-12, F-14, K-1, K-3 and K-4 (`specs/briefs/2c-F2-plan.md`; the
-   rulings are in `specs/briefs/lead-rulings.md`, section 2.8). Its jobs work on local branches
-   (`cb2/2c-F2A` to `cb2/2c-F2D`). The lead merges each job into `claude/cb2-wave-2c` after its
-   review. When a job of section 3 of the plan is not merged on this branch, do it again from the
-   plan. The message part of F-7 needs new words: ask the owner first. F-2 waits for the owner's
-   ruling. The repairs of the lead in `c276de5` had the probes of the second reader and the gates,
-   but no second reader of their own.
-   Work on a new branch from `claude/cb2-wave-2c`, give the job an independent review, merge it into
-   `claude/cb2-wave-2c`, run the gates, and push. The draft pull request #4 then shows the change.
-5. After the fix job, run the last review again on the whole wave (the four lenses of section
-   5.1: learner journeys, accessibility, the fence and safety, code correctness), verify each
-   finding, and fix what is small.
+4. Fix round 2 is merged (section 5.1.2). What stays open needs the owner or the SME first:
+   - the owner: F-2 (it changes the selection); the words of a message for the result of a "Try
+     again" (F-7); words for the Radio tip with forced colours (F-10);
+   - the SME: the notes of section 6, and whether a question may come right after the question of
+     its twin (F-12);
+   - small items with no ruling needed: a gate that reads the spoken names; a gate case for
+     "Depart ▸"; the five readout words of register entry U-21; the notes on the look harness in
+     section 5.1.2.
+   For a small item: work on a new branch from `claude/cb2-wave-2c`, give the job an independent
+   review, merge it into `claude/cb2-wave-2c`, run the gates, and push. The draft pull request #4
+   then shows the change.
+5. The repairs of the lead in `c276de5`, `7379e18` and `81daade` had probes and the gates, but no
+   second reader of their own. Before the merge into `main`, run the last review again on the whole
+   wave (the four lenses of section 5.1: learner journeys, accessibility, the fence and safety,
+   code correctness), verify each finding, and fix what is small.
 6. Do not merge into `main`. The owner says when.
