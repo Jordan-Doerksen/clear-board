@@ -131,6 +131,14 @@ option of each. A brief that says "open for the lead" for one of these names fol
 | `2B-BASE` | Each 2b job starts from the head of the Wave 2a branch, `1590be5`. Its look baseline is built from that commit (`npm run look:baseline -- --ref 1590be5…`). Its compare runs in look mode (`--look --gate`). | Wave 2a is merged, checked and green at that commit. |
 | `PICTURES-CAP` | A committed picture is at device scale factor 1. A picture taller than 6000 px is committed as its first 6000 px; the full picture stays in the uncommitted `.look/` folder. | The full Reference pages are about 20,000 px high and 2.5 MB each. The committed pictures are for the owner's look, and the top of a long page carries the look. |
 
+### 2.5 Rulings at the merges of Wave 2b (2026-11-21)
+
+| Name | The ruling | The reason |
+|---|---|---|
+| `PROMPT-SIGNAL` | The hook `data-cb="prompt-signal"` sits on the wrapper of the drawing inside the prompt body (`div.cb-drill-signal`). The hook `data-cb="prompt"` sits on the prompt body (`PROMPT-HOOK`). This corrects contract B.6. | One attribute cannot hold two values. |
+| `OPTION-EDGE` | In Wave 2c, U1 gives the edge of an answer option (`cb-opt`, part G1 of the parts file) the token `--cb-edge`, so that the edge is 3 or more against its fill and its ground, for the Drill and the Radio test alike. | Today the edge is 2.1 in the default mode, the same as before the reskin. The part is shared by B2 and B3, so neither job changes it alone. |
+| `LOOK-SMALLER` | A line "a control is smaller" of the look compare is accepted at a merge when the control stays 44 by 44 px or more (ruling 2.3). At the G1-close of Wave 2b, the G1 line makes such a line a warning in look mode, with the floor of 44 px in the tool. | The tool marks the line FAIL; the ruling already accepts it. |
+
 ## 3. Closed by the owner after Gate A
 
 The owner answered the sheet of these 19 picks on 2026-11-21 with the words "yes to all
