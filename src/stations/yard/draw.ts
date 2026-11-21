@@ -23,6 +23,11 @@ import { fillLegend, legendKey } from './drawing/legend.ts';
 import type { LegendFacts } from './drawing/legend.ts';
 import { TRACK_IDS, switchPos } from './geometry.js';
 
+// A value of the picture, not a number of the game: the widest picture for a printed page. An A4 page
+// at the default margins of the browser is 717 px wide and the app puts 38 px around the picture;
+// 640 px leaves room for a larger chrome, and a Letter page is wider.
+const PRINT_W = 640;
+
 /** The game state of model.js. The adapter reads it and writes nothing to it. */
 export type YardState = Readonly<Record<string, unknown>>;
 /** One job of puzzles.js. The adapter reads it and writes nothing to it. */
@@ -90,8 +95,8 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
   });
 
   /** The form and the frame of the job, for the width of the host and the measured words. */
-  function selectFrame(extra: YardFacts | null): void {
-    width = host.clientWidth;
+  function selectFrame(extra: YardFacts | null, w = host.clientWidth): void {
+    width = w;
     if (!job || width < MIN_W) { frame = null; return; }
     if (!M) M = R.makeMeasures();
     const states = extra ? job.line.concat([extra]) : job.line;
@@ -285,10 +290,25 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
     if (job) { selectFrame(last ? yardFacts(last.state, last.puzzle) : null); render(); }
   });
   mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-dys', 'data-contrast', 'style'] });
-  // Print: the whole yard on the page. The picture is laid out for the width of the page before printing.
-  const onPrint = (): void => { if (job) { selectFrame(last ? yardFacts(last.state, last.puzzle) : null); render(); } };
-  window.addEventListener('beforeprint', onPrint);
-  window.addEventListener('afterprint', onPrint);
+  // Print: the whole yard on the page. Before printing, the picture is laid out for the width of a
+  // printed page (PRINT_W at most), in the form that suits that width. After printing, the frame of the
+  // screen comes back as it was, so a print does not change the form of the job.
+  let printKeep: { frame: Frame | null; legendBelow: boolean } | null = null;
+  const onBeforePrint = (): void => {
+    if (!job) return;
+    printKeep = { frame, legendBelow: job.legendBelow };
+    frame = null;
+    selectFrame(last ? yardFacts(last.state, last.puzzle) : null, Math.min(host.clientWidth, PRINT_W));
+    render();
+  };
+  const onAfterPrint = (): void => {
+    if (!job || !printKeep) return;
+    frame = printKeep.frame; job.legendBelow = printKeep.legendBelow; printKeep = null;
+    width = host.clientWidth;
+    render();
+  };
+  window.addEventListener('beforeprint', onBeforePrint);
+  window.addEventListener('afterprint', onAfterPrint);
 
   return {
     paint(state, puzzle, opts) {
@@ -314,8 +334,8 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
     destroy() {
       ro.disconnect();
       mo.disconnect();
-      window.removeEventListener('beforeprint', onPrint);
-      window.removeEventListener('afterprint', onPrint);
+      window.removeEventListener('beforeprint', onBeforePrint);
+      window.removeEventListener('afterprint', onAfterPrint);
       R.root.removeEventListener('click', onClick);
       layoutFns.length = 0;
     },
