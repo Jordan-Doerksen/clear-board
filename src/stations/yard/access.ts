@@ -95,7 +95,7 @@ export interface SwitchPlaces {
 
 /** The six buttons. */
 export interface SwitchButtons {
-  /** Writes the lining of each switch into the name and the pressed state of its button. */
+  /** Writes the lining of each switch into the name of its button. */
   setLining(lined: Record<string, Lining>): void;
 }
 
@@ -106,6 +106,9 @@ export interface SwitchButtons {
  * focus stays on the pressed button (R2 C15). A press, Enter or Space calls `onPress` with the
  * track id. The click does not reach the click listener of the picture, so that one press throws
  * the switch one time. `host` is the frame that switchBoxes() measures from.
+ *
+ * The name says the lining ("AS73 switch, lined reverse"). The button has no pressed state, so that
+ * a screen reader says the lining one time (ruling SW-NAME).
  */
 export function createSwitchButtons(places: SwitchPlaces, host: HTMLElement, ids: readonly string[], onPress: (id: string) => void): SwitchButtons {
   const layer = places.controls;
@@ -115,7 +118,6 @@ export function createSwitchButtons(places: SwitchPlaces, host: HTMLElement, ids
     b.type = 'button';
     b.className = 'yd-view-sw';
     b.dataset.sw = id;
-    b.setAttribute('aria-pressed', 'false');
     b.setAttribute('aria-label', switchName(id, 'normal'));
     b.addEventListener('click', (e) => { e.stopPropagation(); onPress(id); });
     layer.appendChild(b);
@@ -143,10 +145,8 @@ export function createSwitchButtons(places: SwitchPlaces, host: HTMLElement, ids
   return {
     setLining(lined) {
       for (const [id, b] of buttons) {
-        const lin = lined[id] === 'reverse' ? 'reverse' : 'normal';
-        const name = switchName(id, lin), pressed = lin === 'reverse' ? 'true' : 'false';
+        const name = switchName(id, lined[id] === 'reverse' ? 'reverse' : 'normal');
         if (b.getAttribute('aria-label') !== name) b.setAttribute('aria-label', name);
-        if (b.getAttribute('aria-pressed') !== pressed) b.setAttribute('aria-pressed', pressed);
       }
     },
   };
