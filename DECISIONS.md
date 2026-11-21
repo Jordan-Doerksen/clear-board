@@ -538,6 +538,8 @@ and the notes name the token for each. This is an allowed place for a raw colour
 make the Windows build. The green light carries the mark "SME to confirm".
 **Not verified:** only Chromium rendered the icon. No phone launcher and no desktop taskbar was
 tested. No search for similar marks was made.
+**Later:** job B1 made the PNG set in Wave 2b: `icon-192.png` and `icon-512.png` in the manifest, and
+a 180 px `apple-touch-icon.png` that `index.html` links. The desktop icon set still waits (`TAURI`).
 
 ### D-0035 — The upgrade list: 46 rows have a yes, 5 rows have a no
 **Chosen (the owner, Gate A, question 4):** yes to each recommended row of
@@ -560,7 +562,8 @@ content, signal aspects, puzzle layouts, pars or the solver.
 **Reduced motion in the Yard is slower today, not faster.** The plan said "6 times faster" (fact
 T4). `yard/anim.js` line 17 multiplies each duration by the factor that `yardSim.js` line 228 sets
 to 6. Measured: about 9.0 s against 1.6 s for one move. Three reports agree. Motion does not stop.
-Job Y4 makes it stop.
+Job Y4 makes it stop. **Later:** job Y4a made it stop in Wave 2c. With reduced motion on, each move,
+kick, arrival, departure and watched step ends at once with its end state (P-01).
 **The Signals drill can mark a correct name as wrong.** In `public/data/signals.json` one drawing
 (one red lamp on a mast) belongs to `sig.437` and to `sig.439`, and one drawing (one green lamp on a
 dwarf) belongs to `sig.405` and to `sig.431`. Each of the four items is `verified`. The audit saw the
