@@ -1,13 +1,21 @@
 // sound.js — synthesized Web Audio sfx (no asset files). Lazy context resumed on
 // first gesture; mute persisted in localStorage. SPEC §9.
+//
+// The key sl_muted holds the stored choice (2c-plan C8). Each read and each write of it is guarded:
+// a browser can refuse storage, and then the read throws. With storage refused, the choice holds for
+// this visit only, and the Yard still loads and plays (U-07).
 
 let ctx = null;
-let muted = localStorage.getItem('sl_muted') === '1';
+let muted = readMuted();
+
+function readMuted() {
+  try { return localStorage.getItem('sl_muted') === '1'; } catch { return false; }
+}
 
 export function isMuted() { return muted; }
 export function toggleMute() {
   muted = !muted;
-  localStorage.setItem('sl_muted', muted ? '1' : '0');
+  try { localStorage.setItem('sl_muted', muted ? '1' : '0'); } catch { /* storage refused: the choice holds for this visit */ }
   return muted;
 }
 export function resume() {
