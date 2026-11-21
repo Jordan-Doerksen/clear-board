@@ -80,10 +80,11 @@
 .cb-app .cb-drill-view .cb-drill-feedback .cb-drill-severity { color: var(--ink-2); }
 /* The source line keeps its size of today (12.8 px). */
 .cb-app .cb-drill-view .cb-drill-feedback .cb-sub { font-size: .8rem; }
-/* The word of a button keeps its size of today (14.4 px). "Look it up →" keeps the full width of the
-   panel, and "Next →" or "Finish", the last part, keeps its own width at the start of its line. */
+/* U-38: "Next →" or "Finish" is the main control. It takes the full width of the panel, and its word
+   keeps the size of today (14.4 px). "Look it up →" is a text link: it keeps the width of its words,
+   at the start of its line. */
 .cb-app .cb-drill-view .cb-drill-feedback .dusk-btn { font-size: .9rem; }
-.cb-app .cb-drill-view .cb-drill-feedback > .dusk-btn:last-child { align-self: flex-start; }
+.cb-app .cb-drill-view .cb-drill-feedback .cb-drill-lookup { align-self: flex-start; }
 
 /* ---- the end of a session: a teal Dusk tile ------------------------------------------------------
    The tile is not a control: it does not lift and its edge does not change on hover. */

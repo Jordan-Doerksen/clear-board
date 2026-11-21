@@ -152,8 +152,9 @@ export function Drill({ domain }: { domain?: string }) {
             <span className="cb-drill-severity">{severityOf(item) === 'S3' ? 'Safety-critical — lock this one in.' : 'Worth nailing.'} Review your misses at the end.</span>
           )}
           <span className="cb-sub">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
-          <button className="dusk-btn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
-          <button className="dusk-btn" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>
+          {/* U-38: "Next" is the main control; "Look it up" is a text link. */}
+          <button className="cb-link cb-drill-lookup" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
+          <button className="dusk-btn cb-drill-next" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>
             {idx + 1 < built.slots.length ? 'Next →' : 'Finish'}
           </button>
         </div>
