@@ -13,16 +13,20 @@ import { Signal } from '../stations/Signal';
 import { distinctAspects } from '../core/drill';
 import type { Citation, ContentItem } from '../core/types';
 
-// The trust mark of an entry, as words, and its tone.
-function trustMark(c: Citation): [string, 'ok' | 'caution'] {
-  if (c.trust === 'verified') return ['✓ verified', 'ok'];
-  if (c.trust === 'needs-review') return ['⚠ not yet verified — reference only', 'caution'];
-  return [c.source === 'GOI' ? '● CN practice (GOI), not a CROR rule' : '● No CROR citation in the verified source', 'caution'];
+// The trust mark of an entry: its sign, its words and its tone.
+function trustMark(c: Citation): [string, string, 'ok' | 'caution'] {
+  if (c.trust === 'verified') return ['✓', 'verified', 'ok'];
+  if (c.trust === 'needs-review') return ['⚠', 'not yet verified — reference only', 'caution'];
+  return ['●', c.source === 'GOI' ? 'CN practice (GOI), not a CROR rule' : 'No CROR citation in the verified source', 'caution'];
 }
 
-// The trust mark as a chip (the entry), or as words in a row of the Reference list (U-02).
+// The trust mark as a chip (the entry), or as words in a row of the Reference list (U-02). The sign
+// is decoration and the words carry the state. The sign is in its own span with aria-hidden, so a
+// screen reader says the words only, also in the name of a Reference row (row U-41, ruling
+// SIGN-NAME). The screen shows the sign, a space and the words, as before.
 export function TrustMark({ citation, row = false }: { citation: Citation; row?: boolean }) {
-  const [label, tone] = trustMark(citation);
+  const [sign, words, tone] = trustMark(citation);
+  const label = <><span aria-hidden="true">{sign}</span> {words}</>;
   return row
     ? <span className={`cb-reference-trust cb-reference-trust--${tone}`}>{label}</span>
     : <span className={`cb-chip cb-chip--${tone}`}>{label}</span>;
