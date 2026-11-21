@@ -1,8 +1,8 @@
 /* surfaces/drill.css - the rules that only Drill and Signals need. Owner in Wave 2b: job B2. Class prefix: cb-drill-.
    The Signals route is the Drill. Each selector starts with .cb-app .cb-drill-view, the root of each
    state of the Drill. A rule of a reading mode puts the attribute of the mode on html in front. A
-   size is in rem, so that the text scale reaches it. This sheet holds no raw colour, no transition,
-   no animation and no movement. */
+   text size is in rem, so that the text scale reaches it. A drawing keeps its height in px, as
+   today. This sheet holds no raw colour, no transition, no animation and no movement. */
 
 /* ---- the view: one column of parts, one gap between them --------------------------------------- */
 .cb-app .cb-drill-view {

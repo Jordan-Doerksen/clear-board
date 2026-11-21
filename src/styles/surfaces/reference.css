@@ -1,7 +1,8 @@
 /* surfaces/reference.css - the rules that only Reference needs. Owner in Wave 2b: job B2. Class prefix: cb-reference-.
    Each selector starts with .cb-app .cb-reference-view, the root of the Reference view. A rule of a
-   reading mode puts the attribute of the mode on html in front. A size is in rem, so that the text
-   scale reaches it. This sheet holds no raw colour, no transition, no animation and no movement. */
+   reading mode puts the attribute of the mode on html in front. A text size is in rem or em, so that
+   the text scale reaches it. A drawing keeps its height in px, as today. This sheet holds no raw
+   colour, no transition, no animation and no movement. */
 
 /* ---- the view: one column of parts, one gap between them --------------------------------------- */
 .cb-app .cb-reference-view {
