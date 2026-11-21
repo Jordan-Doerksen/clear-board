@@ -84,57 +84,59 @@ export interface YardView {
 // The body of the Yard page. The app has its own header, so this markup starts with a back button.
 const YARD_HTML = `
   <div class="yard-wrap">
-    <button class="yd-back" data-go="">← Home</button>
+    <button class="yd-back cb-btn--plain" data-go="">← Home</button>
 
-    <div class="yd-bar">
-      <select id="picker" title="Pick a job"></select>
-      <span class="yd-spacer"></span>
-      <div class="yd-readout" id="readout">Moves 0 / par 0 · Joints 0</div>
+    <div class="yd-bar yd-strip dusk-strip">
+      <select class="cb-select" id="picker" title="Pick a job"></select>
+      <span class="dusk-spacer"></span>
+      <div class="dusk-cell"><b class="yd-readout" id="readout">Moves 0 / par 0 · Joints 0</b></div>
     </div>
 
-    <div class="yd-workorder" id="workorder"></div>
+    <div class="yd-workorder dusk-panel dusk-panel--framed" id="workorder"></div>
 
-    <div class="yd-yardframe" data-cb="yard-drawing"></div>
+    <div class="yd-yardframe dusk-panel dusk-panel--framed" data-cb="yard-drawing"></div>
 
-    <div class="yd-bar">
-      <select id="act" title="Action">
+    <div class="yd-bar yd-builder dusk-panel">
+      <select class="cb-select" id="act" title="Action">
         <option value="pull">PULL</option>
         <option value="spot">SPOT</option>
         <option value="kick">KICK</option>
         <option value="secure">SECURE</option>
       </select>
-      <select id="count" title="How many cars"></select>
-      <span class="yd-unit">cars</span>
-      <select id="track" title="Which track"></select>
-      <button class="yd-go" id="work">Work it ▸</button>
-      <button id="optimal" title="Auto-line and play the fewest-moves line in slow motion">▶ Watch optimal</button>
-      <button id="depart" title="Depart the assembled outbound out the lead" style="display:none">Depart ▸</button>
-      <span class="yd-spacer"></span>
-      <button id="reset">Reset</button>
-      <button id="mute" title="Sound">🔊</button>
+      <select class="cb-select" id="count" title="How many cars"></select>
+      <span class="yd-unit cb-sub">cars</span>
+      <select class="cb-select" id="track" title="Which track"></select>
+      <button class="yd-go dusk-btn" id="work">Work it ▸</button>
+      <button class="yd-go dusk-btn" id="optimal" title="Auto-line and play the fewest-moves line in slow motion">▶ Watch optimal</button>
+      <button class="yd-go dusk-btn" id="depart" title="Depart the assembled outbound out the lead" style="display:none">Depart ▸</button>
+      <span class="dusk-spacer"></span>
+      <button class="cb-btn--plain" id="reset">Reset</button>
+      <button class="cb-btn--plain" id="mute" title="Sound">🔊</button>
     </div>
 
-    <div class="yd-banner" id="msg"></div>
+    <div class="yd-banner cb-banner" id="msg"></div>
 
-    <div class="yd-rules-legend">
-      Rules in play —
-      <span class="yd-k">CROR</span> = the national rulebook (applies everywhere) ·
-      <span class="yd-s">S.I.</span> = a <em>special instruction</em>, specific to <em>this</em> yard — <strong>you must know your yard's.</strong>
+    <div class="yd-rules-panel dusk-panel">
+      <div class="yd-rules-legend dusk-rule">
+        <b>Rules in play</b>
+        <span>— <span class="yd-k">CROR</span> = the national rulebook (applies everywhere) ·
+        <span class="yd-s">S.I.</span> = a <em>special instruction</em>, specific to <em>this</em> yard — <strong>you must know your yard's.</strong></span>
+      </div>
+      <div class="yd-rules dusk-grid" id="rules"></div>
     </div>
-    <div class="yd-rules" id="rules"></div>
 
-    <div class="yd-note">
+    <div class="yd-note dusk-panel">
       <strong class="yd-note-head">What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span class="yd-note-more">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span>
     </div>
 
-    <details>
+    <details class="yd-help cb-disclosure">
       <summary>How to play & why these rules</summary>
       <p><strong>You are the conductor, not the engineer.</strong> Click a switch target to line it
       (<span class="yd-key-reverse">yellow</span> = lined into the track / diverging,
       <span class="yd-key-normal">green</span> = normal, straight up the ladder). Then call a move:</p>
       <ul>
-        <li><strong>PULL n from a track</strong> — back in, couple the near (throat) cut, pull <code>n</code> cars onto the lead.</li>
-        <li><strong>SPOT n to a track</strong> — shove <code>n</code> cars in and leave them.</li>
+        <li><strong>PULL n from a track</strong> — back in, couple the near (throat) cut, pull <code class="cb-code">n</code> cars onto the lead.</li>
+        <li><strong>SPOT n to a track</strong> — shove <code class="cb-code">n</code> cars in and leave them.</li>
         <li><strong>KICK n to a track</strong> — shove and cut away; the cars coast in on their own with no coupling. Only where a special instruction allows it (<span class="yd-key-kick">⚡</span>), only onto a secured 2+ car cut, and only car types that can be kicked.</li>
       </ul>
       <p><strong>Score = fewest engine MOVES</strong> — beat or match <em>par</em>. A move is one run of the
@@ -176,16 +178,16 @@ export function createView(root: HTMLElement): YardView {
     setBanner(text, tone) {
       const msg = at('msg');
       msg.textContent = text || '';
-      msg.className = `yd-banner ${tone ? 'yd-' + tone : ''}`;
+      msg.className = `yd-banner cb-banner${tone ? ` yd-${tone} cb-banner--${tone}` : ''}`;
     },
 
     setRefusal(text, onLookup) {
       const msg = at('msg');
-      msg.className = 'yd-banner yd-bad';
+      msg.className = 'yd-banner yd-bad cb-banner cb-banner--bad';
       msg.textContent = text || '';
       if (onLookup) {
         const b = document.createElement('button');
-        b.className = 'yd-lookup'; b.textContent = 'Look it up →';
+        b.className = 'yd-lookup cb-btn--plain'; b.textContent = 'Look it up →';
         b.addEventListener('click', onLookup);
         msg.appendChild(b);
       }
@@ -194,25 +196,31 @@ export function createView(root: HTMLElement): YardView {
     renderRules(list) {
       const box = at('rules'); box.innerHTML = '';
       for (const r of list) {
+        // A rule tile takes the tone of its kind: blue for CROR, amber for a special instruction.
+        // A kind with no tone gets no tone class.
+        const tone = r.kind === 'cror' ? ' dusk-tile--blue' : r.kind === 'si' ? ' dusk-tile--amber' : '';
         const chip = document.createElement('div');
-        chip.className = `yd-chip yd-${r.kind}`;
-        chip.innerHTML = `<b>${r.cite}</b><span>${r.label}</span>`;
+        chip.className = `yd-chip yd-${r.kind} dusk-tile${tone}`;
+        chip.innerHTML = `<div class="dusk-tile-cap"><b class="dusk-tile-lab dusk-num">${r.cite}</b></div>`
+          + `<div class="dusk-tile-body"><span class="dusk-tile-sub">${r.label}</span></div>`;
         box.appendChild(chip);
       }
     },
 
     renderSwitchList(data, { onFlag, onCertify }) {
       const rows = data.lines.map((e, i) =>
-        `<div class="yd-ord-row${e.flagged ? ' yd-flagged' : ''}" data-i="${i}">`
-        + `<span class="yd-ord-flag">${e.flagged ? '⚑' : '▢'}</span>`
-        + `<span class="yd-ord-mark">${e.mark}</span><span class="yd-ord-arrow">→</span><span class="yd-ord-trk">${e.track}</span>`
+        `<div class="yd-ord-row dusk-row dusk-row--amber${e.flagged ? ' dusk-row--on yd-flagged' : ''}" data-i="${i}">`
+        + `<span class="yd-ord-flag dusk-ico">${e.flagged ? '⚑' : '▢'}</span>`
+        + `<span class="yd-ord-line"><span class="yd-ord-mark">${e.mark}</span><span class="yd-ord-arrow">→</span><span class="yd-ord-trk">${e.track}</span></span>`
         + `</div>`).join('');
       at('workorder').innerHTML =
-        `<div class="yd-wo-top"><span class="yd-wo-tag yd-si">SWITCH LIST</span> <span class="yd-wo-id">${data.id.toUpperCase()}</span> · the list can be wrong</div>`
-        + `<div class="yd-wo-job">Build <b>${data.goalTrack}</b> from these cars. Check each line against the yard — tap any that <b>don't match</b>, then certify.</div>`
+        `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag yd-si dusk-panel-name">SWITCH LIST</span> <span class="yd-wo-id dusk-count">${data.id.toUpperCase()}</span> <span class="yd-wo-sub dusk-panel-sub">· the list can be wrong</span></div>`
+        + `<div class="yd-wo-body dusk-panel-body">`
+        + `<div class="yd-wo-job cb-prose">Build <b class="dusk-num">${data.goalTrack}</b> from these cars. Check each line against the yard — tap any that <b class="dusk-num">don't match</b>, then certify.</div>`
         + `<div class="yd-ord-list">${rows}</div>`
-        + `<button class="yd-go" id="certify">Certify order ▸</button>`
-        + `<div class="yd-wo-meta"><span class="yd-wo-tip">${data.hint}</span></div>`;
+        + `<button class="yd-go dusk-btn" id="certify">Certify order ▸</button>`
+        + `<div class="yd-wo-meta cb-sub"><span class="yd-wo-tip">${data.hint}</span></div>`
+        + `</div>`;
       at('workorder').querySelectorAll<HTMLElement>('.yd-ord-row').forEach((row) => row.addEventListener('click', () => {
         onFlag(+(row.dataset.i as string));
       }));
@@ -221,28 +229,29 @@ export function createView(root: HTMLElement): YardView {
 
     renderVerifiedOrder(data) {
       const lines = data.lines
-        .map((e) => `<b>${e.mark}</b> → ${e.track}${e.corrected ? ' <span class="yd-ord-fix">(list was wrong)</span>' : ''}`)
+        .map((e) => `<b class="dusk-num">${e.mark}</b> → ${e.track}${e.corrected ? ' <span class="yd-ord-fix">(list was wrong)</span>' : ''}`)
         .join(' · ');
       at('workorder').innerHTML =
-        `<div class="yd-wo-top"><span class="yd-wo-tag">WORK ORDER ✓</span> <span class="yd-wo-id">${data.goalTrack}</span> · verified</div>`
-        + `<div class="yd-wo-job">Build <b>${data.goalTrack}</b>: ${lines}.</div>`
-        + `<div class="yd-wo-meta">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.</div>`;
+        `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag dusk-panel-name">WORK ORDER ✓</span> <span class="yd-wo-id dusk-count">${data.goalTrack}</span> <span class="yd-wo-sub dusk-panel-sub">· verified</span></div>`
+        + `<div class="yd-wo-body dusk-panel-body">`
+        + `<div class="yd-wo-job cb-prose">Build <b class="dusk-num">${data.goalTrack}</b>: ${lines}.</div>`
+        + `<div class="yd-wo-meta cb-sub">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.</div>`
+        + `</div>`;
     },
 
     renderWorkOrder(data) {
       const nums = data.cars.map((c) => c.split(' ').pop());
-      const head = `<div class="yd-wo-top"><span class="yd-wo-tag">WORK ORDER</span> <span class="yd-wo-id">${data.id.toUpperCase()}</span> · ${data.title}</div>`;
-      const meta = `<div class="yd-wo-meta">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.<span class="yd-wo-tip">${data.hint}</span></div>`;
+      const head = `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag dusk-panel-name">WORK ORDER</span> <span class="yd-wo-id dusk-count">${data.id.toUpperCase()}</span> <span class="yd-wo-sub dusk-panel-sub">· ${data.title}</span></div>`;
+      const meta = `<div class="yd-wo-meta cb-sub">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.<span class="yd-wo-tip">${data.hint}</span></div>`;
       const job = data.depart
-        ? `<div class="yd-wo-job">Build the outbound${data.ordered ? ' in order' : ''} — gather <b>${nums.join(' · ')}</b> onto your train${data.from.length ? ` <span class="yd-wo-from">(set out on ${data.from.join(', ')})</span>` : ''}, then <b>Depart ▸</b>.</div>`
-        : `<div class="yd-wo-job">Build <b>${data.goalTrack}</b> — gather <b>${nums.join(' · ')}</b> onto it${data.from.length ? ` <span class="yd-wo-from">(now on ${data.from.join(', ')})</span>` : ''}.</div>`;
-      at('workorder').innerHTML = head + job + meta;
+        ? `<div class="yd-wo-job cb-prose">Build the outbound${data.ordered ? ' in order' : ''} — gather <b class="dusk-num">${nums.join(' · ')}</b> onto your train${data.from.length ? ` <span class="yd-wo-from">(set out on ${data.from.join(', ')})</span>` : ''}, then <b class="dusk-num">Depart ▸</b>.</div>`
+        : `<div class="yd-wo-job cb-prose">Build <b class="dusk-num">${data.goalTrack}</b> — gather <b class="dusk-num">${nums.join(' · ')}</b> onto it${data.from.length ? ` <span class="yd-wo-from">(now on ${data.from.join(', ')})</span>` : ''}.</div>`;
+      at('workorder').innerHTML = head + `<div class="yd-wo-body dusk-panel-body">` + job + meta + `</div>`;
     },
 
     setCount({ max, value, disabled }) {
       const cnt = at<HTMLSelectElement>('count');
       cnt.disabled = disabled;
-      cnt.style.opacity = disabled ? '.45' : '';
       cnt.innerHTML = '';
       for (let k = 1; k <= max; k++) {
         const o = document.createElement('option'); o.value = String(k); o.textContent = String(k); cnt.appendChild(o);
