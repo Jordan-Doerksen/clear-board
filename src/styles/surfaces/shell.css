@@ -7,9 +7,11 @@
    today. It keeps the padding of the Dusk part and its place in the window grid. */
 .cb-app .cb-shell-win > .dusk-main { display: block; }
 
-/* The content area takes focus at each change of the route. The window cuts each pixel outside
-   its box, so the ring of the content area is drawn inside its edge, at the width of the ring. */
-.cb-app .cb-shell-win > .dusk-main:focus-visible { outline-offset: -3px; }
+/* The content area can take focus (the target of the skip link, and the place of focus until the
+   heading of an island is there). It draws no outline: a ring round the whole view tells nothing
+   (U-29, R5 A11Y-23). The heading of the view takes the focus ring. */
+.cb-app .cb-shell-win > .dusk-main:focus,
+.cb-app .cb-shell-win > .dusk-main:focus-visible { outline: none; }
 
 /* ---- the skip link ---------------------------------------------------------------------------
    The Dusk skip link has a see-through wash. An opaque ground under the wash hides the title bar
@@ -25,3 +27,86 @@
 .cb-app .cb-shell-win > .dusk-titlebar h1 { font-size: 1.35rem; }
 .cb-app .cb-shell-win > .dusk-titlebar .dusk-crumb { font-size: .86rem; }
 .cb-app .cb-shell-win > .dusk-titlebar .dusk-btn { font-size: .9rem; }
+
+/* ---- the screen for a render error (U-05, U-07) ----------------------------------------------
+   A heading, two lines of reading text and two controls. The text is capped at the measure. The
+   controls wrap onto a second line on a narrow screen. */
+.cb-shell-fail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  max-width: var(--measure);
+  padding-block: var(--sp-7);
+}
+.cb-shell-fail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+}
+
+/* ---- the look-up dialog (U-17, 2c-plan C1) ---------------------------------------------------
+   A cb-dialog that is wider than Settings, so that the entry keeps the measure of Reference. The
+   entry keeps the sizes of the Reference entry. No rule sets the display of the dialog, so a closed
+   dialog stays closed. A long entry scrolls inside the dialog. */
+.cb-app .cb-shell-lookup { width: min(92%, 680px); }
+.cb-app .cb-shell-lookup .dusk-panel-name { font-size: 1.17rem; }
+.cb-app .cb-shell-lookup > .dusk-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.cb-app .cb-shell-lookup .cb-chip,
+.cb-app .cb-shell-lookup .dusk-panel-body > .dusk-btn { align-self: flex-start; }
+.cb-app .cb-shell-lookup .cb-prose--lead { font-size: 1.05rem; }
+.cb-app .cb-shell-lookup .cb-sub {
+  max-width: var(--measure);
+  font-size: .8rem;
+}
+.cb-app .cb-shell-lookup .dusk-btn { font-size: .9rem; }
+.cb-app .cb-shell-lookup .cb-disclosure { margin: 0; }
+.cb-app .cb-shell-lookup .cb-quote { max-width: none; }
+.cb-app .cb-shell-lookup .cb-shell-lookup-aspects {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-3);
+}
+.cb-app .cb-shell-lookup .cb-shell-lookup-aspects svg {
+  width: auto;
+  height: 120px;
+}
+
+/* ---- the notices of the shell (U-07, U-10) ---------------------------------------------------
+   One row of the window under the thread. The Dusk window gives its third row the spare height,
+   for the content area; with the notices row the content area is the fourth row. The notices
+   span the window. With no notice the row is empty and has no height. */
+.cb-app .dusk-stage--app > .cb-shell-win { grid-template-rows: auto auto auto 1fr auto; }
+.cb-shell-notices { grid-column: 1 / -1; }
+/* A notice: its words, then its one control. The look-up dialog uses the same notice when its
+   entry is in a part of the library that did not load. */
+.cb-app .cb-shell-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3) var(--sp-5);
+  margin: 0;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
+.cb-app .cb-shell-notices > .cb-shell-notice {
+  padding: var(--sp-3) var(--gap);
+  border-bottom: 1px solid var(--lit-rule);
+  background: var(--well);
+}
+
+/* ---- a station island that did not load (U-07) ----------------------------------------------
+   A message banner in the host of the island: the words, then "Reload". The banner part gives the
+   mark and the red edge of a refusal; the words carry the state. */
+.cb-app .cb-shell-island-fail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3) var(--sp-5);
+  color: var(--ink);
+}

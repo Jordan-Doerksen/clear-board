@@ -66,7 +66,8 @@
   width: 100%;
   min-height: 48px;
   padding: var(--sp-5) var(--sp-6);
-  border: 1px solid var(--lit-rule);
+  /* The edge of a control: 3:1 or more against the fill and the ground (OPTION-EDGE). */
+  border: 1px solid var(--cb-edge);
   border-radius: var(--r-control);
   background-color: var(--head);
   color: var(--ink);
@@ -164,6 +165,9 @@
   outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
+/* A toggle that the app holds (aria-disabled): it keeps the look of its state. The words of its
+   row say why it cannot change. */
+.cb-toggle input[aria-disabled="true"] { cursor: not-allowed; }
 
 /* ---- G5 and G6: the text field and the select ------------------------------------------------
    One skin for both. The native arrow and the native list of a select stay. */
@@ -193,6 +197,9 @@
   color: var(--ink-2);
   cursor: not-allowed;
 }
+/* The browser dims a disabled select. Its words stay 4.5:1 or more: the edge and the words carry
+   the state (DISABLED-EDGE; the review of Y3). */
+.cb-select:disabled { opacity: 1; }
 
 /* ---- G10: the tabs -----------------------------------------------------------------------------
    Markup: .cb-tabs[role=tablist] > button.cb-tab[role=tab][aria-selected]. A tab holds a name and
@@ -451,6 +458,18 @@
   color: var(--ink);
 }
 .cb-dialog::backdrop { background: var(--cb-scrim); }
+/* An open dialog cuts each pixel outside its box, and the Dusk panel head puts its control 4 px
+   below the top edge, but the focus ring reaches 5 px out. With 8 px above and below the control,
+   the whole ring shows, on the ground of the head and clear of the lit edge of the dialog.
+   (Folded from surfaces/settings.css by job U1-B.)
+   A dialog that is taller than the window scrolls inside. Its head stays at the top edge, so the
+   name of the dialog and its control to close stay in view (job U1-B). */
+.cb-app .cb-dialog > .dusk-panel-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-block: var(--sp-3);
+}
 .cb-setrow {
   display: flex;
   align-items: center;
@@ -460,6 +479,10 @@
   padding: var(--sp-3) 0;
 }
 .cb-setrow + .cb-setrow { border-top: 1px solid var(--hair); }
+/* A button in a row keeps the width of its word. Without this rule it shrinks below its word on a
+   narrow screen and loses its padding. (Folded from surfaces/settings.css by job U1-B.) */
+.cb-setrow > .cb-btn--attn,
+.cb-app .cb-setrow > .dusk-btn { flex: none; }
 .cb-setrow small {
   display: block;
   color: var(--ink-2);
@@ -525,6 +548,18 @@
   color: var(--cb-attn-ink);
 }
 /* css-mark:end */
+
+/* ---- forced colours (FORCED-COLOURS) ----------------------------------------------------------
+   With forced colours the Dusk edges (box shadows) do not show, and the home mark draws nothing.
+   Each of these parts gets a 1 px border with no colour value: the system colours paint it. */
+@media (forced-colors: active) {
+  .cb-mark,
+  .cb-dialog,
+  .cb-app .dusk-btn,
+  .cb-app .dusk-tile,
+  .cb-app .dusk-row,
+  .cb-app .dusk-panel { border: 1px solid; }
+}
 
 /* ---- the reading modes ----------------------------------------------------------------------------
    The bridge sets the tokens of each mode. These rules do the work that a token cannot do. */

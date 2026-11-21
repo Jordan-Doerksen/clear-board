@@ -1,4 +1,6 @@
-/* ---- Clear Board: calm, high-contrast dark study tool. Lifted verbatim from the vanilla build. ---- */
+/* ---- Clear Board: the app sheet. The base rules of the page, and the old rules that still match an
+   element. Job U1-B removed each rule that matched no element on any screen (the sweep of Wave 2c,
+   ruling SWEEP); the parts and the surface sheets style the rest. ---- */
 
 *{ box-sizing:border-box }
 html,body{ margin:0 }
@@ -8,61 +10,11 @@ a{ color:var(--cb-link) }
 .muted{ color:var(--muted) }
 :focus-visible{ outline:3px solid var(--focus); outline-offset:2px; border-radius:6px }
 
-.iconbtn{ background:var(--surface-2); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:9px 13px; font:inherit; font-size:.9rem; cursor:pointer; min-height:44px }
-.iconbtn:hover{ border-color:var(--muted) }
-
 /* ---- station views ---- */
-.back{ background:none; border:0; color:var(--cb-link); font:inherit; cursor:pointer; padding:6px 0; min-height:44px }
-.view-title{ font-size:1.3rem; margin:.2em 0 .1em }
-.search{ width:100%; background:var(--surface-2); border:1px solid var(--line); color:var(--ink); border-radius:10px; padding:12px 14px; font:inherit; margin:8px 0 16px }
-.ref-list{ display:flex; flex-direction:column; gap:8px }
-.ref-row{ text-align:left; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:11px 13px; color:var(--ink); font:inherit; cursor:pointer }
-.ref-row:hover{ border-color:var(--clear) } .ref-row b{ display:block } .ref-row small{ color:var(--muted) }
-.ref-detail{ margin-top:16px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:16px 18px }
-.ref-detail h3{ margin:0 0 6px } .ref-detail .plain{ font-size:1.05rem }
-.badge{ display:inline-block; font-size:.72rem; border-radius:999px; padding:2px 9px; margin-bottom:8px }
-.badge.clear{ color:var(--clear); border:1px solid var(--clear) } .badge.caution{ color:var(--caution); border:1px solid var(--caution) }
 details{ margin:10px 0 } summary{ cursor:pointer; color:var(--cb-link) }
 blockquote{ margin:10px 0 0; padding:10px 14px; border-left:3px solid var(--line); background:var(--surface-2); border-radius:0 8px 8px 0; color:var(--ink) }
-.cite{ margin-top:10px; font-size:.8rem; color:var(--muted) }
 
-.drill-top{ display:flex; justify-content:space-between; margin:6px 0 }
-.prompt{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px; font-size:1.1rem; margin-bottom:14px }
-.prompt-signal{ text-align:center; padding:22px } .prompt-signal svg{ height:170px; width:auto }
-.aspects{ display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; margin:12px 0 } .aspects svg{ height:120px; width:auto }
-.signal{ display:inline-flex; align-items:flex-end }
-.small{ font-size:.8rem }
-.opts{ display:flex; flex-direction:column; gap:10px }
-.opt{ text-align:left; background:var(--surface-2); border:1px solid var(--line); color:var(--ink); border-radius:10px; padding:13px 15px; font:inherit; cursor:pointer; min-height:48px }
-.opt:hover:not(:disabled){ border-color:var(--clear) }
-/* interaction-state polish: after answering, options are disabled — mark the cursor and dim the non-feedback ones (keep .right/.wrong at full strength so the answer stays readable) */
-.opt:disabled{ cursor:not-allowed }
-.opt:disabled:not(.right):not(.wrong){ opacity:.55 }
-.opt.right{ border-color:var(--clear); background:var(--rowwash-green) }
-.opt.wrong{ border-color:var(--stop); background:var(--rowwash-red) }
-.feedback{ margin-top:16px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px; display:flex; flex-direction:column; gap:8px }
-.fb-ok{ color:var(--clear) } .fb-no{ color:var(--stop) }
-.feedback .next{ align-self:flex-start; margin-top:6px }
-.big-score{ font-size:2.4rem; margin:.2em 0 }
-
-/* Radio — mode switch (guided vs. call it yourself) + the test-mode readout */
-.mode-tabs{ display:flex; gap:8px; margin:10px 0 16px; flex-wrap:wrap }
-.mode-tab{ flex:1 1 220px; display:flex; flex-direction:column; gap:3px; text-align:left; font:inherit;
-  background:var(--surface-2); border:1px solid var(--line); color:var(--muted);
-  border-radius:10px; padding:11px 14px; cursor:pointer; min-height:48px }
-.mode-tab small{ font-size:.76rem; color:var(--muted) }
-.mode-tab.on{ color:var(--ink); border-color:var(--clear); background:var(--surface) }
-.mode-tab:hover:not(.on){ border-color:var(--clear) }
-.radio-readout{ font-size:1.15rem; font-weight:700; background:var(--surface); border:1px solid var(--line);
-  border-radius:var(--r); padding:12px 15px; margin:8px 0 12px }
-.radio-incoming, .radio-ack{ display:block; background:var(--surface-2); border:1px solid var(--line);
-  border-radius:10px; padding:9px 12px; font-size:.92rem }
-.radio-incoming{ margin:0 0 12px }
 .who{ display:block; font-size:.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px }
-
-/* interaction-state polish: pressed feedback on the app's button-like controls (instant transform, no transition — reduced-motion safe) */
-.iconbtn:active, button.card:active, .ref-row:active, .back:active, footer .tip:active,
-.station:active:not([disabled]), .opt:active:not(:disabled), .mode-tab:active{ transform:translateY(1px) }
 
 /* interaction-state polish: reduced-motion catch-all — was transitions only; now also guards animations + smooth scroll */
 @media (prefers-reduced-motion: reduce){
@@ -76,18 +28,12 @@ blockquote{ margin:10px 0 0; padding:10px 14px; border-left:3px solid var(--line
 }
 
 /* s1-floor:start */
-/* Job S1 wrote this block. It keeps the shapes of today under the Dusk element rules, until each
-   surface is on Dusk parts. A rule here reads Dusk tokens and --cb- names only.
-   Job B1 deletes the body rule in the commit that adds the Dusk app window. The sweep of job U1
-   deletes each other rule of the block. */
+/* Job S1 wrote this block. It keeps the shapes of today under the Dusk element rules. A rule here
+   reads Dusk tokens and --cb- names only. Job B1 deleted the body rule. The sweep of job U1-B
+   deleted each rule of the block that matched no element; the two rules below still match. */
 /* Dusk sets the margin of each paragraph to 0. These paragraphs have no margin rule of their own
    and get the browser default again. The rules have the weight of one element name, so each class
    rule of this sheet wins. They do not match a paragraph of a Dusk part or of a cb- part. */
 :where(.lede, footer, .yard-wrap, .radio-wrap) p:where(:not([class])){ margin-block:1em }
 p:where(.muted, .plain):where(:not([class*="dusk-"], [class*="cb-"])){ margin-block:1em }
-p:where(.badge):where(:not([class*="dusk-"], [class*="cb-"])){ margin-top:1em }
-/* The placeholder of the search field gets a token colour in place of the browser grey. */
-.search::placeholder{ color:var(--ink-3); opacity:1 }
-/* The edge of a field, of a toggle track and of a bar track is the edge of a control. */
-.search, .sw i, .bar, .mini{ border-color:var(--cb-edge) }
 /* s1-floor:end */

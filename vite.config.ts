@@ -41,10 +41,14 @@ export default defineConfig({
     react(),
     themeColour(glass),
     // Offline is the point, not a nicety: this gets studied on a train with no signal (SPEC —
-    // local-first). autoUpdate so a learner is never stranded on a stale rulebook.
+    // local-first). The update is a prompt (U-10; R6 ENG-01): a new version waits until the learner
+    // presses "Reload" in the notice of the shell. The page never reloads by itself, because a
+    // reload in the middle of a question loses the work. Until then the old version keeps its whole
+    // cache, so each station still draws. The app registers the worker itself, through the virtual
+    // module of the plugin (src/App.tsx), so the plugin injects no script.
     VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      registerType: 'prompt',
+      injectRegister: false,
       // The cache list comes from globPatterns alone. Without this option the plugin adds the
       // manifest icon a second time.
       includeManifestIcons: false,
@@ -58,7 +62,7 @@ export default defineConfig({
         name: 'Clear Board — become a conductor, free',
         short_name: 'Clear Board',
         description:
-          'A free CROR conductor-qualification trainer — first day to job-ready, built for the people a rulebook failed.',
+          'A free CROR conductor-qualification trainer — practice from your first day, not the official test. Built for the people a rulebook failed.',
         start_url: './',
         scope: './',
         display: 'standalone',

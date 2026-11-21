@@ -17,6 +17,11 @@
   letter-spacing: var(--track-label);
 }
 .cb-app .cb-home-view .dusk-badge + .cb-prose { margin-top: var(--sp-4); }
+/* U-25: one plain line under the lede says that this is practice, not the official test. */
+.cb-app .cb-home-view .cb-prose + .cb-home-practice {
+  margin-top: var(--sp-3);
+  font-size: .9rem;
+}
 
 /* ---- the headings ----------------------------------------------------------------------------
    A Dusk named rule. The words keep their size of today. */
@@ -38,6 +43,24 @@
   font-size: .85rem;
 }
 .cb-app .cb-home-view .cb-home-stage + .dusk-bar { margin-top: var(--sp-5); }
+
+/* U-27 and U-26: the one main control of Home, under the bar, and the count of items due now
+   beside it. The control is a Dusk button with the word at the reading size. */
+.cb-home-next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3) var(--sp-6);
+  margin-top: var(--sp-6);
+}
+.cb-app .cb-home-view .cb-home-main {
+  padding-inline: var(--sp-7);
+  font-size: 1rem;
+}
+.cb-home-due {
+  color: var(--ink-2);
+  font-size: .85rem;
+}
 
 /* ---- the domain tiles ------------------------------------------------------------------------
    A live domain is a teal Dusk tile and a button. A domain that is not live is a grey Dusk tile
@@ -71,7 +94,29 @@
   gap: var(--sp-3);
   padding-bottom: var(--sp-4);
 }
-.cb-app .cb-home-view .dusk-tile-body > .dusk-bar { margin-top: auto; }
+/* U-33: the foot of a live tile, at its bottom edge: the bar with the mastery as a number, then the
+   verb of the press. */
+.cb-home-tile-foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-top: auto;
+}
+.cb-home-tile-figure {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.cb-app .cb-home-view .cb-home-tile-figure > .dusk-bar { flex: 1 1 auto; }
+.cb-app .cb-home-view .cb-home-tile-figure > .dusk-num {
+  color: var(--ink);
+  font-size: .85rem;
+}
+.cb-home-tile-act {
+  color: var(--cb-link);
+  font-size: .84rem;
+  font-weight: var(--fw-medium);
+}
 .cb-app .cb-home-view .dusk-tile-tag {
   align-self: flex-start;
   margin: auto 0 0;
@@ -110,3 +155,5 @@
 }
 .cb-app .cb-home-view footer .dusk-btn,
 .cb-app .cb-home-view footer .cb-sub { font-size: .82rem; }
+/* The words of the tip link wrap on a narrow screen (U-42 makes them longer). */
+.cb-app .cb-home-view footer .dusk-btn { line-height: var(--lh-base); }
