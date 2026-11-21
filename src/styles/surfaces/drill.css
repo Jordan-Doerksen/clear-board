@@ -1,1 +1,103 @@
-/* surfaces/drill.css - the rules that only Drill and Signals need. Owner in Wave 2b: job B2. Class prefix: cb-drill-. Job S1 made this file with no rule. */
+/* surfaces/drill.css - the rules that only Drill and Signals need. Owner in Wave 2b: job B2. Class prefix: cb-drill-.
+   The Signals route is the Drill. Each selector starts with .cb-app .cb-drill-view, the root of each
+   state of the Drill. A rule of a reading mode puts the attribute of the mode on html in front. A
+   text size is in rem, so that the text scale reaches it. A drawing keeps its height in px, as
+   today. This sheet holds no raw colour, no transition, no animation and no movement. */
+
+/* ---- the view: one column of parts, one gap between them ---------------------------------------
+   The column is at most --maxw (920 px) wide and sits in the middle of the window, which fills the
+   browser (SURFACE-COLUMN). A box, a panel and a control take the width of the column. On a narrow
+   screen the column takes the full width. */
+.cb-app .cb-drill-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  max-width: var(--maxw);
+  margin-inline: auto;
+}
+/* "← Home" keeps the width of its word */
+.cb-app .cb-drill-view > .cb-btn--plain { align-self: flex-start; }
+
+/* ---- the count line, above the question panel, in the reading order of today ------------------- */
+.cb-app .cb-drill-view .cb-drill-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-5);
+}
+/* "Question N of M" and the count chip "N correct" keep their size of today (16 px). */
+.cb-app .cb-drill-view .cb-drill-top .cb-sub,
+.cb-app .cb-drill-view .cb-drill-top .dusk-count { font-size: 1rem; }
+
+/* ---- the question panel: the head holds the heading only, the body holds the prompt ------------- */
+/* The question heading is reading text and keeps its size of today (20.8 px). */
+.cb-app .cb-drill-view .cb-drill-q .dusk-panel-name { font-size: 1.3rem; }
+/* A drawn signal sits in the middle of the body, 170 px high, with the width that its own
+   proportions give. */
+.cb-app .cb-drill-view .cb-drill-signal {
+  display: flex;
+  justify-content: center;
+}
+.cb-app .cb-drill-view .cb-drill-signal svg {
+  width: auto;
+  height: 170px;
+}
+
+/* ---- the feedback: a Dusk panel. Each part is on its own line, in the order of today ------------ */
+.cb-app .cb-drill-view .cb-drill-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+/* A block of reading text stops at the measure. */
+.cb-app .cb-drill-view .cb-drill-feedback > span { max-width: var(--measure); }
+/* The severity line is a second level of ink at the reading size of today (16 px). */
+.cb-app .cb-drill-view .cb-drill-feedback .cb-drill-severity { color: var(--ink-2); }
+/* The source line keeps its size of today (12.8 px). */
+.cb-app .cb-drill-view .cb-drill-feedback .cb-sub { font-size: .8rem; }
+/* The word of a button keeps its size of today (14.4 px). "Look it up →" keeps the full width of the
+   panel, and "Next →" or "Finish", the last part, keeps its own width at the start of its line. */
+.cb-app .cb-drill-view .cb-drill-feedback .dusk-btn { font-size: .9rem; }
+.cb-app .cb-drill-view .cb-drill-feedback > .dusk-btn:last-child { align-self: flex-start; }
+
+/* ---- the end of a session: a teal Dusk tile ------------------------------------------------------
+   The tile is not a control: it does not lift and its edge does not change on hover. */
+.cb-app .cb-drill-view .cb-drill-done:hover,
+.cb-app .cb-drill-view .cb-drill-done:focus-within {
+  transform: none;
+  box-shadow: var(--tile-neon);
+}
+/* The cap holds no icon square, so its word starts at the edge of the words of the body. */
+.cb-app .cb-drill-view .cb-drill-done .dusk-tile-cap { padding-left: var(--sp-4); }
+/* The heading keeps its size of today (20.8 px). It wraps and is never cut with an ellipsis. */
+.cb-app .cb-drill-view .cb-drill-done .dusk-tile-lab {
+  overflow: visible;
+  font-size: 1.3rem;
+  white-space: normal;
+  text-overflow: clip;
+}
+/* The score and the mastery lines keep their size of today (38.4 px and 16 px). The lines stop at
+   the measure. The body keeps a space under the last line. */
+.cb-app .cb-drill-view .cb-drill-done .dusk-tile-body { padding-bottom: var(--sp-4); }
+.cb-app .cb-drill-view .cb-drill-done .dusk-tile-num { font-size: 2.4rem; }
+.cb-app .cb-drill-view .cb-drill-done .dusk-tile-sub {
+  max-width: var(--measure);
+  font-size: 1rem;
+}
+
+/* ---- the end actions: actions, not answers. A row of Dusk buttons that wraps, words at 16 px ---- */
+.cb-app .cb-drill-view .cb-drill-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+}
+.cb-app .cb-drill-view .cb-drill-actions .dusk-btn { font-size: 1rem; }
+
+/* ---- the dyslexia mode -------------------------------------------------------------------------
+   A Dusk part with a fixed line height or a fixed tracking takes the line height and the letter
+   spacing of the mode. The letter spacing comes from html, through inherit: no value is set here. */
+html[data-dys="1"] .cb-app .cb-drill-view .dusk-btn,
+html[data-dys="1"] .cb-app .cb-drill-view .dusk-tile-num,
+html[data-dys="1"] .cb-app .cb-drill-view .dusk-tile-sub { line-height: var(--lh-base); }
+html[data-dys="1"] .cb-app .cb-drill-view .dusk-tile-num { letter-spacing: inherit; }

@@ -131,6 +131,23 @@ option of each. A brief that says "open for the lead" for one of these names fol
 | `2B-BASE` | Each 2b job starts from the head of the Wave 2a branch, `1590be5`. Its look baseline is built from that commit (`npm run look:baseline -- --ref 1590be5…`). Its compare runs in look mode (`--look --gate`). | Wave 2a is merged, checked and green at that commit. |
 | `PICTURES-CAP` | A committed picture is at device scale factor 1. A picture taller than 6000 px is committed as its first 6000 px; the full picture stays in the uncommitted `.look/` folder. | The full Reference pages are about 20,000 px high and 2.5 MB each. The committed pictures are for the owner's look, and the top of a long page carries the look. |
 
+### 2.5 Rulings at the merges of Wave 2b (2026-11-21)
+
+| Name | The ruling | The reason |
+|---|---|---|
+| `PROMPT-SIGNAL` | The hook `data-cb="prompt-signal"` sits on the wrapper of the drawing inside the prompt body (`div.cb-drill-signal`). The hook `data-cb="prompt"` sits on the prompt body (`PROMPT-HOOK`). This corrects contract B.6. | One attribute cannot hold two values. |
+| `OPTION-EDGE` | In Wave 2c, U1 gives the edge of an answer option (`cb-opt`, part G1 of the parts file) the token `--cb-edge`, so that the edge is 3 or more against its fill and its ground, for the Drill and the Radio test alike. | Today the edge is 2.1 in the default mode, the same as before the reskin. The part is shared by B2 and B3, so neither job changes it alone. |
+| `LOOK-SMALLER` | A line "a control is smaller" of the look compare is accepted at a merge when the control stays 44 by 44 px or more (ruling 2.3). At the G1-close of Wave 2b, the G1 line makes such a line a warning in look mode, with the floor of 44 px in the tool. | The tool marks the line FAIL; the ruling already accepts it. |
+| `SURFACE-COLUMN` | Reference, the Drill, Signals and both Radio modes sit in a centred column of at most `var(--maxw)` (920 px, the width of today) inside the full-width window. Inside that column, a box, a panel, a control and the Radio scene take the column width; a Dusk lede or note keeps its own cap at `--measure`. Home, Settings and the Yard keep the full window. Job B-COL builds it in Wave 2b. | The lead looked at the merged branch at 1440 px: with no column, the answer rows and "Look it up" run about 1,400 px wide and the Radio scene grows to 1,416 px, and boxed text in the Radio ends at another width than the scene. The owner's pick keeps the window full width for the Yard; reading surfaces read better at the width of today. The owner sees it at the look gate and can reverse it. |
+| `TILE-CAP-SQUARE` | The domain tiles of Home lose the empty icon square of the cap. Job B-COL removes it. No glyph is drawn. | An empty dark square reads like an unchecked box (the review of B1). It carries no information. |
+| `MAXW` | `--maxw` stays in the bridge: `SURFACE-COLUMN` reads it. U1 does not remove it. | It has a reader again. |
+| `FORCED-COLOURS` | In Wave 2c, U1 adds one block `@media (forced-colors: active)` to the parts file that gives `cb-mark`, `cb-dialog`, `dusk-btn`, `dusk-tile`, `dusk-row` and `dusk-panel` a 1 px solid border with no colour value. | With forced colours the Dusk edges (box shadows) do not show, and the home mark draws nothing (the review of B1). |
+| `FOCUS-OUTER` | The contrast of a focus ring is measured against the colour outside the ring. | A ring that sits on a glowing tile has two sides; the outer side meets WCAG. |
+| `RADIO-LINE1` | In Wave 2c, U1 corrects the comment on line 1 of `radioSim.js` ("Ported VERBATIM"), which is no longer true for the style. A comment only. | The review of B3. |
+| `READOUT-CELLS` (picked) | The Yard readout stays one element. The three-cell form is not built. | In the three-cell form the labels fall from 16 px to 11 px, against `TEXT-READING`. |
+| `DISABLED-EDGE` | The edge of a disabled control can be under 3:1. Its words stay 4.5:1 or more. | WCAG 1.4.11 does not cover an inactive control; the words carry the state. |
+| `Y-FIX` | After Y2 is merged, a small follow-up job in `yard.css` and `view.ts`: the message well and the note panel take the full width of the Yard while their text keeps the cap at `--measure` (as `SURFACE-COLUMN` does for the boxes of the Radio); and only a car mark or a number of the job line takes the mono face (today each bold word does, so "don't match" and "Depart ▸" show in mono). | The review of Y3. A box and a panel line up with the panels around them. |
+
 ## 3. Closed by the owner after Gate A
 
 The owner answered the sheet of these 19 picks on 2026-11-21 with the words "yes to all

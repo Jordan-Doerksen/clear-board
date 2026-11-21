@@ -8,7 +8,7 @@ Sources: [`specs/briefs/00-contracts.md`](specs/briefs/00-contracts.md) (names, 
 - **Today** means: read from the code on 2026-11-20. Outside `specs/`, `DECISIONS.md` and this file, the tree is equal to commit `86cfef2` (`git diff --stat`). Each line number is a line of that tree.
 - **Planned** means: Wave 2, not built. Each planned statement comes from the contract. The lead accepted each file row of it (`FILES`).
 - **PENDING RULING `NAME`** means: the owner or the SME has not answered. Until an answer, each job keeps the behaviour of today. Section 10 lists each one that changes this map. **Not verified** means: no check was made (section 11).
-- State: Wave 1 is complete. Gate A is closed (D-0031 to D-0035, D-0037), and the owner answered 19 more picks (D-0038). **Wave 2a is built and merged** on `claude/cb2-wave-2a` (section 0). Wave 2b and 2c are planned.
+- State: Wave 1 is complete. Gate A is closed (D-0031 to D-0035, D-0037), and the owner answered 19 more picks (D-0038). **Wave 2a and Wave 2b are built and merged** (sections 0 and 0b). Wave 2c is planned.
 
 
 ## 0. State after Wave 2a (the lead, 2026-11-21)
@@ -37,6 +37,30 @@ Wave 2a is merged on the wave branch at `beb3d14`. Sections 2 to 4 still describ
   `imperativeStation.ts` exports the type `StationCtx`. The reading modes reach the Yard text.
 - **Left, as planned:** the Yard drawing (`render.js`, 22 raw colours) and the guided Radio
   (`radioSim.js`, 45) keep their old colours until Y2 and B3 in Wave 2b.
+
+## 0b. State after Wave 2b (the lead, 2026-11-21)
+
+Wave 2b is merged on the wave branch `claude/cb2-wave-2b`. What it added or changed:
+
+- **The surfaces (B1, B2, B3).** The shell is one Dusk window that fills the browser, with a title
+  bar and the lit thread (`App.tsx`, `src/styles/surfaces/shell.css`). Home, Settings, Reference,
+  the Drill, Signals and both Radio modes use Dusk parts and the `cb-` parts. The guided Radio
+  island holds no raw colour; its `STEPS` wording is unchanged. The PNG icons of the monogram are in
+  the manifest.
+- **The reading column (B-COL).** Reference, the Drill, Signals and the Radio sit in a column of at
+  most `--maxw` (920 px), centred in the window. Home, Settings and the Yard use the full window.
+- **The Yard chrome (Y3).** `yard/view.ts` and `yard/yard.css` put the picker, the readout, the
+  work order, the move builder, the message, the legend and the rule tiles on Dusk parts.
+- **The Yard drawing (Y2).** `render.js` and the canvas are gone. `yard/draw.ts` is the adapter of
+  an inline SVG drawing in `yard/drawing/` (`layout.ts` the view transform over the frozen
+  `geometry.js`, `bodies.ts` the facts and the motion, `svg.ts` the elements, `legend.ts`,
+  `drawing.css`). It draws look C2: a wide form and a tall form, chosen when a job starts. Its
+  colours are the `--yard-*` names of the bridge.
+- **The gates (G1-close of 2b).** No counted file holds a raw colour. The smoke test has 15 gate
+  cases. The look harness accepts a smaller control that stays 44 px or more, and the approved
+  words of look C2, as warnings.
+- **Left for Wave 2c:** the Yard access layer and the Yard controls of the owner's picks (Y4), the
+  upgrade rows (U1), the tests and the cache budget (G1-2), and the documents (D1).
 
 ## 1. What the app is
 1. Clear Board is a free trainer for the conductor qualification under the Canadian Rail Operating Rules (CROR).

@@ -17,11 +17,11 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const scripts = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).scripts;
 
-// The limit of lint warnings. It is the count of warnings after Wave 2a. The three warnings are
-// in files of other jobs: `src/stations/yard/anim.js` (Y2), `src/stations/imperativeStation.ts`
-// (Y4) and `src/state/AppContext.tsx` (U1). The closing commit of the G1 line lowers this number
-// when a job removes a warning. It never goes up.
-const LINT_WARNING_LIMIT = 3;
+// The limit of lint warnings. It is the count of warnings after Wave 2b. The two warnings are in
+// files of other jobs: `src/stations/imperativeStation.ts` (Y4) and `src/state/AppContext.tsx`
+// (U1). The closing commit of the G1 line lowers this number when a job removes a warning. It
+// never goes up.
+const LINT_WARNING_LIMIT = 2;
 
 // The steps, in the order of the run. `script` is an npm script name. `command` is a command
 // line for a step that has no npm script name. `extra` is text that the runner adds to the

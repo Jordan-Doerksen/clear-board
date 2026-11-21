@@ -1,0 +1,5479 @@
+{
+ "note": "Compact tape of the Yard on the build of job Y2 (brief Y2, requirement 40), made with the adapted copy of the recorder of job Y1. A long field (words, tree, controls, storage, drawing) is given as its SHA-256.",
+ "made": "2026-11-21T06:13:58.778Z",
+ "dist": "y2-426ed24",
+ "passes": [
+  "A",
+  "B",
+  "C",
+  "D"
+ ],
+ "records": [
+  {
+   "pass": "A",
+   "step": "A1 load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "e0c3206f3e592ce890b5fcf5f008234127e1c2d8129c9001d82f4d49f18275b1",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "59712f4d89e8a1faf38eedb15865f796a8cd835b663f3f8f6f4e6f63800df484",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "112e2fcc39e582ee5b7393bf1e36b12ed86c7ee52cbce410a2d0df9e8bf66b94",
+   "storage": "c819a7ceb517ecaea9a23969c9569fa011541be966f5b21fd0e38883e92bbcb9"
+  },
+  {
+   "pass": "A",
+   "step": "A2 mute",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "e0c3206f3e592ce890b5fcf5f008234127e1c2d8129c9001d82f4d49f18275b1",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-1 a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "e0c3206f3e592ce890b5fcf5f008234127e1c2d8129c9001d82f4d49f18275b1",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-1 c refused move",
+   "banner": {
+    "text": "AS73 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "e0c3206f3e592ce890b5fcf5f008234127e1c2d8129c9001d82f4d49f18275b1",
+   "sounds": 1,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "10a17a167caac16d02b512cea55ffefe5b471e5513cd371a09c7a0dcc01e9d34",
+   "tree": "043c6baa51e2704d35a045b0dc58e84a61eb234eb511b166f54c14ec69881f6e",
+   "controls": "2436eeb064369212e5b0a94a6f18e3baa0fb30d0b44b5af934b8ace05c7feaaf",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-1 d throw AS76",
+   "banner": {
+    "text": "AS73 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "a70b7b81aa54ba4e7c2e3cf01707d1d5f300c685b264d4166511f10ee847a787",
+   "sounds": 2,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "10a17a167caac16d02b512cea55ffefe5b471e5513cd371a09c7a0dcc01e9d34",
+   "tree": "043c6baa51e2704d35a045b0dc58e84a61eb234eb511b166f54c14ec69881f6e",
+   "controls": "2436eeb064369212e5b0a94a6f18e3baa0fb30d0b44b5af934b8ace05c7feaaf",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-1 d throw AS76 again",
+   "banner": {
+    "text": "AS73 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "e0c3206f3e592ce890b5fcf5f008234127e1c2d8129c9001d82f4d49f18275b1",
+   "sounds": 3,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "10a17a167caac16d02b512cea55ffefe5b471e5513cd371a09c7a0dcc01e9d34",
+   "tree": "043c6baa51e2704d35a045b0dc58e84a61eb234eb511b166f54c14ec69881f6e",
+   "controls": "2436eeb064369212e5b0a94a6f18e3baa0fb30d0b44b5af934b8ace05c7feaaf",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-1 d click (10, 10)",
+   "banner": {
+    "text": "AS73 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "e0c3206f3e592ce890b5fcf5f008234127e1c2d8129c9001d82f4d49f18275b1",
+   "sounds": 3,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "10a17a167caac16d02b512cea55ffefe5b471e5513cd371a09c7a0dcc01e9d34",
+   "tree": "043c6baa51e2704d35a045b0dc58e84a61eb234eb511b166f54c14ec69881f6e",
+   "controls": "2436eeb064369212e5b0a94a6f18e3baa0fb30d0b44b5af934b8ace05c7feaaf",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-1 e step 1 pull AS73 3",
+   "banner": {
+    "text": "Pulled 3 from AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 5 · Joints 1",
+   "drawing": "9564118554b5aebe58d6593f7b9d5fa02a3014971899e80d9dc1076ade98481f",
+   "sounds": 6,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "26d3b2b0ccfb1816c0e6899aceb0cae1173e110faaa1a9aa241db269a08dddc2",
+   "tree": "651724a4af513fceb40704c6daf9fe54dc01a47eda45dfd33e7c90fa3ea871df",
+   "controls": "070318d8020b29400323a06179ecc7bfa91956120838258783c4a70c1930e722",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-1 e step 2 pull AS72 3",
+   "banner": {
+    "text": "Pulled 3 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 5 · Joints 2",
+   "drawing": "57fe8e04cb5f21a2f1847772dee29d51d81b7adf469286db39387c63b262d507",
+   "sounds": 10,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "72c64fa0e703a02d95a4bb73383f8a74db8918ac84b7dc1f8eb66bd2f48ce781",
+   "tree": "651724a4af513fceb40704c6daf9fe54dc01a47eda45dfd33e7c90fa3ea871df",
+   "controls": "c0d910576a5be5dbe246063fe42501a9ea65fe654c6e6131762e36c723165d68",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-1 e step 3 spot AS75 6",
+   "banner": {
+    "text": "The cars are where they belong, but AS75 is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE AS75 to finish the job.Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 2",
+   "drawing": "94a9125967f95df55ddd06cf1b138dfdde8a669f1293f95ee7f195f55b2eec66",
+   "sounds": 13,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "35340f38355d6464c5b48fe5eb8d2f0daea7b7d547d0249ceab3b3853cfc1602",
+   "tree": "888fa5a786a5c600a439bc0898e8cc3139e5f560afbe84a0ddc6c26a6631896b",
+   "controls": "7323b8574a1e0fea611d7e2e28d453fd122ba0b00149ea9cb9ebdd2a14bd25b4",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-1 e step 4 secure AS75",
+   "banner": {
+    "text": "✓ Par! 5 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 2",
+   "drawing": "c851ee5102666db0d362ceb12cfe7aaaabf543a69beb232b460d2d93cfb2ec56",
+   "sounds": 18,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "cf5c6c0b99311be04870ae7fec88ac55f9b5d6f0fd034d18c36e267ddbef1aae",
+   "tree": "af533f2202dab8cc82ba7c8a852ba0e068550f0e22b17598be3ce2f0640d95c2",
+   "controls": "d4a25791e47096bea47bd867a5df807b9d24afef5a9f700644136555ea6b4543",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-1 g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "00266f1c213decf8dc484d5d9c529ce2ab2109ec171b89b15770e8c3598a1079",
+   "sounds": 18,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "d3bb576f0f2210623fbb10fb279c097aabbd2f8c20660a6bf66d7ecf51a707e9",
+   "tree": "a2ec22ea66c9b677f69f0e22430696050fde584b5e05514814ea658c1be6aca0",
+   "controls": "d4a25791e47096bea47bd867a5df807b9d24afef5a9f700644136555ea6b4543",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-1 h watch optimal",
+   "banner": {
+    "text": "✓ Par! 5 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 2",
+   "drawing": "c851ee5102666db0d362ceb12cfe7aaaabf543a69beb232b460d2d93cfb2ec56",
+   "sounds": 31,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "cf5c6c0b99311be04870ae7fec88ac55f9b5d6f0fd034d18c36e267ddbef1aae",
+   "tree": "af533f2202dab8cc82ba7c8a852ba0e068550f0e22b17598be3ce2f0640d95c2",
+   "controls": "d4a25791e47096bea47bd867a5df807b9d24afef5a9f700644136555ea6b4543",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-2 a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "bdfb23836e668ae22586419c7fbba83431dbd5e91eaf972cc1cbefa82d9ec256",
+   "sounds": 31,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "4f3f91388f88d4d4cf2405d3e420c92ab3f325ee4d8f131579555de520d79d38",
+   "tree": "a2ec22ea66c9b677f69f0e22430696050fde584b5e05514814ea658c1be6aca0",
+   "controls": "aabe26b6fe952a1f9c287a7dd2d0f1a9a8f5d76d4c430fe18cee80bde86c941d",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-2 c refused move",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "bdfb23836e668ae22586419c7fbba83431dbd5e91eaf972cc1cbefa82d9ec256",
+   "sounds": 32,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8d56af20ecfbec013f6e8f8bad68579f4547a82d434f5cca1d365b7e47a7f7e6",
+   "tree": "055be762c8278d5693e8e19295775c113730b43f8ddc108617911ce81108dd52",
+   "controls": "fa74414452bd34b720cca8e16006b74d1e75cbc4da787994eeb8db664b14879b",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-2 d throw AS76",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "d42375e3aafc0352ecd089c5b88f5f33c30ca4f6725871848cd8da09532bb997",
+   "sounds": 33,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8d56af20ecfbec013f6e8f8bad68579f4547a82d434f5cca1d365b7e47a7f7e6",
+   "tree": "055be762c8278d5693e8e19295775c113730b43f8ddc108617911ce81108dd52",
+   "controls": "fa74414452bd34b720cca8e16006b74d1e75cbc4da787994eeb8db664b14879b",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-2 d throw AS76 again",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "bdfb23836e668ae22586419c7fbba83431dbd5e91eaf972cc1cbefa82d9ec256",
+   "sounds": 34,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8d56af20ecfbec013f6e8f8bad68579f4547a82d434f5cca1d365b7e47a7f7e6",
+   "tree": "055be762c8278d5693e8e19295775c113730b43f8ddc108617911ce81108dd52",
+   "controls": "fa74414452bd34b720cca8e16006b74d1e75cbc4da787994eeb8db664b14879b",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-2 d click (10, 10)",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "bdfb23836e668ae22586419c7fbba83431dbd5e91eaf972cc1cbefa82d9ec256",
+   "sounds": 34,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8d56af20ecfbec013f6e8f8bad68579f4547a82d434f5cca1d365b7e47a7f7e6",
+   "tree": "055be762c8278d5693e8e19295775c113730b43f8ddc108617911ce81108dd52",
+   "controls": "fa74414452bd34b720cca8e16006b74d1e75cbc4da787994eeb8db664b14879b",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-2 e step 1 pull AS71 2",
+   "banner": {
+    "text": "Pulled 2 from AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 5 · Joints 1",
+   "drawing": "d5ef897962269dde3de15184885f6f4d1055b612ad0ae7d1912c1dde16ae785a",
+   "sounds": 37,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "3b49560eb39242f98603e2e03b39fc8186066a0c8370855988202c2c81364f83",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "7cbda6a7f591ac1a14ab3063884a9818e2213a3945fed83742c526135a65d7d5",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-2 e step 2 pull AS72 2",
+   "banner": {
+    "text": "Pulled 2 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 5 · Joints 2",
+   "drawing": "96743d0ea6cd46df18285a71899133ec2d23642176dc39c8e33f8ae5de972f6c",
+   "sounds": 41,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "7db0caf730d38c61761f0246d61faa01f868b8d065375a31e91ff6b8c823d56c",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "1635d3071185bd4634f909a0e0a9a902ef5d9636f66379914ded7450d6b20063",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-2 e step 3 spot AS73 4",
+   "banner": {
+    "text": "The cars are where they belong, but AS73 is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE AS73 to finish the job.Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 3",
+   "drawing": "f8295599df92a02ff50e68e8aca45e4e09c37f957160b8d9200838e4f5535c51",
+   "sounds": 45,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "ba2ef5f209506fd91f8ab8866c6a2cf85708148837c813b05a8e619e7eac5198",
+   "tree": "bb02f7128579843354a4cb9580876f17d67c4c9eacacf1001a59375f959335d2",
+   "controls": "dea26c2eb08f845220212561ffffb867a3d063cef4dd789743a5755fcd26dea4",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-2 e step 4 secure AS73",
+   "banner": {
+    "text": "✓ Par! 5 moves — 3 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 3",
+   "drawing": "051ad40c41445875bf5279a66d1670bc6d9101989300a87da2407904569c5e07",
+   "sounds": 50,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8c7a0ab61e0f0ce4f0970650e699ca5e9ac31f8b542e570ce57aa7b0ec989cc9",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "0381d26617062ff2ff142013ea30145282dbaeee71e77c29094462db30b3524c",
+   "storage": "a1e492039e3a3e10b7634d5189e687a3c3c423b7898df07b876d97a40da1d563"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-2 g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "4a51ba0235a21fd8915d52225a67b790a0ba66b503987db7923817df221bc742",
+   "sounds": 50,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bb04dae9aeaad3638687bb86cc60aae498abe28da78a017376f156f4489d9b32",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "0381d26617062ff2ff142013ea30145282dbaeee71e77c29094462db30b3524c",
+   "storage": "a1e492039e3a3e10b7634d5189e687a3c3c423b7898df07b876d97a40da1d563"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-2 h watch optimal",
+   "banner": {
+    "text": "✓ Par! 5 moves — 3 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 3",
+   "drawing": "051ad40c41445875bf5279a66d1670bc6d9101989300a87da2407904569c5e07",
+   "sounds": 64,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8c7a0ab61e0f0ce4f0970650e699ca5e9ac31f8b542e570ce57aa7b0ec989cc9",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "0381d26617062ff2ff142013ea30145282dbaeee71e77c29094462db30b3524c",
+   "storage": "a1e492039e3a3e10b7634d5189e687a3c3c423b7898df07b876d97a40da1d563"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-3 a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "b72733c20659d452f719a9e4fb1b9ffb6415dbf7540e5aeeed39ea1936c5e88a",
+   "sounds": 64,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "82691bedd704b74abb344ab28cdd30e18ac5756026b7f3e87a0cb1795726ae40",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "102cd50942489d4de0659ba8d5571bbf091173dc2a4965d4a611a87597b37783",
+   "storage": "a1e492039e3a3e10b7634d5189e687a3c3c423b7898df07b876d97a40da1d563"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-3 c refused move",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "b72733c20659d452f719a9e4fb1b9ffb6415dbf7540e5aeeed39ea1936c5e88a",
+   "sounds": 65,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "c2660ece2bf67a0bb5785a12a04863f80390a12d331617aa08b8642692e0c703",
+   "tree": "46787dd0a3e0eefd2b0455814ca67e01266ea4af7bd740ffee118a60522ce6c6",
+   "controls": "2f6aba4b19b35aaf00e122afa1de120adb7318b80bfab6cdebc0f83d02aac598",
+   "storage": "a1e492039e3a3e10b7634d5189e687a3c3c423b7898df07b876d97a40da1d563"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-3 d throw AS76",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "579545ce329231b87600cdeec3a72e40fa22fecc6f23398ad7f015a05e2a1cd8",
+   "sounds": 66,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "c2660ece2bf67a0bb5785a12a04863f80390a12d331617aa08b8642692e0c703",
+   "tree": "46787dd0a3e0eefd2b0455814ca67e01266ea4af7bd740ffee118a60522ce6c6",
+   "controls": "2f6aba4b19b35aaf00e122afa1de120adb7318b80bfab6cdebc0f83d02aac598",
+   "storage": "a1e492039e3a3e10b7634d5189e687a3c3c423b7898df07b876d97a40da1d563"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-3 d throw AS76 again",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "b72733c20659d452f719a9e4fb1b9ffb6415dbf7540e5aeeed39ea1936c5e88a",
+   "sounds": 67,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "c2660ece2bf67a0bb5785a12a04863f80390a12d331617aa08b8642692e0c703",
+   "tree": "46787dd0a3e0eefd2b0455814ca67e01266ea4af7bd740ffee118a60522ce6c6",
+   "controls": "2f6aba4b19b35aaf00e122afa1de120adb7318b80bfab6cdebc0f83d02aac598",
+   "storage": "a1e492039e3a3e10b7634d5189e687a3c3c423b7898df07b876d97a40da1d563"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-3 d click (10, 10)",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "b72733c20659d452f719a9e4fb1b9ffb6415dbf7540e5aeeed39ea1936c5e88a",
+   "sounds": 67,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "c2660ece2bf67a0bb5785a12a04863f80390a12d331617aa08b8642692e0c703",
+   "tree": "46787dd0a3e0eefd2b0455814ca67e01266ea4af7bd740ffee118a60522ce6c6",
+   "controls": "2f6aba4b19b35aaf00e122afa1de120adb7318b80bfab6cdebc0f83d02aac598",
+   "storage": "a1e492039e3a3e10b7634d5189e687a3c3c423b7898df07b876d97a40da1d563"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-3 e step 1 pull AS72 3",
+   "banner": {
+    "text": "Pulled 3 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 5 · Joints 1",
+   "drawing": "36a21c06439bc213c4cf3211ba3e5d3f422443f6b792ab2e37cd75e149526d26",
+   "sounds": 70,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "56d96e51723a22652236e6382261f4ece6b47d1eb405761a3f43620755f144c6",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "ac8d9d8b145b72225edeaf23c542a5b661be0b6fcdf2aae1ce5a8fefb2434184",
+   "storage": "a1e492039e3a3e10b7634d5189e687a3c3c423b7898df07b876d97a40da1d563"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-3 e step 2 pull AS76 3",
+   "banner": {
+    "text": "Pulled 3 from AS76.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 5 · Joints 2",
+   "drawing": "bbf87d268c2a51150fe39be17a173a55338b8b5341eeb6b3ec6ebc8bbd732dab",
+   "sounds": 74,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "f5edb8073f597608be6d830abf8d586f172018905c858affbf166854ffe80a68",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "3643fe599f5a3f54eaef9cab4d5acd05d0c0ff133a6c7cd4ebc3a0d3cae70e7f",
+   "storage": "a1e492039e3a3e10b7634d5189e687a3c3c423b7898df07b876d97a40da1d563"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-3 e step 3 spot AS71 6",
+   "banner": {
+    "text": "The cars are where they belong, but AS71 is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE AS71 to finish the job.Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 2",
+   "drawing": "06c0eced149edec191dee0d61dc31e89d4990349d599705952ed955b748ddda0",
+   "sounds": 77,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "04efe6f6f682ef3234dac947e40cb2d0a255dac7d6631d11c01f0e09c3119904",
+   "tree": "bb02f7128579843354a4cb9580876f17d67c4c9eacacf1001a59375f959335d2",
+   "controls": "796ac27539029fb8a75a8734c2904b0f0d62ac92072e064ddcf6be01cc069109",
+   "storage": "a1e492039e3a3e10b7634d5189e687a3c3c423b7898df07b876d97a40da1d563"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-3 e step 4 secure AS71",
+   "banner": {
+    "text": "✓ Par! 5 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 2",
+   "drawing": "11c695fadd02618e9fbf054031c6f1c0fcc896aa34210a31df08a75763fe23ca",
+   "sounds": 82,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "cbf4527afb53171b42fca79171a13afe4ee4aa80694f25995974a2887b120c9c",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "1cb648f87fb01a2ede0efa05801f68ba955afaa7fd6e5835b46ab9e2b9145fae",
+   "storage": "717b3e79575b12a16689ff948679c4b148b4ee572ea156fca2c5f1bf5832853b"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-3 g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "852d91fa1b09c73052807bd037084970b45a621149a8ceb61f0aa8816f0d5b6a",
+   "sounds": 82,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "ab934b62b28640584b21981ed06466fe02a7a4153e844266a1a14242ee64a215",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "1cb648f87fb01a2ede0efa05801f68ba955afaa7fd6e5835b46ab9e2b9145fae",
+   "storage": "717b3e79575b12a16689ff948679c4b148b4ee572ea156fca2c5f1bf5832853b"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-3 h watch optimal",
+   "banner": {
+    "text": "✓ Par! 5 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 2",
+   "drawing": "11c695fadd02618e9fbf054031c6f1c0fcc896aa34210a31df08a75763fe23ca",
+   "sounds": 95,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "cbf4527afb53171b42fca79171a13afe4ee4aa80694f25995974a2887b120c9c",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "1cb648f87fb01a2ede0efa05801f68ba955afaa7fd6e5835b46ab9e2b9145fae",
+   "storage": "717b3e79575b12a16689ff948679c4b148b4ee572ea156fca2c5f1bf5832853b"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-4 a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "81378a875481edf49da2b65a111d7b21ab310cdfdf114b00491c14d1a8b6d410",
+   "sounds": 95,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "d0730a223e037b208c732bf3d340465d4751bf71758bf667c5a730fbede4a6dd",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "758218bea15b337878d38f8c0cb90964fce8bc4cfc0738318fd59a323ec59210",
+   "storage": "717b3e79575b12a16689ff948679c4b148b4ee572ea156fca2c5f1bf5832853b"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-4 c refused move",
+   "banner": {
+    "text": "AS75 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "81378a875481edf49da2b65a111d7b21ab310cdfdf114b00491c14d1a8b6d410",
+   "sounds": 96,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "98fa1b022e98d2b5a742606d30418168121daee4b9a0170d93c0d550b4746e4d",
+   "tree": "055be762c8278d5693e8e19295775c113730b43f8ddc108617911ce81108dd52",
+   "controls": "fc5b9b77a3b1846db555bf062a780281061ac3f0284cdb6e410fa46763824451",
+   "storage": "717b3e79575b12a16689ff948679c4b148b4ee572ea156fca2c5f1bf5832853b"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-4 d throw AS76",
+   "banner": {
+    "text": "AS75 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "3bf46edf025402aa70b3a35c95de23623aa1471e274fc0f4d9615a6e251aeb95",
+   "sounds": 97,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "98fa1b022e98d2b5a742606d30418168121daee4b9a0170d93c0d550b4746e4d",
+   "tree": "055be762c8278d5693e8e19295775c113730b43f8ddc108617911ce81108dd52",
+   "controls": "fc5b9b77a3b1846db555bf062a780281061ac3f0284cdb6e410fa46763824451",
+   "storage": "717b3e79575b12a16689ff948679c4b148b4ee572ea156fca2c5f1bf5832853b"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-4 d throw AS76 again",
+   "banner": {
+    "text": "AS75 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "81378a875481edf49da2b65a111d7b21ab310cdfdf114b00491c14d1a8b6d410",
+   "sounds": 98,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "98fa1b022e98d2b5a742606d30418168121daee4b9a0170d93c0d550b4746e4d",
+   "tree": "055be762c8278d5693e8e19295775c113730b43f8ddc108617911ce81108dd52",
+   "controls": "fc5b9b77a3b1846db555bf062a780281061ac3f0284cdb6e410fa46763824451",
+   "storage": "717b3e79575b12a16689ff948679c4b148b4ee572ea156fca2c5f1bf5832853b"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-4 d click (10, 10)",
+   "banner": {
+    "text": "AS75 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "81378a875481edf49da2b65a111d7b21ab310cdfdf114b00491c14d1a8b6d410",
+   "sounds": 98,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "98fa1b022e98d2b5a742606d30418168121daee4b9a0170d93c0d550b4746e4d",
+   "tree": "055be762c8278d5693e8e19295775c113730b43f8ddc108617911ce81108dd52",
+   "controls": "fc5b9b77a3b1846db555bf062a780281061ac3f0284cdb6e410fa46763824451",
+   "storage": "717b3e79575b12a16689ff948679c4b148b4ee572ea156fca2c5f1bf5832853b"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-4 e step 1 pull AS75 2",
+   "banner": {
+    "text": "Pulled 2 from AS75.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 7 · Joints 1",
+   "drawing": "815fb36e30a3d1ca4384f0afb2bb6e1fa673bac907ed38c240446456e3d36cc9",
+   "sounds": 101,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "17d53d6cb54101f0277b1d30010e1e38d1f4022dec7ea6b3f54805f22c583d9d",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "2aceacdeb05f9beb5a411837424420034e57d4b674d1502c308f51ee4fc0fa61",
+   "storage": "717b3e79575b12a16689ff948679c4b148b4ee572ea156fca2c5f1bf5832853b"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-4 e step 2 pull AS72 2",
+   "banner": {
+    "text": "Pulled 2 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 7 · Joints 2",
+   "drawing": "64165dd650b46c91e1cf02d6c39e72f3b775a3843230ab73dd47b32ca7d0a237",
+   "sounds": 105,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "86cf1fe132dd092eb8fb5922f51f6129981de2b74305eab8cc991bf98f96da71",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "0579347fbf678001559e5913131e961a65c5701d43ba977d0e9caef8a721ea84",
+   "storage": "717b3e79575b12a16689ff948679c4b148b4ee572ea156fca2c5f1bf5832853b"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-4 e step 3 pull AS71 2",
+   "banner": {
+    "text": "Pulled 2 from AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 6 / par 7 · Joints 3",
+   "drawing": "21367155e7875d757ad7b5097ea3927384eaeba41cf3204f4fdb883b11c12870",
+   "sounds": 109,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "86de839afa5d455a043c11012a051e046af0dc8b4000aa1e4ba10a449ce33c1e",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "3958b772c60f6d496578ef4a542896dc9bfe7b4b1b4a5fea6faac6469f6ef0c2",
+   "storage": "717b3e79575b12a16689ff948679c4b148b4ee572ea156fca2c5f1bf5832853b"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-4 e step 4 spot AS74 6",
+   "banner": {
+    "text": "The cars are where they belong, but AS74 is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE AS74 to finish the job.Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 7 / par 7 · Joints 3",
+   "drawing": "3f2e133798809b3333c6e503dc33405bf31bf828126c1e55cfdf84de2575768b",
+   "sounds": 112,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "9892738fbeaf8142e24e0fc9b7be1bff004f7ef9cdd6869d2ebebd44d3c8bd88",
+   "tree": "bb02f7128579843354a4cb9580876f17d67c4c9eacacf1001a59375f959335d2",
+   "controls": "318f8d9ba543cd23b52859f86cc2d53868348e3d6bd1989c72457882384f5ba8",
+   "storage": "717b3e79575b12a16689ff948679c4b148b4ee572ea156fca2c5f1bf5832853b"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-4 e step 5 secure AS74",
+   "banner": {
+    "text": "✓ Par! 7 moves — 3 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 7 / par 7 · Joints 3",
+   "drawing": "7395b8ac0df70ab3d3a0faab527dd34719667b994ed84e01f15692c2d5d4c09e",
+   "sounds": 117,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "e5da40688815c22964fd96c54ee5fb13c23112ce70de9162e3bd906bbc6d6f84",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "415c900211dae2011e585f363527b0a77f1d5a9fa19e09808b1f7d5a191369b4",
+   "storage": "9bcbf1cb5de65b595f2235dcdba4fb862ae70e03ab9e9f7430418409a0d5cc43"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-4 g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "7fb5a46a965db58e368f8a7bf5de1b5eae9a4f111fae5697c14e608ba6cd66b6",
+   "sounds": 117,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "7c84c472104a09746d926836029c18407a65c49527300199f077193b738def7e",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "415c900211dae2011e585f363527b0a77f1d5a9fa19e09808b1f7d5a191369b4",
+   "storage": "9bcbf1cb5de65b595f2235dcdba4fb862ae70e03ab9e9f7430418409a0d5cc43"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p0-4 h watch optimal",
+   "banner": {
+    "text": "✓ Par! 7 moves — 3 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 7 / par 7 · Joints 3",
+   "drawing": "7395b8ac0df70ab3d3a0faab527dd34719667b994ed84e01f15692c2d5d4c09e",
+   "sounds": 133,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "e5da40688815c22964fd96c54ee5fb13c23112ce70de9162e3bd906bbc6d6f84",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "415c900211dae2011e585f363527b0a77f1d5a9fa19e09808b1f7d5a191369b4",
+   "storage": "9bcbf1cb5de65b595f2235dcdba4fb862ae70e03ab9e9f7430418409a0d5cc43"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-dig a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "cbdf28c773c2721af3b0729f07122a849f190dc03c66d05fdb494a2777720b8c",
+   "sounds": 133,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "fb35b11d40e816a5d103b95ac8a8e741b92b3048cb25a4f02e89c7c5a1860ae6",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "dff3f814075220e9ba5e579407f8ed5650c9468f32c3592c2398ab6baa4a8c7d",
+   "storage": "9bcbf1cb5de65b595f2235dcdba4fb862ae70e03ab9e9f7430418409a0d5cc43"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-dig c refused move",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "cbdf28c773c2721af3b0729f07122a849f190dc03c66d05fdb494a2777720b8c",
+   "sounds": 134,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8afb539093d2eb07f5a19a5240061f7e3abd7d2313b04289ade81edc2a577182",
+   "tree": "ad6cc0b0e289595b3e413f3aeb3ec6f55baccb807fe3feac31d6708a3917d85b",
+   "controls": "bd5a2faea2c84ef639d87e9ef13ef20070647ced6e023e1ff4436bde102b1245",
+   "storage": "9bcbf1cb5de65b595f2235dcdba4fb862ae70e03ab9e9f7430418409a0d5cc43"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-dig d throw AS76",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "aa2d077a85bbd434245f3ed98b735b4fee9c23d9e394345440005ce2856a1bb5",
+   "sounds": 135,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8afb539093d2eb07f5a19a5240061f7e3abd7d2313b04289ade81edc2a577182",
+   "tree": "ad6cc0b0e289595b3e413f3aeb3ec6f55baccb807fe3feac31d6708a3917d85b",
+   "controls": "bd5a2faea2c84ef639d87e9ef13ef20070647ced6e023e1ff4436bde102b1245",
+   "storage": "9bcbf1cb5de65b595f2235dcdba4fb862ae70e03ab9e9f7430418409a0d5cc43"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-dig d throw AS76 again",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "cbdf28c773c2721af3b0729f07122a849f190dc03c66d05fdb494a2777720b8c",
+   "sounds": 136,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8afb539093d2eb07f5a19a5240061f7e3abd7d2313b04289ade81edc2a577182",
+   "tree": "ad6cc0b0e289595b3e413f3aeb3ec6f55baccb807fe3feac31d6708a3917d85b",
+   "controls": "bd5a2faea2c84ef639d87e9ef13ef20070647ced6e023e1ff4436bde102b1245",
+   "storage": "9bcbf1cb5de65b595f2235dcdba4fb862ae70e03ab9e9f7430418409a0d5cc43"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-dig d click (10, 10)",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "cbdf28c773c2721af3b0729f07122a849f190dc03c66d05fdb494a2777720b8c",
+   "sounds": 136,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8afb539093d2eb07f5a19a5240061f7e3abd7d2313b04289ade81edc2a577182",
+   "tree": "ad6cc0b0e289595b3e413f3aeb3ec6f55baccb807fe3feac31d6708a3917d85b",
+   "controls": "bd5a2faea2c84ef639d87e9ef13ef20070647ced6e023e1ff4436bde102b1245",
+   "storage": "9bcbf1cb5de65b595f2235dcdba4fb862ae70e03ab9e9f7430418409a0d5cc43"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-dig e step 1 pull AS71 5",
+   "banner": {
+    "text": "Pulled 5 from AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 7 · Joints 1",
+   "drawing": "731fd5726854e1cff5326e693239e95de668e1a9e4abc376be6de0d7bc75ba9d",
+   "sounds": 139,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "ed52ac8b05379c26ff4897ace8ffc0558111154187fdf0c3c2607a05fb98d523",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "6f30cd976589dfa1f85749654bda31645700f78802e1f57a64461b17a0718ee3",
+   "storage": "9bcbf1cb5de65b595f2235dcdba4fb862ae70e03ab9e9f7430418409a0d5cc43"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-dig e step 2 pull AS73 2",
+   "banner": {
+    "text": "Pulled 2 from AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 7 · Joints 2",
+   "drawing": "2c987339fc21733ab0793f183d317b03704e96b0509d7341bc38fcc00f9d74a0",
+   "sounds": 143,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "1d35ff908ac63e37036d00c255a052286058da6ad05afda5d02f62687651891e",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "23bb3616083cf5f8abe3293115aa5d340b6d3240c4bb53d59494e4a5e7e78261",
+   "storage": "9bcbf1cb5de65b595f2235dcdba4fb862ae70e03ab9e9f7430418409a0d5cc43"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-dig e step 3 spot AS75 5",
+   "banner": {
+    "text": "Spotted 5 to AS75.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 5 / par 7 · Joints 2",
+   "drawing": "2893948769f09d20cc24045bc1b251ff2b3cc439a73a6f0c24e336cfb442bf21",
+   "sounds": 146,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "ebf5a6dd47caebd650ea6b7e069edc30f893882b7dccef4f0da1dfa3f860aac0",
+   "tree": "12f7764026f5b4086cfa152239091a05ecc5f219a6300531a76324314cb1a76e",
+   "controls": "fcc213a09b25e87448d6a62c6dfc92a808285bab7763250378cb9347a1f49b93",
+   "storage": "9bcbf1cb5de65b595f2235dcdba4fb862ae70e03ab9e9f7430418409a0d5cc43"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-dig e step 4 spot AS71 2",
+   "banner": {
+    "text": "The cars are where they belong, but AS75 is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE AS75 to finish the job.Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 7 / par 7 · Joints 2",
+   "drawing": "ae8a669a4b23afa72844f4a6e98e6545c2ec5b2dea80b488c8f03daf94197217",
+   "sounds": 149,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "d0dc7056cf961020e29661a76c85c65ca18967dfa7e368e877a0742e18946123",
+   "tree": "bb02f7128579843354a4cb9580876f17d67c4c9eacacf1001a59375f959335d2",
+   "controls": "3eae01009386dead247358042506f359a42664f155b6d25899df1f32e0bc1a93",
+   "storage": "9bcbf1cb5de65b595f2235dcdba4fb862ae70e03ab9e9f7430418409a0d5cc43"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-dig e step 5 secure AS75",
+   "banner": {
+    "text": "✓ Par! 7 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 7 / par 7 · Joints 2",
+   "drawing": "61533f9906e8601f6ed0afdda9682c265e1a386d4d32bbdd39dbb3c085f24774",
+   "sounds": 156,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "f98c053a6991140d0e47c86819792e2f97eedfc177e7dc73ace51cbc8ee42981",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "445c2e3061116084d670115a43f545cda58c6656b8636f5b652b92f82d355611",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-dig g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "daf408a81147cb75c58f26795ee7649d0696172194df64c30a98f5cb601a574d",
+   "sounds": 156,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "5eebeb332ed9a6b20c09702d07bc18c3391b57fc1ddfa83ded07577291cbaaff",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "445c2e3061116084d670115a43f545cda58c6656b8636f5b652b92f82d355611",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-dig h watch optimal",
+   "banner": {
+    "text": "✓ Par! 7 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 7 / par 7 · Joints 2",
+   "drawing": "08a5eb7fea3c8798267a7ce50f027d406b29f9c18964f870d9246c5fa38a7857",
+   "sounds": 171,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "f98c053a6991140d0e47c86819792e2f97eedfc177e7dc73ace51cbc8ee42981",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "445c2e3061116084d670115a43f545cda58c6656b8636f5b652b92f82d355611",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "2425c8f5927aa1aa03291766c2449295de3a3d1a90a65814c60b744c654eeddc",
+   "sounds": 171,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "6004a4a4a8225868a09df238b7e3388ab16e2050ee61c4a6664b463edb27a33b",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "5e4b973b0df0ee34f66eb4900db10404eab97ed1d7f32bbf96ad6b72d0278399",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear c refused move",
+   "banner": {
+    "text": "AS74 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "2425c8f5927aa1aa03291766c2449295de3a3d1a90a65814c60b744c654eeddc",
+   "sounds": 172,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "4450bf2a65263550d89cb2036951e52a9667c6a29fe70aea755489fa53ec0d88",
+   "tree": "46787dd0a3e0eefd2b0455814ca67e01266ea4af7bd740ffee118a60522ce6c6",
+   "controls": "37d2d3e5009b585ae0b1554faa9ef4acc1c76ee500d1cac9d3af5f7442129b2d",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear d throw AS76",
+   "banner": {
+    "text": "AS74 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "d92c8cfae6e0b172121d38325b7dbc3c5038bc4d17bc6a0236e2940ce3dcab38",
+   "sounds": 173,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "4450bf2a65263550d89cb2036951e52a9667c6a29fe70aea755489fa53ec0d88",
+   "tree": "46787dd0a3e0eefd2b0455814ca67e01266ea4af7bd740ffee118a60522ce6c6",
+   "controls": "37d2d3e5009b585ae0b1554faa9ef4acc1c76ee500d1cac9d3af5f7442129b2d",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear d throw AS76 again",
+   "banner": {
+    "text": "AS74 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "2425c8f5927aa1aa03291766c2449295de3a3d1a90a65814c60b744c654eeddc",
+   "sounds": 174,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "4450bf2a65263550d89cb2036951e52a9667c6a29fe70aea755489fa53ec0d88",
+   "tree": "46787dd0a3e0eefd2b0455814ca67e01266ea4af7bd740ffee118a60522ce6c6",
+   "controls": "37d2d3e5009b585ae0b1554faa9ef4acc1c76ee500d1cac9d3af5f7442129b2d",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear d click (10, 10)",
+   "banner": {
+    "text": "AS74 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "2425c8f5927aa1aa03291766c2449295de3a3d1a90a65814c60b744c654eeddc",
+   "sounds": 174,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "4450bf2a65263550d89cb2036951e52a9667c6a29fe70aea755489fa53ec0d88",
+   "tree": "46787dd0a3e0eefd2b0455814ca67e01266ea4af7bd740ffee118a60522ce6c6",
+   "controls": "37d2d3e5009b585ae0b1554faa9ef4acc1c76ee500d1cac9d3af5f7442129b2d",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear e step 1 pull AS74 3",
+   "banner": {
+    "text": "Pulled 3 from AS74.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 9 · Joints 1",
+   "drawing": "3a6fa74a14f88dac1f06e52301b9d907316d22edb975e0f7dda2ac2409f039ad",
+   "sounds": 177,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "06ab866f4b656953d1e30236973d317364f0371706b75c6c35ef804a9533c643",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "11f1097341f4b4fc1f3709bad5f5c91d06c028ebc46d8d20f26791ba1db553ed",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear e step 2 pull AS73 2",
+   "banner": {
+    "text": "Pulled 2 from AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 9 · Joints 2",
+   "drawing": "bd2d2e74f7e3a8003fb0189cbd0b5582574b4057a5b6d3702ae81609d624c2e9",
+   "sounds": 181,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "ced37321a40d5c53a84f2fa6aa8fabb03fb76621ed16fd5944f8427e63501b51",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "be626ce21737f3475dc74ca826b9d47424acb43290a68dbaabd45eab06b3417e",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear e step 3 pull AS72 2",
+   "banner": {
+    "text": "Pulled 2 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 6 / par 9 · Joints 3",
+   "drawing": "739b1f9d45d102474531f7ecb341ea4d23e53cc6a8886da20d40121a6bd81e5b",
+   "sounds": 185,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "33f88d12dc2e001ce2219e0ca98db394b523c032ce3d3219b72417e7ca7d864e",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "895574dfd6af17625345ecee4a724c114c57f620cfd35548593861ca435fbc0a",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear e step 4 spot AS74 4",
+   "banner": {
+    "text": "Spotted 4 to AS74.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 7 / par 9 · Joints 3",
+   "drawing": "f4f9cae9dab3f02244a87296125227a48ca54950f9d1f7c25714ba184808e77f",
+   "sounds": 188,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "f01ad3049c1897018a61d5e09f594314ba80229bda45d47e37be995898627987",
+   "tree": "b95f6e7948b6b1b4d8a86d5c606793b793a3376fbfde6ac7f22201161b96f823",
+   "controls": "4b93bd749925ad1c982bab4877085d4a790b1fe01c7c975cd4fbec30b8afa3b0",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear e step 5 spot AS76 3",
+   "banner": {
+    "text": "The cars are where they belong, but AS74 is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE AS74 to finish the job.Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 9 / par 9 · Joints 3",
+   "drawing": "2928c2aa82720b420e40ca82fd713db5ba20a32b0851788cafd2963b08fa55aa",
+   "sounds": 191,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "764a0901602d5ba293d9d9ff7c4617b274f46a89d309fd1e82cf16f98aa27913",
+   "tree": "bb02f7128579843354a4cb9580876f17d67c4c9eacacf1001a59375f959335d2",
+   "controls": "6636be8965c24b8435ff961b8f7a23499d0fff0e672bbc3d7f2571ddf625c8c7",
+   "storage": "8f04c3d3bf2b86c03072210977fc0a87be6e61e434bfc76eae679d3a863135c4"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear e step 6 secure AS74",
+   "banner": {
+    "text": "✓ Par! 9 moves — 3 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 9 / par 9 · Joints 3",
+   "drawing": "ba48eb3d46a44b07c7ee627fa1e10ce4eefe888e446792ae4f16e7438d2e98b5",
+   "sounds": 198,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "b7bbb88a6665e77fbba7d15e9d8a2dde368eed4957a2b002464302b8a12bc319",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "8e4327428f29d07a47ec66254322060b367bd965a7740e029063ed7f20038c3d",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "b76fdcd6e9fd0354cc55f7d4d6a5332f0829d4ce86c2a5df77397eb74e6e57ba",
+   "sounds": 198,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "4c48cd98508d8f498d8c8c5a08cd238785f9ffe2f0d959774b71424bd4d08c7c",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "8e4327428f29d07a47ec66254322060b367bd965a7740e029063ed7f20038c3d",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-clear h watch optimal",
+   "banner": {
+    "text": "✓ Par! 9 moves — 3 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 9 / par 9 · Joints 3",
+   "drawing": "03513b281e5ce2b29bee09f7577e8aa34eb8ab9489df4cd41aa2ec29ecbf657d",
+   "sounds": 216,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "b7bbb88a6665e77fbba7d15e9d8a2dde368eed4957a2b002464302b8a12bc319",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "8e4327428f29d07a47ec66254322060b367bd965a7740e029063ed7f20038c3d",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "f5d659f1b92cba715ca7d5192d5c68ba7b95afd99e1b830d21e8ea48a724115c",
+   "sounds": 216,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "d90a0621a72ec554a046871ce9f06f16b0de9fc291ef3477912e5c7de1d0a026",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "9f70b4796a194349ef5fa2d2ef8aeb5a1741333dcc77cee9eab64345443d9697",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy c refused move",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "f5d659f1b92cba715ca7d5192d5c68ba7b95afd99e1b830d21e8ea48a724115c",
+   "sounds": 217,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "331d037f90532560ac966f65d76bcd13e0618c9310f1a7021c15389b1af0d02c",
+   "tree": "055be762c8278d5693e8e19295775c113730b43f8ddc108617911ce81108dd52",
+   "controls": "309e283e52e0663b273ceab5e07f5711668db06fe06b289a72db9390c7263394",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy d throw AS76",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "19bf17a612e04fbaf71680d64d3e9d345042cf2652cb33f23ba95ffbb3ce27b1",
+   "sounds": 218,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "331d037f90532560ac966f65d76bcd13e0618c9310f1a7021c15389b1af0d02c",
+   "tree": "055be762c8278d5693e8e19295775c113730b43f8ddc108617911ce81108dd52",
+   "controls": "309e283e52e0663b273ceab5e07f5711668db06fe06b289a72db9390c7263394",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy d throw AS76 again",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "f5d659f1b92cba715ca7d5192d5c68ba7b95afd99e1b830d21e8ea48a724115c",
+   "sounds": 219,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "331d037f90532560ac966f65d76bcd13e0618c9310f1a7021c15389b1af0d02c",
+   "tree": "055be762c8278d5693e8e19295775c113730b43f8ddc108617911ce81108dd52",
+   "controls": "309e283e52e0663b273ceab5e07f5711668db06fe06b289a72db9390c7263394",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy d click (10, 10)",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "f5d659f1b92cba715ca7d5192d5c68ba7b95afd99e1b830d21e8ea48a724115c",
+   "sounds": 219,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "331d037f90532560ac966f65d76bcd13e0618c9310f1a7021c15389b1af0d02c",
+   "tree": "055be762c8278d5693e8e19295775c113730b43f8ddc108617911ce81108dd52",
+   "controls": "309e283e52e0663b273ceab5e07f5711668db06fe06b289a72db9390c7263394",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy e step 1 pull AS72 2",
+   "banner": {
+    "text": "Pulled 2 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 9 · Joints 1",
+   "drawing": "d7fb8611baede6214cbf476242c1a100c39665f1fac02fc8f65bc150cdaea8c7",
+   "sounds": 222,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "105aa4dc278b71749a8fb12b56be90ad01e154170d33d760e37b8c183b467464",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "65f2d8d0b92c4b7a18be5cfaa2d9aee5a02e52efc0c7e43541d384750cf21145",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy e step 2 pull AS71 1",
+   "banner": {
+    "text": "Pulled 1 from AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 9 · Joints 2",
+   "drawing": "3c408d55d9e1596a949ceda0b52ba3277898d61d874ad63b9cf9ea27fa02e3f3",
+   "sounds": 226,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "28fa8c30214c35d83ddec893535773acab6be8a502c78168403c13ada571234f",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "dc6ec1393ac83889abac141277b7ddb94f9d1843521e5d9db0797f64cf8b4001",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy e step 3 pull AS73 2",
+   "banner": {
+    "text": "Pulled 2 from AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 6 / par 9 · Joints 3",
+   "drawing": "7dfedb112a98bd68507a943e3cefecfe2fcc34ca7b90c6eeca77788f73b9dfdd",
+   "sounds": 230,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "52151be8d4ca0a79d474579b296cadbac5befd867d6c16635590c9291d50ce1f",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "62a6e233b81d0508882de1dc21c246fcc8da4c7fab029d511abc5e946ab6fb82",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy e step 4 spot AS75 4",
+   "banner": {
+    "text": "Spotted 4 to AS75.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 7 / par 9 · Joints 3",
+   "drawing": "1ec9da9907f4aa7ea8e33f9fcd5c9e9dfce7a14a1b1017f4e8cedf21bc432da5",
+   "sounds": 233,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "85fc35591f0f6c6c2da8a16c0d3c8288729d640b7da0d8b262e133c3e67deec8",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "4ce7e79f0e8a12c70d1f6b6e15dcdec99394face4558f9adba1b9da5bcd0ffcc",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy e step 5 spot AS72 1",
+   "banner": {
+    "text": "The cars are where they belong, but AS75 is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE AS75 to finish the job.Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 9 / par 9 · Joints 3",
+   "drawing": "38ae1ff4e3ec08a27b2fdaadc8091e526e21d6109ac2b4b2f11d4b0bc833a815",
+   "sounds": 236,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "f405f2d88f85ab09f53b3f8193af28cbf189045a4470de780a6dbd1ecd64a1b5",
+   "tree": "bb02f7128579843354a4cb9580876f17d67c4c9eacacf1001a59375f959335d2",
+   "controls": "51bddc271bc29ef38d407e1f84c0f9f4c767a93273109ce9b0c8adc2f86a6eab",
+   "storage": "8ed9ec5f1edec742a2e9ebbfb33db1cab7743130df19e1eb08ca4e65c28d23b9"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy e step 6 secure AS75",
+   "banner": {
+    "text": "✓ Par! 9 moves — 3 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 9 / par 9 · Joints 3",
+   "drawing": "c653a1021cb0ed5ea328f62440769c8029d41b54e438fde640c5c32b4896e96a",
+   "sounds": 243,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "1b36f124366c084333015864d3067d7c2d0176761232ee0bc7583c47c2ca10f9",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "4480f07b19cc05ab6a190ef9a2f3148a0c43d22801cbe8280f7f44421f506caa",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "edf53ac5dfde7f42a7b063effcf9a0450f8e4e16a80fe06c5028cd797dae5645",
+   "sounds": 243,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "ae09cf3d1634014d38cf9946ffbd7c1c726bb9be29631545d05231d65551dcf5",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "4480f07b19cc05ab6a190ef9a2f3148a0c43d22801cbe8280f7f44421f506caa",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-messy h watch optimal",
+   "banner": {
+    "text": "✓ Par! 9 moves — 3 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 9 / par 9 · Joints 3",
+   "drawing": "fbd0515a7adea8080b3a6bc5b1b56a4fc703dd84351b8bbb15a3c21f52f9db5b",
+   "sounds": 261,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "1b36f124366c084333015864d3067d7c2d0176761232ee0bc7583c47c2ca10f9",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "4480f07b19cc05ab6a190ef9a2f3148a0c43d22801cbe8280f7f44421f506caa",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "6dd749b80e1cbe71ed84eee97b9017be3ec998e470494a716dd3863675af49c9",
+   "sounds": 261,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "7b5d5d251c23a6514468fab7a0b1b8a135ad9de6a226fc96c85c9007bccc7cad",
+   "tree": "abe8d7fa16ebb19e98b026f2667e2e8a57ee8c02fc251e6e57e3f0ef19802c91",
+   "controls": "2e2ed92a325e7e78d1a375b85475e846fbd2f07e3b8cebedf7968a5ff8ddcec3",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list b work before verify",
+   "banner": {
+    "text": "Verify the switch list first — flag the bad lines and certify the order.",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "6dd749b80e1cbe71ed84eee97b9017be3ec998e470494a716dd3863675af49c9",
+   "sounds": 262,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "b7bfb5c24b7e136b5ee2bb60afa832c76f104e77a19ec8074b2c38464221aea1",
+   "tree": "900ae4ef1d09658cd4fdb44cfa37e6739f3cb643b5c2d9f30f5ad21f3427263b",
+   "controls": "2e2ed92a325e7e78d1a375b85475e846fbd2f07e3b8cebedf7968a5ff8ddcec3",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list b certify, no line flagged",
+   "banner": {
+    "text": "Not so fast — AS75 has no CN 318044 — that car isn't where the list says.",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "6dd749b80e1cbe71ed84eee97b9017be3ec998e470494a716dd3863675af49c9",
+   "sounds": 263,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "239aed724b7903915529ad129ff224051cbf94c198656b442c4cb2322aca8d67",
+   "tree": "900ae4ef1d09658cd4fdb44cfa37e6739f3cb643b5c2d9f30f5ad21f3427263b",
+   "controls": "2e2ed92a325e7e78d1a375b85475e846fbd2f07e3b8cebedf7968a5ff8ddcec3",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list b flag line 0",
+   "banner": {
+    "text": "Not so fast — AS75 has no CN 318044 — that car isn't where the list says.",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "6dd749b80e1cbe71ed84eee97b9017be3ec998e470494a716dd3863675af49c9",
+   "sounds": 264,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "e6830917ef9283925b6254c9ca6fb5ea9f98de02fcbc32233cf0c037c0a6b8c1",
+   "tree": "9ced8391205a533227ae68663b0d2abd69b4b344cb5911850e37087c8c0a2917",
+   "controls": "e4a8e497d1005377e6a8af4507026c277ab6de020c38dba448c9a398d81a33d1",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list b certify, line 0 flagged",
+   "banner": {
+    "text": "Not so fast — read AS74 again — the number on the ground isn't BNSF 5512.",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "6dd749b80e1cbe71ed84eee97b9017be3ec998e470494a716dd3863675af49c9",
+   "sounds": 265,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "4386488bf4c3ad728a646723aa2857857ca73df978745815f7b5e59608675acd",
+   "tree": "9ced8391205a533227ae68663b0d2abd69b4b344cb5911850e37087c8c0a2917",
+   "controls": "e4a8e497d1005377e6a8af4507026c277ab6de020c38dba448c9a398d81a33d1",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list b flag line 1",
+   "banner": {
+    "text": "Not so fast — read AS74 again — the number on the ground isn't BNSF 5512.",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "6dd749b80e1cbe71ed84eee97b9017be3ec998e470494a716dd3863675af49c9",
+   "sounds": 266,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "6c551926b30912ac48dd0ff322d8b79cfcff83a026c07cc8dae3180de38abe07",
+   "tree": "d8619736455b3be0dac7f8c9726e1bf9e22cfe2ae50312619b17a62cdec94f02",
+   "controls": "952cfeea24c3aab925e75d4bdf0778ea29fba78ea0bebfbef52276900ca3a97e",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list b certify, verified",
+   "banner": {
+    "text": "✓ Order verified — now work the real cars onto AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "6dd749b80e1cbe71ed84eee97b9017be3ec998e470494a716dd3863675af49c9",
+   "sounds": 268,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "754cef80ac5645f4e9e3cadcb467f0bb5261f4f4801e5a237935a244a9b407de",
+   "tree": "d745fd021e17c5568e187133f2be72ea8d6661785e2edd2d42dd1f7eb00ee359",
+   "controls": "467d41022dd152e6c27bdaec61306c84f4e97fdd4545a90644e53fa458510afb",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list c refused move",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "6dd749b80e1cbe71ed84eee97b9017be3ec998e470494a716dd3863675af49c9",
+   "sounds": 269,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "5f262a37311d7c6b1a63530069831d2d7526b3a86ad8d69d39616f58c6250dd9",
+   "tree": "cde5612449cdacbc398d11ec86f8e1f2bcb5a9df3b631dd3e43ee4665cd44d8e",
+   "controls": "4c985799b7df3a3eca7a063e8b4ba017c68af3abdde4f361f69c363bc938b77f",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list d throw AS76",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "8e195e1f3202fc8b9d537bcf912b06028611234e15152ef91ae188e76c103072",
+   "sounds": 270,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "5f262a37311d7c6b1a63530069831d2d7526b3a86ad8d69d39616f58c6250dd9",
+   "tree": "cde5612449cdacbc398d11ec86f8e1f2bcb5a9df3b631dd3e43ee4665cd44d8e",
+   "controls": "4c985799b7df3a3eca7a063e8b4ba017c68af3abdde4f361f69c363bc938b77f",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list d throw AS76 again",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "6dd749b80e1cbe71ed84eee97b9017be3ec998e470494a716dd3863675af49c9",
+   "sounds": 271,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "5f262a37311d7c6b1a63530069831d2d7526b3a86ad8d69d39616f58c6250dd9",
+   "tree": "cde5612449cdacbc398d11ec86f8e1f2bcb5a9df3b631dd3e43ee4665cd44d8e",
+   "controls": "4c985799b7df3a3eca7a063e8b4ba017c68af3abdde4f361f69c363bc938b77f",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list d click (10, 10)",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "6dd749b80e1cbe71ed84eee97b9017be3ec998e470494a716dd3863675af49c9",
+   "sounds": 271,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "5f262a37311d7c6b1a63530069831d2d7526b3a86ad8d69d39616f58c6250dd9",
+   "tree": "cde5612449cdacbc398d11ec86f8e1f2bcb5a9df3b631dd3e43ee4665cd44d8e",
+   "controls": "4c985799b7df3a3eca7a063e8b4ba017c68af3abdde4f361f69c363bc938b77f",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list e step 1 pull AS71 1",
+   "banner": {
+    "text": "Pulled 1 from AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 5 · Joints 1",
+   "drawing": "169bbf76ea2764e3db60318d51b614c19517d56a042220a431fa73a909e91044",
+   "sounds": 274,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "93f772d23b56776675c407e161dc2acd6e4f3cbee5f817e20926d41e0c28f45c",
+   "tree": "24f04306a410f9b9e88168daa5f50d1a505004819d566b1fd22b1f196e0e61cd",
+   "controls": "365cd3889fa2333324521dead17705eb524704a7850faa26536e718231990123",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list e step 2 pull AS74 1",
+   "banner": {
+    "text": "Pulled 1 from AS74.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 5 · Joints 2",
+   "drawing": "696078f181d95742292e5a676d3d19a5dd1737ab619254b1abba5ec7ab08aa67",
+   "sounds": 278,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "a8e9d01c437ab8e41060119736db81facad55164ad513a1ffcd04b10b54ded2f",
+   "tree": "24f04306a410f9b9e88168daa5f50d1a505004819d566b1fd22b1f196e0e61cd",
+   "controls": "5e3ac5716e97ac81f7bb03e01e519bc4a5d598a0b5986a7778b7ab224749679c",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list e step 3 spot AS73 2",
+   "banner": {
+    "text": "The cars are where they belong, but AS73 is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE AS73 to finish the job.Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 2",
+   "drawing": "21d017d1c33976d5cb9db22592b9ea8b1dbfb0f09137a4904c7ee5b582155ed2",
+   "sounds": 281,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "e626245df161647ca3e6af0f90572e05bb452d3521b86e59ae90e8bd5deeb063",
+   "tree": "4acacb24ceb5cf0659fca07822240644cb1f3ea49c15cbc298ed14c665579440",
+   "controls": "a930a0ac0f8569b7718de15935e1172509d2d30300ab72a749c19009a4c77902",
+   "storage": "490e2371b29537703c6ff0b7b24c3806357e5583d6ec9dadf0554490649bd249"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list e step 4 secure AS73",
+   "banner": {
+    "text": "✓ Par! 5 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 2",
+   "drawing": "9123c02c34d30b844788fd96f6ade9dc604a6a6176642a0d7f64cb5cc42f86d0",
+   "sounds": 286,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bbbef8c3413e75133fe2d3379af7b6799ce8d9ea1b86666be86697f62311a413",
+   "tree": "d745fd021e17c5568e187133f2be72ea8d6661785e2edd2d42dd1f7eb00ee359",
+   "controls": "41ba3d13d9e2b7f27f46fb82c93b467bdb54d59153228d5460b4811ec2d63c6b",
+   "storage": "747d1059d2ef3847f691dbdcb8a6f4513c2f3412582ac0d747cbb7a248964a31"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "6dd749b80e1cbe71ed84eee97b9017be3ec998e470494a716dd3863675af49c9",
+   "sounds": 286,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "a74696b92451d6fd2871235c131e98f656808eb75f7a7cf1a00aa976c39cc35d",
+   "tree": "abe8d7fa16ebb19e98b026f2667e2e8a57ee8c02fc251e6e57e3f0ef19802c91",
+   "controls": "c824cf7ff4456c51a8e7d5f86985664088e2ccac151b0a9690d880f8946f5c81",
+   "storage": "747d1059d2ef3847f691dbdcb8a6f4513c2f3412582ac0d747cbb7a248964a31"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-list h watch optimal",
+   "banner": {
+    "text": "✓ Par! 5 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 2",
+   "drawing": "9123c02c34d30b844788fd96f6ade9dc604a6a6176642a0d7f64cb5cc42f86d0",
+   "sounds": 299,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bbbef8c3413e75133fe2d3379af7b6799ce8d9ea1b86666be86697f62311a413",
+   "tree": "d745fd021e17c5568e187133f2be72ea8d6661785e2edd2d42dd1f7eb00ee359",
+   "controls": "41ba3d13d9e2b7f27f46fb82c93b467bdb54d59153228d5460b4811ec2d63c6b",
+   "storage": "747d1059d2ef3847f691dbdcb8a6f4513c2f3412582ac0d747cbb7a248964a31"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-kick a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 3 · Joints 0",
+   "drawing": "203d49a6afdf0b4600eef058b6fd24134c0b1beb2176b564d20f00cf35a0837d",
+   "sounds": 299,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "93cd6c2e10cbb06282770de861bd43f66b9abb71e1d17c26b9815545e1ed51c2",
+   "tree": "2abee9d91856f58d42485895d1f7e53e2342abe8b8d3670bd2d678d8c2f68f3c",
+   "controls": "42a52efc5093f836444deab5ba95ac47ceedbd561ff2902f91df0ae42e577c7c",
+   "storage": "747d1059d2ef3847f691dbdcb8a6f4513c2f3412582ac0d747cbb7a248964a31"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-kick c refused move",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 3 · Joints 0",
+   "drawing": "203d49a6afdf0b4600eef058b6fd24134c0b1beb2176b564d20f00cf35a0837d",
+   "sounds": 300,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "1da52db43357b63510a1466b3114290b651e1f31e5e138c2862af18e3ce51371",
+   "tree": "f5ac77c2de3c973b54cba54b89473dbe92f54521c92c1287e55a5cbfc2a3c64b",
+   "controls": "1ff90fbdcd658dcb9eda2fba1a33621e25268dc2632d89745cab3c7734a2db35",
+   "storage": "747d1059d2ef3847f691dbdcb8a6f4513c2f3412582ac0d747cbb7a248964a31"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-kick d throw AS76",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 3 · Joints 0",
+   "drawing": "de3c3a98685ba58bfce7b97a03cbfaf8497f76d83367143fdd0e7d9f5bcb55f5",
+   "sounds": 301,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "1da52db43357b63510a1466b3114290b651e1f31e5e138c2862af18e3ce51371",
+   "tree": "f5ac77c2de3c973b54cba54b89473dbe92f54521c92c1287e55a5cbfc2a3c64b",
+   "controls": "1ff90fbdcd658dcb9eda2fba1a33621e25268dc2632d89745cab3c7734a2db35",
+   "storage": "747d1059d2ef3847f691dbdcb8a6f4513c2f3412582ac0d747cbb7a248964a31"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-kick d throw AS76 again",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 3 · Joints 0",
+   "drawing": "203d49a6afdf0b4600eef058b6fd24134c0b1beb2176b564d20f00cf35a0837d",
+   "sounds": 302,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "1da52db43357b63510a1466b3114290b651e1f31e5e138c2862af18e3ce51371",
+   "tree": "f5ac77c2de3c973b54cba54b89473dbe92f54521c92c1287e55a5cbfc2a3c64b",
+   "controls": "1ff90fbdcd658dcb9eda2fba1a33621e25268dc2632d89745cab3c7734a2db35",
+   "storage": "747d1059d2ef3847f691dbdcb8a6f4513c2f3412582ac0d747cbb7a248964a31"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-kick d click (10, 10)",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 3 · Joints 0",
+   "drawing": "203d49a6afdf0b4600eef058b6fd24134c0b1beb2176b564d20f00cf35a0837d",
+   "sounds": 302,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "1da52db43357b63510a1466b3114290b651e1f31e5e138c2862af18e3ce51371",
+   "tree": "f5ac77c2de3c973b54cba54b89473dbe92f54521c92c1287e55a5cbfc2a3c64b",
+   "controls": "1ff90fbdcd658dcb9eda2fba1a33621e25268dc2632d89745cab3c7734a2db35",
+   "storage": "747d1059d2ef3847f691dbdcb8a6f4513c2f3412582ac0d747cbb7a248964a31"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-kick e step 1 pull AS71 2",
+   "banner": {
+    "text": "Pulled 2 from AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 3 · Joints 1",
+   "drawing": "d81070cec0f1d1595dc9cb3c9e4b8481da8ce0c43adf7fc3745814ed69df29ab",
+   "sounds": 305,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "ac9f2f6ab9ea6308816f47949ea634bf790362e79ea20c4bc7619e8c0af89990",
+   "tree": "41cafa4c3ea43378a7580a5fd3d4e64a0d43cd62be08c882744ad8ec4ead515e",
+   "controls": "c7b0bfe4186c9cff2b57ead3e65067b6778f7b3368cf6731c4a451e4ee5d4b35",
+   "storage": "747d1059d2ef3847f691dbdcb8a6f4513c2f3412582ac0d747cbb7a248964a31"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-kick e step 2 kick AS73 2",
+   "banner": {
+    "text": "✓ Par! 3 moves — 1 coupling, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 3 / par 3 · Joints 1",
+   "drawing": "09e2086998efe8b84870b66b52a19a4d4ba25fc5ca35e83ee8148d527f1a93ed",
+   "sounds": 312,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "2695fdad4fc65f3285761ee1c86c6c0142750cd1aee3e08b90972948597b4440",
+   "tree": "19e5ed76c97ce5da531afd9e4451cef75a3ea9b26fcb959e7c1dced73754a3df",
+   "controls": "14dea08f49449d8527bc51a3ab4537975174416f577343aa6c26435461d3a65f",
+   "storage": "d64b91d9a1ec06371a9f6abb2962d6372d7f5a25d4ffc470a171f12078a6e796"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-kick g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 3 · Joints 0",
+   "drawing": "203d49a6afdf0b4600eef058b6fd24134c0b1beb2176b564d20f00cf35a0837d",
+   "sounds": 312,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "c87bc9487abdb209e067ed33d7eeb17d85578e1f5df980b20e39bf1f6017db84",
+   "tree": "7a3aec336e67e71dc2f974648cd996c181c632b42ab11bdbb81d798bf89f9e8f",
+   "controls": "14dea08f49449d8527bc51a3ab4537975174416f577343aa6c26435461d3a65f",
+   "storage": "d64b91d9a1ec06371a9f6abb2962d6372d7f5a25d4ffc470a171f12078a6e796"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-kick h watch optimal",
+   "banner": {
+    "text": "✓ Par! 3 moves — 1 coupling, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 3 / par 3 · Joints 1",
+   "drawing": "09e2086998efe8b84870b66b52a19a4d4ba25fc5ca35e83ee8148d527f1a93ed",
+   "sounds": 321,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "2695fdad4fc65f3285761ee1c86c6c0142750cd1aee3e08b90972948597b4440",
+   "tree": "19e5ed76c97ce5da531afd9e4451cef75a3ea9b26fcb959e7c1dced73754a3df",
+   "controls": "14dea08f49449d8527bc51a3ab4537975174416f577343aa6c26435461d3a65f",
+   "storage": "d64b91d9a1ec06371a9f6abb2962d6372d7f5a25d4ffc470a171f12078a6e796"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-save a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 4 · Joints 0",
+   "drawing": "a7fa4b711388ac4ca50535bca5579a7cb25001dfe634e0bb545c154c2ffb6fa3",
+   "sounds": 321,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "1365dbd8d0aa171466c2e9303a2be2c4ac7e38e19baba9a499e056b5b1f0b7c9",
+   "tree": "7a3aec336e67e71dc2f974648cd996c181c632b42ab11bdbb81d798bf89f9e8f",
+   "controls": "640f9784a93a3994a449aa0f7628efd5c25ae42a2cd7168eae25e9259120b65d",
+   "storage": "d64b91d9a1ec06371a9f6abb2962d6372d7f5a25d4ffc470a171f12078a6e796"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-save c refused move",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 4 · Joints 0",
+   "drawing": "a7fa4b711388ac4ca50535bca5579a7cb25001dfe634e0bb545c154c2ffb6fa3",
+   "sounds": 322,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "c141ef76bac55cc6de2849cec190e0eb54918bed76752d2faf1880a729ae4acc",
+   "tree": "adc89b4ed26496b604aa8c45ddae24203659fa28ea8c5efbb48bd6cfe49c5423",
+   "controls": "d450f0bde43916754030ede17f2ee550348bab39e8b91f53266929887e938139",
+   "storage": "d64b91d9a1ec06371a9f6abb2962d6372d7f5a25d4ffc470a171f12078a6e796"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-save d throw AS76",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 4 · Joints 0",
+   "drawing": "4b18aa594f722b2c497dc57aa73f67c60d137b17389335eb90bbcd7d9c41d9da",
+   "sounds": 323,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "c141ef76bac55cc6de2849cec190e0eb54918bed76752d2faf1880a729ae4acc",
+   "tree": "adc89b4ed26496b604aa8c45ddae24203659fa28ea8c5efbb48bd6cfe49c5423",
+   "controls": "d450f0bde43916754030ede17f2ee550348bab39e8b91f53266929887e938139",
+   "storage": "d64b91d9a1ec06371a9f6abb2962d6372d7f5a25d4ffc470a171f12078a6e796"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-save d throw AS76 again",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 4 · Joints 0",
+   "drawing": "a7fa4b711388ac4ca50535bca5579a7cb25001dfe634e0bb545c154c2ffb6fa3",
+   "sounds": 324,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "c141ef76bac55cc6de2849cec190e0eb54918bed76752d2faf1880a729ae4acc",
+   "tree": "adc89b4ed26496b604aa8c45ddae24203659fa28ea8c5efbb48bd6cfe49c5423",
+   "controls": "d450f0bde43916754030ede17f2ee550348bab39e8b91f53266929887e938139",
+   "storage": "d64b91d9a1ec06371a9f6abb2962d6372d7f5a25d4ffc470a171f12078a6e796"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-save d click (10, 10)",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 4 · Joints 0",
+   "drawing": "a7fa4b711388ac4ca50535bca5579a7cb25001dfe634e0bb545c154c2ffb6fa3",
+   "sounds": 324,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "c141ef76bac55cc6de2849cec190e0eb54918bed76752d2faf1880a729ae4acc",
+   "tree": "adc89b4ed26496b604aa8c45ddae24203659fa28ea8c5efbb48bd6cfe49c5423",
+   "controls": "d450f0bde43916754030ede17f2ee550348bab39e8b91f53266929887e938139",
+   "storage": "d64b91d9a1ec06371a9f6abb2962d6372d7f5a25d4ffc470a171f12078a6e796"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-save e step 1 pull AS71 3",
+   "banner": {
+    "text": "Pulled 3 from AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 4 · Joints 1",
+   "drawing": "665680ec345bf63afb96b2945543f085e464ae6e7b0e8a28b9a1032584057eea",
+   "sounds": 327,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "d94d1ff66078d9c108ec48620908258c613968e6f8b9b02fe6c139a2d7fc125a",
+   "tree": "41cafa4c3ea43378a7580a5fd3d4e64a0d43cd62be08c882744ad8ec4ead515e",
+   "controls": "aa0e7ef652e862482a2833610cc74f120980a3724b99b63454dae127b49221ca",
+   "storage": "d64b91d9a1ec06371a9f6abb2962d6372d7f5a25d4ffc470a171f12078a6e796"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-save e step 2 kick AS73 2",
+   "banner": {
+    "text": "Kicked 2 to AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 3 / par 4 · Joints 1",
+   "drawing": "c6c73a7d0002275b850280666b925de8c6068818968960b36227fe7e0d8f99d7",
+   "sounds": 330,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "72c8bfbd4bac24ca96376e69774cf0404f4dd54e7c8904d837c4e1e6645a296d",
+   "tree": "41cafa4c3ea43378a7580a5fd3d4e64a0d43cd62be08c882744ad8ec4ead515e",
+   "controls": "640f9784a93a3994a449aa0f7628efd5c25ae42a2cd7168eae25e9259120b65d",
+   "storage": "d64b91d9a1ec06371a9f6abb2962d6372d7f5a25d4ffc470a171f12078a6e796"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-save e step 3 spot AS74 1",
+   "banner": {
+    "text": "✓ Par! 4 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 4 / par 4 · Joints 2",
+   "drawing": "a2d73c2dcfba68b360dcc41525fe2085f20f5218d6b500ca2ca72e11038cf7c4",
+   "sounds": 338,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "23188820b738618b423a5c8b5f35b867ff96337b0e22f82e588e661212c8f6a0",
+   "tree": "19e5ed76c97ce5da531afd9e4451cef75a3ea9b26fcb959e7c1dced73754a3df",
+   "controls": "da8f5d306f78aa5ceac05b0fbb8da9bae7964b674c3c6dc2d07c3d81eba047ae",
+   "storage": "991e98cc703739a8e0d32f21188b395d6168efb318d4e577acb8d3a8115a0398"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-save g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 4 · Joints 0",
+   "drawing": "264f627c56b2b3eb43f96527b2bb2c3a85ece564ce3581f441311807ff2964c9",
+   "sounds": 338,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "01aabb025c4b08c30a3ada5c7d692c98f99094861d3a5c6e14578c0a69c3f7e6",
+   "tree": "7a3aec336e67e71dc2f974648cd996c181c632b42ab11bdbb81d798bf89f9e8f",
+   "controls": "da8f5d306f78aa5ceac05b0fbb8da9bae7964b674c3c6dc2d07c3d81eba047ae",
+   "storage": "991e98cc703739a8e0d32f21188b395d6168efb318d4e577acb8d3a8115a0398"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-save h watch optimal",
+   "banner": {
+    "text": "✓ Par! 4 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 4 / par 4 · Joints 2",
+   "drawing": "a011d6cb67ed2e19ad87c0a25334033870989c2cb6b2fb0f99396ec1fc2c016a",
+   "sounds": 350,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "23188820b738618b423a5c8b5f35b867ff96337b0e22f82e588e661212c8f6a0",
+   "tree": "19e5ed76c97ce5da531afd9e4451cef75a3ea9b26fcb959e7c1dced73754a3df",
+   "controls": "da8f5d306f78aa5ceac05b0fbb8da9bae7964b674c3c6dc2d07c3d81eba047ae",
+   "storage": "991e98cc703739a8e0d32f21188b395d6168efb318d4e577acb8d3a8115a0398"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-types a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 6 · Joints 0",
+   "drawing": "0b6f025e0c772ab88d49e54ba9b0b08e55164a43b715d8ce247083a27b7037c0",
+   "sounds": 350,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "7cdef4ce752d8a9500eba842807b7d64542a07f5fbde7111ec8dfd69c6495c88",
+   "tree": "7a3aec336e67e71dc2f974648cd996c181c632b42ab11bdbb81d798bf89f9e8f",
+   "controls": "34ec0f71b5d233f9aaee7c83702366891f0dea27d53c257079c54fcc16e8efb9",
+   "storage": "991e98cc703739a8e0d32f21188b395d6168efb318d4e577acb8d3a8115a0398"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-types c refused move",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 6 · Joints 0",
+   "drawing": "0b6f025e0c772ab88d49e54ba9b0b08e55164a43b715d8ce247083a27b7037c0",
+   "sounds": 351,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "6264a4d379bb1abfe5d77fddb4e8943bc92847017ad0e74bbe8638a2b698e5d8",
+   "tree": "adc89b4ed26496b604aa8c45ddae24203659fa28ea8c5efbb48bd6cfe49c5423",
+   "controls": "ead7a09cba840b2eed9886c05ced6ba80d2b8ec7f7943f0f7ee0f30f4df14227",
+   "storage": "991e98cc703739a8e0d32f21188b395d6168efb318d4e577acb8d3a8115a0398"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-types d throw AS76",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 6 · Joints 0",
+   "drawing": "c2c2310da47058329dbc9d398247821ae90a24cd06d00f58b25314b0b216d477",
+   "sounds": 352,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "6264a4d379bb1abfe5d77fddb4e8943bc92847017ad0e74bbe8638a2b698e5d8",
+   "tree": "adc89b4ed26496b604aa8c45ddae24203659fa28ea8c5efbb48bd6cfe49c5423",
+   "controls": "ead7a09cba840b2eed9886c05ced6ba80d2b8ec7f7943f0f7ee0f30f4df14227",
+   "storage": "991e98cc703739a8e0d32f21188b395d6168efb318d4e577acb8d3a8115a0398"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-types d throw AS76 again",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 6 · Joints 0",
+   "drawing": "0b6f025e0c772ab88d49e54ba9b0b08e55164a43b715d8ce247083a27b7037c0",
+   "sounds": 353,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "6264a4d379bb1abfe5d77fddb4e8943bc92847017ad0e74bbe8638a2b698e5d8",
+   "tree": "adc89b4ed26496b604aa8c45ddae24203659fa28ea8c5efbb48bd6cfe49c5423",
+   "controls": "ead7a09cba840b2eed9886c05ced6ba80d2b8ec7f7943f0f7ee0f30f4df14227",
+   "storage": "991e98cc703739a8e0d32f21188b395d6168efb318d4e577acb8d3a8115a0398"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-types d click (10, 10)",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 6 · Joints 0",
+   "drawing": "0b6f025e0c772ab88d49e54ba9b0b08e55164a43b715d8ce247083a27b7037c0",
+   "sounds": 353,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "6264a4d379bb1abfe5d77fddb4e8943bc92847017ad0e74bbe8638a2b698e5d8",
+   "tree": "adc89b4ed26496b604aa8c45ddae24203659fa28ea8c5efbb48bd6cfe49c5423",
+   "controls": "ead7a09cba840b2eed9886c05ced6ba80d2b8ec7f7943f0f7ee0f30f4df14227",
+   "storage": "991e98cc703739a8e0d32f21188b395d6168efb318d4e577acb8d3a8115a0398"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-types e step 1 pull AS71 3",
+   "banner": {
+    "text": "Pulled 3 from AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 6 · Joints 1",
+   "drawing": "5aacb945a21f279e5b42bcc3858ea66f02eef49f9ffd7c6f13468796398f88ca",
+   "sounds": 356,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "e15c190f7682bb9cc9259c02fddcd52bf56eb305b30843596c104bd24a7a00f7",
+   "tree": "41cafa4c3ea43378a7580a5fd3d4e64a0d43cd62be08c882744ad8ec4ead515e",
+   "controls": "86787a5459056af29e79283108c59255f45060a6b16aed41b791c30b962ec1ff",
+   "storage": "991e98cc703739a8e0d32f21188b395d6168efb318d4e577acb8d3a8115a0398"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-types e step 2 kick AS73 1",
+   "banner": {
+    "text": "Kicked 1 to AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 3 / par 6 · Joints 1",
+   "drawing": "89efb0f38441681d7ef74ea99e02a14cc50966c8ef777ca740fff8299cb5f839",
+   "sounds": 359,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "2070eb76dad06e4754d59edbea9d5e83a7589975d60db16153146d21c1add687",
+   "tree": "61959aee338d95579307457e57d2d76eb5f2cbdc1eb854953d50bfcea1ce65d8",
+   "controls": "82f9d184796423302283d9ad89440b3964fe8d42e678ef11ea80fbf8b75d80ec",
+   "storage": "991e98cc703739a8e0d32f21188b395d6168efb318d4e577acb8d3a8115a0398"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-types e step 3 spot AS72 1",
+   "banner": {
+    "text": "Spotted 1 to AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 6 · Joints 2",
+   "drawing": "22be29c6e956bb97306f46ce721e3eb9a0e4a69c8d3556df9faa1d582f1a64f5",
+   "sounds": 363,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "b377808c55da5914c608cde2db11c78cef8f5e90cc3791d6d1d6dda9302e0cd6",
+   "tree": "41cafa4c3ea43378a7580a5fd3d4e64a0d43cd62be08c882744ad8ec4ead515e",
+   "controls": "8fa5147818dbeb24407363223f66d24fd785937f54049351dc2bda3494b2a847",
+   "storage": "991e98cc703739a8e0d32f21188b395d6168efb318d4e577acb8d3a8115a0398"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-types e step 4 kick AS73 1",
+   "banner": {
+    "text": "✓ Par! 6 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 6 / par 6 · Joints 2",
+   "drawing": "ca10dafe5ce18fe0b4baffd4651f82866584113b53b20f908154c687f92f9636",
+   "sounds": 370,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8cccb3354bd15d970b91e173bc05ca61ca7693265b3f8162c6995952c938b1e1",
+   "tree": "19e5ed76c97ce5da531afd9e4451cef75a3ea9b26fcb959e7c1dced73754a3df",
+   "controls": "d6a463163912ffb8747437e583720b8e1b58b982cb885fd305f30b57958dbc42",
+   "storage": "22b6a09394079350ecb1ab6ca86923b9f4f8550bbd8203957707ccf6ae1fd410"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-types g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 6 · Joints 0",
+   "drawing": "e28d1dfecde76eca4bd4966273698f5c978f4d041d0aa7c540f117926450c304",
+   "sounds": 370,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "3a05e8946732ab61d15d407787dcdce02d86a9b9b556b489a4d59bbd5baf47d5",
+   "tree": "7a3aec336e67e71dc2f974648cd996c181c632b42ab11bdbb81d798bf89f9e8f",
+   "controls": "d6a463163912ffb8747437e583720b8e1b58b982cb885fd305f30b57958dbc42",
+   "storage": "22b6a09394079350ecb1ab6ca86923b9f4f8550bbd8203957707ccf6ae1fd410"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-types h watch optimal",
+   "banner": {
+    "text": "✓ Par! 6 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 6 / par 6 · Joints 2",
+   "drawing": "3325ab134b2e817d99674763ffde32535c02723d8edfb8d6df6828bd4a65b9f6",
+   "sounds": 384,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8cccb3354bd15d970b91e173bc05ca61ca7693265b3f8162c6995952c938b1e1",
+   "tree": "19e5ed76c97ce5da531afd9e4451cef75a3ea9b26fcb959e7c1dced73754a3df",
+   "controls": "d6a463163912ffb8747437e583720b8e1b58b982cb885fd305f30b57958dbc42",
+   "storage": "22b6a09394079350ecb1ab6ca86923b9f4f8550bbd8203957707ccf6ae1fd410"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-build a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "f5511d36bdb0ebaaac545c86bcce8bc76a457c20b93249fb909c94756556fcec",
+   "sounds": 384,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "794d08d183c39b2534fd2cd7f82f343be96c2b814e0698e866fd3ae43911610c",
+   "tree": "7a3aec336e67e71dc2f974648cd996c181c632b42ab11bdbb81d798bf89f9e8f",
+   "controls": "006a8d26fbdf691646f937d91665171aa7cb5f77555ec4d66c30f2200c733f30",
+   "storage": "22b6a09394079350ecb1ab6ca86923b9f4f8550bbd8203957707ccf6ae1fd410"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-build c refused move",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "f5511d36bdb0ebaaac545c86bcce8bc76a457c20b93249fb909c94756556fcec",
+   "sounds": 385,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "5fb97c6d1721cbf8e5f9be0d2cbd6b7fe8d4df8b03301b5ce98b63b897d19dc6",
+   "tree": "f5ac77c2de3c973b54cba54b89473dbe92f54521c92c1287e55a5cbfc2a3c64b",
+   "controls": "b41c74ec3e064bc3b6193e979259a45b1dbc061071a800dd6bb8482225189dec",
+   "storage": "22b6a09394079350ecb1ab6ca86923b9f4f8550bbd8203957707ccf6ae1fd410"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-build d throw AS76",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "bb0e67c2c7c80e1097d498b2986f2305fae8dccea79b9c3103f75fe4857237e1",
+   "sounds": 386,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "5fb97c6d1721cbf8e5f9be0d2cbd6b7fe8d4df8b03301b5ce98b63b897d19dc6",
+   "tree": "f5ac77c2de3c973b54cba54b89473dbe92f54521c92c1287e55a5cbfc2a3c64b",
+   "controls": "b41c74ec3e064bc3b6193e979259a45b1dbc061071a800dd6bb8482225189dec",
+   "storage": "22b6a09394079350ecb1ab6ca86923b9f4f8550bbd8203957707ccf6ae1fd410"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-build d throw AS76 again",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "f5511d36bdb0ebaaac545c86bcce8bc76a457c20b93249fb909c94756556fcec",
+   "sounds": 387,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "5fb97c6d1721cbf8e5f9be0d2cbd6b7fe8d4df8b03301b5ce98b63b897d19dc6",
+   "tree": "f5ac77c2de3c973b54cba54b89473dbe92f54521c92c1287e55a5cbfc2a3c64b",
+   "controls": "b41c74ec3e064bc3b6193e979259a45b1dbc061071a800dd6bb8482225189dec",
+   "storage": "22b6a09394079350ecb1ab6ca86923b9f4f8550bbd8203957707ccf6ae1fd410"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-build d click (10, 10)",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "f5511d36bdb0ebaaac545c86bcce8bc76a457c20b93249fb909c94756556fcec",
+   "sounds": 387,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "5fb97c6d1721cbf8e5f9be0d2cbd6b7fe8d4df8b03301b5ce98b63b897d19dc6",
+   "tree": "f5ac77c2de3c973b54cba54b89473dbe92f54521c92c1287e55a5cbfc2a3c64b",
+   "controls": "b41c74ec3e064bc3b6193e979259a45b1dbc061071a800dd6bb8482225189dec",
+   "storage": "22b6a09394079350ecb1ab6ca86923b9f4f8550bbd8203957707ccf6ae1fd410"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-build e step 1 pull AS72 2",
+   "banner": {
+    "text": "Pulled 2 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 7 · Joints 1",
+   "drawing": "c323ad3d13a784efd101ebd6a7448827d50e0c9cf62145b1ed6e6965cf0e36ac",
+   "sounds": 390,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "01753002f5cfbf5e5a43807d12216e90ce0407ec2e521070bae9972b2bf72fe8",
+   "tree": "41cafa4c3ea43378a7580a5fd3d4e64a0d43cd62be08c882744ad8ec4ead515e",
+   "controls": "e774a72f978ee89a09d9a20ae61157b01952e21fe8c319ef90b029c02e2b2fbd",
+   "storage": "22b6a09394079350ecb1ab6ca86923b9f4f8550bbd8203957707ccf6ae1fd410"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-build e step 2 kick AS73 2",
+   "banner": {
+    "text": "Kicked 2 to AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 3 / par 7 · Joints 1",
+   "drawing": "34659ba0d0463b98755af2e5efd938014e07fa043a9be971a5981b07921001eb",
+   "sounds": 393,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "afc189294e213b8e499e2721cd2d4f66b6d55d888fcaf5715c2baf63bf1ba679",
+   "tree": "41cafa4c3ea43378a7580a5fd3d4e64a0d43cd62be08c882744ad8ec4ead515e",
+   "controls": "006a8d26fbdf691646f937d91665171aa7cb5f77555ec4d66c30f2200c733f30",
+   "storage": "22b6a09394079350ecb1ab6ca86923b9f4f8550bbd8203957707ccf6ae1fd410"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-build e step 3 pull AS71 3",
+   "banner": {
+    "text": "Pulled 3 from AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 5 / par 7 · Joints 2",
+   "drawing": "f06982b273465eff99cf88a33b83053a76d3d0c15667419c1d43849eb4db9bdb",
+   "sounds": 397,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "11f7b0c966b7f24a172981707bcb65f8ed4d859b104fc1db4bacc19d7532932d",
+   "tree": "41cafa4c3ea43378a7580a5fd3d4e64a0d43cd62be08c882744ad8ec4ead515e",
+   "controls": "6e36b2827f851af143d7ab47bda9a3c590a852cc06091c9ac810327753ceaa8c",
+   "storage": "22b6a09394079350ecb1ab6ca86923b9f4f8550bbd8203957707ccf6ae1fd410"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-build e step 4 kick AS73 2",
+   "banner": {
+    "text": "Kicked 2 to AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 6 / par 7 · Joints 2",
+   "drawing": "95fbacef52011f9cde06a6b6435f61aa4721308d3188659f5f0bf4ce6a51350e",
+   "sounds": 400,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "65a5e54468925e8d2397e40d9531de07bb862651c5b3319a685005c58ce1ec45",
+   "tree": "41cafa4c3ea43378a7580a5fd3d4e64a0d43cd62be08c882744ad8ec4ead515e",
+   "controls": "006a8d26fbdf691646f937d91665171aa7cb5f77555ec4d66c30f2200c733f30",
+   "storage": "22b6a09394079350ecb1ab6ca86923b9f4f8550bbd8203957707ccf6ae1fd410"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-build e step 5 spot AS71 1",
+   "banner": {
+    "text": "✓ Par! 7 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 7 / par 7 · Joints 2",
+   "drawing": "29edfc8e44062ed61b39a167898c45bf6715e764c712f7cec3876a28168a9439",
+   "sounds": 407,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "3de6766d22fb8ad28e4552055dc4be4fb04ac4890deddb7bc6d3c53cb35aae97",
+   "tree": "19e5ed76c97ce5da531afd9e4451cef75a3ea9b26fcb959e7c1dced73754a3df",
+   "controls": "3abdecb36c774254469c682ae4457a0e5e402009959e1f1e0856b2fee556277d",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-build g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "bc508f674465358a4a77815875bed32d6c7d23c7cb73a0632a0683266e385610",
+   "sounds": 407,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "be43fe46827f02b62bb15f0a20e3a0090623b40025e2fbe6b04ecca8eadfa61f",
+   "tree": "7a3aec336e67e71dc2f974648cd996c181c632b42ab11bdbb81d798bf89f9e8f",
+   "controls": "3abdecb36c774254469c682ae4457a0e5e402009959e1f1e0856b2fee556277d",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p2-build h watch optimal",
+   "banner": {
+    "text": "✓ Par! 7 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 7 / par 7 · Joints 2",
+   "drawing": "6082080cd5798177a2d42d9522ad5f44fed7becd036fe8f3147242446f99eb12",
+   "sounds": 423,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "3de6766d22fb8ad28e4552055dc4be4fb04ac4890deddb7bc6d3c53cb35aae97",
+   "tree": "19e5ed76c97ce5da531afd9e4451cef75a3ea9b26fcb959e7c1dced73754a3df",
+   "controls": "3abdecb36c774254469c682ae4457a0e5e402009959e1f1e0856b2fee556277d",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 19 · Joints 0",
+   "drawing": "da543556017f01011ed426b3620e3b0742bb94c63f848519f2e8e2a0d3e41527",
+   "sounds": 423,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "04fb4bf41a3d58b2216c9f27739dcd8061fcaa1c2e72d6d0101d018fda2270a8",
+   "tree": "876ea98be8ab5c81739ca65fc7eca74d73576c0ce146d5861fa7dd9e6b6f0fb3",
+   "controls": "acef7112d0f705a71d7e5972a6e6532b71939737ae3ef187848270c815a3f07e",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort c refused move",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 19 · Joints 0",
+   "drawing": "da543556017f01011ed426b3620e3b0742bb94c63f848519f2e8e2a0d3e41527",
+   "sounds": 424,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "12eb8d9b9f47740f66960ef5db9e95f766a0613f7cff3f2880fe4b5d1b5a5412",
+   "tree": "4605e17cb8c67cdef7f3eccd07f5a6c2ea504ee81c7b58562f690f8cb198307e",
+   "controls": "0e674b9a93df046af211249eace7a2f4bd223856a731853946941b179cf9aaa5",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort d throw AS76",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 19 · Joints 0",
+   "drawing": "914f142c4027e5b754d33f7bc67e9cd4e03475400f8fd1896b1f4c4f8e7c304a",
+   "sounds": 425,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "12eb8d9b9f47740f66960ef5db9e95f766a0613f7cff3f2880fe4b5d1b5a5412",
+   "tree": "4605e17cb8c67cdef7f3eccd07f5a6c2ea504ee81c7b58562f690f8cb198307e",
+   "controls": "0e674b9a93df046af211249eace7a2f4bd223856a731853946941b179cf9aaa5",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort d throw AS76 again",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 19 · Joints 0",
+   "drawing": "da543556017f01011ed426b3620e3b0742bb94c63f848519f2e8e2a0d3e41527",
+   "sounds": 426,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "12eb8d9b9f47740f66960ef5db9e95f766a0613f7cff3f2880fe4b5d1b5a5412",
+   "tree": "4605e17cb8c67cdef7f3eccd07f5a6c2ea504ee81c7b58562f690f8cb198307e",
+   "controls": "0e674b9a93df046af211249eace7a2f4bd223856a731853946941b179cf9aaa5",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort d click (10, 10)",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 19 · Joints 0",
+   "drawing": "da543556017f01011ed426b3620e3b0742bb94c63f848519f2e8e2a0d3e41527",
+   "sounds": 426,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "12eb8d9b9f47740f66960ef5db9e95f766a0613f7cff3f2880fe4b5d1b5a5412",
+   "tree": "4605e17cb8c67cdef7f3eccd07f5a6c2ea504ee81c7b58562f690f8cb198307e",
+   "controls": "0e674b9a93df046af211249eace7a2f4bd223856a731853946941b179cf9aaa5",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort e step 1 pull AS72 1",
+   "banner": {
+    "text": "Pulled 1 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 19 · Joints 1",
+   "drawing": "5085139559ffd9ea107b7fa9fc9125dae9c2f6bf4cd928ba8da6967df962c12d",
+   "sounds": 429,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "6db5429f650e8cccbfaac71c2246108b6fa4d8aeb5b3f920b42050774587817a",
+   "tree": "835c040eeb7e9430d9e0c11ddebcec3684d25403ed309352bf622d4f59781ca6",
+   "controls": "0e3153068ed15e5b457eab40b8ab136c65305558b20fa16172f155b539e977bd",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort e step 2 spot AS74 1",
+   "banner": {
+    "text": "Spotted 1 to AS74.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 3 / par 19 · Joints 1",
+   "drawing": "cb418356dd7b4b6dd581b8d5d823abf738c871cdeeadd338bae343642b59d8d4",
+   "sounds": 432,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "c2ace4d2f86bb1c34e0fc27f2f86be9f802f88b628b289ac1ede80a84f185352",
+   "tree": "9fb4a007568d46bdfc160905130777bc4d0dbb956507ffd0e5927f1925c6f2b0",
+   "controls": "f81aa2e7628a840a4683712132722066e3375a390cb17a1efab1a8f2893785ef",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort e step 3 pull AS72 1",
+   "banner": {
+    "text": "Pulled 1 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 6 / par 19 · Joints 2",
+   "drawing": "6714138d755fe6dc2a0f43916f1cef40a7ea38bfb163e68aaae1893a3e0aa799",
+   "sounds": 436,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "751add1c74467c185d5b4daff332c22026136aac1da7a31692f37e092053472e",
+   "tree": "2e009298ec8dff31146951ac37584edfa38c9ec51c12f3ce4d1577544ff78eb7",
+   "controls": "4797b799083470919a7d8f8ba098dfb630c6c3d5fbb7406bd42ca426e8039660",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort e step 4 spot AS74 1",
+   "banner": {
+    "text": "Spotted 1 to AS74.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 7 / par 19 · Joints 3",
+   "drawing": "d751d96b1fe23d4d6e5d17c7b9c959263825e91a38fc9e0b1c3e76fabf2145eb",
+   "sounds": 440,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "c98baa6e8741f41d27e16a31718a1b64fdfb805a388c581243723e0cc57683f0",
+   "tree": "9fb4a007568d46bdfc160905130777bc4d0dbb956507ffd0e5927f1925c6f2b0",
+   "controls": "f81aa2e7628a840a4683712132722066e3375a390cb17a1efab1a8f2893785ef",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort e step 5 pull AS72 1",
+   "banner": {
+    "text": "Pulled 1 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 10 / par 19 · Joints 4",
+   "drawing": "10a51ffe715de48dbcd27aca19484e10f7cc9da6e2f6d44a0d74b433efe3470d",
+   "sounds": 444,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "e4cfe204cb4c2bb6d3aae533b8317ec58a8245219fa59c1c35fe4a453411d63b",
+   "tree": "f085326135a9d2090655d47b3a4ba52b14eaed9de48ec1fa25fe3fabd8686f39",
+   "controls": "ca901d0f0557c600bcace1f2fc96ab323ee5064bb40e605ef9a4de2b07ee3021",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort e step 6 spot AS74 1",
+   "banner": {
+    "text": "Spotted 1 to AS74.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 11 / par 19 · Joints 5",
+   "drawing": "06faffd7fb9374f25770a1aa8481bc7dd82f0b6a5fe2c51fbf25b3364cfa2bea",
+   "sounds": 448,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "addfc60eb10073e0ddd4d10106733dff58467e9a1fffec79e6b9afee1638ac9c",
+   "tree": "9fb4a007568d46bdfc160905130777bc4d0dbb956507ffd0e5927f1925c6f2b0",
+   "controls": "f81aa2e7628a840a4683712132722066e3375a390cb17a1efab1a8f2893785ef",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort e step 7 pull AS72 1",
+   "banner": {
+    "text": "Pulled 1 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 14 / par 19 · Joints 6",
+   "drawing": "33995debed260af1d1ca0f90aef55b4f36ff7466a0d9fc43629afcf1a9e49dbe",
+   "sounds": 452,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "3d1114f2eeb06687c90ebc7388b7d4dda25d341edd5b7262142ea000347f2663",
+   "tree": "9fb4a007568d46bdfc160905130777bc4d0dbb956507ffd0e5927f1925c6f2b0",
+   "controls": "9399f19fdb1edd7940ff0dbf5087e2ae20a5310ad058ea0856d2f91f549af795",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort e step 8 spot AS74 1",
+   "banner": {
+    "text": "Spotted 1 to AS74.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 15 / par 19 · Joints 7",
+   "drawing": "e76d35726fb33698f252b87e21acdf01a3bd94fa09d3cc5955edaf0c73b15622",
+   "sounds": 456,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "a557bc1e971df392b3f1e23ba3bbaedf474fae14ae16ca66b8558b1aac0ff38f",
+   "tree": "9fb4a007568d46bdfc160905130777bc4d0dbb956507ffd0e5927f1925c6f2b0",
+   "controls": "f81aa2e7628a840a4683712132722066e3375a390cb17a1efab1a8f2893785ef",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort e step 9 pull AS72 1",
+   "banner": {
+    "text": "Pulled 1 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 18 / par 19 · Joints 8",
+   "drawing": "aa2de9e146f4be348b8311c23edf1fd2b43641c9ffbb7f171a17577a162cfc32",
+   "sounds": 460,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "e7186f57ab707f911fa06b3ebec5e9956268e8a5a6e7f5634544bb3c34d04ef9",
+   "tree": "9fb4a007568d46bdfc160905130777bc4d0dbb956507ffd0e5927f1925c6f2b0",
+   "controls": "9399f19fdb1edd7940ff0dbf5087e2ae20a5310ad058ea0856d2f91f549af795",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort e step 10 spot AS74 1",
+   "banner": {
+    "text": "The cars are where they belong, but AS74 is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE AS74 to finish the job.Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 19 / par 19 · Joints 9",
+   "drawing": "bfd09e092cf0c8b8d9bfcc9460fb345e70e2a1f84ba5fdedf643a2bf292d1ddb",
+   "sounds": 464,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "598f575fdb4f022f54316753a55cde2e2c6223d61b74835e74c13b48fc876964",
+   "tree": "6d900e41a51f446d89c72211698e01cda20454cdacf6503a6411fc3be51e80b8",
+   "controls": "a0b720779e44c7362ec30922c3e698cd7864dbf466cd642c27cace4b2a7c15b4",
+   "storage": "67392b37890bd7394ccb10a66a6ad0f101927de9e18c4da2af0639b30ec1ced3"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort e step 11 secure AS74",
+   "banner": {
+    "text": "✓ Par! 19 moves — 9 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 19 / par 19 · Joints 9",
+   "drawing": "d47e46201cae1bc9400b48472267eed2b1d9308b21f9e304fa0d82311ed450cd",
+   "sounds": 469,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "9348c7313c29e2133563f96f6b00165b2838b05fb2a0be26dcb02befed4d2255",
+   "tree": "710412d7c607f38fcf5862c92ace7856c278be18bd4b10ac36558bc22fc45eba",
+   "controls": "9933d1ec53eeea35d4d52d20dc885124e3b6702d61b0ce63c397b997bf0e81d8",
+   "storage": "8196a7c1861f39a6e29109a1ac02bfe913625ee1767146bc6be0b8f374023a08"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 19 · Joints 0",
+   "drawing": "da543556017f01011ed426b3620e3b0742bb94c63f848519f2e8e2a0d3e41527",
+   "sounds": 469,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "5273fb2a6732bcc7a20653eff4325f68e0afed179c83b2c861b0dda1cef47ee1",
+   "tree": "fb10f0d13183fd8978111bec8c9e6cff575cd3a1977456cf0368966de07c869b",
+   "controls": "9933d1ec53eeea35d4d52d20dc885124e3b6702d61b0ce63c397b997bf0e81d8",
+   "storage": "8196a7c1861f39a6e29109a1ac02bfe913625ee1767146bc6be0b8f374023a08"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p1-sort h watch optimal",
+   "banner": {
+    "text": "✓ Par! 19 moves — 9 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 19 / par 19 · Joints 9",
+   "drawing": "d47e46201cae1bc9400b48472267eed2b1d9308b21f9e304fa0d82311ed450cd",
+   "sounds": 503,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "9348c7313c29e2133563f96f6b00165b2838b05fb2a0be26dcb02befed4d2255",
+   "tree": "710412d7c607f38fcf5862c92ace7856c278be18bd4b10ac36558bc22fc45eba",
+   "controls": "9933d1ec53eeea35d4d52d20dc885124e3b6702d61b0ce63c397b997bf0e81d8",
+   "storage": "8196a7c1861f39a6e29109a1ac02bfe913625ee1767146bc6be0b8f374023a08"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-loads a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 3 · Joints 0",
+   "drawing": "d605faf7c5d009f370873bc894c733c85142e0a60fff751a0cec8f30bfb7b3c4",
+   "sounds": 503,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "77630e252ff1a158bbcda44dce5da944f81d10e9a30d889229a7baae32598dce",
+   "tree": "a51bad438620d1aa39703f2c6e90610f77cc44531616f71d6d4c34f670dd07e4",
+   "controls": "02e3fdb924f02cbc0a1cd2266e49e6333b72e3b1bdbb371cf62ddc62192ad80d",
+   "storage": "8196a7c1861f39a6e29109a1ac02bfe913625ee1767146bc6be0b8f374023a08"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-loads c refused move",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 3 · Joints 0",
+   "drawing": "d605faf7c5d009f370873bc894c733c85142e0a60fff751a0cec8f30bfb7b3c4",
+   "sounds": 504,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "b52034a09b7d1acc576b966e33f52e2f1b67d99b1879b5f49704ea0861c925ef",
+   "tree": "24ceb7fcd58d1ddd5068980977e5e9fe98795ebc5a2b05040f83e9063861ca9e",
+   "controls": "898f84fe58602b3a51451e2237322b882ca683e62af6cad8830a233cf4081c9f",
+   "storage": "8196a7c1861f39a6e29109a1ac02bfe913625ee1767146bc6be0b8f374023a08"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-loads d throw AS76",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 3 · Joints 0",
+   "drawing": "7a7b422dc7b3301ddba1c69d181271e49f2ffa5bdf8f8ee0177ad8134e132805",
+   "sounds": 505,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "b52034a09b7d1acc576b966e33f52e2f1b67d99b1879b5f49704ea0861c925ef",
+   "tree": "24ceb7fcd58d1ddd5068980977e5e9fe98795ebc5a2b05040f83e9063861ca9e",
+   "controls": "898f84fe58602b3a51451e2237322b882ca683e62af6cad8830a233cf4081c9f",
+   "storage": "8196a7c1861f39a6e29109a1ac02bfe913625ee1767146bc6be0b8f374023a08"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-loads d throw AS76 again",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 3 · Joints 0",
+   "drawing": "d605faf7c5d009f370873bc894c733c85142e0a60fff751a0cec8f30bfb7b3c4",
+   "sounds": 506,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "b52034a09b7d1acc576b966e33f52e2f1b67d99b1879b5f49704ea0861c925ef",
+   "tree": "24ceb7fcd58d1ddd5068980977e5e9fe98795ebc5a2b05040f83e9063861ca9e",
+   "controls": "898f84fe58602b3a51451e2237322b882ca683e62af6cad8830a233cf4081c9f",
+   "storage": "8196a7c1861f39a6e29109a1ac02bfe913625ee1767146bc6be0b8f374023a08"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-loads d click (10, 10)",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 3 · Joints 0",
+   "drawing": "d605faf7c5d009f370873bc894c733c85142e0a60fff751a0cec8f30bfb7b3c4",
+   "sounds": 506,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "b52034a09b7d1acc576b966e33f52e2f1b67d99b1879b5f49704ea0861c925ef",
+   "tree": "24ceb7fcd58d1ddd5068980977e5e9fe98795ebc5a2b05040f83e9063861ca9e",
+   "controls": "898f84fe58602b3a51451e2237322b882ca683e62af6cad8830a233cf4081c9f",
+   "storage": "8196a7c1861f39a6e29109a1ac02bfe913625ee1767146bc6be0b8f374023a08"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-loads e step 1 pull AS71 2",
+   "banner": {
+    "text": "Pulled 2 from AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 3 · Joints 1",
+   "drawing": "1c46f24f41efa92158ceeefde05f17e1426157008cf992eeb480977d1b0e8ca3",
+   "sounds": 509,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "beb9c562be943de3128f8b8d6ebea0f32478f4c30f81197625e13f245f5f178e",
+   "tree": "00e155622d7d4edb581f0416dec2b0dcb8c31153db562f1b999d21b8967a481e",
+   "controls": "e3978a3be84d580ae4c4cdcb0e9ffb8dfad54c1af2ef8cea675d34f9878455de",
+   "storage": "8196a7c1861f39a6e29109a1ac02bfe913625ee1767146bc6be0b8f374023a08"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-loads e step 2 kick AS73 2",
+   "banner": {
+    "text": "✓ Par! 3 moves — 1 coupling, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 3 / par 3 · Joints 1",
+   "drawing": "8f732dccfc6879793f4cfa502f3219c27719f189ba999d447424b8941cfed321",
+   "sounds": 516,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "4a1706649efc541b28a063fd40fa7c72e66cac4aab40129a06ffa4183fe76360",
+   "tree": "c6d2cb4041db69dbc39f379f99c634e690a3b1e065bb515daee1c0667f507fbe",
+   "controls": "4ec9d7056a5fc7a54de9c2be099ea8d76d7cd88d2f53511770423c7ded76344d",
+   "storage": "a32404b9d712ff65727c0506c5b03870cafabbb623c0c8267704ce91630a0726"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-loads g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 3 · Joints 0",
+   "drawing": "d605faf7c5d009f370873bc894c733c85142e0a60fff751a0cec8f30bfb7b3c4",
+   "sounds": 516,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "563296bf0e45f8d663bda63099a5f89b2c4038073908f6e47e0e8e9edc68ee76",
+   "tree": "513cb24fa961353d14fd0441c09529f7d7e75c09c503d3c6a49a736ea595fe29",
+   "controls": "4ec9d7056a5fc7a54de9c2be099ea8d76d7cd88d2f53511770423c7ded76344d",
+   "storage": "a32404b9d712ff65727c0506c5b03870cafabbb623c0c8267704ce91630a0726"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-loads h watch optimal",
+   "banner": {
+    "text": "✓ Par! 3 moves — 1 coupling, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 3 / par 3 · Joints 1",
+   "drawing": "8f732dccfc6879793f4cfa502f3219c27719f189ba999d447424b8941cfed321",
+   "sounds": 525,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "4a1706649efc541b28a063fd40fa7c72e66cac4aab40129a06ffa4183fe76360",
+   "tree": "c6d2cb4041db69dbc39f379f99c634e690a3b1e065bb515daee1c0667f507fbe",
+   "controls": "4ec9d7056a5fc7a54de9c2be099ea8d76d7cd88d2f53511770423c7ded76344d",
+   "storage": "a32404b9d712ff65727c0506c5b03870cafabbb623c0c8267704ce91630a0726"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-split a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "5b3b6e86e9e143c5891210b8d265064f5aa04b8650bb871cfe6360f3d8bf5d58",
+   "sounds": 525,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "83608aac405280071bca50189321e19b53bb7a04c17c62e49ac37c34ff0feb67",
+   "tree": "513cb24fa961353d14fd0441c09529f7d7e75c09c503d3c6a49a736ea595fe29",
+   "controls": "b20e0478cb6ad16fed98628eefbd1926820e74013b855126df39053f955c437f",
+   "storage": "a32404b9d712ff65727c0506c5b03870cafabbb623c0c8267704ce91630a0726"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-split c refused move",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "5b3b6e86e9e143c5891210b8d265064f5aa04b8650bb871cfe6360f3d8bf5d58",
+   "sounds": 526,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bec07f3754975041efa29da1fa11e8bf8b078c3f29eb6cb286bf801f222f5c17",
+   "tree": "998ae6a38d97dcf090ac09bb051ce3d24b2446b6acb9a24c82ee231a1db70943",
+   "controls": "c1f79f4be4fe4313eafe058a7048f10e184ae6d6d11d7b2ff3da99a011248207",
+   "storage": "a32404b9d712ff65727c0506c5b03870cafabbb623c0c8267704ce91630a0726"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-split d throw AS76",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "c8de190ea6e315b795e8f1fae694d5b8e8e46fa105b6e5fcbb03ab226663fa7c",
+   "sounds": 527,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bec07f3754975041efa29da1fa11e8bf8b078c3f29eb6cb286bf801f222f5c17",
+   "tree": "998ae6a38d97dcf090ac09bb051ce3d24b2446b6acb9a24c82ee231a1db70943",
+   "controls": "c1f79f4be4fe4313eafe058a7048f10e184ae6d6d11d7b2ff3da99a011248207",
+   "storage": "a32404b9d712ff65727c0506c5b03870cafabbb623c0c8267704ce91630a0726"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-split d throw AS76 again",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "5b3b6e86e9e143c5891210b8d265064f5aa04b8650bb871cfe6360f3d8bf5d58",
+   "sounds": 528,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bec07f3754975041efa29da1fa11e8bf8b078c3f29eb6cb286bf801f222f5c17",
+   "tree": "998ae6a38d97dcf090ac09bb051ce3d24b2446b6acb9a24c82ee231a1db70943",
+   "controls": "c1f79f4be4fe4313eafe058a7048f10e184ae6d6d11d7b2ff3da99a011248207",
+   "storage": "a32404b9d712ff65727c0506c5b03870cafabbb623c0c8267704ce91630a0726"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-split d click (10, 10)",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "5b3b6e86e9e143c5891210b8d265064f5aa04b8650bb871cfe6360f3d8bf5d58",
+   "sounds": 528,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bec07f3754975041efa29da1fa11e8bf8b078c3f29eb6cb286bf801f222f5c17",
+   "tree": "998ae6a38d97dcf090ac09bb051ce3d24b2446b6acb9a24c82ee231a1db70943",
+   "controls": "c1f79f4be4fe4313eafe058a7048f10e184ae6d6d11d7b2ff3da99a011248207",
+   "storage": "a32404b9d712ff65727c0506c5b03870cafabbb623c0c8267704ce91630a0726"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-split e step 1 pull AS71 6",
+   "banner": {
+    "text": "Pulled 6 from AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 5 · Joints 1",
+   "drawing": "d3c4636c66b1b314f12fbbd5f30be7ee47c0077ac78025a71aaf81bf70a7b14f",
+   "sounds": 531,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "5ba610c3fefa7abcb8e07eaa49e12a0aec0e6316d0bb2986ec2c221e8e340b27",
+   "tree": "00e155622d7d4edb581f0416dec2b0dcb8c31153db562f1b999d21b8967a481e",
+   "controls": "ede8dd042d42be0b46a2a78757348e2e8240ff074259eb4c66680f746cf7716d",
+   "storage": "a32404b9d712ff65727c0506c5b03870cafabbb623c0c8267704ce91630a0726"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-split e step 2 kick AS73 3",
+   "banner": {
+    "text": "Kicked 3 to AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 3 / par 5 · Joints 1",
+   "drawing": "f274d57e399099539faef3d4260bae918fbf4e9b3fc367632479ebd2286ed010",
+   "sounds": 534,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "84435f85e3c50be70f0741f7d6e064746b38d73c013608af9fda26309b4e100c",
+   "tree": "dfd5414f7824eb0134c8cbbd30d32de00c1dc6936151e9af89595c23267db9f0",
+   "controls": "77355f362a186af7f053c34257aa5b9fd8ab860c620bd57000d5b3354fd31ca9",
+   "storage": "a32404b9d712ff65727c0506c5b03870cafabbb623c0c8267704ce91630a0726"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-split e step 3 kick AS73 2",
+   "banner": {
+    "text": "Kicked 2 to AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 5 · Joints 1",
+   "drawing": "207d94efe83d25b8ca37bac857314427b388d87fe0c7b6cbb88f5543e6830f21",
+   "sounds": 535,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "2490709209ca938b2f0202c08789b5e501104509d387d09fe6093fb9c2383db5",
+   "tree": "00e155622d7d4edb581f0416dec2b0dcb8c31153db562f1b999d21b8967a481e",
+   "controls": "b20e0478cb6ad16fed98628eefbd1926820e74013b855126df39053f955c437f",
+   "storage": "a32404b9d712ff65727c0506c5b03870cafabbb623c0c8267704ce91630a0726"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-split e step 4 spot AS71 1",
+   "banner": {
+    "text": "✓ Par! 5 moves — 1 coupling, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 1",
+   "drawing": "774abe51f941e72caf08129dee86d31759c0ebe2a7a216edd20428352fd6666b",
+   "sounds": 542,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "4fc421d0951afc7825298573669b87fda97f59b1cc8060aa3f20cdc424397102",
+   "tree": "c6d2cb4041db69dbc39f379f99c634e690a3b1e065bb515daee1c0667f507fbe",
+   "controls": "f45385e838d021aecdba4405644cb2abf0d565c3d44af42c2af4c4f3bb58a28c",
+   "storage": "b0cf10278464c02fcea3a63cd1d18a1be1252a606e9548b2fd216656f9cd7f03"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-split g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "5f0112e9219cec34d76cb0a5a101746d1d8c25612d1a25297351b1e3b9fa9135",
+   "sounds": 542,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "a3eb9277ba1e314cbcfb9f558ef0046d1ffbcefb6a94a5f59df662627274a341",
+   "tree": "513cb24fa961353d14fd0441c09529f7d7e75c09c503d3c6a49a736ea595fe29",
+   "controls": "f45385e838d021aecdba4405644cb2abf0d565c3d44af42c2af4c4f3bb58a28c",
+   "storage": "b0cf10278464c02fcea3a63cd1d18a1be1252a606e9548b2fd216656f9cd7f03"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-split h watch optimal",
+   "banner": {
+    "text": "✓ Par! 5 moves — 1 coupling, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 1",
+   "drawing": "16076e0ba0f8cd598a636f4b5ae3a78f429d7130b59541717c22f578ca3a3bf3",
+   "sounds": 555,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "4fc421d0951afc7825298573669b87fda97f59b1cc8060aa3f20cdc424397102",
+   "tree": "c6d2cb4041db69dbc39f379f99c634e690a3b1e065bb515daee1c0667f507fbe",
+   "controls": "f45385e838d021aecdba4405644cb2abf0d565c3d44af42c2af4c4f3bb58a28c",
+   "storage": "b0cf10278464c02fcea3a63cd1d18a1be1252a606e9548b2fd216656f9cd7f03"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-peel a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 6 · Joints 0",
+   "drawing": "46d99a21f104c416405446ef1d8b80aabf2d9f9550b1cf978bb3d13239296ba5",
+   "sounds": 555,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "fbfef2fc056dea1eb5c50297811c0bf31a1305f52c859cf662a25bfa1ed5963f",
+   "tree": "513cb24fa961353d14fd0441c09529f7d7e75c09c503d3c6a49a736ea595fe29",
+   "controls": "ab92ca1e2720cd810cb255b2ae91f8cfabb69e4a657e4b627891791c8541cd99",
+   "storage": "b0cf10278464c02fcea3a63cd1d18a1be1252a606e9548b2fd216656f9cd7f03"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-peel c refused move",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 6 · Joints 0",
+   "drawing": "46d99a21f104c416405446ef1d8b80aabf2d9f9550b1cf978bb3d13239296ba5",
+   "sounds": 556,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "a787c7ddfbee6653a14ae123e9b330465e385075e8d3e290728b6031d96af36b",
+   "tree": "82f3885d93398c296e4f822fc8017a4f5ae7af12488315a4d6eadb97f2b507e5",
+   "controls": "6765ba34324a9fd09500db621fefd6048b2a1c07fd01fb10e7d0a7f819214f10",
+   "storage": "b0cf10278464c02fcea3a63cd1d18a1be1252a606e9548b2fd216656f9cd7f03"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-peel d throw AS76",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 6 · Joints 0",
+   "drawing": "d5e406828c2db9468c0d1bc4318c0e34400a20d44f5133ca2770a6aba64a14d0",
+   "sounds": 557,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "a787c7ddfbee6653a14ae123e9b330465e385075e8d3e290728b6031d96af36b",
+   "tree": "82f3885d93398c296e4f822fc8017a4f5ae7af12488315a4d6eadb97f2b507e5",
+   "controls": "6765ba34324a9fd09500db621fefd6048b2a1c07fd01fb10e7d0a7f819214f10",
+   "storage": "b0cf10278464c02fcea3a63cd1d18a1be1252a606e9548b2fd216656f9cd7f03"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-peel d throw AS76 again",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 6 · Joints 0",
+   "drawing": "46d99a21f104c416405446ef1d8b80aabf2d9f9550b1cf978bb3d13239296ba5",
+   "sounds": 558,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "a787c7ddfbee6653a14ae123e9b330465e385075e8d3e290728b6031d96af36b",
+   "tree": "82f3885d93398c296e4f822fc8017a4f5ae7af12488315a4d6eadb97f2b507e5",
+   "controls": "6765ba34324a9fd09500db621fefd6048b2a1c07fd01fb10e7d0a7f819214f10",
+   "storage": "b0cf10278464c02fcea3a63cd1d18a1be1252a606e9548b2fd216656f9cd7f03"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-peel d click (10, 10)",
+   "banner": {
+    "text": "AS71 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 6 · Joints 0",
+   "drawing": "46d99a21f104c416405446ef1d8b80aabf2d9f9550b1cf978bb3d13239296ba5",
+   "sounds": 558,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "a787c7ddfbee6653a14ae123e9b330465e385075e8d3e290728b6031d96af36b",
+   "tree": "82f3885d93398c296e4f822fc8017a4f5ae7af12488315a4d6eadb97f2b507e5",
+   "controls": "6765ba34324a9fd09500db621fefd6048b2a1c07fd01fb10e7d0a7f819214f10",
+   "storage": "b0cf10278464c02fcea3a63cd1d18a1be1252a606e9548b2fd216656f9cd7f03"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-peel e step 1 pull AS71 3",
+   "banner": {
+    "text": "Pulled 3 from AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 6 · Joints 1",
+   "drawing": "6bd20b57e83a393cc589ae16df254aa1a661c1d94e71c6377f976eaa5ee9eb61",
+   "sounds": 561,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "ad3f7d4bb7f30a6e077e419fc45323a554f19fe5c4d08e1acbe31b757b9708ac",
+   "tree": "00e155622d7d4edb581f0416dec2b0dcb8c31153db562f1b999d21b8967a481e",
+   "controls": "b5e29a7e9de962a5525320051e265d47488bb5b02c31de869e87bb80163ef5d0",
+   "storage": "b0cf10278464c02fcea3a63cd1d18a1be1252a606e9548b2fd216656f9cd7f03"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-peel e step 2 kick AS73 1",
+   "banner": {
+    "text": "Kicked 1 to AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 3 / par 6 · Joints 1",
+   "drawing": "bc7518d28932c66d35103b3211f9b53a73e2097487b2316fe8df5832578340c4",
+   "sounds": 564,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "c36cd5b186f061789a8e90cade757329041239c25532aba2cd4ea2133b44fadd",
+   "tree": "11ccd8d4e92b40a3ebc106ac81ca122fdc555bba425e0138122f5ab4dd7be31b",
+   "controls": "06f6fba46c23979b41fbcf5970827fabd64bc29b3c2b0318979bb53916cc8932",
+   "storage": "b0cf10278464c02fcea3a63cd1d18a1be1252a606e9548b2fd216656f9cd7f03"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-peel e step 3 spot AS72 1",
+   "banner": {
+    "text": "Spotted 1 to AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 6 · Joints 2",
+   "drawing": "dfa6d1199cfb0e6ea2c4dc597a3d229b98147d9227905a32442a99974514cd84",
+   "sounds": 568,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "6dacbf212f4483af1d4388828a88accd8b938d629fff4cdb16b8c9dcd86c2e1a",
+   "tree": "00e155622d7d4edb581f0416dec2b0dcb8c31153db562f1b999d21b8967a481e",
+   "controls": "43e05e13a3d425cbcc0cb7b65ba0600d1802ae460e98cfbc0f541a41f39961f6",
+   "storage": "b0cf10278464c02fcea3a63cd1d18a1be1252a606e9548b2fd216656f9cd7f03"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-peel e step 4 kick AS73 1",
+   "banner": {
+    "text": "✓ Par! 6 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 6 / par 6 · Joints 2",
+   "drawing": "4a12ab7999200aeb22f8bc1fce2b22f8accaf1ce38d1162a96c766be0099c3e2",
+   "sounds": 575,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "385f4a553535974d37c2a7c1e643599b43c41bf872d3a1985c88748b101edd76",
+   "tree": "c6d2cb4041db69dbc39f379f99c634e690a3b1e065bb515daee1c0667f507fbe",
+   "controls": "987adc4872d2caca124457ca0e06dfac0d51eff73fe2e5a8b97ad38db28f8f78",
+   "storage": "254dc399961e94fbb706bae4c6bda22529511f86a400a745429feb4b00461019"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-peel g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 6 · Joints 0",
+   "drawing": "2474edf3ff2c7251f17218fafaee2c95c3c6d47d868d95d5788e74d38fa360a7",
+   "sounds": 575,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bc69c576ae55781114c24c619b8500073959a7bac74fb8f644220f13fea5bee6",
+   "tree": "513cb24fa961353d14fd0441c09529f7d7e75c09c503d3c6a49a736ea595fe29",
+   "controls": "987adc4872d2caca124457ca0e06dfac0d51eff73fe2e5a8b97ad38db28f8f78",
+   "storage": "254dc399961e94fbb706bae4c6bda22529511f86a400a745429feb4b00461019"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p4-peel h watch optimal",
+   "banner": {
+    "text": "✓ Par! 6 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 6 / par 6 · Joints 2",
+   "drawing": "718c87f62759ef92daf794303c6c2c0d21f191bf004e2734d68463515ac230d2",
+   "sounds": 589,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "385f4a553535974d37c2a7c1e643599b43c41bf872d3a1985c88748b101edd76",
+   "tree": "c6d2cb4041db69dbc39f379f99c634e690a3b1e065bb515daee1c0667f507fbe",
+   "controls": "987adc4872d2caca124457ca0e06dfac0d51eff73fe2e5a8b97ad38db28f8f78",
+   "storage": "254dc399961e94fbb706bae4c6bda22529511f86a400a745429feb4b00461019"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-long a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "4e5c5fd317e72044f63b76e0b0252b6fa5a02dd7acd065eef313c845d917af38",
+   "sounds": 589,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "70b3b7b9959fc6d644cc3f7dec12f6b7d1161c78e0b1119f24bd0b5cff36e185",
+   "tree": "feb75ca39a7e3b763973ba8faf897ef8e713b768fffd7a0ba60be23cb482205a",
+   "controls": "2a1d8b29f8e815b65bead527277db1130952875fee0427ed16ed9360e6b438ee",
+   "storage": "254dc399961e94fbb706bae4c6bda22529511f86a400a745429feb4b00461019"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-long c refused move",
+   "banner": {
+    "text": "AS73 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "4e5c5fd317e72044f63b76e0b0252b6fa5a02dd7acd065eef313c845d917af38",
+   "sounds": 590,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "e89a29337a3b1a50c858e3459b6d1b7f4ad0bc6ba5f5257f4265b54a13f35c5e",
+   "tree": "1732c97087f9917f094269340d1beca3c58425ddd846a8189b50f6d701729cd1",
+   "controls": "003e168d2c2b21a812a6293bc42f3dea73806aeae76da925b4fe3ab79630f93c",
+   "storage": "254dc399961e94fbb706bae4c6bda22529511f86a400a745429feb4b00461019"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-long d throw AS76",
+   "banner": {
+    "text": "AS73 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "fdc6da46ca8478a8e123dca5e0448eb699bf99b554ac12207a8f22dbf66f6ea7",
+   "sounds": 591,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "e89a29337a3b1a50c858e3459b6d1b7f4ad0bc6ba5f5257f4265b54a13f35c5e",
+   "tree": "1732c97087f9917f094269340d1beca3c58425ddd846a8189b50f6d701729cd1",
+   "controls": "003e168d2c2b21a812a6293bc42f3dea73806aeae76da925b4fe3ab79630f93c",
+   "storage": "254dc399961e94fbb706bae4c6bda22529511f86a400a745429feb4b00461019"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-long d throw AS76 again",
+   "banner": {
+    "text": "AS73 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "4e5c5fd317e72044f63b76e0b0252b6fa5a02dd7acd065eef313c845d917af38",
+   "sounds": 592,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "e89a29337a3b1a50c858e3459b6d1b7f4ad0bc6ba5f5257f4265b54a13f35c5e",
+   "tree": "1732c97087f9917f094269340d1beca3c58425ddd846a8189b50f6d701729cd1",
+   "controls": "003e168d2c2b21a812a6293bc42f3dea73806aeae76da925b4fe3ab79630f93c",
+   "storage": "254dc399961e94fbb706bae4c6bda22529511f86a400a745429feb4b00461019"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-long d click (10, 10)",
+   "banner": {
+    "text": "AS73 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "4e5c5fd317e72044f63b76e0b0252b6fa5a02dd7acd065eef313c845d917af38",
+   "sounds": 592,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "e89a29337a3b1a50c858e3459b6d1b7f4ad0bc6ba5f5257f4265b54a13f35c5e",
+   "tree": "1732c97087f9917f094269340d1beca3c58425ddd846a8189b50f6d701729cd1",
+   "controls": "003e168d2c2b21a812a6293bc42f3dea73806aeae76da925b4fe3ab79630f93c",
+   "storage": "254dc399961e94fbb706bae4c6bda22529511f86a400a745429feb4b00461019"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-long e step 1 pull AS73 4",
+   "banner": {
+    "text": "Pulled 4 from AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 7 · Joints 1",
+   "drawing": "720ee5083d5de6b9a200ec30eeb8c4b5a655698d556be5333f0a746fac5c457d",
+   "sounds": 595,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "a3d8a42169381117c2a5d2593faae80e8686fc1aa34f65c2dac74337036fe952",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "95c9eff2009bf3d7e89c7613af98010721a86f332a1b6d92e697db1796f2b9de",
+   "storage": "254dc399961e94fbb706bae4c6bda22529511f86a400a745429feb4b00461019"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-long e step 2 spot AS71 4",
+   "banner": {
+    "text": "Spotted 4 to AS71.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 3 / par 7 · Joints 1",
+   "drawing": "1acd7d5bdea78208cf96239d01eb0f146ef611eaa838d3e4c5c772a706d94808",
+   "sounds": 598,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "f40de15790167838f5b98cee2fe2b9411d74d0813461f8d0e32d2f52efa77e1a",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "4de5748dccfd1032b054142effaa0fac89402720c5bd111ad66ff896884a00aa",
+   "storage": "254dc399961e94fbb706bae4c6bda22529511f86a400a745429feb4b00461019"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-long e step 3 pull AS74 4",
+   "banner": {
+    "text": "Pulled 4 from AS74.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 6 / par 7 · Joints 2",
+   "drawing": "a885dd36720e5b2fcb2750fda6152a3e9de822f076960481e18165cb3e478e0c",
+   "sounds": 602,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "ce1562e11eeec85bebae4565ea74a64457a111f4c39e54fa1e1409cbd0cb0d95",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "ebb25006f8ce12a83f0e65ff728dca45805ab707f481bc0fe37473bd9b78f3be",
+   "storage": "254dc399961e94fbb706bae4c6bda22529511f86a400a745429feb4b00461019"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-long e step 4 spot AS71 4",
+   "banner": {
+    "text": "The cars are where they belong, but AS71 is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE AS71 to finish the job.Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 7 / par 7 · Joints 3",
+   "drawing": "a756ad7131c8f85f5b1e6fa8ab4070c679344d6a3f01306019dd4897ebccb8ee",
+   "sounds": 606,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "1295a0174334786a5f32cbaf0e98492d99cd96d912d49f611199f97cab0547cd",
+   "tree": "bb02f7128579843354a4cb9580876f17d67c4c9eacacf1001a59375f959335d2",
+   "controls": "e1805b2b9bb64b0937d12532904ee2d19598b4997a9f412d2ed3e882f2f8fe13",
+   "storage": "254dc399961e94fbb706bae4c6bda22529511f86a400a745429feb4b00461019"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-long e step 5 secure AS71",
+   "banner": {
+    "text": "✓ Par! 7 moves — 3 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 7 / par 7 · Joints 3",
+   "drawing": "72561223b2155a3f7d7d1e014f43290b1a85a4c4af961d0a9a5f47ef8a84dbb9",
+   "sounds": 611,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "7356d1420cc0ffce3e13f14799e78b0b7e15ddb6aa6dfadff8b502275c812ddd",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "7c78dfe6082bfd2c4fd05aaae4c1db822fec5cbe867975588fcfbcf63c533c8c",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-long g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 7 · Joints 0",
+   "drawing": "6fc06ace10e6be1298903118446134c318b0631ca072d51367c015250f8782f4",
+   "sounds": 611,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "f9b4e3e91ef11c94d895bef80fdb1a79680ce9ebaae04c194cfb57e5963a5ea8",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "7c78dfe6082bfd2c4fd05aaae4c1db822fec5cbe867975588fcfbcf63c533c8c",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-long h watch optimal",
+   "banner": {
+    "text": "✓ Par! 7 moves — 3 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 7 / par 7 · Joints 3",
+   "drawing": "72561223b2155a3f7d7d1e014f43290b1a85a4c4af961d0a9a5f47ef8a84dbb9",
+   "sounds": 627,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "7356d1420cc0ffce3e13f14799e78b0b7e15ddb6aa6dfadff8b502275c812ddd",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "7c78dfe6082bfd2c4fd05aaae4c1db822fec5cbe867975588fcfbcf63c533c8c",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "6bb4145a2ef8097028de4f9fe55a0b422e71d168ebaf60304d107d22b0461b1c",
+   "sounds": 627,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "b5868a36e877f145a32e95c6af1e6206111e48be3fd9da60c96d5a57cf233f26",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "2b395897441c57280630f7a4865ae81933f9d0468a467c48c0ef20d93071b09a",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room c refused move",
+   "banner": {
+    "text": "AS74 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "6bb4145a2ef8097028de4f9fe55a0b422e71d168ebaf60304d107d22b0461b1c",
+   "sounds": 628,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "17b70b3462f309a27c577b1c59aad62b33e6ec81d43362ffcb895634880b5b86",
+   "tree": "46787dd0a3e0eefd2b0455814ca67e01266ea4af7bd740ffee118a60522ce6c6",
+   "controls": "440c46ece2d135614677edb0436bd0c5a5e09a2e4c1844301f8336bb33729067",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room d throw AS76",
+   "banner": {
+    "text": "AS74 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "910aa7202870eba22229440971501cb0424493a0d34583a74331ce87c79a2a33",
+   "sounds": 629,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "17b70b3462f309a27c577b1c59aad62b33e6ec81d43362ffcb895634880b5b86",
+   "tree": "46787dd0a3e0eefd2b0455814ca67e01266ea4af7bd740ffee118a60522ce6c6",
+   "controls": "440c46ece2d135614677edb0436bd0c5a5e09a2e4c1844301f8336bb33729067",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room d throw AS76 again",
+   "banner": {
+    "text": "AS74 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "6bb4145a2ef8097028de4f9fe55a0b422e71d168ebaf60304d107d22b0461b1c",
+   "sounds": 630,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "17b70b3462f309a27c577b1c59aad62b33e6ec81d43362ffcb895634880b5b86",
+   "tree": "46787dd0a3e0eefd2b0455814ca67e01266ea4af7bd740ffee118a60522ce6c6",
+   "controls": "440c46ece2d135614677edb0436bd0c5a5e09a2e4c1844301f8336bb33729067",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room d click (10, 10)",
+   "banner": {
+    "text": "AS74 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "6bb4145a2ef8097028de4f9fe55a0b422e71d168ebaf60304d107d22b0461b1c",
+   "sounds": 630,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "17b70b3462f309a27c577b1c59aad62b33e6ec81d43362ffcb895634880b5b86",
+   "tree": "46787dd0a3e0eefd2b0455814ca67e01266ea4af7bd740ffee118a60522ce6c6",
+   "controls": "440c46ece2d135614677edb0436bd0c5a5e09a2e4c1844301f8336bb33729067",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room e step 1 pull AS74 3",
+   "banner": {
+    "text": "Pulled 3 from AS74.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 9 · Joints 1",
+   "drawing": "20cd23bf754dfdea29d7da22d209da791255c8452b49335d53d9fdc65492dac5",
+   "sounds": 633,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "9796ffaf7354d96fe046dee2b3e8cd2589b0da746b6d8daf150ecc19e8fdf5a6",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "b9b568c8b71db99c5f0b2e50cfa3322aa71b658f151c9bee09f813674432426b",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room e step 2 pull AS73 2",
+   "banner": {
+    "text": "Pulled 2 from AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 9 · Joints 2",
+   "drawing": "561aa86eeec5d316e91323dc37b6ffb9bd82e81f645c96e7da193f7ea619ce47",
+   "sounds": 637,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "b02b6d1e78aa771f4b39c9666ccc9408ae947994fbdf4a067c7ff0aafc515a5b",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "c5d9b9dd0e38fe63093459e2466aacbb3a2f983b52a77c95798acba6a8a56280",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room e step 3 pull AS72 2",
+   "banner": {
+    "text": "Pulled 2 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 6 / par 9 · Joints 3",
+   "drawing": "472cc7aacfb382962f6c6f1327af8449f9b52a5d285e633ad9ae4779893740f5",
+   "sounds": 641,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "6c91928f8a728280f11b56fe344ef5821b52becb39fb087aef97cf05cadd1718",
+   "tree": "381e6bc87a71f44db16f937da6b274359631a811b3d94c16cbd1126c7d86e464",
+   "controls": "2d25c3c556357c7533d91d951a8b137db6e9869a4888981fb06cc3b720851ab5",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room e step 4 spot AS74 4",
+   "banner": {
+    "text": "Spotted 4 to AS74.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 7 / par 9 · Joints 3",
+   "drawing": "f5d980e8d8e60774ef28306514b079550203438ac4ead2030d1977b0276394d3",
+   "sounds": 644,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "fa3ee56a0304fd9045b77b5423b654771c152d9c66b667a64429cb5fafa52c73",
+   "tree": "b95f6e7948b6b1b4d8a86d5c606793b793a3376fbfde6ac7f22201161b96f823",
+   "controls": "89579e63d2202dbf3b6fe82b5deb49e708f1b4aa4aad61ef5943bdb03001f350",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room e step 5 spot AS71 3",
+   "banner": {
+    "text": "The cars are where they belong, but AS74 is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE AS74 to finish the job.Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 9 / par 9 · Joints 3",
+   "drawing": "bb647616e97a8c60222dee21af8511a21a1ad3e3283cb964e4e2b91906c38563",
+   "sounds": 647,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "e068bcd8503d35db953b58afd0ceb4a60e6f4040bc5a890a62e7e47aac5a7736",
+   "tree": "bb02f7128579843354a4cb9580876f17d67c4c9eacacf1001a59375f959335d2",
+   "controls": "fbdb4772dcf661e0553e96bdfe1443d333267f88873727e1d321bc71e3cc3182",
+   "storage": "53b61b552e47954cc07317fee46c16b6b9f1e4c6f38637ff9ca6b0fbbecefddd"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room e step 6 secure AS74",
+   "banner": {
+    "text": "✓ Par! 9 moves — 3 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 9 / par 9 · Joints 3",
+   "drawing": "40d8981d074d421ab1e0def36b9f5993cada2a7f3a71fe51e947787965e9b761",
+   "sounds": 654,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "6a7ecd8135c3fc70f98d67009da17663354ed2a242a402b267d522c3acb3b109",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "35686fc818395fb307be14975912c62df86813acd90ab6386b3a78006e4af3b3",
+   "storage": "b89832a279c3be9d002103b5bc467d511b4aa084beb9b1b20fb12ffe02333c9a"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 9 · Joints 0",
+   "drawing": "25fd2bd8e0767cc688fbfc1bc1e29ad95441331ade34b3a586429f2f08782fb6",
+   "sounds": 654,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "1ba53bb7aec03686a88e2012d6c431fb531019c6aa2cdfd3a34da19ef9f6403c",
+   "tree": "4d5257256dbd7582a43a9d77a58bc816e13c6c7b4bcd994c1e205e4424bf25ac",
+   "controls": "35686fc818395fb307be14975912c62df86813acd90ab6386b3a78006e4af3b3",
+   "storage": "b89832a279c3be9d002103b5bc467d511b4aa084beb9b1b20fb12ffe02333c9a"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p5-room h watch optimal",
+   "banner": {
+    "text": "✓ Par! 9 moves — 3 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 9 / par 9 · Joints 3",
+   "drawing": "f4321f1d6505cb60e301eb669471aef8dbd0a5c1ce2acae83872fb983b877d98",
+   "sounds": 672,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "6a7ecd8135c3fc70f98d67009da17663354ed2a242a402b267d522c3acb3b109",
+   "tree": "7e0b1f358c86e029b4b13c81894963a3e458aff013eddc793e6051e6e4d0f7b4",
+   "controls": "35686fc818395fb307be14975912c62df86813acd90ab6386b3a78006e4af3b3",
+   "storage": "b89832a279c3be9d002103b5bc467d511b4aa084beb9b1b20fb12ffe02333c9a"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p6-road a load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 4 · Joints 0",
+   "drawing": "fe78a4b080b9897e6d87c67b4dd024234a2729d408f8aaff19ffb70eadf27496",
+   "sounds": 672,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "ea43e8703f24e2704534f3992f6db9634420bdad36487bce5bc068e9375ec3a2",
+   "tree": "cb31912e04927ac02c9838e51a599076e990aa751aa230f782a01120143fe8a0",
+   "controls": "521e425833e0acf366fd99ff8971695831660429b0c3ffacb6dd7f49cca87284",
+   "storage": "b89832a279c3be9d002103b5bc467d511b4aa084beb9b1b20fb12ffe02333c9a"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p6-road c refused move",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 4 · Joints 0",
+   "drawing": "fe78a4b080b9897e6d87c67b4dd024234a2729d408f8aaff19ffb70eadf27496",
+   "sounds": 673,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "f53f2c10407f0ca2174842ff49b46dbda0b4341676675d90070c268eba6f37e4",
+   "tree": "ca352072203b726375ebc3324ba6141512c50d4aef375d92aa155d84406d88e0",
+   "controls": "417df18a79e3593c4fb5ed194f45a97ef0e73799b2f8bc60a1d62534bfd88f3b",
+   "storage": "b89832a279c3be9d002103b5bc467d511b4aa084beb9b1b20fb12ffe02333c9a"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p6-road d throw AS76",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 4 · Joints 0",
+   "drawing": "d1ce2dedaab20e08127a77cc74dc555e1a959cf5e403fb695ad7acc2e1053866",
+   "sounds": 674,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "f53f2c10407f0ca2174842ff49b46dbda0b4341676675d90070c268eba6f37e4",
+   "tree": "ca352072203b726375ebc3324ba6141512c50d4aef375d92aa155d84406d88e0",
+   "controls": "417df18a79e3593c4fb5ed194f45a97ef0e73799b2f8bc60a1d62534bfd88f3b",
+   "storage": "b89832a279c3be9d002103b5bc467d511b4aa084beb9b1b20fb12ffe02333c9a"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p6-road d throw AS76 again",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 4 · Joints 0",
+   "drawing": "fe78a4b080b9897e6d87c67b4dd024234a2729d408f8aaff19ffb70eadf27496",
+   "sounds": 675,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "f53f2c10407f0ca2174842ff49b46dbda0b4341676675d90070c268eba6f37e4",
+   "tree": "ca352072203b726375ebc3324ba6141512c50d4aef375d92aa155d84406d88e0",
+   "controls": "417df18a79e3593c4fb5ed194f45a97ef0e73799b2f8bc60a1d62534bfd88f3b",
+   "storage": "b89832a279c3be9d002103b5bc467d511b4aa084beb9b1b20fb12ffe02333c9a"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p6-road d click (10, 10)",
+   "banner": {
+    "text": "AS72 is lined normal — line its switch reverse for the track (CROR 104).Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 0 / par 4 · Joints 0",
+   "drawing": "fe78a4b080b9897e6d87c67b4dd024234a2729d408f8aaff19ffb70eadf27496",
+   "sounds": 675,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "f53f2c10407f0ca2174842ff49b46dbda0b4341676675d90070c268eba6f37e4",
+   "tree": "ca352072203b726375ebc3324ba6141512c50d4aef375d92aa155d84406d88e0",
+   "controls": "417df18a79e3593c4fb5ed194f45a97ef0e73799b2f8bc60a1d62534bfd88f3b",
+   "storage": "b89832a279c3be9d002103b5bc467d511b4aa084beb9b1b20fb12ffe02333c9a"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p6-road e step 1 pull AS72 1",
+   "banner": {
+    "text": "Pulled 1 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 4 · Joints 1",
+   "drawing": "13f81304aa96e39150eff3391a589e78925edf1e5b7b8a4e3d8db3baaebb79e3",
+   "sounds": 678,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "5697d78404a09f931fb2cadb48f6b05826698f43c10b80395a7b4f7ca20c9423",
+   "tree": "5a14db8dc035f3a8d8e1e1f2fc43577197837e8adc2a01ca6fd71735968fdc44",
+   "controls": "f59e5145422b4106add618961ac4e562edf8fe14769f5b3a6507484d52c7a2a5",
+   "storage": "b89832a279c3be9d002103b5bc467d511b4aa084beb9b1b20fb12ffe02333c9a"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p6-road e step 2 pull AS73 2",
+   "banner": {
+    "text": "✓ Outbound built in order — call Depart ▸ to leave.",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 4 / par 4 · Joints 2",
+   "drawing": "c48d54b7d1cf1a7cc46ce0ab9a758670b6ab5e3f09def0489ce78fde0f8c4556",
+   "sounds": 682,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "3f08e1a11be9d7a54994fd857ba6af8d544189a34a3040aca4ceae98d3f20bf4",
+   "tree": "99d7d17595c2b14de39d6919f0b6f719790ad17e993d06977d383ab530a24292",
+   "controls": "5a89fcde3354508c7f9f8940093ef59db09cee8624a44c9a07d23593a2da4337",
+   "storage": "b89832a279c3be9d002103b5bc467d511b4aa084beb9b1b20fb12ffe02333c9a"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p6-road f depart",
+   "banner": {
+    "text": "✓ Departed out the lead — Par! 4 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 4 / par 4 · Joints 2",
+   "drawing": "8a05f0fd4fd5456d167c886f9e4d0372f8b334ff96ad202d9be82f694e4e0721",
+   "sounds": 686,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8ff8e2bdce92b1c3b43697f400c47e53810b31789eae1c6d02aced3795f24bba",
+   "tree": "3f3e1a91bd81bd2f0d49513af0726e792e999c353e20322c25459a6119b65867",
+   "controls": "e933c85e101cf1e53b14f8d3ce1d87b8b3b14f38d7c08c54d394f3e7653f5f88",
+   "storage": "aac5936da3df6239275914fd7babea011dd127fb4fd2a990d7e0accc5034d8ef"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p6-road g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 4 · Joints 0",
+   "drawing": "7ad42ec21b3f776a03dffa4db7bffee8ff41d2378c5a33d1c9e61531ef258b40",
+   "sounds": 686,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "0bc7b7307ffb3f55a0f1efbb0b6f9b45be976b0b6f71e0d6aa4766a865c44aa0",
+   "tree": "1c612c9ae48a8c9a72e44d29c096a4df2e7580e0912b59b8f202627136b57831",
+   "controls": "ab2b2f7ee6ecd95eb58d819ecdd59a1d6e83d0a49c391c161c723b596ac2e905",
+   "storage": "aac5936da3df6239275914fd7babea011dd127fb4fd2a990d7e0accc5034d8ef"
+  },
+  {
+   "pass": "A",
+   "step": "A3 p6-road h watch optimal",
+   "banner": {
+    "text": "✓ Departed out the lead — Par! 4 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 4 / par 4 · Joints 2",
+   "drawing": "8a05f0fd4fd5456d167c886f9e4d0372f8b334ff96ad202d9be82f694e4e0721",
+   "sounds": 696,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8ff8e2bdce92b1c3b43697f400c47e53810b31789eae1c6d02aced3795f24bba",
+   "tree": "3f3e1a91bd81bd2f0d49513af0726e792e999c353e20322c25459a6119b65867",
+   "controls": "e933c85e101cf1e53b14f8d3ce1d87b8b3b14f38d7c08c54d394f3e7653f5f88",
+   "storage": "aac5936da3df6239275914fd7babea011dd127fb4fd2a990d7e0accc5034d8ef"
+  },
+  {
+   "pass": "A",
+   "step": "A4 help open",
+   "banner": {
+    "text": "✓ Departed out the lead — Par! 4 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 4 / par 4 · Joints 2",
+   "drawing": "8a05f0fd4fd5456d167c886f9e4d0372f8b334ff96ad202d9be82f694e4e0721",
+   "sounds": 696,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "a5a0b4f3834de333df7b205c19dee12704ac3654d49bbbf3552fc5d5784f18b5",
+   "tree": "ba34e320fe558ca284cc1e64684b200a49ccb59f5ddad921f4ce1e09c42ab3f4",
+   "controls": "e933c85e101cf1e53b14f8d3ce1d87b8b3b14f38d7c08c54d394f3e7653f5f88",
+   "storage": "aac5936da3df6239275914fd7babea011dd127fb4fd2a990d7e0accc5034d8ef"
+  },
+  {
+   "pass": "A",
+   "step": "A5 mute",
+   "banner": {
+    "text": "✓ Departed out the lead — Par! 4 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 4 / par 4 · Joints 2",
+   "drawing": "8a05f0fd4fd5456d167c886f9e4d0372f8b334ff96ad202d9be82f694e4e0721",
+   "sounds": 696,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "9e3e487ca283b05240e56813d571127f889b7c280d7beb97ed68324d14f170b6",
+   "tree": "3f3e1a91bd81bd2f0d49513af0726e792e999c353e20322c25459a6119b65867",
+   "controls": "dac3d664b40706ab85b65b3fd44652a89afc79f547b1ecf35115c0c9b7eb8b23",
+   "storage": "cd1b5fa6a0c716617074733c1224cde3a7aacfa6cf7b75ca47a1cd06c5e0b5e9"
+  },
+  {
+   "pass": "A",
+   "step": "A5 mute again",
+   "banner": {
+    "text": "✓ Departed out the lead — Par! 4 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 4 / par 4 · Joints 2",
+   "drawing": "8a05f0fd4fd5456d167c886f9e4d0372f8b334ff96ad202d9be82f694e4e0721",
+   "sounds": 696,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "8ff8e2bdce92b1c3b43697f400c47e53810b31789eae1c6d02aced3795f24bba",
+   "tree": "3f3e1a91bd81bd2f0d49513af0726e792e999c353e20322c25459a6119b65867",
+   "controls": "e933c85e101cf1e53b14f8d3ce1d87b8b3b14f38d7c08c54d394f3e7653f5f88",
+   "storage": "aac5936da3df6239275914fd7babea011dd127fb4fd2a990d7e0accc5034d8ef"
+  },
+  {
+   "pass": "A",
+   "step": "A6 look it up",
+   "banner": null,
+   "readout": null,
+   "drawing": null,
+   "sounds": 697,
+   "hash": "#/reference?focus=rule.104",
+   "errors": 0,
+   "words": null,
+   "tree": null,
+   "controls": null,
+   "storage": "aac5936da3df6239275914fd7babea011dd127fb4fd2a990d7e0accc5034d8ef"
+  },
+  {
+   "pass": "A",
+   "step": "A6 back in the Yard, a new mount",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "e0c3206f3e592ce890b5fcf5f008234127e1c2d8129c9001d82f4d49f18275b1",
+   "sounds": 697,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "dc91bfe4259e0f9364b60a954734ff4b95af4913012884420127766e3a51b0b0",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "1e7b2f6556b86dc66a3761a359127d66b373b56ef487b358f4dc1cc3657ed8ce",
+   "storage": "cd1b5fa6a0c716617074733c1224cde3a7aacfa6cf7b75ca47a1cd06c5e0b5e9"
+  },
+  {
+   "pass": "A",
+   "step": "A7 left during watch optimal",
+   "banner": null,
+   "readout": null,
+   "drawing": null,
+   "sounds": 697,
+   "hash": "#/",
+   "errors": 0,
+   "words": null,
+   "tree": null,
+   "controls": null,
+   "storage": "cd1b5fa6a0c716617074733c1224cde3a7aacfa6cf7b75ca47a1cd06c5e0b5e9"
+  },
+  {
+   "pass": "A",
+   "step": "A7 14 s after the leave",
+   "banner": null,
+   "readout": null,
+   "drawing": null,
+   "sounds": 697,
+   "hash": "#/",
+   "errors": 1,
+   "words": null,
+   "tree": null,
+   "controls": null,
+   "storage": "cd1b5fa6a0c716617074733c1224cde3a7aacfa6cf7b75ca47a1cd06c5e0b5e9"
+  },
+  {
+   "pass": "A",
+   "step": "A8 new mount, sound on",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "e0c3206f3e592ce890b5fcf5f008234127e1c2d8129c9001d82f4d49f18275b1",
+   "sounds": 697,
+   "hash": "#/yard",
+   "errors": 1,
+   "words": "85ef176aa6f258dacea3ccdb3ca0d93c3c379f679df485cc3b9afff0c7f0c007",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "667aef9a429b69e377247ea9266c29d1087cf023d5f425dc471e52e2cf567b33",
+   "storage": "aac5936da3df6239275914fd7babea011dd127fb4fd2a990d7e0accc5034d8ef"
+  },
+  {
+   "pass": "A",
+   "step": "A8 left during watch optimal, sound on",
+   "banner": null,
+   "readout": null,
+   "drawing": null,
+   "sounds": 700,
+   "hash": "#/",
+   "errors": 1,
+   "words": null,
+   "tree": null,
+   "controls": null,
+   "storage": "aac5936da3df6239275914fd7babea011dd127fb4fd2a990d7e0accc5034d8ef"
+  },
+  {
+   "pass": "A",
+   "step": "A8 14 s after the leave, sound on",
+   "banner": null,
+   "readout": null,
+   "drawing": null,
+   "sounds": 700,
+   "hash": "#/",
+   "errors": 2,
+   "words": null,
+   "tree": null,
+   "controls": null,
+   "storage": "aac5936da3df6239275914fd7babea011dd127fb4fd2a990d7e0accc5034d8ef"
+  },
+  {
+   "pass": "B",
+   "step": "B A1 load",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3a22d4e89fc6ccb9c974ee95ddac4ab69cc9af341dddf540adc79fdb185a24a2",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "59712f4d89e8a1faf38eedb15865f796a8cd835b663f3f8f6f4e6f63800df484",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "112e2fcc39e582ee5b7393bf1e36b12ed86c7ee52cbce410a2d0df9e8bf66b94",
+   "storage": "c819a7ceb517ecaea9a23969c9569fa011541be966f5b21fd0e38883e92bbcb9"
+  },
+  {
+   "pass": "B",
+   "step": "B A2 mute",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3a22d4e89fc6ccb9c974ee95ddac4ab69cc9af341dddf540adc79fdb185a24a2",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B throw AS71",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "5ab50488c97e8c31a1f92567878f36b05555f392d95001e538c2dcef60a53a5b",
+   "sounds": 1,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B throw AS72",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "a72f2b4f7ab304a27d6b77deb3ed0a417de2f6979cad81dc2b8fb2606b8e04dd",
+   "sounds": 2,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B throw AS73",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "c93d27cfed2da00ebe2c6cde87c791de6b42ca0d7ce1588c38ed3fef31279ab7",
+   "sounds": 3,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B throw AS74",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "7e39b44a797fbcfffede2a51f2fd92f74f05cd8d369b641cf8fd5842aa822e8c",
+   "sounds": 4,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B throw AS75",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "00218a849505867826f5cb9992809f66792841ae7afbb5978c33fd7fe2c31c20",
+   "sounds": 5,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B throw AS76",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "d31380dc9a9110c3a79db8182ce0cf1edd8c7f842881e3681a94dbcc8a629941",
+   "sounds": 6,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B throw AS71 again",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "c2a6c5badd9226e3e3169d940af7f6c5612a0de70b50063ab4e901b90d90f44d",
+   "sounds": 7,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B throw AS72 again",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "bd80484ad0cde0edb8b23a7d5e893eb1c10d156d0395eed33ae5f4f4a1287da4",
+   "sounds": 8,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B throw AS73 again",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "1b25ff7142de43550616eb9407ff716be424286efb19a17f89ee8315ac113f8b",
+   "sounds": 9,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B throw AS74 again",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "f1403693eaae07b7498170a576564f36d87d4625d0024ecbb091840724685ee5",
+   "sounds": 10,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B throw AS75 again",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "a950c982e6e7b64477139ec1be81122b930014e519a8b8eb7cea567e67427dbc",
+   "sounds": 11,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B throw AS76 again",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3a22d4e89fc6ccb9c974ee95ddac4ab69cc9af341dddf540adc79fdb185a24a2",
+   "sounds": 12,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B AS73, 17 units right of the centre",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3370ee89b39ab70fa020e993ba87975ec135b9cbc1234d3001c72ed32f852817",
+   "sounds": 13,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B AS73 at the centre",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3a22d4e89fc6ccb9c974ee95ddac4ab69cc9af341dddf540adc79fdb185a24a2",
+   "sounds": 14,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B AS73 box, 1 px inside the left edge",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3370ee89b39ab70fa020e993ba87975ec135b9cbc1234d3001c72ed32f852817",
+   "sounds": 15,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B AS73 box, 3 px outside the left edge",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3370ee89b39ab70fa020e993ba87975ec135b9cbc1234d3001c72ed32f852817",
+   "sounds": 15,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B AS73 box, 1 px inside the right edge",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3a22d4e89fc6ccb9c974ee95ddac4ab69cc9af341dddf540adc79fdb185a24a2",
+   "sounds": 16,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B AS73 box, 3 px outside the right edge",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3a22d4e89fc6ccb9c974ee95ddac4ab69cc9af341dddf540adc79fdb185a24a2",
+   "sounds": 16,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B AS73 box, 1 px inside the top edge",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3370ee89b39ab70fa020e993ba87975ec135b9cbc1234d3001c72ed32f852817",
+   "sounds": 17,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B AS73 box, 3 px outside the top edge",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3370ee89b39ab70fa020e993ba87975ec135b9cbc1234d3001c72ed32f852817",
+   "sounds": 17,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B AS73 box, 1 px inside the bottom edge",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3a22d4e89fc6ccb9c974ee95ddac4ab69cc9af341dddf540adc79fdb185a24a2",
+   "sounds": 18,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B AS73 box, 3 px outside the bottom edge",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3a22d4e89fc6ccb9c974ee95ddac4ab69cc9af341dddf540adc79fdb185a24a2",
+   "sounds": 18,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B reset before the authored line (added by Y1)",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "3a22d4e89fc6ccb9c974ee95ddac4ab69cc9af341dddf540adc79fdb185a24a2",
+   "sounds": 18,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B e step 1 pull AS73 3",
+   "banner": {
+    "text": "Pulled 3 from AS73.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 5 · Joints 1",
+   "drawing": "d747ba56d58180fd71d2508f0390fd35d6d4c83251b89e8e1e809b758b3e4d47",
+   "sounds": 21,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "26d3b2b0ccfb1816c0e6899aceb0cae1173e110faaa1a9aa241db269a08dddc2",
+   "tree": "651724a4af513fceb40704c6daf9fe54dc01a47eda45dfd33e7c90fa3ea871df",
+   "controls": "070318d8020b29400323a06179ecc7bfa91956120838258783c4a70c1930e722",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B e step 2 pull AS72 3",
+   "banner": {
+    "text": "Pulled 3 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 4 / par 5 · Joints 2",
+   "drawing": "f8c7ecbbd7ee2deb4534556a7cce119d0e12550b0de58bee4dd662ff208f57cd",
+   "sounds": 25,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "72c64fa0e703a02d95a4bb73383f8a74db8918ac84b7dc1f8eb66bd2f48ce781",
+   "tree": "651724a4af513fceb40704c6daf9fe54dc01a47eda45dfd33e7c90fa3ea871df",
+   "controls": "c0d910576a5be5dbe246063fe42501a9ea65fe654c6e6131762e36c723165d68",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B e step 3 spot AS75 6",
+   "banner": {
+    "text": "The cars are where they belong, but AS75 is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE AS75 to finish the job.Look it up →",
+    "cls": [
+     "yd-banner",
+     "yd-bad"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 2",
+   "drawing": "5bfd667bc4417c215a707d2d758ed72c238cf0049c5452908900aa239d5483fa",
+   "sounds": 28,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "35340f38355d6464c5b48fe5eb8d2f0daea7b7d547d0249ceab3b3853cfc1602",
+   "tree": "888fa5a786a5c600a439bc0898e8cc3139e5f560afbe84a0ddc6c26a6631896b",
+   "controls": "7323b8574a1e0fea611d7e2e28d453fd122ba0b00149ea9cb9ebdd2a14bd25b4",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "B",
+   "step": "B e step 4 secure AS75",
+   "banner": {
+    "text": "✓ Par! 5 moves — 2 couplings, clean",
+    "cls": [
+     "yd-banner",
+     "yd-win"
+    ]
+   },
+   "readout": "Moves 5 / par 5 · Joints 2",
+   "drawing": "620d83a89447a12619cc139e367474810e10042ea1ad116b3ffeaf09cb8e49a8",
+   "sounds": 33,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "cf5c6c0b99311be04870ae7fec88ac55f9b5d6f0fd034d18c36e267ddbef1aae",
+   "tree": "af533f2202dab8cc82ba7c8a852ba0e068550f0e22b17598be3ce2f0640d95c2",
+   "controls": "d4a25791e47096bea47bd867a5df807b9d24afef5a9f700644136555ea6b4543",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "B",
+   "step": "B g reset",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "b19373aa16c1654a19cfa6a73825b1a281e5b48034e5de14ece913183cce6a25",
+   "sounds": 33,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "d3bb576f0f2210623fbb10fb279c097aabbd2f8c20660a6bf66d7ecf51a707e9",
+   "tree": "a2ec22ea66c9b677f69f0e22430696050fde584b5e05514814ea658c1be6aca0",
+   "controls": "d4a25791e47096bea47bd867a5df807b9d24afef5a9f700644136555ea6b4543",
+   "storage": "444d93e6763def0b1f6df630e358492e62de1a0ffe9ab4a48ea58c8a0e9bf09f"
+  },
+  {
+   "pass": "C",
+   "step": "C no-preference run 1",
+   "banner": {
+    "text": "Pulled 3 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 5 · Joints 1",
+   "drawing": "2a7c9874c4580d981b559d84a04ba7e9a756507a19db42ce343f9f99dac0762e",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bc657dc57bf12571adb5170d8ade044f8b782a883bcbdcba288061274f85a9aa",
+   "tree": "651724a4af513fceb40704c6daf9fe54dc01a47eda45dfd33e7c90fa3ea871df",
+   "controls": "b0355c39fde3828ddce97560c535f95ee441ad1fe65b8655b641f8980e85b568",
+   "storage": "c819a7ceb517ecaea9a23969c9569fa011541be966f5b21fd0e38883e92bbcb9",
+   "ms": 1615,
+   "reducedMotion": "no-preference",
+   "reduce": "0"
+  },
+  {
+   "pass": "C",
+   "step": "C no-preference run 2",
+   "banner": {
+    "text": "Pulled 3 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 5 · Joints 1",
+   "drawing": "2a7c9874c4580d981b559d84a04ba7e9a756507a19db42ce343f9f99dac0762e",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bc657dc57bf12571adb5170d8ade044f8b782a883bcbdcba288061274f85a9aa",
+   "tree": "651724a4af513fceb40704c6daf9fe54dc01a47eda45dfd33e7c90fa3ea871df",
+   "controls": "b0355c39fde3828ddce97560c535f95ee441ad1fe65b8655b641f8980e85b568",
+   "storage": "c819a7ceb517ecaea9a23969c9569fa011541be966f5b21fd0e38883e92bbcb9",
+   "ms": 1615,
+   "reducedMotion": "no-preference",
+   "reduce": "0"
+  },
+  {
+   "pass": "C",
+   "step": "C no-preference run 3",
+   "banner": {
+    "text": "Pulled 3 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 5 · Joints 1",
+   "drawing": "2a7c9874c4580d981b559d84a04ba7e9a756507a19db42ce343f9f99dac0762e",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bc657dc57bf12571adb5170d8ade044f8b782a883bcbdcba288061274f85a9aa",
+   "tree": "651724a4af513fceb40704c6daf9fe54dc01a47eda45dfd33e7c90fa3ea871df",
+   "controls": "b0355c39fde3828ddce97560c535f95ee441ad1fe65b8655b641f8980e85b568",
+   "storage": "c819a7ceb517ecaea9a23969c9569fa011541be966f5b21fd0e38883e92bbcb9",
+   "ms": 1615,
+   "reducedMotion": "no-preference",
+   "reduce": "0"
+  },
+  {
+   "pass": "C",
+   "step": "C reduce run 1",
+   "banner": {
+    "text": "Pulled 3 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 5 · Joints 1",
+   "drawing": "2a7c9874c4580d981b559d84a04ba7e9a756507a19db42ce343f9f99dac0762e",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bc657dc57bf12571adb5170d8ade044f8b782a883bcbdcba288061274f85a9aa",
+   "tree": "651724a4af513fceb40704c6daf9fe54dc01a47eda45dfd33e7c90fa3ea871df",
+   "controls": "b0355c39fde3828ddce97560c535f95ee441ad1fe65b8655b641f8980e85b568",
+   "storage": "dfdc20dbffa2617e8624ab0f8330102f9c743aa9e823ab5019ead0f34e347aaf",
+   "ms": 9304,
+   "reducedMotion": "reduce",
+   "reduce": "1"
+  },
+  {
+   "pass": "C",
+   "step": "C reduce run 2",
+   "banner": {
+    "text": "Pulled 3 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 5 · Joints 1",
+   "drawing": "2a7c9874c4580d981b559d84a04ba7e9a756507a19db42ce343f9f99dac0762e",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bc657dc57bf12571adb5170d8ade044f8b782a883bcbdcba288061274f85a9aa",
+   "tree": "651724a4af513fceb40704c6daf9fe54dc01a47eda45dfd33e7c90fa3ea871df",
+   "controls": "b0355c39fde3828ddce97560c535f95ee441ad1fe65b8655b641f8980e85b568",
+   "storage": "dfdc20dbffa2617e8624ab0f8330102f9c743aa9e823ab5019ead0f34e347aaf",
+   "ms": 9315,
+   "reducedMotion": "reduce",
+   "reduce": "1"
+  },
+  {
+   "pass": "C",
+   "step": "C reduce run 3",
+   "banner": {
+    "text": "Pulled 3 from AS72.",
+    "cls": [
+     "yd-banner",
+     "yd-ok"
+    ]
+   },
+   "readout": "Moves 2 / par 5 · Joints 1",
+   "drawing": "2a7c9874c4580d981b559d84a04ba7e9a756507a19db42ce343f9f99dac0762e",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "bc657dc57bf12571adb5170d8ade044f8b782a883bcbdcba288061274f85a9aa",
+   "tree": "651724a4af513fceb40704c6daf9fe54dc01a47eda45dfd33e7c90fa3ea871df",
+   "controls": "b0355c39fde3828ddce97560c535f95ee441ad1fe65b8655b641f8980e85b568",
+   "storage": "dfdc20dbffa2617e8624ab0f8330102f9c743aa9e823ab5019ead0f34e347aaf",
+   "ms": 9308,
+   "reducedMotion": "reduce",
+   "reduce": "1"
+  },
+  {
+   "pass": "D",
+   "step": "D load, a new profile",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "e0c3206f3e592ce890b5fcf5f008234127e1c2d8129c9001d82f4d49f18275b1",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "59712f4d89e8a1faf38eedb15865f796a8cd835b663f3f8f6f4e6f63800df484",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "112e2fcc39e582ee5b7393bf1e36b12ed86c7ee52cbce410a2d0df9e8bf66b94",
+   "storage": "c819a7ceb517ecaea9a23969c9569fa011541be966f5b21fd0e38883e92bbcb9"
+  },
+  {
+   "pass": "D",
+   "step": "D mute, sound on",
+   "banner": {
+    "text": "",
+    "cls": [
+     "yd-banner"
+    ]
+   },
+   "readout": "Moves 0 / par 5 · Joints 0",
+   "drawing": "e0c3206f3e592ce890b5fcf5f008234127e1c2d8129c9001d82f4d49f18275b1",
+   "sounds": 0,
+   "hash": "#/yard",
+   "errors": 0,
+   "words": "02db605d9ab27170cab9633f191238320aa1c70c0b70d3608be6a7de3768ffbe",
+   "tree": "691a9c5ee89f11083a2258571bfd1ebfd40920563cd4310663a21b61e1022154",
+   "controls": "f128e33a7c21cc121cfbf1b45f37e029c1778fcceaeaa230199d4e07a3e9329e",
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "D",
+   "step": "D left during watch optimal",
+   "banner": null,
+   "readout": null,
+   "drawing": null,
+   "sounds": 3,
+   "hash": "#/",
+   "errors": 0,
+   "words": null,
+   "tree": null,
+   "controls": null,
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  },
+  {
+   "pass": "D",
+   "step": "D 14 s after the leave",
+   "banner": null,
+   "readout": null,
+   "drawing": null,
+   "sounds": 3,
+   "hash": "#/",
+   "errors": 1,
+   "words": null,
+   "tree": null,
+   "controls": null,
+   "storage": "f562eba60975688c4017d6947d36db11372dee46dbd264c17916d69b64caa1d5"
+  }
+ ]
+}

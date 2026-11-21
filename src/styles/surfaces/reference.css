@@ -1,1 +1,107 @@
-/* surfaces/reference.css - the rules that only Reference needs. Owner in Wave 2b: job B2. Class prefix: cb-reference-. Job S1 made this file with no rule. */
+/* surfaces/reference.css - the rules that only Reference needs. Owner in Wave 2b: job B2. Class prefix: cb-reference-.
+   Each selector starts with .cb-app .cb-reference-view, the root of the Reference view. A rule of a
+   reading mode puts the attribute of the mode on html in front. A text size is in rem or em, so that
+   the text scale reaches it. A drawing keeps its height in px, as today. This sheet holds no raw
+   colour, no transition, no animation and no movement. */
+
+/* ---- the view: one column of parts, one gap between them ---------------------------------------
+   The column is at most --maxw (920 px) wide and sits in the middle of the window, which fills the
+   browser (SURFACE-COLUMN). A box, a panel and a control take the width of the column. On a narrow
+   screen the column takes the full width. */
+.cb-app .cb-reference-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  max-width: var(--maxw);
+  margin-inline: auto;
+}
+/* "← Home" keeps the width of its word */
+.cb-app .cb-reference-view > .cb-btn--plain { align-self: flex-start; }
+
+/* ---- the title: a heading is reading text and keeps its size of today (20.8 px at a 16 px root) */
+.cb-app .cb-reference-view .cb-reference-title { font-size: 1.3rem; }
+/* The station icon sits in the Dusk icon square, before the word, on the line of the word. The glyph
+   keeps the size of the heading, and the square is sized to the glyph. */
+.cb-app .cb-reference-view .cb-reference-title .dusk-ico {
+  display: inline-grid;
+  vertical-align: middle;
+  width: 1.6em;
+  height: 1.6em;
+  font-size: 1em;
+}
+
+/* ---- the result list: one column at each width ------------------------------------------------
+   Below 760 px Dusk makes .dusk-rows a grid of columns of 150 px or more. The list stays one column.
+   The list is a ul with one li for each row: no list marker, no list margin, no list padding. */
+.cb-app .cb-reference-view .cb-reference-list {
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A result row has no icon square: the row is one column, so that the title does not fall into the
+   24 px column of the Dusk row. The title and its plain words have no gap between them, as in a
+   Dusk row where they share one cell, so that each row reads as one unit. */
+.cb-app .cb-reference-view .cb-reference-row {
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 0;
+}
+/* The plain words of a row are reading text. They keep their size of today (13.33 px at a 16 px
+   root), take the line height of reading text, not the 1.25 of the Dusk rule for small text, and
+   stop at the measure. The row, a control, keeps the full width. */
+.cb-app .cb-reference-view .cb-reference-row .cb-sub {
+  max-width: var(--measure);
+  font-size: calc(1rem / 1.2);
+  line-height: var(--lh-base);
+}
+
+/* ---- the entry: a framed Dusk panel. The head holds the title, the body holds the rest. ---------- */
+/* The entry title is reading text and keeps its size of today (18.72 px at a 16 px root). */
+.cb-app .cb-reference-view .cb-reference-detail .dusk-panel-name { font-size: 1.17rem; }
+/* The body is one column with one gap. A chip and a button keep the width of their words; the rule
+   text and its control keep the full width. */
+.cb-app .cb-reference-view .cb-reference-detail > .dusk-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.cb-app .cb-reference-view .cb-reference-detail .cb-chip,
+.cb-app .cb-reference-view .cb-reference-detail .dusk-btn { align-self: flex-start; }
+/* The plain words keep their size of today (16.8 px). */
+.cb-app .cb-reference-view .cb-reference-detail .cb-prose--lead { font-size: 1.05rem; }
+/* The line "Hardware variants ..." and the source line keep their size of today (12.8 px), and a
+   block of reading text stops at the measure. */
+.cb-app .cb-reference-view .cb-reference-detail .cb-sub {
+  max-width: var(--measure);
+  font-size: .8rem;
+}
+/* The word of a button keeps its size of today (14.4 px). */
+.cb-app .cb-reference-view .cb-reference-detail .dusk-btn { font-size: .9rem; }
+/* The rule text: the gap of the body is the only space around it. */
+.cb-app .cb-reference-view .cb-reference-detail .cb-disclosure { margin: 0; }
+/* The quote of the rule text is a box. A box takes the width of the panel body, so that its right
+   edge lines up with the panel (SURFACE-COLUMN). The part stops the quote at the measure. */
+.cb-app .cb-reference-view .cb-reference-detail .cb-quote { max-width: none; }
+
+/* The drawings of a signal entry: a row that wraps, the frames on one bottom line. Each frame has
+   its own edge, so the gap between two frames is small. Each drawing is 120 px high, with the
+   width that its own proportions give. */
+.cb-app .cb-reference-view .cb-reference-aspects {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-3);
+}
+.cb-app .cb-reference-view .cb-reference-aspects svg {
+  width: auto;
+  height: 120px;
+}
+
+/* ---- the dyslexia mode -------------------------------------------------------------------------
+   A Dusk part with a fixed line height or a fixed tracking takes the line height and the letter
+   spacing of the mode. The letter spacing comes from html, through inherit: no value is set here. */
+html[data-dys="1"] .cb-app .cb-reference-view .cb-reference-title { letter-spacing: inherit; }
+html[data-dys="1"] .cb-app .cb-reference-view .cb-reference-title .dusk-ico,
+html[data-dys="1"] .cb-app .cb-reference-view .cb-reference-row b,
+html[data-dys="1"] .cb-app .cb-reference-view .dusk-btn { line-height: var(--lh-base); }

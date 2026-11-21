@@ -1,1 +1,112 @@
 /* surfaces/home.css - the rules that only Home needs. Owner in Wave 2b: job B1. Class prefix: cb-home-. Job S1 made this file with no rule. */
+
+/* ---- the view --------------------------------------------------------------------------------
+   One element holds the view. Its parts stack in one column with the gap of the Dusk content
+   area. A heading has more space above it than below it, as today. */
+.cb-home-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+/* ---- the lede --------------------------------------------------------------------------------
+   The chip keeps the upper case of today. Its size is the Dusk size of a label (D-0038, TEXT-SIZE),
+   which is larger than the size of today. */
+.cb-app .cb-home-view .dusk-badge {
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+}
+.cb-app .cb-home-view .dusk-badge + .cb-prose { margin-top: var(--sp-4); }
+
+/* ---- the headings ----------------------------------------------------------------------------
+   A Dusk named rule. The words keep their size of today. */
+.cb-app .cb-home-view .dusk-rule { margin-top: var(--sp-6); }
+.cb-app .cb-home-view .dusk-rule b { font-size: .78rem; }
+
+/* ---- the path --------------------------------------------------------------------------------
+   The stage name and the figure share one row. Each text keeps its size of today. */
+.cb-home-stage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+.cb-home-stage b { font-size: 1.05rem; }
+.cb-home-stage span {
+  color: var(--ink-2);
+  font-size: .85rem;
+}
+.cb-app .cb-home-view .cb-home-stage + .dusk-bar { margin-top: var(--sp-5); }
+
+/* ---- the domain tiles ------------------------------------------------------------------------
+   A live domain is a teal Dusk tile and a button. A domain that is not live is a grey Dusk tile
+   and not a control (D-0038, TILE-TONE). Each tile has the corner of a control. */
+.cb-app .cb-home-view .dusk-tile { border-radius: var(--r-control); }
+
+/* The cap holds the name only. It has no icon square, because an empty square reads like a box
+   to tick (TILE-CAP-SQUARE). The name starts at the edge of the words of the body. */
+.cb-app .cb-home-view .dusk-tile-cap { padding-left: var(--sp-4); }
+
+/* The focus ring of a tile lies in the gap between two tiles. With the Dusk gap of 10 px the edge
+   and the glow of the next tile are 3 px from the ring, and the ring has less than 3:1 against
+   them. The grid keeps the gap of the cards of today, 14 px: the ring then has 3:1 or more against
+   the ground beside it on each side, and the grid keeps two columns at 390 px. */
+.cb-app .cb-home-view .dusk-grid { gap: 14px; }
+
+/* A tile that is not a control does not lift. Its edge still brightens, as on each Dusk tile. */
+.cb-app .cb-home-view div.dusk-tile:hover,
+.cb-app .cb-home-view div.dusk-tile:focus-within { transform: none; }
+
+/* The name and the description keep their size of today. The description is reading text, so it
+   keeps the line height of the reading modes. */
+.cb-app .cb-home-view .dusk-tile-lab { font-size: 1rem; }
+.cb-app .cb-home-view .dusk-tile-sub {
+  font-size: .84rem;
+  line-height: var(--lh-base);
+}
+
+/* The body holds the description, then the bar or the words "Coming soon" at its bottom edge. */
+.cb-app .cb-home-view .dusk-tile-body {
+  gap: var(--sp-3);
+  padding-bottom: var(--sp-4);
+}
+.cb-app .cb-home-view .dusk-tile-body > .dusk-bar { margin-top: auto; }
+.cb-app .cb-home-view .dusk-tile-tag {
+  align-self: flex-start;
+  margin: auto 0 0;
+  font-size: .7rem;
+}
+
+/* ---- the stations ----------------------------------------------------------------------------
+   A Dusk list of rows. Each row is a button with its icon square first: the emoji of today is the
+   glyph of the square. The list keeps the columns and the column gap of today at each width. A
+   Dusk list is one column above 760 px. */
+.cb-app .cb-home-view .cb-home-stations {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  column-gap: var(--sp-5);
+}
+
+/* A station row has no chevron, so it has no third track: the words take that width, and the
+   longest word of a name fits in each reading mode. */
+.cb-app .cb-home-view .cb-home-stations .dusk-row { grid-template-columns: var(--ico-size) minmax(0, 1fr); }
+
+/* The name and the sub-line keep their size of today and the line height of the reading modes. */
+.cb-app .cb-home-view .cb-home-stations .dusk-row b,
+.cb-app .cb-home-view .cb-home-stations .dusk-row small { line-height: var(--lh-base); }
+.cb-app .cb-home-view .cb-home-stations .dusk-row small { font-size: smaller; }
+
+/* ---- the footer ------------------------------------------------------------------------------
+   The tip link is a Dusk button. The link and the text keep their size of today. The text is
+   capped at the measure. */
+.cb-home-view > footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-5);
+  margin-top: var(--sp-6);
+  padding-top: var(--sp-7);
+  border-top: 1px solid var(--lit-rule);
+}
+.cb-app .cb-home-view footer .dusk-btn,
+.cb-app .cb-home-view footer .cb-sub { font-size: .82rem; }

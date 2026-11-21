@@ -4,5 +4,5 @@ import { drawSignal } from '../core/signal';
 import type { SignalAspect } from '../core/types';
 
 export function Signal({ aspect }: { aspect: SignalAspect }) {
-  return <span className="signal" role="img" dangerouslySetInnerHTML={{ __html: drawSignal(aspect) }} />;
+  return <span className="cb-signal" role="img" dangerouslySetInnerHTML={{ __html: drawSignal(aspect) }} />;
 }

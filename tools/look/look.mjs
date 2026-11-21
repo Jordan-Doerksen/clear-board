@@ -11,7 +11,8 @@
 //   --ref <commit>    baseline only. Build that commit outside the tree, from a `git archive`,
 //                     with the installed node_modules, and take the baseline from that build.
 //                     With no option the baseline comes from `dist/` of the working tree.
-//   --look            compare only. A pixel difference is listed and does not fail.
+//   --look            compare only. A pixel difference is listed and does not fail. A control
+//                     that is smaller and stays 44 by 44 px or more gives a warning only.
 //   --gate            compare only. A shot that scrolls sideways fails, also when the baseline
 //                     scrolls sideways.
 //   --only <text>     Take only the shots whose name holds this text.
@@ -35,10 +36,13 @@
 // `compare` fails on these facts: an element id that is gone (an id of `idsMayGo` gives a
 // warning only); a class name that is gone (a class of `classesMayGo` gives a warning only; an
 // entry can end with `*`); a new script error; more sideways scroll; a smaller smallest text;
-// a word or a number that is gone or new; a control that is gone or smaller. A word and the name
-// of a control are read as the markup writes them: a letter case that a style sets (text-transform)
-// changes the picture only. With no `--look` a pixel difference fails also. The pixels are counted with no package: the SHA-256 of the
-// two files is compared, and where they differ both are decoded in a browser page.
+// a word or a number that is gone or new (a new word of the list `wordsMayCome` of its page gives
+// a warning only); a control that is gone or smaller (with `--look`, a control that stays 44 by
+// 44 px or more gives a warning only, with both sizes). A word and the name of a control are
+// read as the markup writes them: a letter case that a style sets (text-transform) changes the
+// picture only. With no `--look` a pixel difference fails also. The pixels are counted with no
+// package: the SHA-256 of the two files is compared, and where they differ both are decoded in a
+// browser page.
 //
 // A baseline is compared only with pictures from the same machine.
 import { execFileSync } from 'node:child_process';
@@ -280,8 +284,12 @@ async function pixelDiff(a, b) {
 }
 
 // ---- Compare the facts of one shot.
+// The floor of a target, in CSS px (fence rule 8). With `--look`, a control that is smaller than
+// in the baseline and stays 44 by 44 px or more gives a warning with both sizes (ruling
+// LOOK-SMALLER). A control under the floor in width or in height fails.
+const TARGET_FLOOR = 44;
 const mayGo = (name, list) => (list ?? []).some((entry) => (entry.endsWith('*') ? name.startsWith(entry.slice(0, -1)) : name === entry));
-function compareFacts(before, now) {
+function compareFacts(before, now, page) {
   const fails = [];
   const warnings = [];
   for (const id of before.ids.filter((x) => !now.ids.includes(x))) {
@@ -296,16 +304,21 @@ function compareFacts(before, now) {
   if (before.smallestText && now.smallestText && now.smallestText.px < before.smallestText.px - 0.01) {
     fails.push(`smaller smallest text: ${before.smallestText.px} px in the baseline, ${now.smallestText.px} px now (${now.smallestText.where})`);
   }
+  // A new word of the list wordsMayCome of the page gives a warning only. Each other new word
+  // fails. A word that is gone always fails.
+  const mayCome = new Set(page.wordsMayCome ?? []);
   const gone = [];
   const added = [];
+  const addedMayCome = [];
   for (const word of new Set([...Object.keys(before.words), ...Object.keys(now.words)])) {
     const was = before.words[word] ?? 0;
     const is = now.words[word] ?? 0;
     if (is < was) gone.push(was - is > 1 || is > 0 ? `${word} (${was} -> ${is})` : word);
-    if (is > was) added.push(is - was > 1 || was > 0 ? `${word} (${was} -> ${is})` : word);
+    if (is > was) (mayCome.has(word) ? addedMayCome : added).push(is - was > 1 || was > 0 ? `${word} (${was} -> ${is})` : word);
   }
   if (gone.length) fails.push(`words or numbers that are gone: ${gone.slice(0, 40).join(' | ')}${gone.length > 40 ? ` | and ${gone.length - 40} more` : ''}`);
   if (added.length) fails.push(`words or numbers that are new: ${added.slice(0, 40).join(' | ')}${added.length > 40 ? ` | and ${added.length - 40} more` : ''}`);
+  if (addedMayCome.length) warnings.push(`${addedMayCome.length} words or numbers are new and are in wordsMayCome of the page: ${addedMayCome.join(' | ')}`);
   const group = (controls) => { const map = new Map(); for (const c of controls) map.set(c.key, [...(map.get(c.key) ?? []), c]); return map; };
   const was = group(before.controls);
   const is = group(now.controls);
@@ -314,7 +327,9 @@ function compareFacts(before, now) {
     if (current.length < list.length) fails.push(`a control is gone: ${key} (${list.length} -> ${current.length})`);
     current.slice(0, list.length).forEach((c, i) => {
       if (c.width < list[i].width - 0.5 || c.height < list[i].height - 0.5) {
-        fails.push(`a control is smaller: ${key}: ${list[i].width} by ${list[i].height} px in the baseline, ${c.width} by ${c.height} px now`);
+        const line = `a control is smaller: ${key}: ${list[i].width} by ${list[i].height} px in the baseline, ${c.width} by ${c.height} px now`;
+        if (flag('--look') && c.width >= TARGET_FLOOR && c.height >= TARGET_FLOOR) warnings.push(`${line}; it stays ${TARGET_FLOOR} by ${TARGET_FLOOR} px or more (--look)`);
+        else fails.push(line);
       }
     });
   }
@@ -415,7 +430,7 @@ try {
       while (!equal() && takes < 3) { now = await take(shot); takes++; }
       writeFileSync(join(outDir, 'current', `${shot.name}.png`), now.png);
       writeFileSync(join(outDir, 'current', `${shot.name}.json`), `${JSON.stringify(now.facts, null, 1)}\n`);
-      const { fails, warnings } = compareFacts(before.facts, now.facts);
+      const { fails, warnings } = compareFacts(before.facts, now.facts, shot.page);
       const lines = [];
       const images = [['baseline', `baseline/${shot.name}.png`], ['current', `current/${shot.name}.png`]];
       let pixels = 0;

@@ -1,1 +1,54 @@
 /* surfaces/settings.css - the rules that only Settings needs. Owner in Wave 2b: job B1. Class prefix: cb-settings-. Job S1 made this file with no rule. */
+
+/* ---- the dialog ------------------------------------------------------------------------------
+   The native dialog in the cb-dialog part (G3). No rule sets its display, so a closed dialog stays
+   closed. The head is a Dusk panel head and the body is a Dusk panel body. Each text keeps its size
+   of today in rem (D-0038, TEXT-SIZE). */
+.cb-app .cb-settings-view .dusk-panel-name { font-size: 1.05rem; }
+.cb-app .cb-settings-view .dusk-btn,
+.cb-app .cb-settings-view .cb-btn--attn { font-size: .9rem; }
+
+/* A defect of shared parts, for job U1 to fold into the parts file: an open dialog cuts each pixel
+   outside its box, and the Dusk panel head puts "Done" 4 px below the top edge, but the focus ring
+   reaches 5 px out. With 8 px above and below "Done", the whole ring shows, on the ground of the
+   head and clear of the lit edge of the dialog. */
+.cb-app .cb-settings-view .dusk-panel-head { padding-block: var(--sp-3); }
+
+/* ---- the sample ------------------------------------------------------------------------------
+   A well that shows the reading modes at work. "Aa" is in the gold of the lit line. */
+.cb-settings-sample {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+  margin-bottom: var(--sp-4);
+  padding: var(--sp-5) var(--sp-6);
+  border-radius: var(--r-control);
+  background: var(--well);
+  box-shadow: var(--ring-well);
+}
+.cb-settings-aa {
+  color: var(--lit);
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.cb-settings-sample b { display: block; }
+.cb-settings-sample small { color: var(--ink-2); }
+
+/* ---- the rows --------------------------------------------------------------------------------
+   The label and the second line of a row keep their size of today. The words of the reset row are
+   plain text, not a label, because no control belongs to them. They keep the size of a label. */
+.cb-app .cb-settings-view .cb-setrow label,
+.cb-app .cb-settings-view .cb-settings-label { font-size: .95rem; }
+.cb-app .cb-settings-view .cb-setrow small { font-size: .8rem; }
+
+/* A defect of two shared parts, for job U1 to fold into the parts file: the attention button has a
+   least width of 44 px, so in a row (cb-setrow) it shrinks below the width of its word and loses
+   its padding on a narrow screen. In this row it keeps its own width. */
+.cb-app .cb-settings-view .cb-setrow > .cb-btn--attn { flex: none; }
+
+/* ---- the note -------------------------------------------------------------------------------- */
+.cb-app .cb-settings-view .dusk-note {
+  margin-top: var(--sp-5);
+  font-size: .8rem;
+}

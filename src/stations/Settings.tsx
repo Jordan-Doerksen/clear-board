@@ -28,32 +28,32 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
   }
 
   return (
-    <dialog id="settings" ref={ref} aria-label="Settings" onClose={onClose} onCancel={onClose}>
-      <div className="set-h"><h2>Settings</h2><button className="iconbtn" onClick={onClose}>Done</button></div>
-      <div className="set-body">
-        <div className="set-sample">
-          <span className="ss-aa">Aa</span>
+    <dialog className="cb-dialog cb-settings-view" id="settings" ref={ref} aria-label="Settings" onClose={onClose} onCancel={onClose}>
+      <div className="dusk-panel-head"><h2 className="dusk-panel-name">Settings</h2><span className="dusk-spacer" /><button className="dusk-btn" onClick={onClose}>Done</button></div>
+      <div className="dusk-panel-body">
+        <div className="cb-settings-sample">
+          <span className="cb-settings-aa">Aa</span>
           <div><b>The quick brown fox jumps.</b><small>Rule 112 — secure unattended equipment. This preview reflects your settings live.</small></div>
         </div>
         {TOGGLES.map(t => (
-          <div className="row" key={t.key}>
-            <div><label htmlFor={`t-${t.key}`}>{t.label}</label><small>{t.sub}</small></div>
-            <span className="sw">
-              <input type="checkbox" id={`t-${t.key}`} checked={settings[t.key]} onChange={e => toggle(t.key, e.target.checked)} />
+          <div className="cb-setrow" key={t.key}>
+            <div><label htmlFor={`t-${t.key}`}>{t.label}</label><small id={`t-${t.key}-sub`}>{t.sub}</small></div>
+            <span className="cb-toggle">
+              <input type="checkbox" id={`t-${t.key}`} aria-describedby={`t-${t.key}-sub`} checked={settings[t.key]} onChange={e => toggle(t.key, e.target.checked)} />
               <i />
             </span>
           </div>
         ))}
-        <div className="row">
-          <div><label>Reset my progress</label><small>Clear mastery, drills &amp; yard wins on this device</small></div>
-          <button className="iconbtn danger" onClick={() => {
+        <div className="cb-setrow">
+          <div><span className="cb-settings-label">Reset my progress</span><small>Clear mastery, drills &amp; yard wins on this device</small></div>
+          <button className="cb-btn--attn" onClick={() => {
             if (confirm('Reset all your progress on this device? Mastery, drills and yard wins will be cleared. This cannot be undone.')) {
               resetProgress();
               onClose();
             }
           }}>Reset</button>
         </div>
-        <p className="set-note">Everything is saved only on this device — no account, nothing sent anywhere.</p>
+        <p className="dusk-note">Everything is saved only on this device — no account, nothing sent anywhere.</p>
       </div>
     </dialog>
   );
