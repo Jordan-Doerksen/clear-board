@@ -238,15 +238,15 @@ export function Drill({ domain }: { domain?: string }) {
         })}
       </div>
       {answered && (
-        <div className="feedback" aria-live="polite">
-          <b className={ok ? 'fb-ok' : 'fb-no'}>{ok ? 'Right.' : 'Not quite.'}</b>
+        <div className="dusk-panel cb-drill-feedback" data-cb="feedback" aria-live="polite">
+          <b className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{ok ? 'Right.' : 'Not quite.'}</b>
           <span><b>{item.title}</b> — {q.explain || item.plain || c.verbatim}</span>
           {!ok && severityOf(item) !== 'S1' && (
-            <span className="muted">{severityOf(item) === 'S3' ? 'Safety-critical — lock this one in.' : 'Worth nailing.'} Review your misses at the end.</span>
+            <span className="cb-drill-severity">{severityOf(item) === 'S3' ? 'Safety-critical — lock this one in.' : 'Worth nailing.'} Review your misses at the end.</span>
           )}
-          <span className="cite">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
-          <button className="iconbtn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
-          <button className="iconbtn next" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>
+          <span className="cb-sub">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
+          <button className="dusk-btn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
+          <button className="dusk-btn" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>
             {idx + 1 < built.slots.length ? 'Next →' : 'Finish'}
           </button>
         </div>

@@ -38,3 +38,24 @@
   width: auto;
   height: 170px;
 }
+
+/* ---- the feedback: a Dusk panel. Each part is on its own line, in the order of today ------------ */
+.cb-app .cb-drill-view .cb-drill-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+/* A block of reading text stops at the measure. */
+.cb-app .cb-drill-view .cb-drill-feedback > span { max-width: var(--measure); }
+/* The severity line is a second level of ink at the reading size of today (16 px). */
+.cb-app .cb-drill-view .cb-drill-feedback .cb-drill-severity { color: var(--ink-2); }
+/* The source line keeps its size of today (12.8 px). */
+.cb-app .cb-drill-view .cb-drill-feedback .cb-sub { font-size: .8rem; }
+/* The word of a button keeps its size of today (14.4 px). "Look it up →" keeps the full width of the
+   panel, and "Next →" or "Finish", the last part, keeps its own width at the start of its line. */
+.cb-app .cb-drill-view .cb-drill-feedback .dusk-btn { font-size: .9rem; }
+.cb-app .cb-drill-view .cb-drill-feedback > .dusk-btn:last-child { align-self: flex-start; }
+
+/* ---- the dyslexia mode -------------------------------------------------------------------------
+   A Dusk part with a fixed line height takes the line height of the mode. */
+html[data-dys="1"] .cb-app .cb-drill-view .dusk-btn { line-height: var(--lh-base); }
