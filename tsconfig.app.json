@@ -6,7 +6,7 @@
     "module": "esnext",
     "types": ["vite/client"],
     "skipLibCheck": true,
-    "allowJs": true,        /* the byte-for-byte Yard engine ships as .js; allowed, not type-checked (checkJs off) */
+    "allowJs": true,        /* the Yard engine and the islands ship as .js; allowed, not type-checked (checkJs off) */
 
     /* Bundler mode */
     "moduleResolution": "bundler",

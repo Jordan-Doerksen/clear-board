@@ -3,6 +3,7 @@
 // current route. The station under it stays mounted, so the session, the Yard job and the Radio run
 // stay. Closing the dialog (Close, Escape) returns focus to the control that opened it.
 import { useEffect, useId, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import type { LookUpRequest } from '../state/AppContext';
 import { Entry } from './Entry';
@@ -21,6 +22,16 @@ export function LookUp() {
   const opener = useRef<HTMLElement | null>(null);
   const shown = useRef<LookUpRequest | null>(null);
   const headingId = useId();
+  const location = useLocation();
+
+  // A change of route (the browser Back, for example) closes the dialog: its entry belongs to the
+  // station that asked for it (finding F-4 of the last review of Wave 2c). This effect runs before the
+  // effect of the shell, which then moves focus to the heading of the new view (contract C7), so
+  // focus does not return to the control of the old station.
+  useEffect(() => {
+    const dialog = ref.current;
+    if (dialog?.open) { opener.current = null; dialog.close(); }
+  }, [location.pathname]);
 
   useEffect(() => {
     const dialog = ref.current;

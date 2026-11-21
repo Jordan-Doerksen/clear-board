@@ -49,8 +49,9 @@ export function Reference() {
     setSelected(i);
   };
 
-  // Deep link: a Drill miss or a Yard refusal opens Reference focused on the exact rule
-  // (REVAMP §6 — every error one tap from the plain-language rule). ?focus=<itemId>.
+  // Deep link: ?focus=<itemId> opens Reference at the entry of that item (REVAMP §6). Since row
+  // U-17, "Look it up" in the Drill, the Radio test and the Yard opens the look-up dialog over the
+  // station in place of this route.
   useEffect(() => {
     if (!focusId || !content) return;
     const it = content.byId[focusId];
@@ -100,9 +101,13 @@ export function Reference() {
         ))
         // U-07 (2c-plan C9): with no entry loaded, "No match" would not be true. The notice of the
         // shell says what happened, with its retry control.
-        : items.length === 0 && contentFailed.length > 0
-          ? <LibraryNotice />
-          : <p className="dusk-lede">No match. Try another word.</p>}
+        // While the library loads, "No match" would not be true (finding F-5 of the last review of
+        // Wave 2c; fence item 15): the list says "Loading…", as the other stations do.
+        : !content
+          ? <p className="dusk-lede">Loading…</p>
+          : items.length === 0 && contentFailed.length > 0
+            ? <LibraryNotice />
+            : <p className="dusk-lede">No match. Try another word.</p>}
     </div>
   );
 }
