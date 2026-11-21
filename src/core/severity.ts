@@ -1,6 +1,6 @@
 // S1/S2/S3 severity — drives feedback tone and remediation weight (safety-critical misses come back
 // first). This is a REVIEWABLE v1 classification, NOT a legal safety ranking: transparent DOMAIN
-// defaults + a short, reasoned override list. Jordan/SME: adjust DOMAIN_SEV and SEV_OVERRIDE freely.
+// defaults + a short, reasoned override list. The SME can adjust the two lists, DOMAIN_SEV and SEV_OVERRIDE.
 //   S1 = knowledge / inefficiency · S2 = rule violation · S3 = safety-critical (someone gets hurt).
 import type { ContentItem } from './types';
 
