@@ -144,6 +144,9 @@ option of each. A brief that says "open for the lead" for one of these names fol
 | `FORCED-COLOURS` | In Wave 2c, U1 adds one block `@media (forced-colors: active)` to the parts file that gives `cb-mark`, `cb-dialog`, `dusk-btn`, `dusk-tile`, `dusk-row` and `dusk-panel` a 1 px solid border with no colour value. | With forced colours the Dusk edges (box shadows) do not show, and the home mark draws nothing (the review of B1). |
 | `FOCUS-OUTER` | The contrast of a focus ring is measured against the colour outside the ring. | A ring that sits on a glowing tile has two sides; the outer side meets WCAG. |
 | `RADIO-LINE1` | In Wave 2c, U1 corrects the comment on line 1 of `radioSim.js` ("Ported VERBATIM"), which is no longer true for the style. A comment only. | The review of B3. |
+| `READOUT-CELLS` (picked) | The Yard readout stays one element. The three-cell form is not built. | In the three-cell form the labels fall from 16 px to 11 px, against `TEXT-READING`. |
+| `DISABLED-EDGE` | The edge of a disabled control can be under 3:1. Its words stay 4.5:1 or more. | WCAG 1.4.11 does not cover an inactive control; the words carry the state. |
+| `Y-FIX` | After Y2 is merged, a small follow-up job in `yard.css` and `view.ts`: the message well and the note panel take the full width of the Yard while their text keeps the cap at `--measure` (as `SURFACE-COLUMN` does for the boxes of the Radio); and only a car mark or a number of the job line takes the mono face (today each bold word does, so "don't match" and "Depart ▸" show in mono). | The review of Y3. A box and a panel line up with the panels around them. |
 
 ## 3. Closed by the owner after Gate A
 
