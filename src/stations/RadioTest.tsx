@@ -128,9 +128,9 @@ export function RadioTest({ active = true }: { active?: boolean }) {
   // ── Run finished ──
   if (item === undefined || step === undefined) {
     const gradedCount = order.filter(i => items[i]?.citation.trust === 'verified').length;
-    // The end value is also read after the decay, as the start value is: the app recomputes the
-    // stored mastery at an answer that counts, and a run in which no answer counts would otherwise
-    // compare a value with the decay and a value without it.
+    // The end value is also read after the decay, as the start value is. The app context recomputes
+    // the mastery at an answer that counts and at a change of route, not while a run is open, so a
+    // run in which no answer counts would otherwise compare a value with the decay and an older one.
     const end = withRecomputedMastery(profile, content).domains['radio']?.mastery || 0;
     const delta = Math.round((end - (startRef.current?.mastery ?? end)) * 100);
     return (

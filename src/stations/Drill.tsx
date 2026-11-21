@@ -120,8 +120,9 @@ export function Drill({ domain }: { domain?: string }) {
     const due = dueGroups(built.slots.map(s => s.item.id), profile)
       .map(g => (g.days === 0 ? `${g.count} now` : `${g.count} in ${count(g.days, 'day')}`));
     // U-15: the end value is also read after the decay, as the start value is (buildSession). The app
-    // recomputes the stored mastery only at the load and at an answer that counts, so after the app
-    // has been open for days a session in which no answer counts would show the decay as a gain.
+    // context recomputes the mastery at the load, at an answer that counts and at a change of route
+    // (MASTERY-NOW). A session can stay open for days with no change of route, so a session in which
+    // no answer counts would otherwise show the decay as a gain.
     const after = withRecomputedMastery(profile, content);
     const lines = built.drilledDomains.map(d => {
       const name = (DOMAINS.find(x => x.id === d) || {}).name || d;

@@ -1,7 +1,8 @@
 // Clear Board — one provider for the whole app: content library, the single profile, and settings.
 // Mirrors the vanilla `ctx` object (profile/content/settings/save/recompute/speak) as React context.
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { freshProfile, keepProfileCopy, loadContent, mergeProfileInto, mergeStoredProfile, PROFILE_KEY, readStoredProfile, recomputeMastery, repairProfile, saveProfile, SETTINGS_KEY, YARD_SOUND_KEY } from '../core/store';
 import { grade } from '../core/sr';
 import { answerCounts } from '../core/drill';
@@ -91,13 +92,22 @@ interface AppValue {
   // close event of the dialog clears only the request that it closes.
   lookUpRequest: LookUpRequest | null;
   closeLookUp: (request: LookUpRequest) => void;
+  // MASTERY-NOW: useApp reports the route of the page. At the first report of a new route the app
+  // context recomputes the mastery, so that each view shows the current value.
+  followRoute: (path: string) => void;
 }
 export interface LookUpRequest { itemId: string }
 
 const Ctx = createContext<AppValue | null>(null);
 
+// Each part of the app that reads the context is inside the router, and the provider is not. So
+// each reader reports the route (MASTERY-NOW). The report is a layout effect: a recompute after a
+// change of route comes before the new view paints.
 export function useApp(): AppValue {
   const v = useContext(Ctx);
+  const { pathname } = useLocation();
+  const followRoute = v?.followRoute;
+  useLayoutEffect(() => { followRoute?.(pathname); }, [followRoute, pathname]);
   if (!v) throw new Error('useApp must be used inside <AppProvider>');
   return v;
 }
@@ -265,6 +275,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [choices, content]);
 
+  // MASTERY-NOW: the mastery decays with time, and the app context recomputed it only at the load
+  // and at an answer that counts. So after the app had been open for days, Home showed an older value
+  // than the end of a Drill session (which reads the value after the decay). Now the first report of
+  // a new route recomputes it. The recompute does not write the stored profile: the load and the
+  // next answer that counts write it.
+  const lastRoute = useRef<string | null>(null);
+  const followRoute = useCallback((path: string) => {
+    const before = lastRoute.current;
+    lastRoute.current = path;
+    if (before === null || before === path || !content) return;
+    setProfile(prev => { const p = structuredClone(prev); recomputeMastery(p, content); return p; });
+  }, [content]);
+
   // C1: the look-up dialog. An id that the full library does not hold opens nothing.
   const [lookUpRequest, setLookUpRequest] = useState<LookUpRequest | null>(null);
   // An id that the library does not hold opens nothing, unless part of the library did not load:
@@ -290,7 +313,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [content]);
 
   return (
-    <Ctx.Provider value={{ content, contentFailed, retryContent, profile, settings, choices, deviceReduce, deviceContrast, setSetting, resetProgress, replaceProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak, lookUp, lookUpRequest, closeLookUp }}>
+    <Ctx.Provider value={{ content, contentFailed, retryContent, profile, settings, choices, deviceReduce, deviceContrast, setSetting, resetProgress, replaceProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak, lookUp, lookUpRequest, closeLookUp, followRoute }}>
       {children}
     </Ctx.Provider>
   );
