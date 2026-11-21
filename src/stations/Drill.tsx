@@ -1,179 +1,101 @@
 // Drill — adaptive (SM-2-lite) MC across content types; updates mastery → the path. (vanilla drill.js)
 // Definitions → term↔definition MC. Signals → read-the-aspect MC. Rules → authored MC bank. One loop, one profile.
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import { Signal } from './Signal';
-import { DOMAINS, drillable } from '../core/store';
-import { isDue } from '../core/sr';
-import { severityOf, SEV_RANK } from '../core/severity';
-import type { Content, ContentItem, Question, SignalAspect } from '../core/types';
+import { DOMAINS } from '../core/store';
+import { severityOf } from '../core/severity';
+import { buildSession, dueGroups, withRecomputedMastery } from '../core/drill';
+import type { DrillQuestion, Session } from '../core/drill';
 
-const shuffle = <T,>(a: T[]): T[] => {
-  const x = a.slice();
-  for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; }
-  return x;
-};
-
-// An item's intro difficulty: the easiest question a rule can ask; defs/signals are gentle (tier 1).
-function itemTier(item: ContentItem, content: Content): number {
-  if (item.type !== 'rule') return 1;
-  const tiers = (content.questionsByRule[item.id] || []).map(qq => qq.tier ?? 1);
-  return tiers.length ? Math.min(...tiers) : 1;
+// The station heading (U-29, 2c-plan C7): one visible h2 with the station name of Home, in the form
+// of the Reference title. The route /signals is the station Signals; each other route is the Drill.
+function StationTitle({ signals }: { signals: boolean }) {
+  return (
+    <div className="dusk-top cb-drill-head">
+      <h2 className="dusk-title cb-drill-title"><span className="dusk-ico">{signals ? '🚦' : '🎯'}</span> {signals ? 'Signals' : 'Drill'}</h2>
+    </div>
+  );
 }
 
-type Q =
-  | { kind: 'rule'; heading: string; promptText: string; correct: string; options: string[]; explain: string }
-  | { kind: 'signal'; heading: string; aspect: SignalAspect; correct: string; options: string[]; explain?: string }
-  | { kind: 'text'; heading: string; promptText: string; correct: string; options: string[]; explain?: string };
+// "1 item", "3 items": a count with its noun.
+const count = (n: number, noun: string) => `${n} ${noun}${n === 1 ? '' : 's'}`;
 
-interface QCtx { pool: ContentItem[]; byType: Record<string, ContentItem[]>; ceiling: number }
-interface Slot { item: ContentItem; q: Q }
-interface Built { slots: Slot[]; drilledDomains: string[]; startMastery: Record<string, number> }
+// U-26: the note of a session in which no item was due at the start. It states the guard of the
+// grading (answerCounts in src/core/drill.ts), so it is true for each answer of the session.
+const PRACTICE_NOTE = 'A right answer counts only when the item is due. A miss always counts.';
 
-const TARGET = 8;        // aim for a ~8-question session
-const PER_RULE_CAP = 3;  // …but no single rule may fill more than 3 of it (REVAMP §5, rule.112's 17)
-
-function distractors(item: ContentItem, pool: ContentItem[], byType: Record<string, ContentItem[]>, fieldFn: (o: ContentItem) => string): string[] {
-  const same = (byType[item.type] || pool).filter(o => o.id !== item.id);
-  let opts = shuffle(same).slice(0, 3).map(fieldFn);
-  if (opts.length < 3) opts = opts.concat(shuffle(pool.filter(o => o.id !== item.id)).slice(0, 3 - opts.length).map(fieldFn));
-  return opts;
-}
-
-// Build one question. For rules, `forceQ` pins a specific authored question (so a thin domain can
-// draw several DISTINCT facets of one rule); otherwise one is picked within the tier band.
-function buildQ(item: ContentItem, content: Content, ctx: QCtx, forceQ?: Question): Q {
-  if (item.type === 'rule') {
-    const qs = content.questionsByRule[item.id] || [];
-    const band = qs.filter(qq => (qq.tier ?? 1) <= ctx.ceiling);   // ask within the learner's tier band (#8)
-    const from = band.length ? band : qs;
-    const Q = forceQ || from[Math.floor(Math.random() * from.length)];
-    return { kind: 'rule', heading: 'What does the rule say?', promptText: Q.stem, correct: Q.answer, options: shuffle(Q.choices.slice()), explain: Q.explain };
-  }
-  if (item.type === 'signal') {
-    const aspects = item.payload?.aspects || [];
-    const aspect = aspects[Math.floor(Math.random() * aspects.length)];
-    const correct = item.title;
-    return { kind: 'signal', heading: 'What signal is this?', aspect, correct, options: shuffle([correct, ...distractors(item, ctx.pool, ctx.byType, o => o.title)]) };
-  }
-  const dir = Math.random() < 0.5 ? 'term' : 'def';
-  const field = (it: ContentItem) => (dir === 'term' ? (it.plain || it.citation.verbatim || '') : it.title);
-  const promptText = dir === 'term' ? item.title : (item.plain || item.citation.verbatim || '');
-  const correct = field(item);
-  return { kind: 'text', heading: dir === 'term' ? 'What does this mean?' : 'Which term is this?', promptText, correct, options: shuffle([correct, ...distractors(item, ctx.pool, ctx.byType, field)]) };
+// U-31: Read aloud speaks the words of the screen, in the order of the screen. Each part ends as a
+// sentence, so that a voice makes a stop between two options.
+const said = (text: string) => { const t = text.trim(); return /[.?!:…]$/.test(t) ? t : `${t}.`; };
+function questionSpeech(q: DrillQuestion): string {
+  const parts = [q.heading, ...(q.kind === 'signal' ? [] : [q.promptText]), ...q.options.map((o, i) => `${i + 1}. ${o}`)];
+  return parts.filter(Boolean).map(said).join(' ');
 }
 
 export function Drill({ domain }: { domain?: string }) {
   const { content, profile, recordAnswer, speak } = useApp();
   const navigate = useNavigate();
+  const onSignals = useLocation().pathname === '/signals';
+  const title = <StationTitle signals={onSignals} />;
   const profileRef = useRef(profile);
   profileRef.current = profile;
 
-  const [sessionKey, setSessionKey] = useState(0);
-  const [built, setBuilt] = useState<Built | null>(null);
+  const [built, setBuilt] = useState<Session | null>(null);
+  const [isReview, setIsReview] = useState(false);                     // the session is a "practice your misses" round
+  const [reviewNext, setReviewNext] = useState<Session | null>(null); // that round, built at "Finish" (U-15)
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
-  const [focusIds, setFocusIds] = useState<string[] | null>(null);   // set ⇒ a "practice your misses" round
-  const missedRef = useRef<Set<string>>(new Set());                  // items missed in the current session
+  const missedRef = useRef<Set<string>>(new Set());                    // items missed in the current session
+  // U-14: after "Next" keyboard focus stays in the task. The control that had focus is removed, so
+  // focus goes to the heading of the next question, or to the end heading after "Finish".
+  const questionHeadRef = useRef<HTMLHeadingElement>(null);
+  const doneHeadRef = useRef<HTMLHeadingElement>(null);
+  const focusTo = useRef<'question' | 'any' | null>(null);
+  useEffect(() => {
+    const want = focusTo.current;
+    if (!want) return;
+    const el = questionHeadRef.current ?? (want === 'any' ? doneHeadRef.current : null);
+    if (el) { focusTo.current = null; el.focus(); }
+  });
 
-  // Build the session once per (content, domain, sessionKey). profileRef → pre-session snapshot.
+  // Build the first session once per (content, domain). profileRef → pre-session snapshot.
+  // The selection is the pure function buildSession of src/core/drill.ts (row U-44).
   useEffect(() => {
     if (!content) return;
-    let items: ContentItem[] = [];
-    if (focusIds) items = focusIds.map(id => content.byId[id]).filter((i): i is ContentItem => !!i);   // misses-review round
-    else if (domain) items = drillable(content.byDomain[domain], content);
-    else for (const d of DOMAINS.filter(d => d.live)) items.push(...drillable(content.byDomain[d.id], content));
-    items = items.filter(i => i.type !== 'signal' || (i.payload?.aspects?.length ?? 0) > 0);
-    // radio-script items are graded in the Radio station's "Call it yourself" mode, where the
-    // question is "which call comes next" — they have no term↔definition reading, so the Drill
-    // must never draw them (they'd fall to the text branch and ask nonsense).
-    items = items.filter(i => i.type !== 'radio-script');
-
-    const byType: Record<string, ContentItem[]> = {};
-    for (const i of items) (byType[i.type] ||= []).push(i);
-    const due = items.filter(i => isDue(profileRef.current.items[i.id]));
-
-    // Tier-aware seeding (#8): a fresh profile (nothing seen) starts gentle — tier-1 only — so the
-    // first session is winnable, never tier-3 cold; the band widens as domain mastery grows.
-    const cand = domain ? [domain] : DOMAINS.filter(d => d.live).map(d => d.id);
-    const seenAny = items.some(i => (profileRef.current.items[i.id]?.seen ?? 0) > 0);
-    const mast = cand.reduce((s, d) => s + (profileRef.current.domains[d]?.mastery || 0), 0) / Math.max(1, cand.length);
-    const ceiling = focusIds ? Infinity : !seenAny ? 1 : mast < 0.15 ? 1 : mast < 0.45 ? 2 : 3;   // a review round includes every miss, any tier
-    const tierOK = (i: ContentItem) => itemTier(i, content) <= ceiling;
-    const ctx: QCtx = { pool: items, byType, ceiling };
-
-    // Priority: due & in-band → in-band (not-due, fills a fresh session) → due but harder → the rest.
-    const order = [
-      ...shuffle(due.filter(tierOK)),
-      ...shuffle(items.filter(i => tierOK(i) && !due.includes(i))),
-      ...shuffle(due.filter(i => !tierOK(i))),
-      ...shuffle(items.filter(i => !tierOK(i) && !due.includes(i))),
-    ];
-    const seen = new Set<string>();
-    let chosen = order.filter(i => !seen.has(i.id) && !!seen.add(i.id)).slice(0, 10);
-    if (focusIds) chosen = chosen.sort((a, b) => SEV_RANK[severityOf(a)] - SEV_RANK[severityOf(b)]);   // review: safety-critical misses first
-
-    // One slot per chosen item, tracking which authored questions each rule has used so a thin
-    // domain (e.g. securement's 3 items) can pad with DISTINCT facets rather than stall under the
-    // 4-question floor — capped per rule so no one rule (rule.112 has 17) dominates the session.
-    const bandQs = (it: ContentItem) => {
-      const qs = content.questionsByRule[it.id] || [];
-      const b = qs.filter(qq => (qq.tier ?? 1) <= ceiling);
-      return b.length ? b : qs;
-    };
-    const usedQ: Record<string, Set<string>> = {};
-    const slots: Slot[] = [];
-    for (const it of chosen) {
-      if (it.type === 'rule') {
-        const qs = bandQs(it);
-        const pick = qs[Math.floor(Math.random() * qs.length)];
-        (usedQ[it.id] ||= new Set()).add(pick?.id ?? '');
-        slots.push({ item: it, q: buildQ(it, content, ctx, pick) });
-      } else slots.push({ item: it, q: buildQ(it, content, ctx) });
-    }
-    // Pad a thin session with extra distinct rule facets (round-robin, ≤ PER_RULE_CAP each).
-    const rules = chosen.filter(it => it.type === 'rule');
-    let progressed = rules.length > 0;
-    while (slots.length < TARGET && progressed) {
-      progressed = false;
-      for (const it of rules) {
-        if (slots.length >= TARGET) break;
-        const used = (usedQ[it.id] ||= new Set());
-        if (used.size >= PER_RULE_CAP) continue;
-        const unused = bandQs(it).filter(qq => !used.has(qq.id));
-        if (!unused.length) continue;
-        const pick = unused[Math.floor(Math.random() * unused.length)];
-        used.add(pick.id);
-        slots.push({ item: it, q: buildQ(it, content, ctx, pick) });
-        progressed = true;
-      }
-    }
-    const finalSlots = (focusIds ? slots : shuffle(slots)).slice(0, 10);   // a review round keeps the safety-first order
-    const drilledDomains = [...new Set(finalSlots.map(s => s.item.domain))];
-    const startMastery = Object.fromEntries(drilledDomains.map(d => [d, profileRef.current.domains[d]?.mastery || 0]));
-
     missedRef.current = new Set();
-    setBuilt({ slots: finalSlots, drilledDomains, startMastery });
+    setBuilt(buildSession({ content, profile: profileRef.current, domain }));
+    setIsReview(false); setReviewNext(null);
     setIdx(0); setScore(0); setPicked(null);
-  }, [content, domain, sessionKey, focusIds]);
+  }, [content, domain]);
+
+  // Start a new session from the end screen ("Drill again", or the review of the misses).
+  function start(session: Session, review: boolean) {
+    focusTo.current = 'question';
+    missedRef.current = new Set();
+    setBuilt(session); setIsReview(review); setReviewNext(null);
+    setIdx(0); setScore(0); setPicked(null);
+  }
 
   const slot = built && idx < built.slots.length ? built.slots[idx] : null;
   const item = slot?.item ?? null;
   const q = slot?.q ?? null;
 
-  // Read-aloud the prompt (not the signal SVG) when a new question appears.
+  // Read aloud a new question: its heading, its prompt (a signal question has a drawing and no
+  // prompt text) and its options (U-31). speak does nothing when Read aloud is off.
   useEffect(() => {
-    if (q && (q.kind === 'rule' || q.kind === 'text')) speak(q.promptText);
+    if (q) speak(questionSpeech(q));
   }, [q, speak]);
 
-  if (!content || !built) return <div className="cb-drill-view"><p className="dusk-lede">Loading…</p></div>;
+  if (!content || !built) return <div className="cb-drill-view">{title}<p className="dusk-lede">Loading…</p></div>;
 
-  if (built.slots.length < (focusIds ? 1 : 4)) {
+  if (built.slots.length < (isReview ? 1 : 4)) {
     return (
       <div className="cb-drill-view">
         <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+        {title}
         <p className="dusk-lede">Not enough verified content to drill yet.</p>
       </div>
     );
@@ -181,30 +103,47 @@ export function Drill({ domain }: { domain?: string }) {
 
   // Finished — show the session summary with mastery deltas.
   if (!slot || !item || !q) {
+    // U-15 (UX-27): the button of the review says the count of items and the count of questions of
+    // the round that it starts.
+    const reviewItems = new Set(reviewNext?.slots.map(s => s.item.id)).size;
+    // U-26: items that were new and now have an answer; and when the items of the session come back.
+    const started = built.newIds.filter(id => (profile.items[id]?.seen ?? 0) > 0).length;
+    const due = dueGroups(built.slots.map(s => s.item.id), profile)
+      .map(g => (g.days === 0 ? `${g.count} now` : `${g.count} in ${count(g.days, 'day')}`));
+    // U-15: the end value is also read after the decay, as the start value is (buildSession). The app
+    // recomputes the stored mastery only at the load and at an answer that counts, so after the app
+    // has been open for days a session in which no answer counts would show the decay as a gain.
+    const after = withRecomputedMastery(profile, content);
     const lines = built.drilledDomains.map(d => {
       const name = (DOMAINS.find(x => x.id === d) || {}).name || d;
-      const end = profile.domains[d]?.mastery || 0;
+      const end = after.domains[d]?.mastery || 0;
       const delta = Math.round((end - (built.startMastery[d] || 0)) * 100);
       return `${name}: ${delta >= 0 ? '+' : ''}${delta}% → ${Math.round(end * 100)}%`;
     }).join(' · ');
     return (
       <div className="cb-drill-view">
         <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+        {title}
         <div className="dusk-tile dusk-tile--teal cb-drill-done">
-          <div className="dusk-tile-cap"><h2 className="dusk-tile-lab">{focusIds ? 'Review done' : 'Session done'}</h2></div>
+          <div className="dusk-tile-cap"><h3 className="dusk-tile-lab" ref={doneHeadRef} tabIndex={-1}>{isReview ? 'Review done' : 'Session done'}</h3></div>
           <div className="dusk-tile-body">
             <p className="dusk-tile-num">{score} / {built.slots.length}</p>
             <p className="dusk-tile-sub">{lines}. Spaced out over the next days so it sticks.</p>
+            {/* U-26: progress in words, from the stored profile */}
+            <p className="dusk-tile-sub cb-drill-progress">Right answers: {score} of {built.slots.length}.{started > 0 ? ` New items started: ${started}.` : ''}</p>
+            {due.length > 0 && <p className="dusk-tile-sub cb-drill-progress">Items due again: {due.join(', ')}.</p>}
+            {built.practiceOnly && <p className="dusk-tile-sub cb-drill-progress">This session was practice only: no item in it was due at the start. {PRACTICE_NOTE}</p>}
           </div>
         </div>
         <div className="cb-drill-actions">
-          {missedRef.current.size > 0 && (
-            <button className="dusk-btn" onClick={() => { setFocusIds([...missedRef.current]); setSessionKey(k => k + 1); }}>
-              Practice the {missedRef.current.size} you missed →
+          {reviewNext && reviewNext.slots.length > 0 && (
+            <button className="dusk-btn" onClick={() => start(reviewNext, true)}>
+              Practice the {count(reviewItems, 'item')} you missed: {count(reviewNext.slots.length, 'question')} →
             </button>
           )}
-          <button className="dusk-btn" onClick={() => { setFocusIds(null); setSessionKey(k => k + 1); }}>Drill again</button>
-          <button className="dusk-btn" onClick={() => navigate('/')}>Back to the path</button>
+          <button className="dusk-btn" onClick={() => start(buildSession({ content, profile: profileRef.current, domain }), false)}>Drill again</button>
+          {/* U-40 (2c-plan C6): the way back to Home has one name. */}
+          <button className="dusk-btn" onClick={() => navigate('/')}>← Home</button>
         </div>
       </div>
     );
@@ -213,6 +152,17 @@ export function Drill({ domain }: { domain?: string }) {
   const answered = picked !== null;
   const ok = picked === q.correct;
   const c = item.citation;
+  const explain = q.explain || item.plain || c.verbatim;
+  // U-06: after a miss the feedback names the right answer. The line of the title and the
+  // explanation names it already for a signal and a term; for a rule question it can miss it.
+  const namesAnswer = `${item.title} — ${explain ?? ''}`.includes(q.correct);
+  const sev = severityOf(item);
+  const sevLine = `${sev === 'S3' ? 'Safety-critical — lock this one in.' : 'Worth nailing.'} Review your misses at the end.`;
+  // U-19: the verdict goes into a live region that is in the view before the answer. A miss on a
+  // safety-critical item (S3) goes into an alert, so that a screen reader says it at once.
+  const urgent = answered && !ok && sev === 'S3';
+  const verdict = !answered ? '' : ok ? 'Right.'
+    : ['Not quite.', `Correct answer: ${q.correct}.`, sev !== 'S1' ? sevLine : ''].filter(Boolean).join(' ');
 
   function choose(value: string) {
     if (picked !== null) return;
@@ -221,14 +171,22 @@ export function Drill({ domain }: { domain?: string }) {
     if (correct) setScore(s => s + 1);
     else missedRef.current.add(item!.id);   // remembered for the end-of-session review round (#10)
     recordAnswer(item!, correct);   // AppContext gates a correct re-advance by due-ness (anti-marathon, F2)
+    // Read aloud the feedback (U-31): the verdict, the right answer after a miss, the explanation
+    // and the severity line, as the panel shows them.
+    const words = correct ? ['Right.'] : ['Not quite.', namesAnswer ? '' : `Correct answer: ${q!.correct}`];
+    words.push(`${item!.title}. ${explain ?? ''}`);
+    if (!correct && sev !== 'S1') words.push(sevLine);
+    speak(words.filter(Boolean).map(said).join(' '));
   }
 
   return (
     <div className="cb-drill-view">
       <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+      {title}
       <div className="cb-drill-top"><span className="cb-sub">Question {idx + 1} of {built.slots.length}</span><span className="dusk-count">{score} correct</span></div>
+      {built.practiceOnly && <p className="cb-sub cb-drill-note">This session is practice only: no item in it was due at the start. {PRACTICE_NOTE}</p>}
       <div className="dusk-panel dusk-panel--framed cb-drill-q">
-        <div className="dusk-panel-head"><h2 className="dusk-panel-name">{q.heading}</h2></div>
+        <div className="dusk-panel-head"><h3 className="dusk-panel-name" ref={questionHeadRef} tabIndex={-1}>{q.heading}</h3></div>
         <div className="dusk-panel-body cb-drill-prompt" data-cb="prompt">
           {q.kind === 'signal'
             ? <div className="cb-drill-signal" data-cb="prompt-signal"><Signal aspect={q.aspect} /></div>
@@ -237,20 +195,37 @@ export function Drill({ domain }: { domain?: string }) {
       </div>
       <div className="cb-opts">
         {q.options.map((o, i) => {
-          const cls = answered ? (o === q.correct ? 'cb-opt cb-opt--right' : (o === picked ? 'cb-opt cb-opt--wrong' : 'cb-opt')) : 'cb-opt';
-          return <button key={i} className={cls} data-cb="opt" disabled={answered} onClick={() => choose(o)}>{o}</button>;
+          // U-06: after an answer the right option and the picked wrong option carry words, not only a colour.
+          const right = answered && o === q.correct;
+          const wrong = answered && !right && o === picked;
+          const cls = right ? 'cb-opt cb-opt--right' : wrong ? 'cb-opt cb-opt--wrong' : 'cb-opt';
+          return (
+            <button key={i} className={cls} data-cb="opt" disabled={answered} onClick={() => choose(o)}>
+              {o}
+              {right && <>{' '}<span className="cb-drill-tag">Correct answer</span></>}
+              {wrong && <>{' '}<span className="cb-drill-tag">Your answer</span></>}
+            </button>
+          );
         })}
       </div>
+      <p className="dusk-sr" role="status">{answered && !urgent ? verdict : ''}</p>
+      <p className="dusk-sr" role="alert">{urgent ? verdict : ''}</p>
       {answered && (
-        <div className="dusk-panel cb-drill-feedback" data-cb="feedback" aria-live="polite">
-          <b className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{ok ? 'Right.' : 'Not quite.'}</b>
-          <span><b>{item.title}</b> — {q.explain || item.plain || c.verbatim}</span>
-          {!ok && severityOf(item) !== 'S1' && (
-            <span className="cb-drill-severity">{severityOf(item) === 'S3' ? 'Safety-critical — lock this one in.' : 'Worth nailing.'} Review your misses at the end.</span>
-          )}
+        <div className="dusk-panel cb-drill-feedback" data-cb="feedback">
+          <b id="cb-drill-verdict" className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{ok ? 'Right.' : 'Not quite.'}</b>
+          {!ok && !namesAnswer && <span className="cb-drill-answer">Correct answer: <b>{q.correct}</b></span>}
+          <span><b>{item.title}</b> — {explain}</span>
+          {!ok && sev !== 'S1' && <span className="cb-drill-severity">{sevLine}</span>}
           <span className="cb-sub">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
-          <button className="dusk-btn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
-          <button className="dusk-btn" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>
+          {/* U-38: "Next" is the main control; "Look it up" is a text link. */}
+          <button className="cb-link cb-drill-lookup" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
+          <button className="dusk-btn cb-drill-next" autoFocus aria-describedby="cb-drill-verdict" onClick={() => {
+            const last = idx + 1 >= built.slots.length;
+            focusTo.current = last ? 'any' : 'question';
+            // At "Finish", build the review of the misses now, so that its button can count it (U-15).
+            if (last && missedRef.current.size > 0) setReviewNext(buildSession({ content, profile: profileRef.current, domain, focusIds: [...missedRef.current] }));
+            setIdx(i => i + 1); setPicked(null);
+          }}>
             {idx + 1 < built.slots.length ? 'Next →' : 'Finish'}
           </button>
         </div>
