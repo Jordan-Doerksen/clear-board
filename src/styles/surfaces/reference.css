@@ -69,6 +69,9 @@
 .cb-app .cb-reference-view .cb-reference-trust--caution { color: var(--cb-caution-ink); }
 
 /* ---- the entry: a framed Dusk panel. The head holds the title, the body holds the rest. ---------- */
+/* The entry opens inside its row item, directly under the pressed row (U-03), with a space above it
+   and the space of the view below it. */
+.cb-app .cb-reference-view .cb-reference-list > li > .cb-reference-detail { margin: var(--sp-3) 0 var(--sp-5); }
 /* The entry title is reading text and keeps its size of today (18.72 px at a 16 px root). */
 .cb-app .cb-reference-view .cb-reference-detail .dusk-panel-name { font-size: 1.17rem; }
 /* The body is one column with one gap. A chip and a button keep the width of their words; the rule

@@ -1,5 +1,6 @@
 // Reference — look anything up: plain words first, the rule text one tap deeper, always cited. (vanilla reference.js)
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { RefObject } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import { Signal } from './Signal';
@@ -32,6 +33,24 @@ export function Reference() {
   const focusId = params.get('focus');
   const [q, setQ] = useState('');
   const [selected, setSelected] = useState<ContentItem | null>(null);
+
+  // U-03: a pressed row opens its entry directly under the row, and focus moves to the title of the
+  // entry. A second press on the open row closes it. The entry is a part of its row, so a search that
+  // drops the row drops the entry too.
+  const entryHeadRef = useRef<HTMLHeadingElement>(null);
+  const focusEntry = useRef(false);
+  useEffect(() => {
+    const head = entryHeadRef.current;
+    if (!focusEntry.current || !head) return;
+    focusEntry.current = false;
+    head.closest('[data-cb="ref-detail"]')?.scrollIntoView({ block: 'nearest' });
+    head.focus({ preventScroll: true });
+  });
+  const press = (i: ContentItem) => {
+    if (selected?.id === i.id) { setSelected(null); return; }
+    focusEntry.current = true;
+    setSelected(i);
+  };
 
   // Deep link: a Drill miss or a Yard refusal opens Reference focused on the exact rule
   // (REVAMP §6 — every error one tap from the plain-language rule). ?focus=<itemId>.
@@ -67,28 +86,27 @@ export function Reference() {
           <ul className="dusk-rows cb-reference-list" role="list">
             {rows.map(i => (
               <li key={i.id}>
-                <button className="dusk-row cb-reference-row" data-cb="ref-row" onClick={() => setSelected(i)}>
+                <button className="dusk-row cb-reference-row" data-cb="ref-row" aria-expanded={selected?.id === i.id} onClick={() => press(i)}>
                   <b>{i.title}</b><RowMark citation={i.citation} /><small className="cb-sub">{i.plain}</small>
                 </button>
+                {selected?.id === i.id && <Detail key={i.id} item={i} audio={settings.audio} onSpeak={speak}
+                  onDrillSignals={() => navigate('/signals')} headRef={entryHeadRef} />}
               </li>
             ))}
           </ul>
         )
         : <p className="dusk-lede">No match. Try another word.</p>}
-
-      {selected && <Detail key={selected.id} item={selected} audio={settings.audio} onSpeak={speak}
-        onDrillSignals={() => navigate('/signals')} />}
     </div>
   );
 }
 
-function Detail({ item, audio, onSpeak, onDrillSignals }:
-  { item: ContentItem; audio: boolean; onSpeak: (t: string) => void; onDrillSignals: () => void }) {
+function Detail({ item, audio, onSpeak, onDrillSignals, headRef }:
+  { item: ContentItem; audio: boolean; onSpeak: (t: string) => void; onDrillSignals: () => void; headRef: RefObject<HTMLHeadingElement | null> }) {
   const c = item.citation;
   const aspects = item.type === 'signal' ? distinctAspects(item.payload?.aspects ?? []) : [];   // U-37: each drawing one time
   return (
-    <div className="dusk-panel dusk-panel--framed cb-reference-detail" data-cb="ref-detail" aria-live="polite">
-      <div className="dusk-panel-head"><h3 className="dusk-panel-name">{item.title}</h3></div>
+    <div className="dusk-panel dusk-panel--framed cb-reference-detail" data-cb="ref-detail">
+      <div className="dusk-panel-head"><h3 className="dusk-panel-name" ref={headRef} tabIndex={-1}>{item.title}</h3></div>
       <div className="dusk-panel-body">
         <Badge citation={c} />
         <p className="cb-prose cb-prose--lead">{item.plain}</p>
