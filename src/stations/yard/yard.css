@@ -7,7 +7,8 @@
    This file declares no custom property and sets no transition and no animation. Each colour is a
    token of Dusk or of the bridge file src/styles/clear-board.tokens.css, so the high-contrast mode
    reaches the Yard. Each type size is a token of the bridge or a rem value, and each face is the
-   face of the body or of a part, so the text scale and the dyslexia type reach the Yard. */
+   face of the body, the face of a part or the Dusk token --font-mono, so the text scale and the
+   dyslexia type reach the Yard. */
 /* The wrapper is the scope of the Yard and nothing more: no ground, no ink and no face of its own
    (the text takes the ink and the face of the body), no side padding, no width and no side margin.
    It keeps the type size of today. */
@@ -68,9 +69,10 @@
    their order and wraps. The message stays the next element after it, outside the panel.
    Work it, Watch optimal, Depart and Certify are Dusk buttons, with one look: gold is the only light
    of the chrome. A Dusk button has no border: the class yd-go gives it a border with no colour, so
-   that it keeps the box of today. A disabled Depart takes the disabled state of the part, with no
+   that it keeps the width of today. A disabled Depart takes the disabled state of the part, with no
    opacity. Reset and the sound button are plain buttons. They keep their text of 14 px, weight 600,
-   and the box of today, as the back control does. "cars" keeps 15 px. */
+   and get the side padding and the border of the back control, so that no box is smaller than
+   today. "cars" keeps 15 px. */
 .yard-wrap .yd-go { border: 1px solid transparent; }
 .yard-wrap #reset, .yard-wrap #mute {
   padding-inline: 12px; border: 1px solid transparent;
