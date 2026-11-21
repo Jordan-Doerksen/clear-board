@@ -173,7 +173,7 @@ export function Drill({ domain }: { domain?: string }) {
   if (built.slots.length < (focusIds ? 1 : 4)) {
     return (
       <div className="cb-drill-view">
-        <button className="back" onClick={() => navigate('/')}>← Home</button>
+        <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
         <p className="muted">Not enough verified content to drill yet.</p>
       </div>
     );
@@ -189,7 +189,7 @@ export function Drill({ domain }: { domain?: string }) {
     }).join(' · ');
     return (
       <div className="cb-drill-view">
-        <button className="back" onClick={() => navigate('/')}>← Home</button>
+        <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
         <h2 className="view-title">{focusIds ? 'Review done' : 'Session done'}</h2>
         <p className="big-score">{score} / {built.slots.length}</p>
         <p className="muted">{lines}. Spaced out over the next days so it sticks.</p>
@@ -221,16 +221,20 @@ export function Drill({ domain }: { domain?: string }) {
 
   return (
     <div className="cb-drill-view">
-      <button className="back" onClick={() => navigate('/')}>← Home</button>
-      <div className="drill-top"><span className="muted">Question {idx + 1} of {built.slots.length}</span><span className="muted">{score} correct</span></div>
-      <h2 className="view-title">{q.heading}</h2>
-      <div className={`prompt ${q.kind === 'signal' ? 'prompt-signal' : ''}`}>
-        {q.kind === 'signal' ? <Signal aspect={q.aspect} /> : q.promptText}
+      <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+      <div className="cb-drill-top"><span className="cb-sub">Question {idx + 1} of {built.slots.length}</span><span className="dusk-count">{score} correct</span></div>
+      <div className="dusk-panel dusk-panel--framed cb-drill-q">
+        <div className="dusk-panel-head"><h2 className="dusk-panel-name">{q.heading}</h2></div>
+        <div className="dusk-panel-body cb-drill-prompt" data-cb="prompt">
+          {q.kind === 'signal'
+            ? <div className="cb-drill-signal" data-cb="prompt-signal"><Signal aspect={q.aspect} /></div>
+            : <div className="cb-prose cb-prose--lead">{q.promptText}</div>}
+        </div>
       </div>
-      <div className="opts">
+      <div className="cb-opts">
         {q.options.map((o, i) => {
-          const cls = answered ? (o === q.correct ? 'opt right' : (o === picked ? 'opt wrong' : 'opt')) : 'opt';
-          return <button key={i} className={cls} disabled={answered} onClick={() => choose(o)}>{o}</button>;
+          const cls = answered ? (o === q.correct ? 'cb-opt cb-opt--right' : (o === picked ? 'cb-opt cb-opt--wrong' : 'cb-opt')) : 'cb-opt';
+          return <button key={i} className={cls} data-cb="opt" disabled={answered} onClick={() => choose(o)}>{o}</button>;
         })}
       </div>
       {answered && (

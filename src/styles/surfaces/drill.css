@@ -1,1 +1,40 @@
-/* surfaces/drill.css - the rules that only Drill and Signals need. Owner in Wave 2b: job B2. Class prefix: cb-drill-. Job S1 made this file with no rule. */
+/* surfaces/drill.css - the rules that only Drill and Signals need. Owner in Wave 2b: job B2. Class prefix: cb-drill-.
+   The Signals route is the Drill. Each selector starts with .cb-app .cb-drill-view, the root of each
+   state of the Drill. A rule of a reading mode puts the attribute of the mode on html in front. A
+   size is in rem, so that the text scale reaches it. This sheet holds no raw colour, no transition,
+   no animation and no movement. */
+
+/* ---- the view: one column of parts, one gap between them --------------------------------------- */
+.cb-app .cb-drill-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+/* "← Home" keeps the width of its word */
+.cb-app .cb-drill-view > .cb-btn--plain { align-self: flex-start; }
+
+/* ---- the count line, above the question panel, in the reading order of today ------------------- */
+.cb-app .cb-drill-view .cb-drill-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-5);
+}
+/* "Question N of M" and the count chip "N correct" keep their size of today (16 px). */
+.cb-app .cb-drill-view .cb-drill-top .cb-sub,
+.cb-app .cb-drill-view .cb-drill-top .dusk-count { font-size: 1rem; }
+
+/* ---- the question panel: the head holds the heading only, the body holds the prompt ------------- */
+/* The question heading is reading text and keeps its size of today (20.8 px). */
+.cb-app .cb-drill-view .cb-drill-q .dusk-panel-name { font-size: 1.3rem; }
+/* A drawn signal sits in the middle of the body, 170 px high, with the width that its own
+   proportions give. */
+.cb-app .cb-drill-view .cb-drill-signal {
+  display: flex;
+  justify-content: center;
+}
+.cb-app .cb-drill-view .cb-drill-signal svg {
+  width: auto;
+  height: 170px;
+}
