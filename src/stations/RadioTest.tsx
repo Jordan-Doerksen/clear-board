@@ -25,7 +25,7 @@ const READOUT_START = '10 cars to the joint';
 
 // `active` is false while the guided mode is shown: the test stays mounted and hidden (row U-17).
 export function RadioTest({ active = true }: { active?: boolean }) {
-  const { content, profile, recordRadioStep, speak } = useApp();
+  const { content, profile, recordRadioStep, speak, lookUp } = useApp();
   const navigate = useNavigate();
 
   const [runKey, setRunKey] = useState(0);
@@ -217,8 +217,9 @@ export function RadioTest({ active = true }: { active?: boolean }) {
           {step.goi && <span className="cb-radio-goi">{step.goi}</span>}
           <span><b>{step.rule}</b> — {step.note}</span>
           <span className="cb-sub">{sourceLine(c)}</span>
+          {/* U-17 (2c-plan C1): the entry opens in a dialog on top of the station, so the run stays. */}
           {item.payload?.ruleId && (
-            <button className="dusk-btn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(String(item.payload!.ruleId))}`)}>
+            <button className="dusk-btn" onClick={() => lookUp(String(item.payload!.ruleId))}>
               Look it up →
             </button>
           )}

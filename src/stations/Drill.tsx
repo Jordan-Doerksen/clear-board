@@ -35,7 +35,7 @@ function questionSpeech(q: DrillQuestion): string {
 }
 
 export function Drill({ domain }: { domain?: string }) {
-  const { content, profile, recordAnswer, speak } = useApp();
+  const { content, profile, recordAnswer, speak, lookUp } = useApp();
   const navigate = useNavigate();
   const onSignals = useLocation().pathname === '/signals';
   // C7-DRILL: each state draws the heading with the same key. The loading state draws it first and
@@ -220,8 +220,9 @@ export function Drill({ domain }: { domain?: string }) {
           <span><b>{item.title}</b> — {explain}</span>
           {!ok && sev !== 'S1' && <span className="cb-drill-severity">{sevLine}</span>}
           <span className="cb-sub">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
-          {/* U-38: "Next" is the main control; "Look it up" is a text link. */}
-          <button className="cb-link cb-drill-lookup" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
+          {/* U-38: "Next" is the main control; "Look it up" is a text link. U-17 (2c-plan C1): the
+              entry opens in a dialog on top of the Drill, so the session stays. */}
+          <button className="cb-link cb-drill-lookup" onClick={() => lookUp(item!.id)}>Look it up →</button>
           <button className="dusk-btn cb-drill-next" autoFocus aria-describedby="cb-drill-verdict" onClick={() => {
             const last = idx + 1 >= built.slots.length;
             focusTo.current = last ? 'any' : 'question';
