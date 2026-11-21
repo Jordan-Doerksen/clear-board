@@ -11,6 +11,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
+import { LibraryNotice } from '../components/LookUp';
 import { LABEL_GOI, LABEL_NO_CITATION, optionsFor, sourceLine, spokenText, verdictRegion } from '../core/radio';
 import { severityOf } from '../core/severity';
 import type { ContentItem } from '../core/types';
@@ -25,7 +26,7 @@ const READOUT_START = '10 cars to the joint';
 
 // `active` is false while the guided mode is shown: the test stays mounted and hidden (row U-17).
 export function RadioTest({ active = true }: { active?: boolean }) {
-  const { content, profile, recordRadioStep, speak, lookUp } = useApp();
+  const { content, contentFailed, profile, recordRadioStep, speak, lookUp } = useApp();
   const navigate = useNavigate();
 
   const [runKey, setRunKey] = useState(0);
@@ -52,11 +53,15 @@ export function RadioTest({ active = true }: { active?: boolean }) {
   });
 
   // radioSim is loaded dynamically here as well as in guided mode, so the island module
-  // keeps its own code-split chunk instead of being pulled into the main bundle.
+  // keeps its own code-split chunk instead of being pulled into the main bundle. When the module
+  // does not load, the test says so, as the host of the guided mode does (U-07; R6 ENG-02).
   const [allSteps, setAllSteps] = useState<Step[] | null>(null);
+  const [stepsFailed, setStepsFailed] = useState(false);
   useEffect(() => {
     let live = true;
-    import('./radioSim.js').then(m => { if (live) setAllSteps(m.STEPS as Step[]); });
+    import('./radioSim.js')
+      .then(m => { if (live) setAllSteps(m.STEPS as Step[]); })
+      .catch(() => { if (live) setStepsFailed(true); });
     return () => { live = false; };
   }, []);
 
@@ -99,8 +104,19 @@ export function RadioTest({ active = true }: { active?: boolean }) {
     if (questionSpoken && active) speak(questionSpoken);
   }, [questionSpoken, speak, active]);
 
+  // U-07: the words and the control of the host of an island that did not load (imperativeStation.ts).
+  // A reload gets the files of the version that the app now holds.
+  if (stepsFailed) {
+    return (
+      <div className="cb-banner cb-banner--bad cb-shell-island-fail" role="alert">
+        This station did not load. <button className="dusk-btn" onClick={() => window.location.reload()}>Reload</button>
+      </div>
+    );
+  }
   if (!content || !allSteps) return <p className="dusk-lede">Loading…</p>;
-  if (!items.length) return <p className="dusk-lede">The radio script hasn't loaded.</p>;
+  // U-07 (2c-plan C9): when a content file did not load, the notice of the shell says so, with its
+  // retry control.
+  if (!items.length) return contentFailed.length > 0 ? <LibraryNotice /> : <p className="dusk-lede">The radio script hasn't loaded.</p>;
 
   // ── Run finished ──
   if (item === undefined || step === undefined) {

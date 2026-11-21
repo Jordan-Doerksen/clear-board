@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
+import { LibraryNotice } from '../components/LookUp';
 import { Signal } from './Signal';
 import { distinctAspects } from '../core/drill';
 import { DOMAINS } from '../core/store';
@@ -39,7 +40,7 @@ function RowMark({ citation }: { citation: Citation }) {
 }
 
 export function Reference() {
-  const { content, settings, speak } = useApp();
+  const { content, contentFailed, settings, speak } = useApp();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const focusId = params.get('focus');
@@ -113,7 +114,11 @@ export function Reference() {
             </ul>
           </div>
         ))
-        : <p className="dusk-lede">No match. Try another word.</p>}
+        // U-07 (2c-plan C9): with no entry loaded, "No match" would not be true. The notice of the
+        // shell says what happened, with its retry control.
+        : items.length === 0 && contentFailed.length > 0
+          ? <LibraryNotice />
+          : <p className="dusk-lede">No match. Try another word.</p>}
     </div>
   );
 }

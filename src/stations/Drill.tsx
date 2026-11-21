@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
+import { LibraryNotice } from '../components/LookUp';
 import { Signal } from './Signal';
 import { DOMAINS } from '../core/store';
 import { severityOf } from '../core/severity';
@@ -35,7 +36,7 @@ function questionSpeech(q: DrillQuestion): string {
 }
 
 export function Drill({ domain }: { domain?: string }) {
-  const { content, profile, recordAnswer, speak, lookUp } = useApp();
+  const { content, contentFailed, profile, recordAnswer, speak, lookUp } = useApp();
   const navigate = useNavigate();
   const onSignals = useLocation().pathname === '/signals';
   // C7-DRILL: each state draws the heading with the same key. The loading state draws it first and
@@ -95,11 +96,16 @@ export function Drill({ domain }: { domain?: string }) {
   if (!content || !built) return <div className="cb-drill-view">{title}<p className="dusk-lede">Loading…</p></div>;
 
   if (built.slots.length < (isReview ? 1 : 4)) {
+    // U-07 (2c-plan C9): when a content file did not load, the items of this domain can be in it, so
+    // the sentence about the verified content would not be true. The notice of the shell says what
+    // happened, with its retry control.
     return (
       <div className="cb-drill-view">
         <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
         {title}
-        <p className="dusk-lede">Not enough verified content to drill yet.</p>
+        {contentFailed.length > 0
+          ? <LibraryNotice />
+          : <p className="dusk-lede">Not enough verified content to drill yet.</p>}
       </div>
     );
   }
