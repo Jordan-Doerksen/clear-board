@@ -118,9 +118,12 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
     fillLegend(probeBox, lf);
     R.probe.replaceChildren(probeBox);
     const lr = probeBox.getBoundingClientRect();
-    const cs = getComputedStyle(probeBox);
+    // The corner inset of the legend (left and top: var(--sp-4) in drawing.css). It is read while the
+    // probe box is in the document: a box out of the document has no computed value.
+    const raw = getComputedStyle(probeBox).getPropertyValue('--sp-4').trim();
     R.probe.replaceChildren();
-    const left = parseFloat(cs.getPropertyValue('--sp-4')) || 0;
+    const left = parseFloat(raw);
+    if (!raw.endsWith('px') || !Number.isFinite(left)) throw new Error(`the Yard drawing reads --sp-4 and found "${raw}"`);
     const box = { x0: left, y0: left, x1: left + lr.width, y1: left + lr.height };
     for (const F of states) {
       const lay = planWide(F, fr, M, width, null);
