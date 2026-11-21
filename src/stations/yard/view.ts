@@ -84,7 +84,7 @@ export interface YardView {
 // The body of the Yard page. The app has its own header, so this markup starts with a back button.
 const YARD_HTML = `
   <div class="yard-wrap">
-    <button class="yd-back" data-go="">← Home</button>
+    <button class="yd-back cb-btn--plain" data-go="">← Home</button>
 
     <div class="yd-bar yd-strip dusk-strip">
       <select class="cb-select" id="picker" title="Pick a job"></select>

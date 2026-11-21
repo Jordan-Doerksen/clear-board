@@ -4,21 +4,18 @@
    Dusk or of the bridge file src/styles/clear-board.tokens.css, so the high-contrast mode reaches
    the Yard. The edge of a control reads --cb-edge. The edge of a container reads --lit-rule.
    Each type size is a token of the bridge or a rem value, and each face is --font-ui or
-   --font-mono, so the text scale and the dyslexia type reach the Yard.
-   The two declarations that the back button took from the app sheet are here: the least height
-   of 44 px and the 1 px move while it is pressed. */
+   --font-mono, so the text scale and the dyslexia type reach the Yard. */
 .yard-wrap {
   color: var(--ink); font-size: var(--fs-l);
   display: block; padding: 4px 0 20px;
 }
-.yard-wrap button.yd-back {
-  font: 600 var(--fs-base) var(--font-ui); color: var(--ink);
-  background: var(--head); border: 1px solid var(--cb-edge); border-radius: 8px;
-  padding: 8px 12px; cursor: pointer; margin-bottom: 10px;
-  min-height: 44px;
+/* The back control is a plain button of the parts: the word in the link colour, no fill at rest, a
+   wash and an underline on hover, a fill change when pressed. It keeps its text of 14 px, weight 600,
+   and the box of today: a side padding of 12 px and a 1 px border with no colour. */
+.yard-wrap .yd-back {
+  margin-bottom: 10px; padding-inline: 12px; border: 1px solid transparent;
+  font-size: var(--fs-base); font-weight: var(--fw-medium);
 }
-.yard-wrap button.yd-back:hover { border-color: var(--lit); }
-.yard-wrap button.yd-back:active { transform: translateY(1px); }
 /* The frame of the drawing is a Dusk panel with no padding: the lit edge, the corner and the fill
    come from the parts. It takes the full width of .yard-wrap and the height of the drawing.
    This file sets no width, height, padding or side margin on it, and no rule for an element
