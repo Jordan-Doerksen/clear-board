@@ -60,15 +60,15 @@ function startProfile(): Profile {
 }
 
 interface AppValue {
-  // `settings` gives the value that each part of the app uses. Its `reduce` is on when the learner
-  // chose it or when the device asks for it (U-13, 2c-plan C4): the Yard reads it at each move.
-  // `choices` gives the choices of the learner, as they are stored.
   content: Content | null;
   // 2c-plan C9 (U-07): the names of the content files that did not load, for example "rules.json".
   // Empty when each file loaded. retryContent() loads the library again.
   contentFailed: string[];
   retryContent: () => void;
   profile: Profile;
+  // `settings` gives the value that each part of the app uses. Its `reduce` is on when the learner
+  // chose it or when the device asks for it (U-13, 2c-plan C4): the Yard reads it at each move.
+  // `choices` gives the choices of the learner, as they are stored.
   settings: Settings;
   choices: Settings;
   // The device asks for less motion, or for more contrast, now.
