@@ -1,8 +1,10 @@
 // The bridge hook for the two imperative islands, the Yard and the Radio. An island is a plain
-// module with mount(host, ctx). The hook gives it a host element and one bridge object, `ctx`, and
-// writes the latest React values into that object. It loads the module lazily, so the island code
-// stays out of the main bundle. The teardown empties the host: the module gets no call.
-import { useEffect, useRef } from 'react';
+// module with mount(host, ctx) and, when it has work to stop, unmount(). The hook gives it a host
+// element and one bridge object, `ctx`, and writes the latest React values into that object. It
+// loads the module lazily, so the island code stays out of the main bundle. At the teardown the
+// hook calls unmount() of the module, when the module exports it, and then empties the host
+// (2c-plan C2). When the module does not load, the host says so (U-07).
+import { useLayoutEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import type { Profile, Settings } from '../core/types';
@@ -18,7 +20,7 @@ export type StationCtx = {
   lookUp: (itemId: string) => void;
 };
 
-type StationModule = { mount: (host: HTMLElement, ctx: StationCtx) => void };
+type StationModule = { mount: (host: HTMLElement, ctx: StationCtx) => void; unmount?: () => void };
 
 // U-07 (R6 ENG-01 a): when the module of an island does not load, or its mount throws, the host
 // says so and offers a reload. A reload gets the files of the version that the app now holds.
@@ -56,16 +58,29 @@ export function useImperativeStation(load: () => Promise<StationModule>) {
   ctxRef.current.recordYardWin = recordYardWin;
   ctxRef.current.lookUp = lookUp;
 
-  useEffect(() => {
+  // The loader is read one time, at mount: it is a constant thunk of a dynamic import.
+  const loadRef = useRef(load);
+
+  useLayoutEffect(() => {
     let cancelled = false;
+    let mounted: StationModule | null = null;
     const host = hostRef.current;
-    load()
-      .then(mod => { if (!cancelled && host) mod.mount(host, ctxRef.current); })
+    loadRef.current()
+      .then(mod => {
+        if (cancelled || !host) return;
+        mod.mount(host, ctxRef.current);
+        mounted = mod;
+      })
       .catch(() => { if (!cancelled && host) showLoadFailure(host); });
-    // Teardown drops the engine's DOM + listeners. These stations have no infinite loops,
-    // so anything in flight resolves harmlessly against a detached node.
-    return () => { cancelled = true; if (host) host.innerHTML = ''; };
-    // run once: `load` is a constant module-import thunk
+    // The teardown calls unmount() of the module first, so that the module stops the work that it
+    // has in flight: timers, animation frames, sounds and listeners. A module with no unmount() gets
+    // no call: its work in flight then runs against a host that is no longer in the page. Then the
+    // host is emptied, also when unmount() throws. This is a layout effect: React runs its teardown
+    // before it takes the host out of the page, so unmount() sees the host as the module left it.
+    return () => {
+      cancelled = true;
+      try { mounted?.unmount?.(); } finally { if (host) host.innerHTML = ''; }
+    };
   }, []);
 
   return hostRef;
