@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
+import { LibraryNotice } from '../components/LookUp';
 import { Signal } from './Signal';
 import { DOMAINS } from '../core/store';
 import { severityOf } from '../core/severity';
-import { buildSession, dueGroups, withRecomputedMastery } from '../core/drill';
-import type { DrillQuestion, Session } from '../core/drill';
+import { answerCounts, buildSession, distinctAspects, dueGroups, withRecomputedMastery } from '../core/drill';
+import type { DrillQuestion, Screen, Session } from '../core/drill';
 
 // The station heading (U-29, 2c-plan C7): one visible h2 with the station name of Home, in the form
 // of the Reference title. The route /signals is the station Signals; each other route is the Drill.
@@ -34,11 +35,22 @@ function questionSpeech(q: DrillQuestion): string {
   return parts.filter(Boolean).map(said).join(' ');
 }
 
+// U-28 (LEARN-GAP): the words of a learn card, in the order of the card: the title, the chip and the
+// plain words. Read aloud speaks them when the card shows.
+const NEW_ITEM = 'New item';
+function screenSpeech(screen: Screen): string {
+  if (screen.kind === 'ask') return questionSpeech(screen.slot.q);
+  return [screen.item.title, NEW_ITEM, screen.item.plain].filter(Boolean).map(said).join(' ');
+}
+
 export function Drill({ domain }: { domain?: string }) {
-  const { content, profile, recordAnswer, speak } = useApp();
+  const { content, contentFailed, profile, recordAnswer, speak, lookUp } = useApp();
   const navigate = useNavigate();
   const onSignals = useLocation().pathname === '/signals';
-  const title = <StationTitle signals={onSignals} />;
+  // C7-DRILL: each state draws the heading with the same key. The loading state draws it first and
+  // each other state draws "← Home" first, so with no key React would make a new heading and the
+  // focus that the shell puts on the heading after a change of route would fall to the page body.
+  const title = <StationTitle key="station-title" signals={onSignals} />;
   const profileRef = useRef(profile);
   profileRef.current = profile;
 
@@ -49,6 +61,7 @@ export function Drill({ domain }: { domain?: string }) {
   const [score, setScore] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const missedRef = useRef<Set<string>>(new Set());                    // items missed in the current session
+  const [counted, setCounted] = useState(false);                        // an answer of the session counted (U26-NOTE)
   // U-14: after "Next" keyboard focus stays in the task. The control that had focus is removed, so
   // focus goes to the heading of the next question, or to the end heading after "Finish".
   const questionHeadRef = useRef<HTMLHeadingElement>(null);
@@ -68,7 +81,7 @@ export function Drill({ domain }: { domain?: string }) {
     missedRef.current = new Set();
     setBuilt(buildSession({ content, profile: profileRef.current, domain }));
     setIsReview(false); setReviewNext(null);
-    setIdx(0); setScore(0); setPicked(null);
+    setIdx(0); setScore(0); setPicked(null); setCounted(false);
   }, [content, domain]);
 
   // Start a new session from the end screen ("Drill again", or the review of the misses).
@@ -76,33 +89,43 @@ export function Drill({ domain }: { domain?: string }) {
     focusTo.current = 'question';
     missedRef.current = new Set();
     setBuilt(session); setIsReview(review); setReviewNext(null);
-    setIdx(0); setScore(0); setPicked(null);
+    setIdx(0); setScore(0); setPicked(null); setCounted(false);
   }
 
-  const slot = built && idx < built.slots.length ? built.slots[idx] : null;
+  // The screens of the session: a question, or a learn card before the first question about a new
+  // item (U-28). `idx` counts the screens.
+  const screen = built && idx < built.screens.length ? built.screens[idx] : null;
+  const slot = screen?.kind === 'ask' ? screen.slot : null;
+  const learn = screen?.kind === 'learn' ? screen.item : null;
   const item = slot?.item ?? null;
   const q = slot?.q ?? null;
 
-  // Read aloud a new question: its heading, its prompt (a signal question has a drawing and no
-  // prompt text) and its options (U-31). speak does nothing when Read aloud is off.
+  // Read aloud a new screen. A question: its heading, its prompt (a signal question has a drawing and
+  // no prompt text) and its options (U-31). A learn card: its words. speak does nothing when Read
+  // aloud is off.
   useEffect(() => {
-    if (q) speak(questionSpeech(q));
-  }, [q, speak]);
+    if (screen) speak(screenSpeech(screen));
+  }, [screen, speak]);
 
   if (!content || !built) return <div className="cb-drill-view">{title}<p className="dusk-lede">Loading…</p></div>;
 
   if (built.slots.length < (isReview ? 1 : 4)) {
+    // U-07 (2c-plan C9): when a content file did not load, the items of this domain can be in it, so
+    // the sentence about the verified content would not be true. The notice of the shell says what
+    // happened, with its retry control.
     return (
       <div className="cb-drill-view">
         <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
         {title}
-        <p className="dusk-lede">Not enough verified content to drill yet.</p>
+        {contentFailed.length > 0
+          ? <LibraryNotice />
+          : <p className="dusk-lede">Not enough verified content to drill yet.</p>}
       </div>
     );
   }
 
   // Finished — show the session summary with mastery deltas.
-  if (!slot || !item || !q) {
+  if (!screen) {
     // U-15 (UX-27): the button of the review says the count of items and the count of questions of
     // the round that it starts.
     const reviewItems = new Set(reviewNext?.slots.map(s => s.item.id)).size;
@@ -111,8 +134,9 @@ export function Drill({ domain }: { domain?: string }) {
     const due = dueGroups(built.slots.map(s => s.item.id), profile)
       .map(g => (g.days === 0 ? `${g.count} now` : `${g.count} in ${count(g.days, 'day')}`));
     // U-15: the end value is also read after the decay, as the start value is (buildSession). The app
-    // recomputes the stored mastery only at the load and at an answer that counts, so after the app
-    // has been open for days a session in which no answer counts would show the decay as a gain.
+    // context recomputes the mastery at the load, at an answer that counts and at a change of route
+    // (MASTERY-NOW). A session can stay open for days with no change of route, so a session in which
+    // no answer counts would otherwise show the decay as a gain.
     const after = withRecomputedMastery(profile, content);
     const lines = built.drilledDomains.map(d => {
       const name = (DOMAINS.find(x => x.id === d) || {}).name || d;
@@ -132,7 +156,9 @@ export function Drill({ domain }: { domain?: string }) {
             {/* U-26: progress in words, from the stored profile */}
             <p className="dusk-tile-sub cb-drill-progress">Right answers: {score} of {built.slots.length}.{started > 0 ? ` New items started: ${started}.` : ''}</p>
             {due.length > 0 && <p className="dusk-tile-sub cb-drill-progress">Items due again: {due.join(', ')}.</p>}
-            {built.practiceOnly && <p className="dusk-tile-sub cb-drill-progress">This session was practice only: no item in it was due at the start. {PRACTICE_NOTE}</p>}
+            {/* U26-NOTE: the end note shows only when no answer of the session counted. A miss always
+                counts, and after a miss the mastery can fall: the note would then not be true. */}
+            {built.practiceOnly && !counted && <p className="dusk-tile-sub cb-drill-progress">This session was practice only: no item in it was due at the start. {PRACTICE_NOTE}</p>}
           </div>
         </div>
         <div className="cb-drill-actions">
@@ -149,6 +175,34 @@ export function Drill({ domain }: { domain?: string }) {
     );
   }
 
+  // U-28 (LEARN-GAP, 2c-plan C11): the learn card of a new item. It shows the text that the data
+  // holds: the title, the plain words and each different drawing of a signal; and one control to go
+  // on. It grades nothing. The question about the item comes later, after one other screen or more.
+  if (learn) {
+    const aspects = learn.type === 'signal' ? distinctAspects(learn.payload?.aspects ?? []) : [];
+    return (
+      <div className="cb-drill-view">
+        <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+        {title}
+        <div className="dusk-panel dusk-panel--framed cb-drill-learn" data-cb="learn">
+          <div className="dusk-panel-head"><h3 className="dusk-panel-name" ref={questionHeadRef} tabIndex={-1}>{learn.title}</h3></div>
+          <div className="dusk-panel-body">
+            <span className="cb-chip cb-chip--info">{NEW_ITEM}</span>
+            <p className="cb-prose cb-prose--lead">{learn.plain}</p>
+            {aspects.length > 0 && <div className="cb-drill-learn-aspects">{aspects.map((a, i) => <Signal key={i} aspect={a} />)}</div>}
+          </div>
+        </div>
+        <button className="dusk-btn cb-drill-learn-next" data-cb="learn-next" onClick={() => {
+          focusTo.current = 'question';
+          setIdx(i => i + 1);
+        }}>Next →</button>
+      </div>
+    );
+  }
+  if (!slot || !item || !q) return null;
+
+  // The number of this question among the questions of the session; a learn card is not counted.
+  const questionNumber = built.screens.slice(0, idx + 1).filter(s => s.kind === 'ask').length;
   const answered = picked !== null;
   const ok = picked === q.correct;
   const c = item.citation;
@@ -170,6 +224,8 @@ export function Drill({ domain }: { domain?: string }) {
     setPicked(value);
     if (correct) setScore(s => s + 1);
     else missedRef.current.add(item!.id);   // remembered for the end-of-session review round (#10)
+    // The guard of the grading, with the profile of this answer (U26-NOTE).
+    if (answerCounts(item!, profileRef.current.items[item!.id], correct)) setCounted(true);
     recordAnswer(item!, correct);   // AppContext gates a correct re-advance by due-ness (anti-marathon, F2)
     // Read aloud the feedback (U-31): the verdict, the right answer after a miss, the explanation
     // and the severity line, as the panel shows them.
@@ -183,7 +239,7 @@ export function Drill({ domain }: { domain?: string }) {
     <div className="cb-drill-view">
       <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
       {title}
-      <div className="cb-drill-top"><span className="cb-sub">Question {idx + 1} of {built.slots.length}</span><span className="dusk-count">{score} correct</span></div>
+      <div className="cb-drill-top"><span className="cb-sub">Question {questionNumber} of {built.slots.length}</span><span className="dusk-count">{score} correct</span></div>
       {built.practiceOnly && <p className="cb-sub cb-drill-note">This session is practice only: no item in it was due at the start. {PRACTICE_NOTE}</p>}
       <div className="dusk-panel dusk-panel--framed cb-drill-q">
         <div className="dusk-panel-head"><h3 className="dusk-panel-name" ref={questionHeadRef} tabIndex={-1}>{q.heading}</h3></div>
@@ -217,16 +273,17 @@ export function Drill({ domain }: { domain?: string }) {
           <span><b>{item.title}</b> — {explain}</span>
           {!ok && sev !== 'S1' && <span className="cb-drill-severity">{sevLine}</span>}
           <span className="cb-sub">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
-          {/* U-38: "Next" is the main control; "Look it up" is a text link. */}
-          <button className="cb-link cb-drill-lookup" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
+          {/* U-38: "Next" is the main control; "Look it up" is a text link. U-17 (2c-plan C1): the
+              entry opens in a dialog on top of the Drill, so the session stays. */}
+          <button className="cb-link cb-drill-lookup" onClick={() => lookUp(item!.id)}>Look it up →</button>
           <button className="dusk-btn cb-drill-next" autoFocus aria-describedby="cb-drill-verdict" onClick={() => {
-            const last = idx + 1 >= built.slots.length;
+            const last = idx + 1 >= built.screens.length;
             focusTo.current = last ? 'any' : 'question';
             // At "Finish", build the review of the misses now, so that its button can count it (U-15).
             if (last && missedRef.current.size > 0) setReviewNext(buildSession({ content, profile: profileRef.current, domain, focusIds: [...missedRef.current] }));
             setIdx(i => i + 1); setPicked(null);
           }}>
-            {idx + 1 < built.slots.length ? 'Next →' : 'Finish'}
+            {idx + 1 < built.screens.length ? 'Next →' : 'Finish'}
           </button>
         </div>
       )}

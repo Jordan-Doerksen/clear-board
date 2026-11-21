@@ -1,8 +1,10 @@
 /* surfaces/drill.css - the rules that only Drill and Signals need. Owner in Wave 2b: job B2. Class prefix: cb-drill-.
    The Signals route is the Drill. Each selector starts with .cb-app .cb-drill-view, the root of each
-   state of the Drill. A rule of a reading mode puts the attribute of the mode on html in front. A
-   text size is in rem, so that the text scale reaches it. A drawing keeps its height in px, as
-   today. This sheet holds no raw colour, no transition, no animation and no movement. */
+   state of the Drill, except the three rules of the words on an answered option: the Radio test
+   shows the same words in the same form (U-06). A rule of a reading mode puts the attribute of the
+   mode on html in front. A text size is in rem, so that the text scale reaches it. A drawing keeps
+   its height in px, as today. This sheet holds no raw colour, no transition, no animation and no
+   movement. */
 
 /* ---- the view: one column of parts, one gap between them ---------------------------------------
    The column is at most --maxw (920 px) wide and sits in the middle of the window, which fills the
@@ -64,17 +66,43 @@
   height: 170px;
 }
 
+/* ---- the learn card (U-28, LEARN-GAP): a framed Dusk panel, in the form of the Reference entry ----
+   The head holds the title of the item at the size of a question heading (20.8 px). The body is one
+   column with one gap: the chip "New item" with the width of its words, the plain words at the size
+   of a prompt, and for a signal each different drawing, 120 px high, in a row that wraps. "Next →"
+   is the one control: it takes the width of the column, and its word has the size of the "Next →"
+   of the feedback (14.4 px). */
+.cb-app .cb-drill-view .cb-drill-learn .dusk-panel-name { font-size: 1.3rem; }
+.cb-app .cb-drill-view .cb-drill-learn > .dusk-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.cb-app .cb-drill-view .cb-drill-learn .cb-chip { align-self: flex-start; }
+.cb-app .cb-drill-view .cb-drill-learn-aspects {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-3);
+}
+.cb-app .cb-drill-view .cb-drill-learn-aspects svg {
+  width: auto;
+  height: 120px;
+}
+.cb-app .cb-drill-view .cb-drill-learn-next { font-size: .9rem; }
+
 /* ---- the words on an answered option (U-06): a line under the answer text -------------------------
    "Correct answer" on the right option and "Your answer" on a picked wrong option. The words carry
-   the state; the ink of the mark is a second carrier. */
-.cb-app .cb-drill-view .cb-drill-tag {
+   the state; the ink of the mark is a second carrier. The Radio test puts the same words on its
+   options, so these three rules hold for an answer option in each view. */
+.cb-app .cb-opt .cb-drill-tag {
   display: block;
   margin-top: var(--sp-2);
   font-size: var(--fs-base);
   font-weight: var(--fw-medium);
 }
-.cb-app .cb-drill-view .cb-opt--right .cb-drill-tag { color: var(--cb-ok-ink); }
-.cb-app .cb-drill-view .cb-opt--wrong .cb-drill-tag { color: var(--cb-attn-ink); }
+.cb-app .cb-opt--right .cb-drill-tag { color: var(--cb-ok-ink); }
+.cb-app .cb-opt--wrong .cb-drill-tag { color: var(--cb-attn-ink); }
 
 /* ---- the feedback: a Dusk panel. Each part is on its own line, in the order of today ------------ */
 .cb-app .cb-drill-view .cb-drill-feedback {

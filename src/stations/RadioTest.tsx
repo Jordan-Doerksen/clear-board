@@ -11,8 +11,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
+import { LibraryNotice } from '../components/LookUp';
 import { LABEL_GOI, LABEL_NO_CITATION, optionsFor, sourceLine, spokenText, verdictRegion } from '../core/radio';
 import { severityOf } from '../core/severity';
+import { withRecomputedMastery } from '../core/drill';
 import type { ContentItem } from '../core/types';
 
 interface Step {
@@ -25,7 +27,7 @@ const READOUT_START = '10 cars to the joint';
 
 // `active` is false while the guided mode is shown: the test stays mounted and hidden (row U-17).
 export function RadioTest({ active = true }: { active?: boolean }) {
-  const { content, profile, recordRadioStep, speak } = useApp();
+  const { content, contentFailed, profile, recordRadioStep, speak, lookUp } = useApp();
   const navigate = useNavigate();
 
   const [runKey, setRunKey] = useState(0);
@@ -34,7 +36,8 @@ export function RadioTest({ active = true }: { active?: boolean }) {
   const [picked, setPicked] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const missedRef = useRef<Set<number>>(new Set());
-  const startRef = useRef(0);
+  const profileRef = useRef(profile);
+  profileRef.current = profile;
 
   // Row U-14: after "Next call →" the keyboard focus stays in the task. The control that had the
   // focus goes away, so the focus goes to the heading of the next call, or to the end heading after
@@ -52,11 +55,15 @@ export function RadioTest({ active = true }: { active?: boolean }) {
   });
 
   // radioSim is loaded dynamically here as well as in guided mode, so the island module
-  // keeps its own code-split chunk instead of being pulled into the main bundle.
+  // keeps its own code-split chunk instead of being pulled into the main bundle. When the module
+  // does not load, the test says so, as the host of the guided mode does (U-07; R6 ENG-02).
   const [allSteps, setAllSteps] = useState<Step[] | null>(null);
+  const [stepsFailed, setStepsFailed] = useState(false);
   useEffect(() => {
     let live = true;
-    import('./radioSim.js').then(m => { if (live) setAllSteps(m.STEPS as Step[]); });
+    import('./radioSim.js')
+      .then(m => { if (live) setAllSteps(m.STEPS as Step[]); })
+      .catch(() => { if (live) setStepsFailed(true); });
     return () => { live = false; };
   }, []);
 
@@ -78,10 +85,15 @@ export function RadioTest({ active = true }: { active?: boolean }) {
     [items, allSteps, runKey],
   );
 
+  // U-15 (UX-39), as in the Drill: the start value of a run is the mastery after the decay. It is
+  // read when the library is in, from a recomputed copy of the profile: after a direct load the
+  // test can mount before the app context recomputes the stored profile. A new library in the
+  // middle of a run (after "Try again") does not change the start value of that run.
+  const startRef = useRef<{ run: number; mastery: number } | null>(null);
   useEffect(() => {
-    startRef.current = profile.domains['radio']?.mastery || 0;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [runKey]);
+    if (!content || startRef.current?.run === runKey) return;
+    startRef.current = { run: runKey, mastery: withRecomputedMastery(profileRef.current, content).domains['radio']?.mastery || 0 };
+  }, [content, runKey]);
 
   const at = order[pos];
   const item: ContentItem | undefined = items[at];
@@ -99,14 +111,28 @@ export function RadioTest({ active = true }: { active?: boolean }) {
     if (questionSpoken && active) speak(questionSpoken);
   }, [questionSpoken, speak, active]);
 
+  // U-07: the words and the control of the host of an island that did not load (imperativeStation.ts).
+  // A reload gets the files of the version that the app now holds.
+  if (stepsFailed) {
+    return (
+      <div className="cb-banner cb-banner--bad cb-shell-island-fail" role="alert">
+        This station did not load. <button className="dusk-btn" onClick={() => window.location.reload()}>Reload</button>
+      </div>
+    );
+  }
   if (!content || !allSteps) return <p className="dusk-lede">Loading…</p>;
-  if (!items.length) return <p className="dusk-lede">The radio script hasn't loaded.</p>;
+  // U-07 (2c-plan C9): when a content file did not load, the notice of the shell says so, with its
+  // retry control.
+  if (!items.length) return contentFailed.length > 0 ? <LibraryNotice /> : <p className="dusk-lede">The radio script hasn't loaded.</p>;
 
   // ── Run finished ──
   if (item === undefined || step === undefined) {
     const gradedCount = order.filter(i => items[i]?.citation.trust === 'verified').length;
-    const end = profile.domains['radio']?.mastery || 0;
-    const delta = Math.round((end - startRef.current) * 100);
+    // The end value is also read after the decay, as the start value is. The app context recomputes
+    // the mastery at an answer that counts and at a change of route, not while a run is open, so a
+    // run in which no answer counts would otherwise compare a value with the decay and an older one.
+    const end = withRecomputedMastery(profile, content).domains['radio']?.mastery || 0;
+    const delta = Math.round((end - (startRef.current?.mastery ?? end)) * 100);
     return (
       <>
         <div className="dusk-tile dusk-tile--teal cb-radio-done">
@@ -147,6 +173,11 @@ export function RadioTest({ active = true }: { active?: boolean }) {
   const answered = picked !== null;
   const ok = picked === step.call;
   const verdict = ok ? 'Right.' : 'Not quite.';
+  // U-06 (A11Y-11), in the form of the Drill: after a miss the feedback names the right call. The
+  // line shows when the other lines of the panel do not hold the call. A screen reader hears the
+  // verdict and the right call (U-19).
+  const namesAnswer = [step.goi, step.rule, step.note].filter(Boolean).join(' ').includes(step.call);
+  const announced = ok ? verdict : spokenText([verdict, `Correct answer: ${step.call}`]);
   const region = verdictRegion(ok, severityOf(item));
   const c = item.citation;
   const readout = step.status || step.read || READOUT_START;
@@ -162,6 +193,7 @@ export function RadioTest({ active = true }: { active?: boolean }) {
     // Read aloud (row U-31) speaks the feedback, with the words of the feedback panel.
     speak(spokenText([
       correct ? 'Right.' : 'Not quite.',
+      !correct && !namesAnswer ? `Correct answer: ${step!.call}` : null,
       correct && step!.ack ? `Engineer · CN 2204 ${step!.ack}` : null,
       step!.goi,
       `${step!.rule} — ${step!.note}`,
@@ -197,8 +229,18 @@ export function RadioTest({ active = true }: { active?: boolean }) {
 
           <div className="cb-opts">
             {opts.map((o, i) => {
-              const cls = answered ? (o === step.call ? 'cb-opt cb-opt--right' : (o === picked ? 'cb-opt cb-opt--wrong' : 'cb-opt')) : 'cb-opt';
-              return <button key={i} className={cls} data-cb="opt" disabled={answered} onClick={() => choose(o)}>{o}</button>;
+              // U-06 (A11Y-11): after an answer the right option and the picked wrong option carry
+              // words, not only a colour, with the words and the look of the Drill (drill.css).
+              const right = answered && o === step.call;
+              const wrong = answered && !right && o === picked;
+              const cls = right ? 'cb-opt cb-opt--right' : wrong ? 'cb-opt cb-opt--wrong' : 'cb-opt';
+              return (
+                <button key={i} className={cls} data-cb="opt" disabled={answered} onClick={() => choose(o)}>
+                  {o}
+                  {right && <>{' '}<span className="cb-drill-tag">Correct answer</span></>}
+                  {wrong && <>{' '}<span className="cb-drill-tag">Your answer</span></>}
+                </button>
+              );
             })}
           </div>
         </div>
@@ -206,19 +248,21 @@ export function RadioTest({ active = true }: { active?: boolean }) {
 
       {/* The verdict for a screen reader (row U-19). Both regions are in the page, empty, before the
           answer; the answer writes the verdict into one of them, so a screen reader announces it. */}
-      <div className="dusk-sr" role="status">{answered && region === 'status' ? verdict : ''}</div>
-      <div className="dusk-sr" role="alert">{answered && region === 'alert' ? verdict : ''}</div>
+      <div className="dusk-sr" role="status">{answered && region === 'status' ? announced : ''}</div>
+      <div className="dusk-sr" role="alert">{answered && region === 'alert' ? announced : ''}</div>
 
       {answered && (
         <div className="dusk-panel cb-radio-feedback" data-cb="feedback">
           <b id="cb-radio-verdict" className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{verdict}</b>
+          {!ok && !namesAnswer && <span>Correct answer: <b>{step.call}</b></span>}
           {/* Only on a correct call: the engineer would not acknowledge a transmission you didn't make. */}
           {ok && step.ack && <span className="cb-tx cb-tx--eng"><span className="cb-who">Engineer · CN 2204</span> {step.ack}</span>}
           {step.goi && <span className="cb-radio-goi">{step.goi}</span>}
           <span><b>{step.rule}</b> — {step.note}</span>
           <span className="cb-sub">{sourceLine(c)}</span>
+          {/* U-17 (2c-plan C1): the entry opens in a dialog on top of the station, so the run stays. */}
           {item.payload?.ruleId && (
-            <button className="dusk-btn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(String(item.payload!.ruleId))}`)}>
+            <button className="dusk-btn" onClick={() => lookUp(String(item.payload!.ruleId))}>
               Look it up →
             </button>
           )}

@@ -7,8 +7,16 @@ import { useApp } from '../state/AppContext';
 import type { LookUpRequest } from '../state/AppContext';
 import { Entry } from './Entry';
 
+// U-07 (2c-plan C9): the notice of the shell, with its retry control, for a place in the page that
+// shows nothing true while a content file did not load: the look-up dialog, the Drill, Reference
+// and the Radio test. The words are the words of the shell notice (App.tsx).
+export function LibraryNotice() {
+  const { retryContent } = useApp();
+  return <p className="cb-shell-notice"><span>Part of the library did not load.</span><button className="dusk-btn" onClick={retryContent}>Try again</button></p>;
+}
+
 export function LookUp() {
-  const { content, contentFailed, retryContent, lookUpRequest, closeLookUp, settings, speak } = useApp();
+  const { content, contentFailed, lookUpRequest, closeLookUp, settings, speak } = useApp();
   const ref = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLElement | null>(null);
   const shown = useRef<LookUpRequest | null>(null);
@@ -48,10 +56,10 @@ export function LookUp() {
       </div>
       <div className="dusk-panel-body">
         {item
-          ? <Entry key={item.id} item={item} audio={settings.audio} onSpeak={speak} />
+          ? <Entry key={item.id} item={item} place="look-up" audio={settings.audio} onSpeak={speak} />
           : lookedUp && (content && contentFailed.length > 0
             // U-07: the entry is in a part of the library that did not load.
-            ? <p className="cb-shell-notice"><span>Part of the library did not load.</span><button className="dusk-btn" onClick={retryContent}>Try again</button></p>
+            ? <LibraryNotice />
             : <p className="dusk-lede">Loading…</p>)}
       </div>
     </dialog>

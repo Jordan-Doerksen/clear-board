@@ -1,9 +1,11 @@
 // Clear Board — one provider for the whole app: content library, the single profile, and settings.
 // Mirrors the vanilla `ctx` object (profile/content/settings/save/recompute/speak) as React context.
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { freshProfile, keepProfileCopy, loadContent, mergeProfileInto, mergeStoredProfile, PROFILE_KEY, readStoredProfile, recomputeMastery, repairProfile, saveProfile, SETTINGS_KEY, YARD_SOUND_KEY } from '../core/store';
-import { grade, isDue } from '../core/sr';
+import { useLocation } from 'react-router-dom';
+import { freshProfile, keepProfileCopy, loadContent, mergeProfileInto, mergeStoredProfile, PROFILE_COPY_KEY, PROFILE_KEY, readStoredProfile, recomputeMastery, repairProfile, saveProfile, SETTINGS_KEY, YARD_SOUND_KEY } from '../core/store';
+import { grade } from '../core/sr';
+import { answerCounts } from '../core/drill';
 import type { Content, ContentItem, Profile, Settings } from '../core/types';
 
 // The device flags of the operating system (U-13; R5 A11Y-07, A11Y-27).
@@ -90,13 +92,22 @@ interface AppValue {
   // close event of the dialog clears only the request that it closes.
   lookUpRequest: LookUpRequest | null;
   closeLookUp: (request: LookUpRequest) => void;
+  // MASTERY-NOW: useApp reports the route of the page. At the first report of a new route the app
+  // context recomputes the mastery, so that each view shows the current value.
+  followRoute: (path: string) => void;
 }
 export interface LookUpRequest { itemId: string }
 
 const Ctx = createContext<AppValue | null>(null);
 
+// Each part of the app that reads the context is inside the router, and the provider is not. So
+// each reader reports the route (MASTERY-NOW). The report is a layout effect: a recompute after a
+// change of route comes before the new view paints.
 export function useApp(): AppValue {
   const v = useContext(Ctx);
+  const { pathname } = useLocation();
+  const followRoute = v?.followRoute;
+  useLayoutEffect(() => { followRoute?.(pathname); }, [followRoute, pathname]);
   if (!v) throw new Error('useApp must be used inside <AppProvider>');
   return v;
 }
@@ -188,10 +199,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProfile(prev => {
       const p = structuredClone(prev);
       mergeStoredProfile(p);   // U-34: the answers of another open copy stay
+      // The guards are answerCounts of src/core/drill.ts, the function that the tests cover (U-44).
+      // F1: an item that is not verified is never graded; the Drill draws verified items only.
       // Anti-marathon (F2 / validation #7): a CORRECT answer only advances the schedule when the item
       // is actually due — re-drilling before its interval elapses can't farm familiarity. A miss always
       // counts (resetting the interval is safety signal regardless of timing).
-      if (correct && !isDue(p.items[item.id])) return prev;
+      if (!answerCounts(item, p.items[item.id], correct)) return prev;
       p.items[item.id] = grade(p.items[item.id], correct);
       const dom = p.domains[item.domain] || (p.domains[item.domain] = { mastery: 0, lastDrill: null });
       dom.lastDrill = new Date().toISOString();
@@ -214,8 +227,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       let touched = false;
       for (const id of itemIds) {
         const item = content.byId[id];
-        if (!item || item.citation?.trust !== 'verified') continue;   // F1: never grade unverified
-        if (correct && !isDue(p.items[id])) continue;                 // F2: no same-session fam farming
+        // F1 (never grade unverified) and F2 (no same-session fam farming): answerCounts (U-44).
+        if (!item || !answerCounts(item, p.items[id], correct)) continue;
         p.items[id] = grade(p.items[id], correct);
         const dom = p.domains[item.domain] || (p.domains[item.domain] = { mastery: 0, lastDrill: null });
         dom.lastDrill = now;
@@ -249,10 +262,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [content]);
 
-  // "Reset my progress" also removes the stored sound choice of the Yard (U-36, 2c-plan C8).
+  // "Reset my progress" also removes the stored sound choice of the Yard (U-36, 2c-plan C8) and the
+  // copy of an older profile under the second key (RESET-COPY): the copy holds old progress.
   const resetProgress = useCallback(() => {
     try {
       localStorage.removeItem(PROFILE_KEY);
+      localStorage.removeItem(PROFILE_COPY_KEY);
       localStorage.removeItem(YARD_SOUND_KEY);
     } catch { /* storage blocked: nothing is stored */ }
     setProfile(() => {
@@ -261,6 +276,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return p;
     });
   }, [choices, content]);
+
+  // MASTERY-NOW: the mastery decays with time, and the app context recomputed it only at the load
+  // and at an answer that counts. So after the app had been open for days, Home showed an older value
+  // than the end of a Drill session (which reads the value after the decay). Now the first report of
+  // a new route recomputes it. The recompute does not write the stored profile: the load and the
+  // next answer that counts write it.
+  const lastRoute = useRef<string | null>(null);
+  const followRoute = useCallback((path: string) => {
+    const before = lastRoute.current;
+    lastRoute.current = path;
+    if (before === null || before === path || !content) return;
+    setProfile(prev => { const p = structuredClone(prev); recomputeMastery(p, content); return p; });
+  }, [content]);
 
   // C1: the look-up dialog. An id that the full library does not hold opens nothing.
   const [lookUpRequest, setLookUpRequest] = useState<LookUpRequest | null>(null);
@@ -287,7 +315,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [content]);
 
   return (
-    <Ctx.Provider value={{ content, contentFailed, retryContent, profile, settings, choices, deviceReduce, deviceContrast, setSetting, resetProgress, replaceProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak, lookUp, lookUpRequest, closeLookUp }}>
+    <Ctx.Provider value={{ content, contentFailed, retryContent, profile, settings, choices, deviceReduce, deviceContrast, setSetting, resetProgress, replaceProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak, lookUp, lookUpRequest, closeLookUp, followRoute }}>
       {children}
     </Ctx.Provider>
   );
