@@ -11,37 +11,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
+import { optionsFor } from '../core/radio';
 import type { ContentItem } from '../core/types';
 
 interface Step {
   call: string; ack?: string; pre?: string; rule: string; note: string; goi?: string; read?: string; status?: string;
 }
 
-const shuffle = <T,>(a: T[]): T[] => {
-  const x = a.slice();
-  for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; }
-  return x;
-};
-
-// A distractor must be a different real call that can't be eliminated by shape alone: never equal
-// to, containing, or contained by the answer (the quiz-validity gate, REVAMP §7.5).
-function distinct(answer: string, other: string): boolean {
-  if (other === answer) return false;
-  const a = answer.toLowerCase(), b = other.toLowerCase();
-  return !a.includes(b) && !b.includes(a);
-}
-
-// Prefer neighbouring calls — "five cars, five, CN 2204" against "two cars, two" is the confusion
-// that actually costs you on the ground; a closing "ten feet" against the opening ID is not.
-function optionsFor(all: Step[], step: number): string[] {
-  const answer = all[step].call;
-  const pool = all.map((s, i) => ({ call: s.call, gap: Math.abs(i - step) }))
-    .filter(o => o.gap > 0 && distinct(answer, o.call));
-  const near = shuffle(pool.filter(o => o.gap <= 3)).map(o => o.call);
-  const far = shuffle(pool.filter(o => o.gap > 3)).map(o => o.call);
-  const picked = [...new Set([...near, ...far])].slice(0, 2);
-  return shuffle([answer, ...picked]);
-}
+// The options of a call (the answer and the distractors) come from optionsFor in src/core/radio.ts.
 
 const READOUT_START = '10 cars to the joint';
 
