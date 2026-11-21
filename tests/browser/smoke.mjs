@@ -191,9 +191,22 @@ const ROUTES = [
 const storedJson = (page, key) => page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), key);
 
 // The text of the guided Radio, as the tape reads it: the visible text of `.radio-wrap`, with
-// each run of white space made one space.
+// each run of white space made one space. The words are read as the markup writes them (ruling
+// TAPE-CASE). A rule with text-transform changes the look of a word, not the word. So
+// text-transform is off while the text is read, as in the look harness. A word or a letter case
+// that the markup changes still changes the text.
 async function radioText(page) {
-  return (await page.locator('.radio-wrap').innerText()).replace(/\s+/g, ' ').trim();
+  const text = await page.locator('.radio-wrap').evaluate((el) => {
+    const asWritten = document.createElement('style');
+    asWritten.textContent = '*, *::first-letter, *::first-line { text-transform: none !important; }';
+    document.head.append(asWritten);
+    try {
+      return el.innerText;
+    } finally {
+      asWritten.remove();
+    }
+  });
+  return text.replace(/\s+/g, ' ').trim();
 }
 const record = (text) => ({ sha256: createHash('sha256').update(text).digest('hex'), words: text.split(' ').length });
 
@@ -535,7 +548,7 @@ try {
     const records = [];
     await withPage({}, (page) => walkGuidedRadio(page, (press, text) => { records.push({ press, ...record(text) }); }));
     const tape = {
-      note: 'The word tape of the guided Radio. tests/browser/smoke.mjs recorded it and compares the page with it. A record is the SHA-256 and the word count of the visible text of .radio-wrap, with each run of white space made one space: before the first press of the key control (press 0) and after each of the 14 presses. The file holds no text of the page. A build job does not edit this file.',
+      note: 'The word tape of the guided Radio. tests/browser/smoke.mjs recorded it and compares the page with it. A record is the SHA-256 and the word count of the visible text of .radio-wrap, with each run of white space made one space: before the first press of the key control (press 0) and after each of the 14 presses. The text is read as the markup writes it: text-transform is off while it is read. The file holds no text of the page. A build job does not edit this file.',
       commit,
       selector: '.radio-wrap',
       records,
