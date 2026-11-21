@@ -735,6 +735,7 @@ export function mount(root, ctx) {
       lines: puzzle.listed.map((e, i) => ({ mark: e.listedMark, track: e.listedTrack, flagged: flagged.has(i) })),
     }, {
       onFlag: (i) => {
+        resume();                     // a flag can be the first press of the page: the sound needs its context
         if (flagged.has(i)) flagged.delete(i); else flagged.add(i);
         sfx.confirm(); view.setLineFlag(i, flagged.has(i));   // in place: focus stays on the line
       },
