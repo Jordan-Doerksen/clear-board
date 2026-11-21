@@ -104,8 +104,9 @@ headless Chromium.
   goes into an alert. (U-19) What a screen reader says: not verified.
 - The emoji of a control and the icon of a station heading are hidden from a screen reader. The
   spoken name of a station heading is the station name. The sign ▶ of "▶ Watch optimal" and of
-  "Key the radio ▶", and the signs ✓ ⚠ ● of a trust mark, are hidden too; the words carry the
-  state. Arrows, as in "← Home", stay in the name. (U-41, `HEAD-ONE`, `SIGN-NAME`) What a screen
+  "Key the radio ▶", and the signs ✓ ⚠ ● of the trust mark of an entry and of a Reference row,
+  are hidden too; the words carry the state. Arrows and other signs stay in the names of some
+  controls, for example "← Home" and "Next →". (U-41, `HEAD-ONE`, `SIGN-NAME`) What a screen
   reader says: not verified.
 - The guided Radio: "← Home" first, one heading, mode tabs that move with the arrow keys, Home and
   End, and a log that is a Tab stop with the role "log". The distance or the status shows as page
