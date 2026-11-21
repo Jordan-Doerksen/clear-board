@@ -45,26 +45,6 @@ blockquote{ margin:10px 0 0; padding:10px 14px; border-left:3px solid var(--line
 .feedback .next{ align-self:flex-start; margin-top:6px }
 .big-score{ font-size:2.4rem; margin:.2em 0 }
 
-/* ---- settings ---- */
-dialog#settings{ background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:var(--r); max-width:440px; width:92%; padding:0 }
-dialog#settings::backdrop{ background:var(--cb-scrim) }
-.set-h{ display:flex; justify-content:space-between; align-items:center; padding:16px 18px; border-bottom:1px solid var(--line) }
-.set-h h2{ margin:0; font-size:1.05rem }
-.set-body{ padding:8px 18px 18px }
-.set-sample{ display:flex; align-items:center; gap:14px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:6px 0 14px }
-.set-sample .ss-aa{ font-size:1.9rem; font-weight:800; color:var(--clear); line-height:1 }
-.set-sample b{ display:block } .set-sample small{ color:var(--muted) }
-.iconbtn.danger{ color:var(--stop); border-color:var(--stop) }
-.set-note{ color:var(--muted); font-size:.8rem; margin:12px 0 0 }
-.row{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:13px 0; border-bottom:1px solid var(--line) }
-.row:last-child{ border-bottom:0 } .row label{ font-size:.95rem } .row small{ display:block; color:var(--muted); font-size:.8rem }
-.sw{ position:relative; width:50px; height:28px; flex:0 0 auto }
-.sw input{ position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer }
-.sw i{ position:absolute; inset:0; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; transition:.2s }
-.sw i::after{ content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--muted); transition:.2s }
-.sw input:checked + i{ background:var(--rowwash-green); border-color:var(--clear) }
-.sw input:checked + i::after{ left:25px; background:var(--clear) }
-html[data-reduce="1"] .sw i, html[data-reduce="1"] .sw i::after{ transition:none }
 /* Radio — mode switch (guided vs. call it yourself) + the test-mode readout */
 .mode-tabs{ display:flex; gap:8px; margin:10px 0 16px; flex-wrap:wrap }
 .mode-tab{ flex:1 1 220px; display:flex; flex-direction:column; gap:3px; text-align:left; font:inherit;
