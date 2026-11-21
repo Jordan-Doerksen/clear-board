@@ -511,6 +511,46 @@ async function playToWin(how) {
   });
 }
 
+// The texts of the status region #yard-live (ruling PLAY-ALL-ONE, finding F-11). A screen reader gets
+// only the last text that a region gets in one task, so a case counts each text that the region gets.
+// recordLive starts the record: a MutationObserver keeps the text of each node that a write puts into
+// the region, also when two writes come in one task. liveTexts waits two animation frames, stops the
+// record and returns the texts in order.
+const recordLive = (page) => page.evaluate(() => {
+  const texts = [];
+  const keep = (records) => {
+    for (const r of records) {
+      if (r.type === 'characterData') texts.push(r.target.data);
+      else for (const node of r.addedNodes) texts.push(node.textContent);
+    }
+  };
+  const observer = new MutationObserver(keep);
+  observer.observe(document.querySelector('#yard-live'), { childList: true, characterData: true, subtree: true });
+  window.__cbLiveStop = () => { keep(observer.takeRecords()); observer.disconnect(); return texts; };
+});
+const liveTexts = (page) => page.evaluate(async () => {
+  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+  return window.__cbLiveStop();
+});
+// The numbers of the steps that a text of the stepper names ("Step 2 of 4: ..."), in order.
+const stepsSaid = (text) => [...text.matchAll(/Step (\d+) of \d+:/g)].map((m) => Number(m[1]));
+// The words of the steps from `first` to the last step of the watched line of `job`, in order, in one
+// text: for each step, "Step k of N: <the call>." and then the readout after the step, with the numbers
+// of the model (`states`, from lineStates). Returns the first part that is missing or out of order, or
+// null when each part is there in order.
+function firstMissingStep(text, job, states, first) {
+  const n = job.opt.length;
+  let at = 0;
+  for (let k = first; k <= n; k++) {
+    for (const part of [`Step ${k} of ${n}: ${callWords(job.opt[k - 1])}.`, `${READOUT(states[k].moves, job.par, states[k].joints)}.`]) {
+      const found = text.indexOf(part, at);
+      if (found === -1) return part;
+      at = found + part.length;
+    }
+  }
+  return null;
+}
+
 // ---- The gate cases.
 const GATE_CASES = [
   { name: '1 routes', async run() {
@@ -685,6 +725,7 @@ const GATE_CASES = [
       await waitText(page, '#yard-demo-count', `0 / ${n}`, 'after Back');
       await waitText(page, '#readout', at(0), 'after Back');
       // "▶ Play all" plays each step on its own, and then the control says "Play all" again and is off.
+      await recordLive(page);
       await click(page, '#yard-play');
       await page.waitForFunction((count) => {
         const play = document.querySelector('#yard-play');
@@ -692,6 +733,11 @@ const GATE_CASES = [
       }, `${n} / ${n}`, { timeout: 30000 }).catch(async () => {
         throw new CaseFailure(`after "▶ Play all" and 30 s the stepper is at "${await page.locator('#yard-demo-count').textContent()}" and its control says "${(await page.locator('#yard-play').textContent()).trim()}"; "${n} / ${n}" and "▶ Play all" (off) are expected`);
       });
+      // With motion on, each step keeps its own text in the status region (ruling PLAY-ALL-ONE).
+      // Case 23 checks "Play all" with "Reduce motion" on.
+      const texts = await liveTexts(page);
+      const each = texts.map(stepsSaid);
+      ok(texts.length === n && each.every((steps, k) => steps.length === 1 && steps[0] === k + 1), `with motion on, "▶ Play all" gave the status region #yard-live ${texts.length} texts with the steps ${each.map((steps) => `[${steps.join(', ')}]`).join(' ')}, and ${n} texts with one step each, in order, are expected`);
       await waitText(page, '#readout', at(n), 'at the end of "▶ Play all"');
       const banner = await page.locator('#msg').textContent();
       ok(banner.includes(`Step ${n} of ${n}`), `at the end of "▶ Play all" the banner says "${banner}", and "Step ${n} of ${n}" is expected`);
@@ -1231,6 +1277,61 @@ const GATE_CASES = [
       }
     }
     return notes.join('; ');
+  } },
+
+  // Case 23 enters the gate in fix round 2 of Wave 2c (job F2-C).
+  { name: '23 yard play all with reduced motion', async run() {
+    // Ruling PLAY-ALL-ONE (finding F-11): with "Reduce motion" on, "▶ Play all" plays each step that
+    // remains at once, in one task, and a screen reader gets only the last text that the status region
+    // gets in a task. So one press of "▶ Play all" must give one text in #yard-live, and that text holds
+    // each step that the press played, in order: "Step k of N: <the call>." and then the readout after
+    // step k (firstMissingStep). The case presses it at step 0 of the first job, and again after Next.
+    // "Reduce motion" is on by the setting at 1440 and by the device flag at 390. After each press the
+    // banner says the last step, and the readout and the step counter show the end of the line, as with
+    // motion on (case 8). Case 8 checks that with motion on each step keeps its own text.
+    const job = YARD_JOB;
+    const states = lineStates(job);
+    const n = job.opt.length;
+    const notes = [];
+    for (const [way, options] of [['the setting', { width: 1440, settings: { ...allOff, reduce: true } }], ['the device flag', { width: 390, reduce: true }]]) {
+      const where = `"Reduce motion" on by ${way}, at ${options.width}`;
+      notes.push(await withPage(options, async (page) => {
+        await open(page, '/yard');
+        await page.locator('#optimal').waitFor();
+        ok(await page.evaluate(() => document.documentElement.dataset.reduce) === '1', `${where}: "Reduce motion" is not on`);
+        ok(await page.locator('#picker').inputValue() === String(PUZZLES.indexOf(job)), `${where}: the picker is not on the first job ${job.id}`);
+        const said = [];
+        for (const first of [1, 2]) {
+          // "▶ Watch optimal" opens the stepper at step 0. For the second press, Next plays step 1 first.
+          await click(page, '#optimal');
+          await waitText(page, '#yard-demo-count', `0 / ${n}`, `${where}: after "▶ Watch optimal"`);
+          if (first === 2) {
+            await click(page, '#yard-next');
+            await waitText(page, '#yard-demo-count', `1 / ${n}`, `${where}: after Next`);
+          }
+          const when = `${where}: one press of "▶ Play all" at step ${first - 1} of ${job.id}`;
+          await recordLive(page);
+          await click(page, '#yard-play');
+          await waitText(page, '#yard-demo-count', `${n} / ${n}`, when);
+          const texts = await liveTexts(page);
+          ok(texts.length === 1, `${when} gave the status region #yard-live ${texts.length} texts (${texts.map((t) => `steps [${stepsSaid(t).join(', ')}]`).join(' ')}), and one text with the steps ${first} to ${n} is expected`);
+          const text = texts[0];
+          const missing = firstMissingStep(text, job, states, first);
+          ok(missing === null, `${when}: the text of #yard-live names the steps [${stepsSaid(text).join(', ')}], and "${missing}" is not in it in order. Each step from ${first} to ${n} is expected, in order`);
+          ok(stepsSaid(text).length === n - first + 1, `${when}: the text of #yard-live names the steps [${stepsSaid(text).join(', ')}], and only the steps ${first} to ${n} are expected`);
+          ok(await page.locator('#yard-live').textContent() === text, `${when}: #yard-live does not keep the text of the press`);
+          const banner = await page.locator('#msg').textContent();
+          ok(banner.startsWith(`Step ${n} of ${n}: ${callWords(job.opt[n - 1])}.`), `${when}: the banner says "${banner}", and the last step "Step ${n} of ${n}" is expected`);
+          await waitText(page, '#readout', READOUT(states[n].moves, job.par, states[n].joints), `${when}, the readout`);
+          said.push(`at step ${first - 1}, one text of ${text.length} characters with the steps ${first} to ${n}`);
+          // "Stop watching" loads the job again, at its start.
+          await click(page, '#optimal');
+          await waitText(page, '#readout', READOUT(0, job.par, 0), `${where}: after "Stop watching"`);
+        }
+        return `${where}: ${said.join('; ')}`;
+      }));
+    }
+    return notes.join('. ');
   } },
 ];
 
