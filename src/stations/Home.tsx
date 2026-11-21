@@ -55,7 +55,9 @@ export function Home() {
                   ? (
                     <span className="cb-home-tile-foot">
                       <span className="cb-home-tile-figure">
-                        <span className="dusk-bar" role="progressbar" aria-label={`${d.name} mastery`} aria-valuenow={m} aria-valuemin={0} aria-valuemax={100}><i className="dusk-fill dusk-fill--teal" style={{ width: `${m}%` }} /></span>
+                        {/* TILE-BAR: the bar is hidden from a screen reader; the visible number gives
+                            the value in the name of the tile one time. */}
+                        <span className="dusk-bar" role="progressbar" aria-hidden="true" aria-label={`${d.name} mastery`} aria-valuenow={m} aria-valuemin={0} aria-valuemax={100}><i className="dusk-fill dusk-fill--teal" style={{ width: `${m}%` }} /></span>
                         <b className="dusk-num">{m}%</b>
                       </span>
                       <span className="cb-home-tile-act">Drill <span aria-hidden="true">→</span></span>
