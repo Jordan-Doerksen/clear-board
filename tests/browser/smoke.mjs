@@ -511,6 +511,99 @@ async function playToWin(how) {
   });
 }
 
+// The texts of the status region #yard-live (ruling PLAY-ALL-ONE, finding F-11). A screen reader gets
+// only the last text that a region gets in one task, so a case counts each text that the region gets.
+// recordLive starts the record: a MutationObserver keeps the text of each node that a write puts into
+// the region, also when two writes come in one task. liveTexts waits two animation frames, stops the
+// record and returns the texts in order.
+const recordLive = async (page) => ok(await page.evaluate(() => {
+  const region = document.querySelector('#yard-live');
+  if (!region) return false;
+  const texts = [];
+  const keep = (records) => {
+    for (const r of records) {
+      if (r.type === 'characterData') texts.push(r.target.data);
+      else for (const node of r.addedNodes) texts.push(node.textContent);
+    }
+  };
+  const observer = new MutationObserver(keep);
+  observer.observe(region, { childList: true, characterData: true, subtree: true });
+  window.__cbLiveStop = () => { keep(observer.takeRecords()); observer.disconnect(); return texts; };
+  return true;
+}), 'the status region #yard-live is not in the page');
+const liveTexts = (page) => page.evaluate(async () => {
+  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+  return window.__cbLiveStop();
+});
+// The numbers of the steps that a text of the stepper names ("Step 2 of 4: ..."), in order.
+const stepsSaid = (text) => [...text.matchAll(/Step (\d+) of \d+:/g)].map((m) => Number(m[1]));
+// The words of the steps from `first` to the last step of the watched line of `job`, in order, in one
+// text: for each step, "Step k of N: <the call>." and then the readout after the step, with the numbers
+// of the model (`states`, from lineStates). Returns the first part that is missing or out of order, or
+// null when each part is there in order.
+function firstMissingStep(text, job, states, first) {
+  const n = job.opt.length;
+  let at = 0;
+  for (let k = first; k <= n; k++) {
+    for (const part of [`Step ${k} of ${n}: ${callWords(job.opt[k - 1])}.`, `${READOUT(states[k].moves, job.par, states[k].joints)}.`]) {
+      const found = text.indexOf(part, at);
+      if (found === -1) return part;
+      at = found + part.length;
+    }
+  }
+  return null;
+}
+
+// Each control of `parts` is in the page as many times as expected, shows, and is 44 by 44 px or more
+// (fence item 8, ruling TARGETS-44); then each other control of the page that shows is 44 by 44 px or
+// more (smallControls). `parts` is a list of [selector, count]. A failure names each control with its
+// words and its size. Returns the controls of `parts` with their words and sizes (ruling GATE-44).
+async function bigControls(page, parts, where) {
+  const found = [];
+  const faults = [];
+  for (const [selector, want] of parts) {
+    const list = await page.locator(selector).evaluateAll((els) => els.map((el) => {
+      const r = el.getBoundingClientRect();
+      const shown = r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden';
+      return { words: (el.getAttribute('aria-label') || el.innerText || '').replace(/\s+/g, ' ').trim(), width: r.width, height: r.height, shown };
+    }));
+    if (list.length !== want) faults.push(`${list.length} control${list.length === 1 ? '' : 's'} ${selector} ${list.length === 1 ? 'is' : 'are'} in the page, and ${want} ${want === 1 ? 'is' : 'are'} expected`);
+    for (const c of list) {
+      if (!c.shown) faults.push(`the control ${selector} "${c.words}" does not show`);
+      else if (c.width < 44 || c.height < 44) faults.push(`the control ${selector} "${c.words}" is ${Math.round(c.width * 100) / 100} by ${Math.round(c.height * 100) / 100} px`);
+      found.push({ selector, ...c });
+    }
+  }
+  ok(faults.length === 0, `${where}: ${faults.join('; ')}. Each control must show and be 44 by 44 px or more.`);
+  const small = await smallControls(page);
+  ok(small.length === 0, `${where}: ${small.length} other control${small.length === 1 ? ' is' : 's are'} under 44 by 44 px: ${small.join('; ')}`);
+  return found;
+}
+
+// Plays the optimal line of `job` with clicks, as a learner does: for each call the case lines the
+// switches (the switch of the track of the call reverse, each other switch normal), sets the move
+// builder and presses "Work it ▸". After each call the readout must show the counters of the model
+// (`states`, from lineStates).
+async function playLine(page, job, states, where) {
+  const how = { press: (p, selector) => click(p, selector) };
+  const ids = await page.locator('[data-sw]').evaluateAll((els) => els.map((el) => el.dataset.sw));
+  ok(ids.length === 6, `${where}: the Yard has ${ids.length} switch buttons, and 6 are expected`);
+  for (const [k, call] of job.opt.entries()) {
+    const [act, track, n] = call;
+    if (act !== 'secure') {
+      for (const id of ids) {
+        const want = id === track ? 'reverse' : 'normal';
+        if (!(await page.locator(`[data-sw="${id}"]`).getAttribute('aria-label')).endsWith(want)) await throwSwitch(page, how, id, want, where);
+      }
+    }
+    for (const [selector, value] of [['#act', act], ['#track', track], ...(act !== 'secure' ? [['#count', String(n)]] : [])]) {
+      await onControl(`${where}: the choice of the option "${value}" of ${selector}`, () => page.locator(selector).selectOption(value));
+    }
+    await click(page, '#work');
+    await waitText(page, '#readout', READOUT(states[k + 1].moves, job.par, states[k + 1].joints), `${where}: after the call ${callWords(call)}`);
+  }
+}
+
 // ---- The gate cases.
 const GATE_CASES = [
   { name: '1 routes', async run() {
@@ -685,6 +778,7 @@ const GATE_CASES = [
       await waitText(page, '#yard-demo-count', `0 / ${n}`, 'after Back');
       await waitText(page, '#readout', at(0), 'after Back');
       // "▶ Play all" plays each step on its own, and then the control says "Play all" again and is off.
+      await recordLive(page);
       await click(page, '#yard-play');
       await page.waitForFunction((count) => {
         const play = document.querySelector('#yard-play');
@@ -692,6 +786,11 @@ const GATE_CASES = [
       }, `${n} / ${n}`, { timeout: 30000 }).catch(async () => {
         throw new CaseFailure(`after "▶ Play all" and 30 s the stepper is at "${await page.locator('#yard-demo-count').textContent()}" and its control says "${(await page.locator('#yard-play').textContent()).trim()}"; "${n} / ${n}" and "▶ Play all" (off) are expected`);
       });
+      // With motion on, each step keeps its own text in the status region (ruling PLAY-ALL-ONE).
+      // Case 23 checks "Play all" with "Reduce motion" on.
+      const texts = await liveTexts(page);
+      const each = texts.map(stepsSaid);
+      ok(texts.length === n && each.every((steps, k) => steps.length === 1 && steps[0] === k + 1), `with motion on, "▶ Play all" gave the status region #yard-live ${texts.length} text${texts.length === 1 ? '' : 's'} with the steps ${each.map((steps) => `[${steps.join(', ')}]`).join(' ')}, and ${n} texts with one step each, in order, are expected`);
       await waitText(page, '#readout', at(n), 'at the end of "▶ Play all"');
       const banner = await page.locator('#msg').textContent();
       ok(banner.includes(`Step ${n} of ${n}`), `at the end of "▶ Play all" the banner says "${banner}", and "Step ${n} of ${n}" is expected`);
@@ -1229,6 +1328,135 @@ const GATE_CASES = [
         });
         if (note) notes.push(note);
       }
+    }
+    return notes.join('; ');
+  } },
+
+  // Cases 23 and 24 enter the gate in fix round 2 of Wave 2c (job F2-C).
+  { name: '23 yard play all with reduced motion', async run() {
+    // Ruling PLAY-ALL-ONE (finding F-11): with "Reduce motion" on, "▶ Play all" plays each step that
+    // remains at once, in one task, and a screen reader gets only the last text that the status region
+    // gets in a task. So one press of "▶ Play all" must give one text in #yard-live, and that text holds
+    // each step that the press played, in order: "Step k of N: <the call>." and then the readout after
+    // step k (firstMissingStep). The case presses it at step 0 of the first job, and again after Next.
+    // "Reduce motion" is on by the setting at 1440 and by the device flag at 390. After each press the
+    // banner says the last step, and the readout and the step counter show the end of the line, as with
+    // motion on (case 8). Case 8 checks that with motion on each step keeps its own text.
+    const job = YARD_JOB;
+    const states = lineStates(job);
+    const n = job.opt.length;
+    const notes = [];
+    for (const [way, options] of [['the setting', { width: 1440, settings: { ...allOff, reduce: true } }], ['the device flag', { width: 390, reduce: true }]]) {
+      const where = `"Reduce motion" on by ${way}, at ${options.width}`;
+      notes.push(await withPage(options, async (page) => {
+        await open(page, '/yard');
+        await page.locator('#optimal').waitFor();
+        ok(await page.evaluate(() => document.documentElement.dataset.reduce) === '1', `${where}: "Reduce motion" is not on`);
+        ok(await page.locator('#picker').inputValue() === String(PUZZLES.indexOf(job)), `${where}: the picker is not on the first job ${job.id}`);
+        const said = [];
+        for (const first of [1, 2]) {
+          // "▶ Watch optimal" opens the stepper at step 0. For the second press, Next plays step 1 first.
+          await click(page, '#optimal');
+          await waitText(page, '#yard-demo-count', `0 / ${n}`, `${where}: after "▶ Watch optimal"`);
+          if (first === 2) {
+            await click(page, '#yard-next');
+            await waitText(page, '#yard-demo-count', `1 / ${n}`, `${where}: after Next`);
+          }
+          const when = `${where}: one press of "▶ Play all" at step ${first - 1} of ${job.id}`;
+          await recordLive(page);
+          await click(page, '#yard-play');
+          await waitText(page, '#yard-demo-count', `${n} / ${n}`, when);
+          const texts = await liveTexts(page);
+          ok(texts.length === 1, `${when} gave the status region #yard-live ${texts.length} texts (${texts.map((t) => `steps [${stepsSaid(t).join(', ')}]`).join(' ')}), and one text with the steps ${first} to ${n} is expected`);
+          const text = texts[0];
+          const missing = firstMissingStep(text, job, states, first);
+          ok(missing === null, `${when}: the text of #yard-live names the steps [${stepsSaid(text).join(', ')}], and "${missing}" is not in it in order. Each step from ${first} to ${n} is expected, in order`);
+          ok(stepsSaid(text).length === n - first + 1, `${when}: the text of #yard-live names the steps [${stepsSaid(text).join(', ')}], and only the steps ${first} to ${n} are expected`);
+          ok(await page.locator('#yard-live').textContent() === text, `${when}: #yard-live does not keep the text of the press`);
+          const banner = await page.locator('#msg').textContent();
+          ok(banner.startsWith(`Step ${n} of ${n}: ${callWords(job.opt[n - 1])}.`), `${when}: the banner says "${banner}", and the last step "Step ${n} of ${n}" is expected`);
+          await waitText(page, '#readout', READOUT(states[n].moves, job.par, states[n].joints), `${when}, the readout`);
+          said.push(`at step ${first - 1}, one text of ${text.length} characters with the steps ${first} to ${n}`);
+          // "Stop watching" loads the job again, at its start.
+          await click(page, '#optimal');
+          await waitText(page, '#readout', READOUT(0, job.par, 0), `${where}: after "Stop watching"`);
+        }
+        return `${where}: ${said.join('; ')}`;
+      }));
+    }
+    return notes.join('. ');
+  } },
+
+  { name: '24 yard stepper and win targets', async run() {
+    // Ruling GATE-44 (item K-4 of the final report): at 390 and 1440, each control of the stepper of the
+    // watched line and each control at the win of a job is 44 by 44 px or more (fence item 8, ruling
+    // TARGETS-44). Case 13 measures the Yard only at the start of a job. The stepper is the controls
+    // "Stop watching", "◂ Back", "Next ▸" and "▶ Play all". It is measured with motion on: at step 0,
+    // while "Play all" plays (its control says "Stop"), at the middle step where Stop leaves it, at each
+    // step after it with Next, and at the last step. The win is the first job, played along its optimal
+    // line with clicks, with "Reduce motion" on, so that each move ends at once. At the win the move log
+    // has "Play again" on each line of a move and "Before and after" on the last line. In each state
+    // each other control that shows is measured too (bigControls). A failure names the control and its
+    // size.
+    const job = YARD_JOB;
+    const states = lineStates(job);
+    const n = job.opt.length;
+    const STEPPER = [['#optimal', 1], ['#yard-back', 1], ['#yard-next', 1], ['#yard-play', 1]];
+    const LOG = [['#yard-log-list button[data-log="again"]', job.opt.filter(([act]) => act !== 'secure').length], ['#yard-log-list button[data-log="before-after"]', 1]];
+    ok(n >= 2, `the optimal line of ${job.id} has ${n} steps, and 2 or more are expected for a middle step`);
+    const notes = [];
+    const px = (v) => Math.round(v * 100) / 100;
+    for (const width of [390, 1440]) {
+      // The measures of the controls of STEPPER and LOG at this width: the count, the narrowest and the lowest.
+      const seen = { count: 0, narrow: null, low: null };
+      const keep = (list) => {
+        for (const c of list) {
+          seen.count++;
+          if (!seen.narrow || c.width < seen.narrow.width) seen.narrow = c;
+          if (!seen.low || c.height < seen.low.height) seen.low = c;
+        }
+        return list;
+      };
+      await withPage({ width }, async (page) => {
+        const where = `the stepper of ${job.id} at ${width}`;
+        await open(page, '/yard');
+        await page.locator('#optimal').waitFor();
+        ok(await page.evaluate(() => document.documentElement.dataset.reduce) === '0', `${where}: "Reduce motion" is not off`);
+        await click(page, '#optimal');
+        await waitText(page, '#yard-demo-count', `0 / ${n}`, `${where}: after "▶ Watch optimal"`);
+        keep(await bigControls(page, STEPPER, `${where}, at step 0`));
+        await click(page, '#yard-play');
+        await page.waitForFunction(() => /Stop/.test(document.querySelector('#yard-play')?.textContent ?? ''))
+          .catch(() => { throw new CaseFailure(`${where}: after a press of "▶ Play all" its control does not say "Stop"`); });
+        const playing = keep(await bigControls(page, STEPPER, `${where}, while "Play all" plays`));
+        const stop = playing.find((c) => c.selector === '#yard-play');
+        ok(/Stop/.test(stop.words), `${where}: the control #yard-play says "${stop.words}" at the measure while "Play all" plays, and "Stop" is expected`);
+        await click(page, '#yard-play');
+        await page.waitForFunction(() => /Play all/.test(document.querySelector('#yard-play')?.textContent ?? ''))
+          .catch(() => { throw new CaseFailure(`${where}: after a press of Stop its control does not say "Play all"`); });
+        // Stop ends the running step at its end state, and the stepper stays at that step: a middle
+        // step. On a slow machine "Play all" can be at step 2 when Stop comes, so the case reads it.
+        const stopped = Number((await page.locator('#yard-demo-count').textContent()).split(' / ')[0]);
+        ok(stopped >= 1 && stopped < n, `${where}: after Stop the stepper is at step ${stopped}, and a middle step (1 to ${n - 1}) is expected`);
+        keep(await bigControls(page, STEPPER, `${where}, at step ${stopped} after Stop`));
+        for (let k = stopped + 1; k <= n; k++) {
+          await click(page, '#yard-next');
+          await waitText(page, '#yard-demo-count', `${k} / ${n}`, `${where}: after Next`);
+          keep(await bigControls(page, STEPPER, `${where}, at step ${k}${k === n ? ', the end' : ''}`));
+        }
+      });
+      await withPage({ width, settings: { ...allOff, reduce: true } }, async (page) => {
+        const where = `the win of ${job.id} at ${width}`;
+        await open(page, '/yard');
+        await page.locator('#work').waitFor();
+        ok(await page.evaluate(() => document.documentElement.dataset.reduce) === '1', `${where}: "Reduce motion" is not on`);
+        ok(await page.locator('#picker').inputValue() === String(PUZZLES.indexOf(job)), `${where}: the picker is not on the first job`);
+        await playLine(page, job, states, where);
+        const banner = (await page.locator('#msg').textContent()).trim();
+        ok(banner.startsWith('Job done.'), `${where}: after the last call the banner says "${banner}", and the win words "Job done." are expected`);
+        keep(await bigControls(page, LOG, where));
+      });
+      notes.push(`at ${width}: ${seen.count} measures of the controls of the stepper and of the move log; the narrowest is "${seen.narrow.words}", ${px(seen.narrow.width)} by ${px(seen.narrow.height)} px; the lowest is "${seen.low.words}", ${px(seen.low.width)} by ${px(seen.low.height)} px`);
     }
     return notes.join('; ');
   } },

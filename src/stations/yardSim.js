@@ -438,9 +438,10 @@ export function mount(root, ctx) {
   // first, U-12). Next plays the next step with the times of a move of the learner; Back shows the
   // state after the step before; "Play all" plays the rest in turn, and Stop ends it. Each step lines
   // the switches for the learner, as the film of the line did before. The words, the counters and the
-  // region say each step at its start. A step back works on copies: `post[k]` is the state after step
-  // k, and `pre[k]` the state before step k with its lining. A watched line gets no done mark and no
-  // win sound: it never reaches recordWin().
+  // region say each step at its start. With reduced motion, "Play all" plays the rest in one call, and
+  // the region says those steps in one message (see playSteps). A step back works on copies:
+  // `post[k]` is the state after step k, and `pre[k]` the state before step k with its lining. A
+  // watched line gets no done mark and no win sound: it never reaches recordWin().
   function startDemo() {
     load(puzzle);
     watched = true;
@@ -466,14 +467,41 @@ export function mount(root, ctx) {
     return `Step ${k} of ${N}: ${callWords(act, trk, n)}. ${demo.post[k].msg} ${costWords(act, demo.post[k - 1], demo.post[k])}${end}`;
   }
 
-  // The banner, the counters and the region say step k.
+  // The words of the steps of "Play all" that the outer call of playSteps() plays, or null when no
+  // such call runs.
+  let playSaid = null;
+
+  // The banner, the counters and the region say step k. While playSteps() runs, the words of the step
+  // go into `playSaid`, and playSteps() writes them to the region.
   function sayStep(k) {
     const st = demo.post[k];
     const readout = view.setReadout({ moves: st.moves, par: puzzle.par, joints: st.joints });
     const text = demoWords(k);
     banner(text, 'ok');
-    live.say(`${text} ${readout}.`);
+    const said = `${text} ${readout}.`;
+    if (playSaid) playSaid.push(said); else live.say(said);
     showDemo();
+  }
+
+  // Each step of "Play all" starts through this function (PLAY-ALL-ONE, finding F-11). With reduced
+  // motion, a step ends at once, and the next step starts in the same call. Thus one call plays each
+  // step that remains. A browser gives a screen reader only the last text that a region gets in one
+  // task. Thus the outer call collects the words of each step that it plays in `playSaid`, and then
+  // writes the region one time: the words of each step, in order, as sayStep gives them (R7 F14;
+  // announce() does the same for the parts of a move). An inner call only plays its step. With
+  // motion on, one call plays one step, so each step keeps its own message. The finally block also
+  // runs after an error, so that `playSaid` does not stay open and keep the next words from the
+  // region.
+  function playSteps() {
+    if (playSaid) { demoStep(); return; }
+    playSaid = [];
+    try {
+      demoStep();
+    } finally {
+      const said = playSaid.join(' ');
+      playSaid = null;
+      if (said) live.say(said);
+    }
   }
 
   // Plays the next step. Its end state is known at its start (the model on a copy), so the words come
@@ -499,12 +527,14 @@ export function mount(root, ctx) {
   }
 
   // "Play all" goes on after a step: the next step after a pause, or at once with reduced motion.
+  // Reduced motion can start while a step moves: the end of that step comes in an animation frame,
+  // and the steps that remain then run in that frame. So each way goes through playSteps().
   function demoNextOfPlay() {
     if (!demo || !demo.playing) return;
     if (demo.at >= demo.line.length) { demo.playing = false; showDemo(); return; }
-    if (still()) { demoStep(); return; }
+    if (still()) { playSteps(); return; }
     const g = gen;
-    later(readTime('--yard-step-gap'), () => { if (gen === g && demo && demo.playing) demoStep(); });
+    later(readTime('--yard-step-gap'), () => { if (gen === g && demo && demo.playing) playSteps(); });
   }
 
   function stopPlay() {
@@ -536,7 +566,7 @@ export function mount(root, ctx) {
     finishEffect();
     if (demo.at >= demo.line.length) return;
     demo.playing = true; showDemo();
-    demoStep();
+    playSteps();
   }
 
   // ---- The move log (R7-P10, R7 section 9) ------------------------------------------------------------

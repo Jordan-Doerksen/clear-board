@@ -257,7 +257,7 @@ browser. It runs each step after a failure, and exits non-zero when one step fai
   whose code ends in "f". It pins what the frozen function draws today. It does not prove that
   a drawing is right for its item.
 - **In a browser:** `npm run test:browser` (`tests/browser/smoke.mjs`) serves `dist/` and runs
-  22 gate cases in Chromium. It needs the build and Chromium. The look
+  24 gate cases in Chromium. It needs the build and Chromium. The look
   harness (`npm run look:baseline`, `npm run look:compare`) compares pictures and page facts
   with the build of a baseline commit.
 - **CI:** `.github/workflows/check.yml` runs `npm ci`, the check, the build and the browser test
