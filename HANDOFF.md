@@ -17,8 +17,12 @@ The owner runs no command (fence rule 13): section 8 is for the next session, no
 - Each pull request is a draft. Each one is based on the one before it, so they merge in the order
   #1, #2, #3, #4. `main` has not moved: it is still at `86cfef2`. `main` moves only on the owner's
   typed word (fence rule 12).
-- The GitHub check (`check.yml`: the check, the build and the browser test) passed on the head of
-  #4 (`dc88b14`) on 2026-11-21.
+- The GitHub check (`check.yml`: the check, the build and the browser test) passed on each head of
+  #4 on 2026-11-21, the last one `b92d1e6` included.
+- **A live preview** of `claude/cb2-wave-2c` at `b92d1e6` is at https://clear-board-2-preview.vercel.app
+  (the Vercel project `clear-board-2-preview` of the owner's Vercel account, made on 2026-11-21 at the
+  owner's request). It is a project of its own: the owner's live site and `main` did not change. A
+  later push to the branch does not update it by itself (not verified): deploy again to see a change.
 
 ## 2. The "done when" list of the plan (section 9)
 
