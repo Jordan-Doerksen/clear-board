@@ -182,7 +182,7 @@ export function mount(root, ctx) {
     renderLog(); renderNext();
     if (idx >= STEPS.length) {
       doneEl.className = 'done show';
-      doneEl.innerHTML = '<b>Coupled, proven, protected, air to the tail.</b> Counted cars then feet, made the joint, stretched it, set &amp; centered, cut the air in; the engineer called air to the tail, you repeated it and called "going for hand brakes." The move/departure is the next layer.';
+      doneEl.innerHTML = '<b>Coupled, proven, protected, air to the tail.</b> Counted cars then feet, made the joint, stretched it, set &amp; centered, cut the air in; the engineer called air to the tail, you repeated it and called "going for hand brakes."';
       // Guided mode grades NOTHING (REVAMP §5 — the walkthrough is a confidence-builder, not a test).
       // The old profile.radio.done boolean was retired with D-0025: it graded attendance and could
       // never decay. Radio mastery now comes from "Call it yourself" through the one SM-2 model.
