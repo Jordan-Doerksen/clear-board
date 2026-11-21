@@ -2,7 +2,7 @@
 // Mirrors the vanilla `ctx` object (profile/content/settings/save/recompute/speak) as React context.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { freshProfile, keepProfileCopy, loadContent, PROFILE_KEY, readStoredProfile, recomputeMastery, saveProfile, SETTINGS_KEY, YARD_SOUND_KEY } from '../core/store';
+import { freshProfile, keepProfileCopy, loadContent, mergeProfileInto, mergeStoredProfile, PROFILE_KEY, readStoredProfile, recomputeMastery, repairProfile, saveProfile, SETTINGS_KEY, YARD_SOUND_KEY } from '../core/store';
 import { grade, isDue } from '../core/sr';
 import type { Content, ContentItem, Profile, Settings } from '../core/types';
 
@@ -125,8 +125,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Recompute mastery as soon as content arrives (decay applies even before any new drill).
   useEffect(() => {
     if (!content) return;
-    setProfile(prev => { const p = structuredClone(prev); recomputeMastery(p, content); saveProfile(p); return p; });
+    setProfile(prev => { const p = structuredClone(prev); mergeStoredProfile(p); recomputeMastery(p, content); saveProfile(p); return p; });
   }, [content]);
+
+  // U-34 (R6 ENG-21): another open copy of the app wrote the profile. A copy of the same profile is
+  // merged into this one. Another profile (a reset or a load in the other copy) replaces this one,
+  // and a removed profile (a reset, or cleared site data) gives a fresh one, so that the next save
+  // of this copy does not write the old progress back.
+  useEffect(() => {
+    function follow(e: StorageEvent) {
+      if (e.storageArea !== localStorage || (e.key !== PROFILE_KEY && e.key !== null)) return;
+      if (e.newValue === null) {
+        setProfile(() => { const p = freshProfile(choices); if (content) recomputeMastery(p, content); return p; });
+        return;
+      }
+      let raw: unknown;
+      try { raw = JSON.parse(e.newValue); } catch { return; }
+      const other = repairProfile(raw, choices);
+      if (!other) return;
+      setProfile(prev => {
+        const p = structuredClone(prev);
+        const next = other.profile.createdAt === p.createdAt ? (mergeProfileInto(p, other.profile), p) : other.profile;
+        if (content) recomputeMastery(next, content);
+        return next;
+      });
+    }
+    window.addEventListener('storage', follow);
+    return () => window.removeEventListener('storage', follow);
+  }, [choices, content]);
 
   // Apply the settings to <html>. CSS keys off these data-attrs + --fs. The store keeps the choices.
   useEffect(() => {
@@ -161,6 +187,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const recordAnswer = useCallback((item: ContentItem, correct: boolean) => {
     setProfile(prev => {
       const p = structuredClone(prev);
+      mergeStoredProfile(p);   // U-34: the answers of another open copy stay
       // Anti-marathon (F2 / validation #7): a CORRECT answer only advances the schedule when the item
       // is actually due — re-drilling before its interval elapses can't farm familiarity. A miss always
       // counts (resetting the interval is safety signal regardless of timing).
@@ -182,6 +209,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!content) return;
     setProfile(prev => {
       const p = structuredClone(prev);
+      mergeStoredProfile(p);   // U-34: the answers of another open copy stay
       const now = new Date().toISOString();
       let touched = false;
       for (const id of itemIds) {
@@ -211,9 +239,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [gradeItems]);
 
   // The Yard mutates profile.yard.completed in place (vanilla engine) then calls this to persist.
+  // U-34: the answers of another open copy stay.
   const persistProfile = useCallback(() => {
-    setProfile(prev => { saveProfile(prev); return prev; });
-  }, []);
+    setProfile(prev => {
+      const p = structuredClone(prev);
+      if (mergeStoredProfile(p) && content) recomputeMastery(p, content);
+      saveProfile(p);
+      return p;
+    });
+  }, [content]);
 
   // "Reset my progress" also removes the stored sound choice of the Yard (U-36, 2c-plan C8).
   const resetProgress = useCallback(() => {

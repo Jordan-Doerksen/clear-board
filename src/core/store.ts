@@ -236,6 +236,49 @@ export function readProgressFile(text: string, settings: Settings): { profile: P
   }
   return null;
 }
+// ---- Two open copies of the app (U-34; R6 ENG-21) -----------------------------------------------
+// Each copy holds the profile in memory and writes the whole profile on each save, so the later save
+// removed the answers of the other copy. Now a copy merges the stored profile into its own before a
+// save, and it follows the storage event of the other copy (AppContext). A merge keeps, for each
+// item, the state that was seen last; each Yard job that one copy completed; and the better Yard
+// record of each job (fewer moves, then fewer joints, as the Yard rule). It merges only two copies
+// of one profile (the same createdAt): another profile comes from a reset or a load, and is not
+// merged.
+const seenAt = (st: SRState) => (st.lastSeen ? Date.parse(st.lastSeen) : -Infinity);
+function laterState(a: SRState, b: SRState): SRState {
+  if (seenAt(a) !== seenAt(b)) return seenAt(a) > seenAt(b) ? a : b;
+  return b.seen > a.seen ? b : a;
+}
+const betterRecord = (a: YardBest, b: YardBest) => (b.moves < a.moves || (b.moves === a.moves && b.joints < a.joints) ? b : a);
+
+// Merges `other` into `p`; `p` changes. The mastery of a domain is not merged: the caller computes it
+// again from the merged items.
+export function mergeProfileInto(p: Profile, other: Profile): void {
+  for (const [id, st] of Object.entries(other.items)) p.items[id] = p.items[id] ? laterState(p.items[id], st) : st;
+  for (const [id, d] of Object.entries(other.domains)) {
+    const mine = p.domains[id];
+    if (!mine) p.domains[id] = { ...d };
+    else if (d.lastDrill && (!mine.lastDrill || Date.parse(d.lastDrill) > Date.parse(mine.lastDrill))) mine.lastDrill = d.lastDrill;
+  }
+  if (!p.yard) p.yard = { completed: [], best: {} };
+  for (const id of other.yard?.completed ?? []) if (!p.yard.completed.includes(id)) p.yard.completed.push(id);
+  if (other.yard?.best) {
+    const best = p.yard.best ?? (p.yard.best = {});
+    for (const [id, b] of Object.entries(other.yard.best)) best[id] = best[id] ? betterRecord(best[id], b) : b;
+  }
+}
+
+// Reads the stored profile and merges it into `p` when it is a copy of the same profile; `p`
+// changes. Returns true when it merged.
+export function mergeStoredProfile(p: Profile): boolean {
+  let raw: unknown;
+  try { raw = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null'); } catch { return false; }
+  const stored = repairProfile(raw, p.settings);
+  if (!stored || stored.profile.createdAt !== p.createdAt) return false;
+  mergeProfileInto(p, stored.profile);
+  return true;
+}
+
 export function saveProfile(p: Profile): void {
   p.updatedAt = new Date().toISOString();
   try { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); } catch { /* storage full / blocked */ }
