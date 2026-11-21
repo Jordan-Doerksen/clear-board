@@ -285,8 +285,8 @@ browser. It runs each step after a failure, and exits non-zero when one step fai
   item (row U-19). The Yard has a text mirror (`#yard-mirror`) and a status region (`#yard-live`)
   (P-03). The emoji of a control is hidden from a screen reader (row U-41). Two signs stay in the
   name of a control: ▶ in "▶ Watch optimal" (the Yard) and in "Key the radio ▶" (the guided Radio),
-  and ⚠ in the trust mark of the four Reference rows of the items that are not verified. No screen
-  reader was run: what a screen reader says is not verified.
+  and ⚠ in the trust mark of the four Reference rows of the `needs-review` items. No screen reader
+  was run: what a screen reader says is not verified.
 - **Dyslexia option:** toggle to a dyslexia-friendly face + wider spacing. The face is Atkinson
   Hyperlegible, two font files that ship with the app with their licence text (row U-30).
 - **Read-aloud:** Web Speech API; **degrades gracefully with no offline voice** (N13) — never blocks
