@@ -3,15 +3,17 @@
    Each class has the prefix yd-. This file declares no custom property. Each colour is a token of
    Dusk or of the bridge file src/styles/clear-board.tokens.css, so the high-contrast mode reaches
    the Yard. The edge of a control reads --cb-edge. The edge of a container reads --lit-rule.
+   Each type size is a token of the bridge or a rem value, and each face is --font-ui or
+   --font-mono, so the text scale and the dyslexia type reach the Yard.
    The two declarations that the back button took from the app sheet are here: the least height
    of 44 px and the 1 px move while it is pressed. */
 .yard-wrap {
-  color: var(--ink); font: 15px/1.5 system-ui, -apple-system, Segoe UI, sans-serif;
+  color: var(--ink); font-size: var(--fs-l);
   display: block; padding: 4px 0 20px;
 }
 .yard-wrap * { box-sizing: border-box; }
 .yard-wrap button.yd-back {
-  font: 600 14px system-ui, sans-serif; color: var(--ink);
+  font: 600 var(--fs-base) var(--font-ui); color: var(--ink);
   background: var(--head); border: 1px solid var(--cb-edge); border-radius: 8px;
   padding: 8px 12px; cursor: pointer; margin-bottom: 10px;
   min-height: 44px;
@@ -28,39 +30,39 @@
   background: var(--panel-fill);
   border: 1px solid var(--lit-rule); border-left: 4px solid var(--teal-ink);
 }
-.yard-wrap .yd-wo-top { font: 700 11px ui-monospace, monospace; letter-spacing: .6px; color: var(--ink-2); }
+.yard-wrap .yd-wo-top { font: 700 var(--fs-xs) var(--font-mono); letter-spacing: .6px; color: var(--ink-2); }
 .yard-wrap .yd-wo-tag { color: var(--teal-ink); } .yard-wrap .yd-wo-id { color: var(--ink); }
-.yard-wrap .yd-wo-job { font-size: 16px; margin-top: 5px; color: var(--ink); }
+.yard-wrap .yd-wo-job { font-size: 1rem; margin-top: 5px; color: var(--ink); }
 .yard-wrap .yd-wo-job b { color: var(--ink); }
-.yard-wrap .yd-wo-from { color: var(--ink-2); font-weight: 600; font-size: 13px; }
-.yard-wrap .yd-wo-meta { font-size: 12.5px; color: var(--ink-2); margin-top: 5px; }
+.yard-wrap .yd-wo-from { color: var(--ink-2); font-weight: 600; font-size: var(--fs-data); }
+.yard-wrap .yd-wo-meta { font-size: .78125rem; color: var(--ink-2); margin-top: 5px; }
 .yard-wrap .yd-wo-tip { display: block; margin-top: 3px; color: var(--ink-2); font-style: italic; }
 .yard-wrap .yd-ord-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
 .yard-wrap .yd-ord-row {
   display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer;
   border: 1px solid var(--cb-edge); border-radius: 8px; background: var(--head);
-  font: 700 14px ui-monospace, monospace; user-select: none; max-width: 360px;
+  font: 700 var(--fs-base) var(--font-mono); user-select: none; max-width: 360px;
 }
 .yard-wrap .yd-ord-row:hover { border-color: var(--lit); }
 .yard-wrap .yd-ord-row.yd-flagged { border-color: var(--amber-ink); background: var(--rowwash-amber); }
-.yard-wrap .yd-ord-flag { font-size: 15px; width: 16px; color: var(--ink-2); }
+.yard-wrap .yd-ord-flag { font-size: var(--fs-l); width: 16px; color: var(--ink-2); }
 .yard-wrap .yd-ord-row.yd-flagged .yd-ord-flag { color: var(--amber-ink); }
 .yard-wrap .yd-ord-mark { color: var(--ink); } .yard-wrap .yd-ord-arrow { color: var(--ink-2); } .yard-wrap .yd-ord-trk { color: var(--blue-ink); }
 /* The track name of a flagged line takes the main ink. The blue ink on the amber wash can be under 4.5. */
 .yard-wrap .yd-ord-row.yd-flagged .yd-ord-trk { color: var(--ink); }
-.yard-wrap .yd-ord-fix { color: var(--amber-ink); font-size: 11px; font-style: italic; }
+.yard-wrap .yd-ord-fix { color: var(--amber-ink); font-size: var(--fs-xs); font-style: italic; }
 .yard-wrap #certify { margin: 4px 0 2px; }
 /* The two toolbar rows are children of .yard-wrap. The child selector keeps this rule out of the drawing.
    The app sheet has a rule for the class "bar". It no longer matches these rows. The declarations that
    cancelled it stay here for now: height, overflow, background, border and border-radius. */
 .yard-wrap > .yd-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; height: auto; overflow: visible; background: none; border: 0; border-radius: 0; margin: 12px 0; }
 .yard-wrap .yd-readout {
-  font: 700 16px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 700 1rem/1 var(--font-mono);
   background: var(--head); border: 1px solid var(--lit-rule); border-radius: 8px;
   padding: 10px 14px; color: var(--ink);
 }
 .yard-wrap select, .yard-wrap button {
-  font: 600 14px system-ui, sans-serif; color: var(--ink);
+  font: 600 var(--fs-base) var(--font-ui); color: var(--ink);
   background: var(--head); border: 1px solid var(--cb-edge); border-radius: 8px;
   padding: 9px 12px; cursor: pointer;
 }
@@ -83,7 +85,7 @@
 /* A refusal and a win: a wash over the panel, as a one-colour gradient over the panel colour. */
 .yard-wrap .yd-banner.yd-bad { color: var(--red-ink); border-color: transparent; box-shadow: var(--rowneon-red); background-image: linear-gradient(var(--rowwash-red), var(--rowwash-red)); }
 .yard-wrap .yd-banner.yd-win { color: var(--green-ink); border-color: transparent; box-shadow: var(--rowneon-green); background-image: linear-gradient(var(--rowwash-green), var(--rowwash-green)); }
-.yard-wrap .yd-rules-legend { color: var(--ink-2); font-size: 12.5px; margin: 6px 0 2px; }
+.yard-wrap .yd-rules-legend { color: var(--ink-2); font-size: .78125rem; margin: 6px 0 2px; }
 .yard-wrap .yd-rules-legend .yd-k { color: var(--blue-ink); font-weight: 700; }
 .yard-wrap .yd-rules-legend .yd-s { color: var(--amber-ink); font-weight: 700; }
 .yard-wrap .yd-rules { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
@@ -91,21 +93,21 @@
   display: flex; flex-direction: column; gap: 2px; padding: 8px 12px;
   border-radius: 8px; border: 1px solid var(--lit-rule); background: var(--panel-hi); min-width: 150px;
 }
-.yard-wrap .yd-chip b { font: 700 12px ui-monospace, monospace; }
-.yard-wrap .yd-chip span { font-size: 12.5px; color: var(--ink-2); }
+.yard-wrap .yd-chip b { font: 700 var(--fs-s) var(--font-mono); }
+.yard-wrap .yd-chip span { font-size: .78125rem; color: var(--ink-2); }
 .yard-wrap .yd-chip.yd-cror { border-left: 3px solid var(--blue-ink); } .yard-wrap .yd-chip.yd-cror b { color: var(--blue-ink); }
 .yard-wrap .yd-chip.yd-si { border-left: 3px solid var(--amber-ink); background: var(--rowwash-amber); } .yard-wrap .yd-chip.yd-si b { color: var(--amber-ink); }
-.yard-wrap details { margin-top: 18px; color: var(--ink-2); font-size: 13px; }
+.yard-wrap details { margin-top: 18px; color: var(--ink-2); font-size: var(--fs-data); }
 .yard-wrap details summary { cursor: pointer; color: var(--ink); font-weight: 600; }
-.yard-wrap code { background: var(--head); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+.yard-wrap code { background: var(--head); padding: 1px 5px; border-radius: 4px; font-size: .78125rem; font-family: var(--font-mono); }
 .yard-wrap .yd-banner .yd-lookup {
-  margin-left: 10px; padding: 4px 9px; font: 600 12px system-ui, sans-serif;
+  margin-left: 10px; padding: 4px 9px; font: 600 var(--fs-s) var(--font-ui);
   color: var(--cb-link); background: none; border: 1px solid var(--cb-edge); border-radius: 6px; cursor: pointer;
 }
 .yard-wrap .yd-banner .yd-lookup:hover { background: var(--wash-1); }
 /* The looks that were inline styles in the markup. */
 .yard-wrap .yd-unit { color: var(--ink-2); }
-.yard-wrap .yd-note { margin: 10px 0 4px; padding: 10px 13px; border-left: 3px solid var(--amber-ink); background: var(--rowwash-amber); border-radius: 6px; font-size: 13px; }
+.yard-wrap .yd-note { margin: 10px 0 4px; padding: 10px 13px; border-left: 3px solid var(--amber-ink); background: var(--rowwash-amber); border-radius: 6px; font-size: var(--fs-data); }
 .yard-wrap .yd-note-head { color: var(--amber-ink); }
 .yard-wrap .yd-note-more { color: var(--ink-2); }
 /* The colour words of the help text: the word "yellow" takes the amber ink, the word "green" takes
