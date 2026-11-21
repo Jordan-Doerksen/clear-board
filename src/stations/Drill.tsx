@@ -12,10 +12,13 @@ import type { DrillQuestion, Screen, Session } from '../core/drill';
 
 // The station heading (U-29, 2c-plan C7): one visible h2 with the station name of Home, in the form
 // of the Reference title. The route /signals is the station Signals; each other route is the Drill.
+// The icon is decoration. aria-hidden keeps it out of the spoken name, so a screen reader says
+// "Drill" or "Signals", as on the Yard and the Radio. The screen shows the icon as before (ruling
+// HEAD-ONE, finding F-14).
 function StationTitle({ signals }: { signals: boolean }) {
   return (
     <div className="dusk-top cb-drill-head">
-      <h2 className="dusk-title cb-drill-title"><span className="dusk-ico">{signals ? '🚦' : '🎯'}</span> {signals ? 'Signals' : 'Drill'}</h2>
+      <h2 className="dusk-title cb-drill-title"><span className="dusk-ico" aria-hidden="true">{signals ? '🚦' : '🎯'}</span> {signals ? 'Signals' : 'Drill'}</h2>
     </div>
   );
 }
