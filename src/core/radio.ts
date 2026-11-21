@@ -17,6 +17,16 @@ export function verdictRegion(correct: boolean, severity: Severity): 'status' | 
 export const LABEL_GOI = 'CN practice (GOI), not a CROR rule';
 export const LABEL_NO_CITATION = 'No CROR citation in the verified source';
 
+/** One text for Read aloud (row U-31), from words of the screen in screen order. An empty part
+ *  goes. A part that does not end with a stop gets a full stop, so that the voice makes a pause. */
+export function spokenText(parts: readonly (string | null | undefined | false)[]): string {
+  return parts
+    .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
+    .map(p => p.trim())
+    .map(p => (/[.?!…]$/.test(p) ? p : `${p}.`))
+    .join(' ');
+}
+
 /** The words of the source line of a call: the source, its paragraph and a related paragraph. */
 export function sourceLine(c: Pick<Citation, 'source' | 'ref' | 'relatedRef'>): string {
   const source = c.source === 'SME' ? LABEL_NO_CITATION : c.source;

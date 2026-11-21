@@ -11,7 +11,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
-import { LABEL_GOI, LABEL_NO_CITATION, optionsFor, sourceLine, verdictRegion } from '../core/radio';
+import { LABEL_GOI, LABEL_NO_CITATION, optionsFor, sourceLine, spokenText, verdictRegion } from '../core/radio';
 import { severityOf } from '../core/severity';
 import type { ContentItem } from '../core/types';
 
@@ -73,10 +73,16 @@ export function RadioTest({ active = true }: { active?: boolean }) {
   const step: Step | undefined = item && allSteps ? allSteps[item.payload?.step ?? 0] : undefined;
   const graded = item?.citation.trust === 'verified';
 
-  // Read aloud speaks the call of the question only while the test is the mode on the screen.
+  const question = step?.pre ? 'What do you reply?' : 'What do you call?';
+  // Read aloud (row U-31) speaks the question as one text: the incoming call or the readout, as
+  // before, then the question and the options in screen order. It speaks only while the test is
+  // the mode on the screen.
+  const questionSpoken = step
+    ? spokenText([step.pre ? step.pre : (step.read || step.status || ''), question, ...(runOptions[at] || [step.call])])
+    : '';
   useEffect(() => {
-    if (step && active) speak(step.pre ? step.pre : (step.read || step.status || ''));
-  }, [step, speak, active]);
+    if (questionSpoken && active) speak(questionSpoken);
+  }, [questionSpoken, speak, active]);
 
   if (!content || !allSteps) return <p className="dusk-lede">Loading…</p>;
   if (!items.length) return <p className="dusk-lede">The radio script hasn't loaded.</p>;
@@ -136,6 +142,14 @@ export function RadioTest({ active = true }: { active?: boolean }) {
     else missedRef.current.add(at);
     // F1 is enforced in AppContext too; this keeps the intent visible at the call site.
     if (graded) recordRadioStep(item!.id, correct);
+    // Read aloud (row U-31) speaks the feedback, with the words of the feedback panel.
+    speak(spokenText([
+      correct ? 'Right.' : 'Not quite.',
+      correct && step!.ack ? `Engineer · CN 2204 ${step!.ack}` : null,
+      step!.goi,
+      `${step!.rule} — ${step!.note}`,
+      sourceLine(item!.citation),
+    ]));
   }
 
   return (
@@ -155,7 +169,7 @@ export function RadioTest({ active = true }: { active?: boolean }) {
 
       <div className="dusk-panel dusk-panel--framed cb-radio-q">
         <div className="dusk-panel-head">
-          <h3 className="dusk-panel-name">{step.pre ? 'What do you reply?' : 'What do you call?'}</h3>
+          <h3 className="dusk-panel-name">{question}</h3>
         </div>
         <div className="dusk-panel-body">
           {!graded && (
