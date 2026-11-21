@@ -65,6 +65,14 @@
 .cb-app .cb-shell-lookup .dusk-btn { font-size: .9rem; }
 .cb-app .cb-shell-lookup .cb-disclosure { margin: 0; }
 .cb-app .cb-shell-lookup .cb-quote { max-width: none; }
+/* A line of app words about the entry (U-11): the same look as in Reference, reading text at 16 px
+   in the second ink, stopped at the measure. */
+.cb-app .cb-shell-lookup .cb-reference-note {
+  max-width: var(--measure);
+  color: var(--ink-2);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
 .cb-app .cb-shell-lookup .cb-shell-lookup-aspects {
   display: flex;
   flex-wrap: wrap;
