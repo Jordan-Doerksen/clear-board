@@ -147,11 +147,11 @@ The confirmed findings, with the same defect found twice shown once:
 | F-7 | medium | After a "Try again" that works, focus falls to the page body and no result is said (`src/App.tsx`, `src/components/LookUp.tsx`). | **Focus fixed in `b0c70f3` and `c276de5`:** it goes to the heading of the view, or of the look-up dialog, also after a try that loads only part of the library. Open: one message that says the result of a try (loaded, or still not loaded). It needs new words, so the owner approves them first. |
 | F-8 | medium | "Reload" of the notice "A new version is ready" does nothing on a page that no service worker controls (`src/App.tsx` lines 87 to 90). Fix: reload the page when no worker waits. | **Fixed in `b0c70f3` and `c276de5`.** Probe with two builds: on a first visit, on a second visit and with two open copies, the first press of "Reload" opens build 2. |
 | F-9 | medium | The guided Radio: the end summary is not announced (`src/stations/radioSim.js` line 79, outside `STEPS`). Fix: put the done box in a `role="status"` region. | **Fixed in `b0c70f3`.** The `STEPS` region stays equal; the gaps round the box stay 10 px. |
-| F-10 | low | Forced colours: the selected Radio mode, the stepper controls that cannot act and the Key button lose their marks. | Open. |
-| F-11 | low | The Yard stepper with Reduce motion: "Play all" announces only the last step (`src/stations/yardSim.js` near line 495). | Open. |
+| F-10 | low | Forced colours: the selected Radio mode, the stepper controls that cannot act and the Key button lose their marks. | **Fixed by job F2-B** (merge `6f7ccf1`; ruling `FORCED-MARKS`), and the lead gave the Radio panels an edge too (`7379e18`). Open: the Radio tip "Green lines are the engineer" is not true with forced colours (no line is green); a fix needs new words, so the owner approves them first. |
+| F-11 | low | The Yard stepper with Reduce motion: "Play all" announces only the last step (`src/stations/yardSim.js` near line 495). | **Fixed by job F2-C** (merge `4a40fdf`; ruling `PLAY-ALL-ONE`). Gate case 23 checks it. |
 | F-12 | low | LEARN-GAP: the learn card of a twin item (the rule item and the signal item of one CROR rule) can come right before a question about the other, and holds its answer (`src/core/drill.ts` lines 107 to 131). A question for the SME too. | Open. |
 | F-13 | low | Comments and one document line that Wave 2c made untrue: `ARCHITECTURE.md` near line 397 (the report case of C7 is now gate case 21), `src/stations/yard/view.ts` lines 5 to 8, `src/App.tsx` lines 127 and 128. | **Fixed in `b0c70f3`.** |
-| F-14 | low | The headings of the Drill and Reference carry their icon in the accessible name; the Yard and the Radio do not. | Open: one verifier refuted it (brief B2 asked for "📖 Reference" as the heading). |
+| F-14 | low | The headings of the Drill and Reference carry their icon in the accessible name; the Yard and the Radio do not. | **Fixed by job F2-A** (merge `012eb07`; ruling `HEAD-ONE`): each station heading speaks the station name. |
 
 #### 5.1.1 The second reader of the fixes of the lead (job F2-R, 2026-11-21)
 
@@ -172,10 +172,10 @@ each one in `c276de5` and ran the reader's probes again on that build:
 
 | # | Item |
 |---|---|
-| K-1 | Row U-41 (an icon in a control is decoration) is not complete: the sign ▶ of "▶ Watch optimal" (`src/stations/yard/view.ts` lines 177 and 449) and of "Key the radio ▶" (`src/stations/radioSim.js` line 174, outside `STEPS`), and the trust signs ✓ ⚠ ● of the Reference rows (`src/components/Entry.tsx`), are part of the accessible name. Hide each sign with `aria-hidden`, and add the name changes to the look register with row U-41. |
+| K-1 | Row U-41 (an icon in a control is decoration) is not complete: the sign ▶ of "▶ Watch optimal" (`src/stations/yard/view.ts` lines 177 and 449) and of "Key the radio ▶" (`src/stations/radioSim.js` line 174, outside `STEPS`), and the trust signs ✓ ⚠ ● of the Reference rows (`src/components/Entry.tsx`), are part of the accessible name. Hide each sign with `aria-hidden`, and add the name changes to the look register with row U-41. **Fixed by job F2-A** (merge `012eb07`; ruling `SIGN-NAME`). The register needs no entry: the look harness reads `innerText`, which keeps the hidden sign. Open: no gate reads the spoken names (a change of `tools/look/look.mjs` to read the accessibility tree), and a list of other signs in spoken names for the lead (the review report of F2-A: "← Home", "Next →", "Look it up →", "Work it ▸" and others). |
 | K-2 | **Fixed in `62cedd7`.** Comments that are no longer true: `tsconfig.app.json` line 9, `index.html` line 5, `src/stations/Reference.tsx` near line 52. (`deploy.yml` stays as it is: fence rule 12.) |
 | K-3 | The register entry of the look shot `drill-learn` (`tools/look/cb.config.json`) holds word counts of the plain text of one signal item. Replace it with a form that holds no item text (ruling `TAPE-FORM` keeps content words out of the gates). |
-| K-4 | No gate case measures the controls of the Yard stepper and of the win state (44 px). A probe found no defect; add the case. |
+| K-4 | No gate case measures the controls of the Yard stepper and of the win state (44 px). A probe found no defect; add the case. **Fixed by job F2-C** (merge `4a40fdf`; ruling `GATE-44`): gate case 24. Open: no gate case measures "Depart ▸" of job p6-road (a probe measured 82.61 by 44 px). |
 
 ### 5.3 Known items, ruled, that stay as they are
 
@@ -240,7 +240,7 @@ and any test with a learner. Each measurement is from headless Chromium on Linux
 
 1. Clone the repository and check out `claude/cb2-wave-2c`. Use Node 22.23.5 (`.nvmrc`) and
    install with `npm ci`, never a fresh resolve (fence rule 10).
-2. Run `npm run check` (12 steps), `npm run build`, and `npm run test:browser` (22 gate cases; it
+2. Run `npm run check` (12 steps), `npm run build`, and `npm run test:browser` (24 gate cases; it
    needs Chromium for Playwright 1.63.0).
 3. Read the fence (plan, section 4) and keep it. The frozen files and the `STEPS` region must stay
    equal to `94a41c5`: `specs/handoff/lead-merge-check.sh` checks them with
