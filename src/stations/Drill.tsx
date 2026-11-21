@@ -138,7 +138,8 @@ export function Drill({ domain }: { domain?: string }) {
             </button>
           )}
           <button className="dusk-btn" onClick={() => start(buildSession({ content, profile: profileRef.current, domain }), false)}>Drill again</button>
-          <button className="dusk-btn" onClick={() => navigate('/')}>Back to the path</button>
+          {/* U-40 (2c-plan C6): the way back to Home has one name. */}
+          <button className="dusk-btn" onClick={() => navigate('/')}>← Home</button>
         </div>
       </div>
     );
