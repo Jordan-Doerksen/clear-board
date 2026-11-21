@@ -16,8 +16,14 @@
 .cb-app .cb-reference-view .cb-reference-title { font-size: 1.3rem; }
 
 /* ---- the result list: one column at each width ------------------------------------------------
-   Below 760 px Dusk makes .dusk-rows a grid of columns of 150 px or more. The list stays one column. */
-.cb-app .cb-reference-view .cb-reference-list { grid-template-columns: minmax(0, 1fr); }
+   Below 760 px Dusk makes .dusk-rows a grid of columns of 150 px or more. The list stays one column.
+   The list is a ul with one li for each row: no list marker, no list margin, no list padding. */
+.cb-app .cb-reference-view .cb-reference-list {
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 
 /* A result row has no icon square: the row is one column, so that the title does not fall into the
    24 px column of the Dusk row. The title and its plain words have no gap between them, as in a

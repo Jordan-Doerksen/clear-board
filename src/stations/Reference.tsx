@@ -53,15 +53,19 @@ export function Reference() {
       <input className="cb-input" data-cb="ref-search" type="search" placeholder="Search a term…" aria-label="Search reference"
         value={q} onChange={e => setQ(e.target.value)} />
 
-      <div className="dusk-rows cb-reference-list" role="list">
-        {rows.length
-          ? rows.map(i => (
-            <button key={i.id} className="dusk-row cb-reference-row" data-cb="ref-row" role="listitem" onClick={() => setSelected(i)}>
-              <b>{i.title}</b><small className="cb-sub">{i.plain}</small>
-            </button>
-          ))
-          : <p className="dusk-lede">No match. Try another word.</p>}
-      </div>
+      {rows.length
+        ? (
+          <ul className="dusk-rows cb-reference-list" role="list">
+            {rows.map(i => (
+              <li key={i.id}>
+                <button className="dusk-row cb-reference-row" data-cb="ref-row" onClick={() => setSelected(i)}>
+                  <b>{i.title}</b><small className="cb-sub">{i.plain}</small>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )
+        : <p className="dusk-lede">No match. Try another word.</p>}
 
       {selected && <Detail key={selected.id} item={selected} audio={settings.audio} onSpeak={speak}
         onDrillSignals={() => navigate('/signals')} />}
