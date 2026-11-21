@@ -42,28 +42,28 @@ const RADIO_HTML = `
   <div class="scenario">Engine <b>CN 2204</b> backs its cut up to couple onto a car on AS73. You're on the ground, in the clear, watching the tail car and the joint. Count it down — cars, then feet — verify the coupling, protect, couple the air, release.</div>
   <div class="stage">
     <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg">
-      <line x1="0" y1="168" x2="760" y2="168" stroke="#2c3340" stroke-width="2"/>
-      <line x1="0" y1="176" x2="760" y2="176" stroke="#2c3340" stroke-width="2"/>
-      <rect x="566" y="120" width="92" height="46" rx="3" fill="#2c3a4c" stroke="#5878a0"/>
-      <text x="612" y="113" fill="#93a6bd" font-size="11" text-anchor="middle" font-family="monospace">standing car · AS73</text>
-      <text id="gaptxt" x="360" y="84" fill="#e8eef6" font-size="14" text-anchor="middle" font-weight="700">10 cars to the joint</text>
-      <text id="status" x="360" y="84" fill="#33c27f" font-size="13.5" text-anchor="middle" font-weight="700" opacity="0"></text>
-      <circle cx="560" cy="190" r="6" fill="#36d07f"/>
-      <line x1="560" y1="196" x2="560" y2="210" stroke="#36d07f" stroke-width="2.5"/>
-      <line x1="560" y1="200" x2="552" y2="206" stroke="#36d07f" stroke-width="2.5"/>
-      <line x1="560" y1="200" x2="568" y2="206" stroke="#36d07f" stroke-width="2.5"/>
-      <line x1="560" y1="210" x2="554" y2="222" stroke="#36d07f" stroke-width="2.5"/>
-      <line x1="560" y1="210" x2="566" y2="222" stroke="#36d07f" stroke-width="2.5"/>
-      <text x="560" y="233" fill="#36d07f" font-size="10.5" text-anchor="middle">you — in the clear, watching the tail car</text>
+      <line x1="0" y1="168" x2="760" y2="168" style="stroke:var(--grey)" stroke-width="2"/>
+      <line x1="0" y1="176" x2="760" y2="176" style="stroke:var(--grey)" stroke-width="2"/>
+      <rect x="566" y="120" width="92" height="46" rx="3" style="fill:var(--tile-grey-lo);stroke:var(--grey-ink)"/>
+      <text x="612" y="113" style="fill:var(--ink-2);font-size:.6875rem;font-family:var(--font-mono)" text-anchor="middle">standing car · AS73</text>
+      <text id="gaptxt" x="360" y="84" style="fill:var(--ink);font-size:.875rem" text-anchor="middle" font-weight="700">10 cars to the joint</text>
+      <text id="status" x="360" y="84" style="fill:var(--green-ink);font-size:.84375rem" text-anchor="middle" font-weight="700" opacity="0"></text>
+      <circle cx="560" cy="190" r="6" style="fill:var(--green)"/>
+      <line x1="560" y1="196" x2="560" y2="210" style="stroke:var(--green)" stroke-width="2.5"/>
+      <line x1="560" y1="200" x2="552" y2="206" style="stroke:var(--green)" stroke-width="2.5"/>
+      <line x1="560" y1="200" x2="568" y2="206" style="stroke:var(--green)" stroke-width="2.5"/>
+      <line x1="560" y1="210" x2="554" y2="222" style="stroke:var(--green)" stroke-width="2.5"/>
+      <line x1="560" y1="210" x2="566" y2="222" style="stroke:var(--green)" stroke-width="2.5"/>
+      <text x="560" y="233" style="fill:var(--green-ink);font-size:.65625rem" text-anchor="middle">you — in the clear, watching the tail car</text>
       <g id="consist">
-        <rect x="20" y="108" width="110" height="58" rx="4" fill="#232a34" stroke="#5878a0"/>
-        <rect x="20" y="92" width="40" height="20" rx="3" fill="#2a323d" stroke="#5878a0"/>
-        <text x="40" y="104" fill="#93a6bd" font-size="9" text-anchor="middle">front</text>
-        <text x="88" y="142" fill="#cfe0f2" font-size="11" text-anchor="middle" font-family="monospace">CN 2204</text>
-        <rect x="134" y="120" width="58" height="46" rx="3" fill="#3a4a5e" stroke="#5878a0"/>
-        <rect x="196" y="120" width="58" height="46" rx="3" fill="#3a4a5e" stroke="#5878a0"/>
-        <rect x="258" y="120" width="58" height="46" rx="3" fill="#46586e" stroke="#7fd0a0"/>
-        <text x="287" y="148" fill="#bfe8cf" font-size="10" text-anchor="middle">tail car</text>
+        <rect x="20" y="108" width="110" height="58" rx="4" style="fill:var(--head);stroke:var(--grey-ink)"/>
+        <rect x="20" y="92" width="40" height="20" rx="3" style="fill:var(--head);stroke:var(--grey-ink)"/>
+        <text x="40" y="104" style="fill:var(--ink-2);font-size:.5625rem" text-anchor="middle">front</text>
+        <text x="88" y="142" style="fill:var(--ink);font-size:.6875rem;font-family:var(--font-mono)" text-anchor="middle">CN 2204</text>
+        <rect x="134" y="120" width="58" height="46" rx="3" style="fill:var(--tile-grey-lo);stroke:var(--grey-ink)"/>
+        <rect x="196" y="120" width="58" height="46" rx="3" style="fill:var(--tile-grey-lo);stroke:var(--grey-ink)"/>
+        <rect x="258" y="120" width="58" height="46" rx="3" style="fill:var(--tile-grey-lo);stroke:var(--green-ink)"/>
+        <text x="287" y="148" style="fill:var(--ink);font-size:.625rem" text-anchor="middle">tail car</text>
       </g>
     </svg>
   </div>
