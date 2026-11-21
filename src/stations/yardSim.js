@@ -26,6 +26,7 @@ import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
 import './yard/yard.css';
 import { createView } from './yard/view.ts';
 import { createDrawing } from './yard/draw.ts';
+import { createMirror, createLive } from './yard/access.ts';
 
 // --- Clear Board: map the engine's rule chips → the content-library items a puzzle
 // exercises, so a genuine win feeds the SAME switching/securement mastery the Drill grades
@@ -74,8 +75,12 @@ export function mount(root, ctx) {
   // the last move. No effect is slower. With it off, each effect keeps its times.
   const still = () => !!(ctx.settings && ctx.settings.reduce);
 
-  // The drawing adapter makes the canvas inside the frame that the view gives.
+  // The drawing adapter makes the picture inside the frame that the view gives.
   const drawing = createDrawing(view.drawHost, { onPick });
+  // The access layer (P-03): the text mirror of the yard, and the one status region. The region says
+  // the result of each move and the words of each refusal, with the words of the banner as they are.
+  const mirror = createMirror(view.el('yard-mirror'));
+  const live = createLive(view.el('yard-live'));
 
   let puzzle, state, anim = null, busy = false, fromDemo = false;
   let gen = 0, stopAnim = null;       // gen invalidates in-flight loops on (re)load; stopAnim aborts the live tween
@@ -91,7 +96,9 @@ export function mount(root, ctx) {
     cineCancel = cineTimer = null; cine = null;
   }
 
-  function load(p) {
+  // `say` is true when the learner asked for the load (a new job, Reset): the region then says the
+  // job and the readout at its start.
+  function load(p, say = false) {
     gen++;                              // invalidate any in-flight move / watch-optimal loop
     if (stopAnim) stopAnim();          // abort the live tween (mid-move, depart, etc.)
     stopAnim = null;
@@ -100,11 +107,16 @@ export function mount(root, ctx) {
     ordered = !p.listed; flagged.clear();
     view.setDepart({ shown: !!p.goal.depart, enabled: false });
     renderRules(); renderOrder(); syncBuilder(); paint(); banner('', '');
-    view.setReadout({ moves: 0, par: p.par, joints: 0 });
+    const readout = view.setReadout({ moves: 0, par: p.par, joints: 0 });
+    if (say) live.say(`${p.title}. ${readout}.`);
     arrivalCinematic();
   }
 
-  function paint() { drawing.paint(state, puzzle, { anim, cine }); }
+  // The mirror states the state of the model at each paint with no motion frame.
+  function paint() {
+    drawing.paint(state, puzzle, { anim, cine });
+    if (!anim && !cine) mirror.update(state, puzzle);
+  }
 
   // Inbound road train (only on `inbound` puzzles): in off the main, STOP, set out a
   // few cars onto the set-out track, then DEPART out the lead — your power is off-scene
@@ -132,7 +144,7 @@ export function mount(root, ctx) {
   function onPick(id) {
     if (busy || cine) return;
     resume();
-    if (id !== null) { lineSwitch(state, id); sfx.points(); paint(); }
+    if (id !== null) { lineSwitch(state, id); sfx.points(); paint(); live.say(`${id} switch, lined ${state.lined[id]}`); }
   }
 
   // --- the move builder ----------------------------------------------------
@@ -143,7 +155,7 @@ export function mount(root, ctx) {
   });
   $('optimal').addEventListener('click', () => { resume(); watchOptimal(); });
   $('depart').addEventListener('click', () => { resume(); departOut(); });
-  $('reset').addEventListener('click', () => { if (!busy) load(puzzle); });
+  $('reset').addEventListener('click', () => { if (!busy) load(puzzle, true); });
   $('mute').addEventListener('click', () => { view.setMuted(toggleMute()); });
 
   // Full validation up front (lining + count + foul/clearance) so a fouling move is
@@ -227,7 +239,10 @@ export function mount(root, ctx) {
 
   function doMove(kind, id, n) {
     if (busy || cine) return;
-    if (!ordered) { sfx.refuse(); banner('Verify the switch list first — flag the bad lines and certify the order.', 'bad'); return; }
+    if (!ordered) {
+      const text = 'Verify the switch list first — flag the bad lines and certify the order.';
+      sfx.refuse(); banner(text, 'bad'); live.say(text); return;
+    }
     const chk = precheck(kind, id, n);
     if (!chk.ok) { sfx.refuse(); refusalBanner(chk.msg); return; }
     // SECURE is the conductor on the ground, not an engine leg — no animation, no move cost.
@@ -257,13 +272,14 @@ export function mount(root, ctx) {
       ordered = true; renderOrder();
     }
     busy = true; setSpeed(1.7);
-    banner(`▶ Watching the optimal line — par ${puzzle.par} move${puzzle.par === 1 ? '' : 's'}`, 'ok');
+    const watching = `▶ Watching the optimal line — par ${puzzle.par} move${puzzle.par === 1 ? '' : 's'}`;
+    banner(watching, 'ok'); live.say(watching);
     for (const [act, trk, n] of puzzle.opt) {
       if (gen !== myGen) return;
       autoLine(trk); sfx.points(); paint(); await sleep(520);
       if (gen !== myGen) return;
       // SECURE has no engine movement to animate — show it as the beat it is.
-      if (act === 'secure') { secure(state, trk); banner(state.msg, 'ok'); paint(); await sleep(420); }
+      if (act === 'secure') { secure(state, trk); banner(state.msg, 'ok'); paint(); live.say(state.msg); await sleep(420); }
       else {
         // With reduced motion the step ends at once. Its end state is painted with no frame, so
         // the trace of the step shows during the pause after it.
@@ -273,7 +289,8 @@ export function mount(root, ctx) {
         if (quiet) paint();
       }
       if (gen !== myGen) return;
-      view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
+      const readout = view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
+      if (act !== 'secure') live.say(`${state.msg} ${readout}.`);
       await sleep(320);
     }
     if (gen !== myGen) return;
@@ -284,24 +301,32 @@ export function mount(root, ctx) {
     fromDemo = false;
   }
 
+  // The banner shows the last of its texts. The region says the result of the move, the readout and
+  // the text that followed, in one message (R7 F14), so that no part of the result is lost.
   function afterMove() {
-    view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
+    const readout = view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
+    const said = [state.msg, `${readout}.`];
     banner(state.msg, 'ok');
     syncBuilder(); paint();
     const done = checkWin(state, puzzle);
     if (done && puzzle.goal.depart) {
       view.setDepart({ shown: true, enabled: true });   // built in order — let them depart
-      banner(`✓ Outbound built${puzzle.goal.ordered ? ' in order' : ''} — call Depart ▸ to leave.`, 'win');
+      const text = `✓ Outbound built${puzzle.goal.ordered ? ' in order' : ''} — call Depart ▸ to leave.`;
+      banner(text, 'win'); said.push(text);
     } else {
       view.setDepart({ shown: !!puzzle.goal.depart, enabled: false });
-      if (done) winBanner();
+      if (done) said.push(winBanner());
       else {
         // Built right but left loose. This is the one refusal that isn't a mistake in the work —
         // it's the step people forget, so name it plainly instead of just withholding the win.
         const loose = unsecuredGoal(state, puzzle);
-        if (loose) refusalBanner(`The cars are where they belong, but ${loose} is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE ${loose} to finish the job.`);
+        if (loose) {
+          const text = `The cars are where they belong, but ${loose} is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE ${loose} to finish the job.`;
+          refusalBanner(text, false); said.push(text);
+        }
       }
     }
+    live.say(said.join(' '));
   }
 
   // Returns the PREVIOUS best for this puzzle (before this win is folded in), or null.
@@ -350,13 +375,16 @@ export function mount(root, ctx) {
     return ` · your best: ${prev.moves}m/${prev.joints}j`;
   }
 
+  // Shows the win and returns its text.
   function winBanner() {
     const g = grade(state, puzzle);
     const prev = bestRecord();
     sfx.win();
     const clean = state.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
-    banner(`${g.beatPar ? '✓ ' : ''}${g.head}${clean}${bestSuffix(prev)}`, g.beatPar ? 'win' : 'ok');
+    const text = `${g.beatPar ? '✓ ' : ''}${g.head}${clean}${bestSuffix(prev)}`;
+    banner(text, g.beatPar ? 'win' : 'ok');
     recordWin();
+    return text;
   }
 
   // Depart — the deliberate final call once the outbound is assembled (P6). The
@@ -367,7 +395,8 @@ export function mount(root, ctx) {
     const prev = bestRecord();
     sfx.win();
     const clean = state.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
-    banner(`✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev)}`, g.beatPar ? 'win' : 'ok');   // win registered now
+    const departed = `✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev)}`;
+    banner(departed, g.beatPar ? 'win' : 'ok'); live.say(departed);   // win registered now
     recordWin();
     view.setDepart({ shown: true, enabled: false });
     // flavor: pull the whole train out the lead, off-frame left
@@ -431,7 +460,8 @@ export function mount(root, ctx) {
     if (ok) {
       ordered = true; sfx.couple();
       renderOrder(); syncBuilder();
-      banner(`✓ Order verified — now work the real cars onto ${puzzle.goal.track}.`, 'win');
+      const text = `✓ Order verified — now work the real cars onto ${puzzle.goal.track}.`;
+      banner(text, 'win'); live.say(text);
       return;
     }
     sfx.refuse();
@@ -447,7 +477,7 @@ export function mount(root, ctx) {
       const e = puzzle.listed[over];
       why = `${e.listedMark} on ${e.listedTrack} checks out — don't flag a good line.`;
     }
-    banner(`Not so fast — ${why}`, 'bad');
+    banner(`Not so fast — ${why}`, 'bad'); live.say(`Not so fast — ${why}`);
   }
 
   function renderVerifiedOrder() {
@@ -474,9 +504,11 @@ export function mount(root, ctx) {
 
   // A refused move is a teaching moment: keep the cited rule, add a one-tap link to its
   // plain-language Reference entry (cause → rule → correct action; REVAMP §6).
-  function refusalBanner(msg) {
+  // The region says the refusal as the model wrote it, unless the caller says it in a longer message.
+  function refusalBanner(msg, say = true) {
     const id = ruleItemFromMsg(msg);
     view.setRefusal(msg, id && ctx && typeof ctx.go === 'function' ? () => ctx.go(`reference?focus=${id}`) : null);
+    if (say) live.say(msg);
   }
   // "…(CROR 113.4/113.5(a)(v))" → rule.113.4; special-instruction-only refusals have no CROR item.
   function ruleItemFromMsg(msg) {
@@ -532,7 +564,7 @@ export function mount(root, ctx) {
   }
 
   buildPicker();
-  picker.addEventListener('change', () => load(PUZZLES[+picker.value]));
+  picker.addEventListener('change', () => load(PUZZLES[+picker.value], true));
 
   // sound default: start muted if Clear Board's audio setting is off.
   if (ctx.settings && !ctx.settings.audio && !isMuted()) toggleMute();

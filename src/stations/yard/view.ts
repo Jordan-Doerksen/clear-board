@@ -63,7 +63,8 @@ export interface YardView {
   el(id: string): HTMLElement | null;
   /** The element that the drawing adapter fills. */
   readonly drawHost: HTMLElement;
-  setReadout(data: ReadoutData): void;
+  /** Writes the readout and returns its text. */
+  setReadout(data: ReadoutData): string;
   setBanner(text: string | null | undefined, tone: BannerTone): void;
   /** A refusal. With `onLookup`, the banner gets the control "Look it up". */
   setRefusal(text: string | null | undefined, onLookup: (() => void) | null): void;
@@ -96,6 +97,8 @@ const YARD_HTML = `
 
     <div class="yd-yardframe dusk-panel dusk-panel--framed" data-cb="yard-drawing"></div>
 
+    <ul class="yd-mirror dusk-sr" id="yard-mirror" role="list"></ul>
+
     <div class="yd-bar yd-builder dusk-panel">
       <select class="cb-select" id="act" title="Action">
         <option value="pull">PULL</option>
@@ -115,6 +118,7 @@ const YARD_HTML = `
     </div>
 
     <div class="yd-banner cb-banner" id="msg"></div>
+    <div class="yd-live dusk-sr" id="yard-live" role="status" aria-live="polite"></div>
 
     <div class="yd-rules-panel dusk-panel">
       <div class="yd-rules-legend dusk-rule">
@@ -172,7 +176,9 @@ export function createView(root: HTMLElement): YardView {
     drawHost,
 
     setReadout({ moves, par, joints }) {
-      at('readout').textContent = `Moves ${moves} / par ${par} · Joints ${joints}`;
+      const text = `Moves ${moves} / par ${par} · Joints ${joints}`;
+      at('readout').textContent = text;
+      return text;
     },
 
     setBanner(text, tone) {
