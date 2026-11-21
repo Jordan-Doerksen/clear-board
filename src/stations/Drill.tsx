@@ -168,13 +168,13 @@ export function Drill({ domain }: { domain?: string }) {
     if (q && (q.kind === 'rule' || q.kind === 'text')) speak(q.promptText);
   }, [q, speak]);
 
-  if (!content || !built) return <div className="cb-drill-view"><p className="muted">Loading…</p></div>;
+  if (!content || !built) return <div className="cb-drill-view"><p className="dusk-lede">Loading…</p></div>;
 
   if (built.slots.length < (focusIds ? 1 : 4)) {
     return (
       <div className="cb-drill-view">
         <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
-        <p className="muted">Not enough verified content to drill yet.</p>
+        <p className="dusk-lede">Not enough verified content to drill yet.</p>
       </div>
     );
   }
@@ -190,17 +190,21 @@ export function Drill({ domain }: { domain?: string }) {
     return (
       <div className="cb-drill-view">
         <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
-        <h2 className="view-title">{focusIds ? 'Review done' : 'Session done'}</h2>
-        <p className="big-score">{score} / {built.slots.length}</p>
-        <p className="muted">{lines}. Spaced out over the next days so it sticks.</p>
-        <div className="opts">
+        <div className="dusk-tile dusk-tile--teal cb-drill-done">
+          <div className="dusk-tile-cap"><h2 className="dusk-tile-lab">{focusIds ? 'Review done' : 'Session done'}</h2></div>
+          <div className="dusk-tile-body">
+            <p className="dusk-tile-num">{score} / {built.slots.length}</p>
+            <p className="dusk-tile-sub">{lines}. Spaced out over the next days so it sticks.</p>
+          </div>
+        </div>
+        <div className="cb-drill-actions">
           {missedRef.current.size > 0 && (
-            <button className="opt" onClick={() => { setFocusIds([...missedRef.current]); setSessionKey(k => k + 1); }}>
+            <button className="dusk-btn" onClick={() => { setFocusIds([...missedRef.current]); setSessionKey(k => k + 1); }}>
               Practice the {missedRef.current.size} you missed →
             </button>
           )}
-          <button className="opt" onClick={() => { setFocusIds(null); setSessionKey(k => k + 1); }}>Drill again</button>
-          <button className="opt" onClick={() => navigate('/')}>Back to the path</button>
+          <button className="dusk-btn" onClick={() => { setFocusIds(null); setSessionKey(k => k + 1); }}>Drill again</button>
+          <button className="dusk-btn" onClick={() => navigate('/')}>Back to the path</button>
         </div>
       </div>
     );
