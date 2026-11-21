@@ -189,7 +189,7 @@ headless Chromium.
   selection and the Radio options are pure functions (`src/core/drill.ts`, `src/core/radio.ts`),
   moved with no change of behaviour, and the app runs the guard that the tests cover. (U-44,
   `U44-GUARDS`)
-- `npm run test:browser` runs 22 gate cases in Chromium: among them an update with a renamed station
+- `npm run test:browser` runs 24 gate cases in Chromium: among them an update with a renamed station
   chunk, a failed load, refused storage, the 44 px targets, the reading modes, the offline cache
   budget of 5 MB (U-43), the focus of a route, the learn card, and a Yard job played to a win by
   touch at 390 px and by keyboard at 1440 px. A word tape (a SHA-256 and a word count) guards the words of the guided Radio. The
