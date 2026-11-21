@@ -39,6 +39,8 @@ export interface WorkOrderData {
   id: string; title: string; hint: string; par: number;
   depart: boolean; ordered: boolean; goalTrack?: string;
   cars: string[]; from: string[];
+  /** The job has an inbound train: the work order holds the control "Show the arrival" (R7-P5). */
+  arrival: boolean;
 }
 
 /** The car count of the move builder. `max` is 1 or more. */
@@ -97,6 +99,10 @@ export interface YardView {
   setDemo(data: DemoData | null): void;
   /** The handlers of Back, Next and "Play all". */
   bindDemo(handlers: DemoHandlers): void;
+  /** Shows or hides the control "Show the arrival" of the work order (R7-P5). */
+  setArrival(shown: boolean): void;
+  /** The handler of the control "Show the arrival". */
+  onArrival(handler: () => void): void;
   /**
    * Asks a question in a modal dialog with the answers Yes and No (U-12). No has the focus first.
    * `answer` gets true for Yes, and false for No, Escape or a close. Focus goes back to the control
@@ -232,6 +238,13 @@ export function createView(root: HTMLElement): YardView {
   at('yard-ask-no').addEventListener('click', () => settle(false));
   dialog.addEventListener('close', () => { if (pending) settle(false); });   // Escape
 
+  // The control "Show the arrival" is made again with the work order, so one listener of the work
+  // order calls the handler.
+  let arrivalHandler: (() => void) | null = null;
+  at('workorder').addEventListener('click', (e) => {
+    if (arrivalHandler && (e.target as HTMLElement).closest('#yard-arrival')) arrivalHandler();
+  });
+
   // A track id in a job line is a mark: bold, in the mono face (TRACK-MONO).
   const mark = (track: string): string => `<b class="dusk-num">${track}</b>`;
   // Writes the work order. When focus was inside it, focus stays inside it (CERTIFY-FOCUS): the job
@@ -339,7 +352,10 @@ export function createView(root: HTMLElement): YardView {
       const job = data.depart
         ? `<div class="yd-wo-job cb-prose">Build the outbound${data.ordered ? ' in order' : ''} — gather <b class="dusk-num">${nums.join(' · ')}</b> onto your train${data.from.length ? ` <span class="yd-wo-from">(set out on ${from})</span>` : ''}, then <b>Depart ▸</b>.</div>`
         : `<div class="yd-wo-job cb-prose">Build ${mark(data.goalTrack as string)} — gather <b class="dusk-num">${nums.join(' · ')}</b> onto it${data.from.length ? ` <span class="yd-wo-from">(now on ${from})</span>` : ''}.</div>`;
-      order(head + `<div class="yd-wo-body dusk-panel-body">` + job + meta + `</div>`);
+      const arrival = data.arrival
+        ? `<button type="button" class="yd-go dusk-btn yd-arrival" id="yard-arrival"><span aria-hidden="true">▶</span> Show the arrival</button>`
+        : '';
+      order(head + `<div class="yd-wo-body dusk-panel-body">` + job + meta + arrival + `</div>`);
     },
 
     setCount({ max, value, disabled }) {
@@ -436,6 +452,13 @@ export function createView(root: HTMLElement): YardView {
     closeAsk() {
       if (pending || dialog.open) settle(false);
     },
+
+    setArrival(shown) {
+      const b = root.querySelector<HTMLElement>('#yard-arrival');
+      if (b && b.hidden === shown) b.hidden = !shown;
+    },
+
+    onArrival(handler) { arrivalHandler = handler; },
 
     // A Depart that stops being enabled while it has the focus gives the focus to Reset, so that the
     // focus does not fall to the page body (after the departure Reset opens the job again, R7-P14).

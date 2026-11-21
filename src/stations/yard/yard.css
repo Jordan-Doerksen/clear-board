@@ -180,3 +180,5 @@
 .yard-wrap .yd-demo-n { min-width: 1.5em; color: var(--ink-3); text-align: right; }
 .yard-wrap .yd-demo-mark { flex: none; width: 1em; color: var(--cb-link); }
 .yard-wrap .yd-demo-call { font-weight: var(--fw-bold); overflow-wrap: anywhere; }
+/* The control "Show the arrival" of the work order (R7-P5): a Dusk button under the meta line. */
+.yard-wrap .yd-arrival { margin-top: var(--sp-4); }

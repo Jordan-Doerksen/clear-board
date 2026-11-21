@@ -99,26 +99,20 @@ export function mount(root, ctx) {
   let departed = false;
   let ordered = true;                 // is the switch list verified? (true when there's no list to check)
   const flagged = new Set();          // indices the player has flagged as wrong
-  let cine = null, cineCancel = null, cineTimer = null;   // inbound-arrival cinematic state
+  let cine = null;                    // a frame of the arrival of the inbound train, or null
   // The refusal on the banner when it is about the lining of the route: the track of the call and the
   // text of the model, or null (R7-P16). A throw of a switch clears it when it is no longer true.
   let refusal = null;
 
   const $ = (id) => view.el(id);
 
-  function cancelCine() {
-    if (cineCancel) cineCancel();
-    if (cineTimer) clearTimeout(cineTimer);
-    cineCancel = cineTimer = null; cine = null;
-  }
-
   // `say` is true when the learner asked for the load (a new job, Reset): the region then says the
   // job and the readout at its start.
   function load(p, say = false) {
     gen++;                              // invalidate the answers and the pauses of an earlier load
-    cancelEffect();                     // stop a move, the departure or a step of the watched line
+    cancelEffect();                     // stop a move, the departure, the arrival or a step of the watched line
     clearPauses();
-    cancelCine();
+    cine = null;
     puzzle = p; state = freshState(p); anim = null;
     watched = false; saved = false; demo = null; departed = false; view.setDemo(null);
     ordered = !p.listed; flagged.clear();
@@ -126,35 +120,42 @@ export function mount(root, ctx) {
     renderRules(); renderOrder(); syncBuilder(); paint(); banner('', '');
     const readout = view.setReadout({ moves: 0, par: p.par, joints: 0 });
     if (say) live.say(`${p.title}. ${readout}.`);
-    arrivalCinematic();
   }
 
   // The mirror and the names of the switch buttons state the model at each paint with no motion frame.
   // After the departure the picture shows the lead empty (the motion of the departure draws the train).
   function paint() {
     drawing.paint(state, puzzle, { anim, cine, departed: departed && !anim });
-    if (!anim && !cine) { mirror.update(state, puzzle, { departed }); switches.setLining(state.lined); }
+    if (!anim && !cine) {
+      mirror.update(state, puzzle, { departed }); switches.setLining(state.lined);
+      view.setArrival(canArrive());
+    }
   }
 
-  // Inbound road train (only on `inbound` puzzles): in off the main, STOP, set out a
-  // few cars onto the set-out track, then DEPART out the lead — your power is off-scene
-  // the whole time. Self-finishes even if rAF is throttled, so the puzzle always
-  // becomes playable (the cars are already on the track in the model).
-  function arrivalCinematic() {
-    cancelCine();
-    if (!puzzle.inbound) { paint(); return; }
+  // The arrival of the inbound train (R7-P5, F9), only on a job with an inbound train and only on
+  // request, from the control in the work order: nothing starts by itself. The train comes in off the
+  // main, stops, sets out its cars onto their track, and leaves out the lead; your engine is off the
+  // picture the whole time. The set-out cars stand on their track in the model from the start of the
+  // job, so the arrival is a picture only, and a new input ends it at the yard that it sets out
+  // (R7-P11). With reduced motion the request shows that end state at once. The picture of the set-out
+  // stays as it was (SME note S5).
+  function showArrival() {
+    if (!canArrive()) return;
+    settle();
     const lenR = routeLength(THROUGH_ROUTE), stopS = lenR - 110;
     cine = { introS: -220, setoutCars: puzzle.inbound.cars, to: puzzle.inbound.to, phase: 'arrive', spotProg: 0 };
-    let ended = false;
-    const finish = () => { ended = true; cancelCine(); paint(); };
-    const run = play([
-      { dur: 2200, fn: (t) => { if (cine) { cine.phase = 'arrive'; cine.introS = -220 + (stopS + 220) * t; } } },   // arrive & stop
-      { dur: 1100, fn: (t) => { if (cine) { cine.phase = 'setout'; cine.spotProg = t; } } },                        // spot the cars in
-      { dur: 1700, fn: (t) => { if (cine) { cine.phase = 'depart'; cine.introS = stopS + (lenR + 420 - stopS) * t; } } }, // depart out the lead
-    ], { onFrame: paint, onDone: finish, still: still() });
-    // With reduced motion the arrival has ended in the call above: no frame and no timer stay.
-    if (!ended) { cineCancel = run.cancel; cineTimer = setTimeout(finish, 5800); }
+    run([
+      { dur: 2200, fn: (t) => { cine.phase = 'arrive'; cine.introS = -220 + (stopS + 220) * t; } },                    // arrive & stop
+      { dur: 1100, fn: (t) => { cine.phase = 'setout'; cine.spotProg = t; } },                                         // spot the cars in
+      { dur: 1700, fn: (t) => { cine.phase = 'depart'; cine.introS = stopS + (lenR + 420 - stopS) * t; } },            // depart out the lead
+    ], still(), () => { cine = null; paint(); });
   }
+  // The arrival is offered while the yard is as the job starts: no move, and each switch lined normal
+  // as the train passes the ladder. In another state the picture of the arrival would be false.
+  function canArrive() {
+    return !!puzzle.inbound && !demo && !departed && state.moves === 0 && TRACK_IDS.every((t) => state.lined[t] === 'normal');
+  }
+  view.onArrival(() => { resume(); showArrival(); });
 
   // --- input: line a switch by clicking its target -------------------------
   // The drawing adapter calls this for each click on the drawing: with the track id of the
@@ -222,12 +223,11 @@ export function mount(root, ctx) {
   function finishEffect() { const e = effect; effect = null; if (e) e.finish(); }
   function cancelEffect() { const e = effect; effect = null; if (e) e.cancel(); anim = null; }
   // Nothing locks during motion (R7-P11, F4). Each input that acts on the yard calls this first: the
-  // running effect ends at its end state, "Play all" of the watched line stops, and the arrival ends
-  // at the yard that it sets out. Then the input runs on that state.
+  // running effect (a move, the departure, the arrival, a step of the watched line) ends at its end
+  // state, and "Play all" of the watched line stops. Then the input runs on that state.
   function settle() {
     stopPlay();
     finishEffect();
-    if (cine) { cancelCine(); paint(); }
   }
 
   // One move of the engine on the state `st`. `quiet` is the reduced-motion value that the caller read
@@ -370,7 +370,6 @@ export function mount(root, ctx) {
   // win sound: it never reaches recordWin().
   function startDemo() {
     load(puzzle);
-    cancelCine();                      // the demonstration starts from the yard after the arrival
     watched = true;
     if (!ordered) {                    // the line starts with the switch list certified
       puzzle.listed.forEach((e, i) => { if (e.error) flagged.add(i); });
@@ -676,6 +675,7 @@ export function mount(root, ctx) {
     view.renderWorkOrder({
       id: puzzle.id, title: puzzle.title, hint: puzzle.hint, par: puzzle.par,
       depart: !!g.depart, ordered: !!g.ordered, goalTrack: g.track, cars: g.cars, from,
+      arrival: !!puzzle.inbound,
     });
   }
 
@@ -775,7 +775,6 @@ export function mount(root, ctx) {
   teardown = () => {
     gen++;
     cancelEffect();
-    cancelCine();
     clearPauses();
     view.closeAsk();                  // an open question closes with No; its answer finds a new gen and does nothing
     stopAll();                        // the timed notes of the win melody and each tone that sounds now
