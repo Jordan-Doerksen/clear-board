@@ -6,14 +6,14 @@ import { Signal } from './Signal';
 import type { ContentItem, Trust } from '../core/types';
 
 const TRUST: Record<Trust, [string, string]> = {
-  'verified':           ['✓ verified', 'clear'],
-  'needs-review':       ['⚠ not yet verified — reference only', 'caution'],
-  'operating-practice': ['● CN practice (GOI), not a CROR rule', 'caution'],
+  'verified':           ['✓ verified', 'cb-chip--ok'],
+  'needs-review':       ['⚠ not yet verified — reference only', 'cb-chip--caution'],
+  'operating-practice': ['● CN practice (GOI), not a CROR rule', 'cb-chip--caution'],
 };
 
 function Badge({ trust }: { trust: Trust }) {
   const [label, cls] = TRUST[trust] || ['', ''];
-  return <span className={`badge ${cls}`}>{label}</span>;
+  return <span className={`cb-chip ${cls}`}>{label}</span>;
 }
 
 export function Reference() {
@@ -78,31 +78,33 @@ function Detail({ item, audio, onSpeak, onDrillSignals }:
   const c = item.citation;
   const aspects = item.type === 'signal' ? item.payload?.aspects ?? [] : [];
   return (
-    <div className="ref-detail" aria-live="polite">
-      <h3>{item.title}</h3>
-      <Badge trust={c.trust} />
-      <p className="plain">{item.plain}</p>
-      {aspects.length > 0 && (
-        <>
-          <div className="aspects">{aspects.slice(0, 8).map((a, idx) => <Signal key={idx} aspect={a} />)}</div>
-          <p className="muted small">Hardware variants — all the same indication.</p>
-          {/* Browsing an aspect was a dead end: the graded read-the-aspect drill already exists at
-              /signals, so this is a route into it — not a second answer surface. */}
-          <button className="iconbtn" onClick={onDrillSignals}>Drill these aspects →</button>
-        </>
-      )}
-      {c.verbatim && (
-        <details>
-          <summary>Show the rule text{c.ref ? ` — ${c.ref}` : ''}</summary>
-          <blockquote>{c.verbatim}</blockquote>
-        </details>
-      )}
-      <div className="cite">
-        Source: {c.source}{c.ref ? ` · ${c.ref}` : ''}{c.relatedRef ? ` · related: ${c.relatedRef}` : ''}
+    <div className="dusk-panel dusk-panel--framed cb-reference-detail" data-cb="ref-detail" aria-live="polite">
+      <div className="dusk-panel-head"><h3 className="dusk-panel-name">{item.title}</h3></div>
+      <div className="dusk-panel-body">
+        <Badge trust={c.trust} />
+        <p className="cb-prose cb-prose--lead">{item.plain}</p>
+        {aspects.length > 0 && (
+          <>
+            <div className="cb-reference-aspects">{aspects.slice(0, 8).map((a, idx) => <Signal key={idx} aspect={a} />)}</div>
+            <p className="cb-sub">Hardware variants — all the same indication.</p>
+            {/* Browsing an aspect was a dead end: the graded read-the-aspect drill already exists at
+                /signals, so this is a route into it — not a second answer surface. */}
+            <button className="dusk-btn" onClick={onDrillSignals}>Drill these aspects →</button>
+          </>
+        )}
+        {c.verbatim && (
+          <details className="cb-disclosure">
+            <summary>Show the rule text{c.ref ? ` — ${c.ref}` : ''}</summary>
+            <blockquote className="cb-quote">{c.verbatim}</blockquote>
+          </details>
+        )}
+        <div className="cb-sub">
+          Source: {c.source}{c.ref ? ` · ${c.ref}` : ''}{c.relatedRef ? ` · related: ${c.relatedRef}` : ''}
+        </div>
+        {audio && (
+          <button className="dusk-btn" onClick={() => onSpeak(`${item.title}. ${item.plain || ''}. ${c.verbatim || ''}`)}>🔊 Read aloud</button>
+        )}
       </div>
-      {audio && (
-        <button className="iconbtn" onClick={() => onSpeak(`${item.title}. ${item.plain || ''}. ${c.verbatim || ''}`)}>🔊 Read aloud</button>
-      )}
     </div>
   );
 }
