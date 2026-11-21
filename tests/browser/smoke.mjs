@@ -14,8 +14,9 @@
 // Each gate case has a new browser context. The service worker is blocked, except in the
 // offline case. A case that needs the same questions on each run sets a seed before the page
 // loads: a fixed generator in place of `Math.random`. Each gate case fails on a page error, on
-// a console error, or on sideways scroll at 390 or 1440. The script prints PASS or FAIL and the
-// time for each gate case, and exits non-zero when one gate case fails.
+// a console error, or on sideways scroll at 390 or 1440: the page scrolls sideways, or the
+// content of `main` is wider than `main`. The script prints PASS or FAIL and the time for each
+// gate case, and exits non-zero when one gate case fails.
 //
 // A report-only case prints PENDING with a count and the job that owns the fix. It does not
 // change the exit code. A count of 0 means that the case passes on this build. The closing
@@ -121,6 +122,15 @@ function ok(condition, message) {
   if (!condition) throw new CaseFailure(message);
 }
 
+// The sideways overflow of the page and of `main`, in px. The window of the shell clips its
+// content sideways, so content that is wider than the window does not make the page scroll
+// sideways. `main` does not clip, so its overflow shows that content.
+const overflowOf = (page) => page.evaluate(() => {
+  const root = document.documentElement;
+  const main = document.querySelector('main');
+  return { page: Math.max(0, root.scrollWidth - root.clientWidth), main: main ? Math.max(0, main.scrollWidth - main.clientWidth) : 0 };
+});
+
 // Open one page in a new context, run `body`, then make the common checks.
 // Options: width (390 or 1440, or another width), seed, serviceWorker, settings (stored before
 // the page loads), reduce (the device flag for reduced motion).
@@ -148,8 +158,9 @@ async function withPage(options, body) {
     if (options.common !== false) {
       ok(errors.length === 0, errors.join('; '));
       if (size.width === 390 || size.width === 1440) {
-        const over = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-        ok(over <= 0, `sideways scroll of ${over} px at ${size.width} px wide, on ${page.url().replace(base, '')}`);
+        const over = await overflowOf(page);
+        ok(over.page === 0, `sideways scroll of ${over.page} px at ${size.width} px wide, on ${page.url().replace(base, '')}`);
+        ok(over.main === 0, `the content of main is ${over.main} px wider than main at ${size.width} px wide, on ${page.url().replace(base, '')}. The window clips it, so the page does not scroll sideways.`);
       }
     }
     return result;
@@ -472,20 +483,18 @@ const GATE_CASES = [
       });
     }
   } },
-];
 
-// ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after
-// the closing commit of the G1 line makes it one.
-const reportPage = (options, body) => withPage({ common: false, ...options }, body);
-
-const REPORT_CASES = [
-  // The floor is 44 px, not 43.5 px (ruling TARGETS-44). The case becomes a gate when its count
-  // is 0, in a later wave.
-  { name: 'targets', owner: 'P-05: B1, B2, B3, Y3', what: 'controls under 44 by 44 px, on the six routes and the Settings dialog, at 390 and 1440', async run() {
-    let small = 0;
-    const measure = (page) => page.evaluate(() => {
+  // Cases 13 and 14 were report-only cases in Wave 2a. Their owners are merged after Wave 2b and
+  // each case passes, so the closing commit of the G1 line made each one a gate.
+  { name: '13 targets', async run() {
+    // Each enabled button, link, select, summary and input is 44 by 44 px or more, on the six
+    // routes and in the Settings dialog, at 390 and 1440. The floor is 44 px, not 43.5 px (ruling
+    // TARGETS-44). An input in a label is measured by the larger box of the two. While a dialog is
+    // open, only the controls in the dialog are measured.
+    const small = (page) => page.evaluate(() => {
       const shown = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden'; };
-      let n = 0;
+      const name = (el) => (el.getAttribute('aria-label') || el.innerText || el.getAttribute('placeholder') || (el.id ? `#${el.id}` : '')).replace(/\s+/g, ' ').trim().slice(0, 40);
+      const found = [];
       for (const el of document.querySelectorAll('button, a, select, summary, input')) {
         if (el.disabled || !shown(el)) continue;
         const dialog = document.querySelector('dialog[open]');
@@ -493,50 +502,116 @@ const REPORT_CASES = [
         let r = el.getBoundingClientRect();
         const label = el.tagName === 'INPUT' ? el.closest('label') : null;
         if (label) { const l = label.getBoundingClientRect(); if (l.width * l.height > r.width * r.height) r = l; }
-        if (r.width < 44 || r.height < 44) n++;
+        if (r.width < 44 || r.height < 44) found.push(`${el.tagName.toLowerCase()} "${name(el)}" ${Math.round(r.width * 100) / 100} by ${Math.round(r.height * 100) / 100} px`);
       }
-      return n;
+      return found;
     });
+    const found = [];
     for (const width of [390, 1440]) {
       for (const r of ROUTES) {
-        small += await reportPage({ width }, async (page) => { await open(page, r.route); await r.check(page); return measure(page); });
+        const list = await withPage({ width }, async (page) => { await open(page, r.route); await r.check(page); return small(page); });
+        found.push(...list.map((s) => `${r.name} at ${width}: ${s}`));
       }
-      small += await reportPage({ width }, async (page) => {
+      const list = await withPage({ width }, async (page) => {
         await open(page, '/');
         await page.locator(hook('settings-open')).first().click();
         await page.locator('dialog#settings[open]').waitFor();
-        return measure(page);
+        return small(page);
       });
+      found.push(...list.map((s) => `settings dialog at ${width}: ${s}`));
     }
-    return small;
+    ok(found.length === 0, `${found.length} controls are under 44 by 44 px: ${found.slice(0, 8).join('; ')}${found.length > 8 ? '; ...' : ''}`);
   } },
 
-  { name: 'yard at 320', owner: 'P-11: Y3', what: 'px of sideways scroll on the Yard at 320 px wide', async run() {
-    return reportPage({ width: 320 }, async (page) => {
+  { name: '14 yard at 320', async run() {
+    // On the Yard at 320 px wide, the page does not scroll sideways, and no content is wider than
+    // main. The case waits for the frame of the Yard drawing first, as the route case does.
+    await withPage({ width: 320 }, async (page) => {
       await open(page, '/yard');
-      await page.locator('#picker').waitFor();
-      return page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth));
+      await ROUTES.find((r) => r.route === '/yard').check(page);
+      const over = await overflowOf(page);
+      ok(over.page === 0, `the Yard at 320 px wide scrolls sideways by ${over.page} px`);
+      ok(over.main === 0, `on the Yard at 320 px wide, the content of main is ${over.main} px wider than main. The window clips it, so the page does not scroll sideways.`);
     });
   } },
 
-  { name: 'type modes in the islands', owner: 'P-06: Y1, Y3, B3', what: 'text elements of the Yard and the guided Radio that are not larger with "Bigger text" on', async run() {
-    const sizes = (big, route, ready) => reportPage({ settings: { ...allOff, big } }, async (page) => {
-      await open(page, route);
-      await page.locator(ready).first().waitFor();
-      return page.evaluate(() => [...document.querySelectorAll('main *')]
-        .filter((el) => [...el.childNodes].some((node) => node.nodeType === 3 && node.textContent.trim()))
-        .map((el) => parseFloat(getComputedStyle(el).fontSize)));
+  // Case 15 was a report-only case in Wave 2a. Its owners are merged after Wave 2b and the case
+  // passes, so the closing commit of the G1 line made it a gate.
+  { name: '15 type modes in the islands', async run() {
+    // With "Bigger text" on, each text element in main on the Yard and on the guided Radio has a
+    // larger computed font size than with it off, at 390 and 1440. A text element is an element
+    // with a text node of its own. Each setting gets its own page load.
+    //
+    // The two loads are matched by a key, not by the order of the elements. The Yard drawing lays
+    // out again with the larger text and can change its form, so elements come and go and the
+    // order changes. The key of an element with an id is the id. The key of each other element
+    // is the nearest element at or above it with an id or a data-cb hook, then its tag, its class
+    // names and its own text. The key holds no position, no size and no order. The elements of
+    // one key are compared as a group: each one with the setting on must be larger than each one
+    // with the setting off.
+    //
+    // An element with no partner under the other setting cannot be compared. Inside the Yard
+    // drawing this is expected: a plate of one form or a break mark of one layout. The case lists
+    // each one. Outside the drawing each text element must have a partner, else the case fails.
+    const DRAWING = '[data-cb="yard-drawing"]';
+    const textKeys = (page) => page.evaluate(() => {
+      const found = [];
+      for (const el of document.querySelectorAll('main *')) {
+        const text = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(' ').replace(/\s+/g, ' ').trim();
+        if (!text) continue;
+        let anchor = 'main';
+        for (let e = el; e && e.tagName !== 'MAIN'; e = e.parentElement) {
+          if (e.id) { anchor = `#${e.id}`; break; }
+          if (e.dataset?.cb) { anchor = `[data-cb="${e.dataset.cb}"]`; break; }
+        }
+        const key = el.id ? anchor : `${anchor} ${el.tagName.toLowerCase()}${[...el.classList].sort().map((c) => `.${c}`).join('')} "${text}"`;
+        found.push({ key, px: parseFloat(getComputedStyle(el).fontSize) });
+      }
+      return found;
     });
-    let notLarger = 0;
-    for (const [route, ready] of [['/yard', '#picker'], ['/radio', '#keyBtn']]) {
-      const off = await sizes(false, route, ready);
-      const on = await sizes(true, route, ready);
-      if (off.length !== on.length) throw new Error(`${route}: ${off.length} text elements with the setting off and ${on.length} with it on`);
-      notLarger += off.filter((size, i) => !(on[i] > size)).length;
+    const group = (list) => {
+      const map = new Map();
+      for (const { key, px } of list) map.set(key, [...(map.get(key) ?? []), px]);
+      return map;
+    };
+    const notLarger = [];
+    const alone = [];
+    const lost = [];
+    let compared = 0;
+    for (const width of [390, 1440]) {
+      for (const [route, ready] of [['/yard', '#picker'], ['/radio', '#keyBtn']]) {
+        const where = `${route} at ${width}`;
+        const load = (big) => withPage({ width, settings: { ...allOff, big } }, async (page) => {
+          await open(page, route);
+          await page.locator(ready).first().waitFor();
+          const fs = await page.evaluate(() => document.documentElement.style.getPropertyValue('--fs').trim());
+          ok(fs === (big ? '18.5px' : '16px'), `${where}: --fs is "${fs}" with "Bigger text" ${big ? 'on' : 'off'}`);
+          return group(await textKeys(page));
+        });
+        const off = await load(false);
+        const on = await load(true);
+        let matched = 0;
+        for (const [key, offPx] of off) {
+          const onPx = on.get(key);
+          if (!onPx) { (key.startsWith(DRAWING) ? alone : lost).push(`${where}, off only: ${key}`); continue; }
+          matched += offPx.length;
+          if (!(Math.min(...onPx) > Math.max(...offPx))) notLarger.push(`${where}: ${key}: ${Math.max(...offPx)} px off, ${Math.min(...onPx)} px on`);
+        }
+        for (const key of on.keys()) if (!off.has(key)) (key.startsWith(DRAWING) ? alone : lost).push(`${where}, on only: ${key}`);
+        ok(matched > 0, `${where}: no text element has a partner under the other setting`);
+        compared += matched;
+      }
     }
-    return notLarger;
+    ok(lost.length === 0, `${lost.length} text elements outside the Yard drawing have no partner under the other setting: ${lost.slice(0, 6).join('; ')}${lost.length > 6 ? '; ...' : ''}`);
+    ok(notLarger.length === 0, `with "Bigger text" on, ${notLarger.length} keys of text elements are not larger: ${notLarger.slice(0, 6).join('; ')}${notLarger.length > 6 ? '; ...' : ''}`);
+    return `${compared} text elements compared, each one larger with "Bigger text" on. ${alone.length} text elements of the Yard drawing have no partner under the other setting and are not compared${alone.length ? `: ${alone.join('; ')}` : ''}.`;
   } },
 ];
+
+// ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after
+// the closing commit of the G1 line makes it one. Each report-only case of Wave 2a is a gate now
+// (cases 11 to 15). A later wave can add a report-only case to this list.
+const REPORT_CASES = [];
 
 // ---- Record the tape, or run the cases.
 const seconds = (ms) => `${(ms / 1000).toFixed(2)} s`;
@@ -564,8 +639,10 @@ try {
       const t0 = Date.now();
       ran++;
       try {
-        await c.run();
+        // A case can return a note. The note says what the case did not compare.
+        const note = await c.run();
         console.log(`PASS  ${c.name}  ${seconds(Date.now() - t0)}`);
+        if (typeof note === 'string' && note) console.log(`      ${note}`);
       } catch (err) {
         failed++;
         console.log(`FAIL  ${c.name}  ${seconds(Date.now() - t0)}\n      ${err instanceof CaseFailure ? err.message : String(err.stack ?? err).split('\n').slice(0, 4).join('\n      ')}`);
