@@ -31,3 +31,5 @@ No line here states, corrects or cites a rule. The words were not checked by the
 | U-07 | The host of a station island that did not load | none (the station is blank) | This station did not load. |
 | U-07 | The control of that message | none | Reload |
 | U-29 | The page title of each route (the station names of Home, 2c-plan C7) | Clear Board — become a conductor, free (on each route) | Home — Clear Board · Reference — Clear Board · Drill — Clear Board · The Yard — Clear Board · Signals — Clear Board · Radio walkthrough — Clear Board. The title in index.html stays until the app runs. |
+| U-10 | The notice of the shell when a new version waits | none (the page changes by itself on the next open; a station can go blank) | A new version is ready. |
+| U-10 | The control of that notice | none | Reload |

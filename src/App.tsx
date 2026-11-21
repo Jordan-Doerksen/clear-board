@@ -2,6 +2,7 @@
 import { Component, useEffect, useId, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 import { AppProvider, useApp } from './state/AppContext';
 import { clearProfileKeepCopy, saveTextFile, storedDataFile, STATIONS } from './core/store';
 import { Home } from './stations/Home';
@@ -62,14 +63,49 @@ class RenderGuard extends Component<{ children: ReactNode; whole?: boolean }, { 
   }
 }
 
+// ---- The update of the app (U-10; R6 ENG-01) ------------------------------------------------------
+// The worker of a new version waits. The notice says so, and the page reloads only when the learner
+// presses "Reload". When the learner comes back to the app, it asks for a new version: that is an
+// event of the page, not a timer.
+function UpdateNotice() {
+  const asked = useRef(false);     // the learner pressed "Reload" in this copy of the app
+  const takenOver = useRef(false); // the new version controls this copy already: another copy chose it
+  const { needRefresh: [needRefresh, setNeedRefresh], updateServiceWorker } = useRegisterSW({
+    onRegisteredSW(_url, registration) {
+      if (!registration) return;
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') registration.update().catch(() => { /* offline: ask later */ });
+      });
+    },
+    // The new version took control. This copy reloads only when its learner chose it here.
+    onNeedReload() {
+      if (asked.current) window.location.reload();
+      else { takenOver.current = true; setNeedRefresh(true); }
+    },
+  });
+  if (!needRefresh) return null;
+  function reload() {
+    asked.current = true;
+    if (takenOver.current) window.location.reload();
+    else void updateServiceWorker(true);
+  }
+  return (
+    <p className="cb-shell-notice">
+      <span>A new version is ready.</span>
+      <button className="dusk-btn" onClick={reload}>Reload</button>
+    </p>
+  );
+}
+
 // ---- The notices of the shell -----------------------------------------------------------------
 // One row under the thread. It is a live region that is always in the page, so that a screen reader
 // hears a notice when it comes. With no notice it is empty and takes no room.
-// U-07 (2c-plan C9): part of the library did not load.
+// U-10: a new version is ready. U-07 (2c-plan C9): part of the library did not load.
 function Notices() {
   const { contentFailed, retryContent } = useApp();
   return (
     <div className="cb-shell-notices" role="status">
+      <UpdateNotice />
       {contentFailed.length > 0 && (
         <p className="cb-shell-notice">
           <span>Part of the library did not load.</span>
