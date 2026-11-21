@@ -23,7 +23,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npm run check          # the 11 offline gate steps; the frozen-file hash gate is step 1
+      - run: npm run check          # the 12 offline gate steps; the frozen-file hash gate is step 1
       - run: npm run build
       - run: npx playwright install chromium
       - run: npm run test:browser

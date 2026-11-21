@@ -25,7 +25,8 @@ const LINT_WARNING_LIMIT = 2;
 
 // The steps, in the order of the run. `script` is an npm script name. `command` is a command
 // line for a step that has no npm script name. `extra` is text that the runner adds to the
-// command of the script.
+// command of the script. Step 12 is a report (row U-01): it lists the shared signal drawings and
+// fails only when it cannot make the list.
 const STEPS = [
   { n: 1, name: 'check:frozen', script: 'check:frozen' },
   { n: 2, name: 'check:dusk', script: 'check:dusk' },
@@ -38,6 +39,7 @@ const STEPS = [
   { n: 9, name: 'solve', command: 'node tools/solve.mjs' },
   { n: 10, name: 'content-check', command: 'node tools/content-check.mjs' },
   { n: 11, name: 'securement-check', command: 'node tools/securement-check.mjs' },
+  { n: 12, name: 'shared-drawings', command: 'node --import ./tests/ts-resolve.mjs tools/shared-drawings.mjs' },
 ];
 
 const env = {
