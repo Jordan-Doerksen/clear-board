@@ -14,6 +14,15 @@
 
 /* ---- the title: a heading is reading text and keeps its size of today (20.8 px at a 16 px root) */
 .cb-app .cb-reference-view .cb-reference-title { font-size: 1.3rem; }
+/* The station icon sits in the Dusk icon square, before the word, on the line of the word. The glyph
+   keeps the size of the heading, and the square is sized to the glyph. */
+.cb-app .cb-reference-view .cb-reference-title .dusk-ico {
+  display: inline-grid;
+  vertical-align: middle;
+  width: 1.6em;
+  height: 1.6em;
+  font-size: 1em;
+}
 
 /* ---- the result list: one column at each width ------------------------------------------------
    Below 760 px Dusk makes .dusk-rows a grid of columns of 150 px or more. The list stays one column.
@@ -84,5 +93,6 @@
    A Dusk part with a fixed line height or a fixed tracking takes the line height and the letter
    spacing of the mode. The letter spacing comes from html, through inherit: no value is set here. */
 html[data-dys="1"] .cb-app .cb-reference-view .cb-reference-title { letter-spacing: inherit; }
+html[data-dys="1"] .cb-app .cb-reference-view .cb-reference-title .dusk-ico,
 html[data-dys="1"] .cb-app .cb-reference-view .cb-reference-row b,
 html[data-dys="1"] .cb-app .cb-reference-view .dusk-btn { line-height: var(--lh-base); }

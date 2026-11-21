@@ -46,7 +46,7 @@ export function Reference() {
       <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
       <div className="dusk-top cb-reference-head">
         <div>
-          <h2 className="dusk-title cb-reference-title">📖 Reference</h2>
+          <h2 className="dusk-title cb-reference-title"><span className="dusk-ico">📖</span> Reference</h2>
           <p className="dusk-lede">Look anything up. Plain words first — the rule text is one tap deeper, always cited.</p>
         </div>
       </div>
