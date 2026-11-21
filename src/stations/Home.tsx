@@ -37,22 +37,24 @@ export function Home() {
       </div>
 
       <h2 className="dusk-rule"><b>The job, one piece at a time</b></h2>
-      <div className="grid">
+      <div className="dusk-grid">
         {DOMAINS.map(d => {
           const m = Math.round((profile.domains[d.id]?.mastery || 0) * 100);
           const liveCard = d.live && drillable(content.byDomain[d.id], content).length > 0;
           const inner = (
             <>
-              <div className="h"><span className="dot" style={liveCard ? undefined : { background: 'var(--muted)' }} /><h3>{d.name}</h3></div>
-              <p>{d.desc}</p>
-              {liveCard
-                ? <div className="mini" role="progressbar" aria-label={`${d.name} mastery`} aria-valuenow={m} aria-valuemin={0} aria-valuemax={100}><i style={{ width: `${m}%` }} /></div>
-                : <span className="soon">Coming soon</span>}
+              <span className="dusk-tile-cap"><span className="dusk-ico" aria-hidden="true" /><h3 className="dusk-tile-lab">{d.name}</h3></span>
+              <span className="dusk-tile-body">
+                <p className="dusk-tile-sub">{d.desc}</p>
+                {liveCard
+                  ? <div className="dusk-bar" role="progressbar" aria-label={`${d.name} mastery`} aria-valuenow={m} aria-valuemin={0} aria-valuemax={100}><i className="dusk-fill dusk-fill--teal" style={{ width: `${m}%` }} /></div>
+                  : <span className="dusk-tile-tag">Coming soon</span>}
+              </span>
             </>
           );
           return liveCard
-            ? <button key={d.id} className="card" aria-label={`Drill ${d.name}`} onClick={() => navigate(`/drill/${d.id}`)}>{inner}</button>
-            : <div key={d.id} className="card locked">{inner}</div>;
+            ? <button key={d.id} className="dusk-tile dusk-tile--teal" data-cb="domain-card" aria-label={`Drill ${d.name}`} onClick={() => navigate(`/drill/${d.id}`)}>{inner}</button>
+            : <div key={d.id} className="dusk-tile dusk-tile--grey" data-cb="domain-card">{inner}</div>;
         })}
       </div>
 

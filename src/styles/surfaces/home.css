@@ -38,3 +38,32 @@
   font-size: .85rem;
 }
 .cb-app .cb-home-view .cb-home-stage + .dusk-bar { margin-top: var(--sp-5); }
+
+/* ---- the domain tiles ------------------------------------------------------------------------
+   A live domain is a teal Dusk tile and a button. A domain that is not live is a grey Dusk tile
+   and not a control (D-0038, TILE-TONE). Each tile has the corner of a control. */
+.cb-app .cb-home-view .dusk-tile { border-radius: var(--r-control); }
+
+/* A tile that is not a control does not lift. Its edge still brightens, as on each Dusk tile. */
+.cb-app .cb-home-view div.dusk-tile:hover,
+.cb-app .cb-home-view div.dusk-tile:focus-within { transform: none; }
+
+/* The name and the description keep their size of today. The description is reading text, so it
+   keeps the line height of the reading modes. */
+.cb-app .cb-home-view .dusk-tile-lab { font-size: 1rem; }
+.cb-app .cb-home-view .dusk-tile-sub {
+  font-size: .84rem;
+  line-height: var(--lh-base);
+}
+
+/* The body holds the description, then the bar or the words "Coming soon" at its bottom edge. */
+.cb-app .cb-home-view .dusk-tile-body {
+  gap: var(--sp-3);
+  padding-bottom: var(--sp-4);
+}
+.cb-app .cb-home-view .dusk-tile-body > .dusk-bar { margin-top: auto; }
+.cb-app .cb-home-view .dusk-tile-tag {
+  align-self: flex-start;
+  margin: auto 0 0;
+  font-size: .7rem;
+}

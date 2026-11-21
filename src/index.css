@@ -11,18 +11,6 @@ a{ color:var(--cb-link) }
 .iconbtn{ background:var(--surface-2); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:9px 13px; font:inherit; font-size:.9rem; cursor:pointer; min-height:44px }
 .iconbtn:hover{ border-color:var(--muted) }
 
-.grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px }
-.card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:15px; display:flex; flex-direction:column; gap:8px }
-.card.locked{ opacity:.55 }
-button.card{ width:100%; text-align:left; font:inherit; color:inherit; cursor:pointer }
-button.card:hover{ border-color:var(--clear) }
-.card .h{ display:flex; align-items:center; gap:9px }
-.dot{ width:9px; height:9px; border-radius:50%; background:var(--clear); flex:0 0 auto }
-.card h3{ margin:0; font-size:1rem } .card p{ margin:0; color:var(--muted); font-size:.84rem; flex:1 }
-.mini{ height:7px; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; overflow:hidden }
-.mini > i{ display:block; height:100%; width:0%; background:var(--clear) }
-.soon{ font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--caution); border:1px solid var(--caution); border-radius:999px; padding:2px 8px; align-self:flex-start }
-
 .stations{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px }
 .station{ background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:14px; text-align:left; color:var(--ink); font:inherit; cursor:pointer; min-height:64px }
 .station:hover{ border-color:var(--clear) } .station b{ display:block } .station small{ color:var(--muted) }
