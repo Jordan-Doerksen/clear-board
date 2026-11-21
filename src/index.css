@@ -5,54 +5,11 @@ html,body{ margin:0 }
 html{ font-size:var(--fs) }   /* "Bigger text" sets --fs → drives rem → scales the whole app */
 body{ background:var(--bg); color:var(--ink); font-family:var(--font); font-size:1rem; line-height:var(--space); -webkit-font-smoothing:antialiased; }
 a{ color:var(--cb-link) }
-.wrap{ max-width:var(--maxw); margin:0 auto; padding:20px 18px 80px }
 .muted{ color:var(--muted) }
 :focus-visible{ outline:3px solid var(--focus); outline-offset:2px; border-radius:6px }
-/* The skip link: dark ink on the green ground. The ink is the Dusk well colour. */
-.skip{ position:absolute; left:-999px; top:0; background:var(--clear); color:var(--well); padding:8px 12px; border-radius:0 0 8px 0; z-index:50 }
-.skip:focus{ left:0 }
 
-header.top{ display:flex; align-items:center; gap:14px; padding:6px 0 18px; border-bottom:1px solid var(--line); margin-bottom:22px }
-.mark{ width:42px; height:42px; border-radius:10px; background:var(--surface-2); border:1px solid var(--line); display:grid; place-items:center; flex:0 0 auto; cursor:pointer }
-.mark span{ width:14px; height:14px; border-radius:50%; background:var(--clear); box-shadow:0 0 12px var(--clear) }
-.brand h1{ font-size:1.35rem; margin:0; letter-spacing:.2px }
-.brand p{ margin:2px 0 0; color:var(--muted); font-size:.86rem }
-.top .grow{ flex:1 }
 .iconbtn{ background:var(--surface-2); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:9px 13px; font:inherit; font-size:.9rem; cursor:pointer; min-height:44px }
 .iconbtn:hover{ border-color:var(--muted) }
-
-.lede{ background:linear-gradient(180deg,var(--surface),var(--surface) 60%,transparent); border:1px solid var(--line); border-radius:var(--r); padding:18px; margin-bottom:24px }
-.lede b{ color:var(--clear) }
-.free{ display:inline-block; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--clear); border:1px solid var(--clear); border-radius:999px; padding:3px 10px; margin-bottom:10px }
-h2.section{ font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:28px 2px 12px }
-
-.path{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px }
-.stage{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap }
-.stage b{ font-size:1.05rem } .stage span{ color:var(--muted); font-size:.85rem }
-.bar{ height:12px; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; overflow:hidden; margin-top:12px }
-.bar > i{ display:block; height:100%; width:0%; background:var(--green); transition:width .6s ease }
-html[data-reduce="1"] .bar > i{ transition:none }
-
-.grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px }
-.card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:15px; display:flex; flex-direction:column; gap:8px }
-.card.locked{ opacity:.55 }
-button.card{ width:100%; text-align:left; font:inherit; color:inherit; cursor:pointer }
-button.card:hover{ border-color:var(--clear) }
-.card .h{ display:flex; align-items:center; gap:9px }
-.dot{ width:9px; height:9px; border-radius:50%; background:var(--clear); flex:0 0 auto }
-.card h3{ margin:0; font-size:1rem } .card p{ margin:0; color:var(--muted); font-size:.84rem; flex:1 }
-.mini{ height:7px; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; overflow:hidden }
-.mini > i{ display:block; height:100%; width:0%; background:var(--clear) }
-.soon{ font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--caution); border:1px solid var(--caution); border-radius:999px; padding:2px 8px; align-self:flex-start }
-
-.stations{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px }
-.station{ background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:14px; text-align:left; color:var(--ink); font:inherit; cursor:pointer; min-height:64px }
-.station:hover{ border-color:var(--clear) } .station b{ display:block } .station small{ color:var(--muted) }
-.station[disabled]{ cursor:not-allowed; opacity:.5 } .station[disabled]:hover{ border-color:var(--line) } /* interaction-state polish: not-allowed cursor on disabled station */
-
-footer{ margin-top:40px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:.82rem }
-footer .tip{ display:inline-block; border:1px solid var(--caution); color:var(--caution); border-radius:999px; padding:6px 13px; margin-bottom:10px; text-decoration:none; min-height:auto }
-footer .tip:hover{ background:var(--rowwash-amber) }
 
 /* ---- station views ---- */
 .back{ background:none; border:0; color:var(--cb-link); font:inherit; cursor:pointer; padding:6px 0; min-height:44px }
@@ -88,26 +45,6 @@ blockquote{ margin:10px 0 0; padding:10px 14px; border-left:3px solid var(--line
 .feedback .next{ align-self:flex-start; margin-top:6px }
 .big-score{ font-size:2.4rem; margin:.2em 0 }
 
-/* ---- settings ---- */
-dialog#settings{ background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:var(--r); max-width:440px; width:92%; padding:0 }
-dialog#settings::backdrop{ background:var(--cb-scrim) }
-.set-h{ display:flex; justify-content:space-between; align-items:center; padding:16px 18px; border-bottom:1px solid var(--line) }
-.set-h h2{ margin:0; font-size:1.05rem }
-.set-body{ padding:8px 18px 18px }
-.set-sample{ display:flex; align-items:center; gap:14px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:6px 0 14px }
-.set-sample .ss-aa{ font-size:1.9rem; font-weight:800; color:var(--clear); line-height:1 }
-.set-sample b{ display:block } .set-sample small{ color:var(--muted) }
-.iconbtn.danger{ color:var(--stop); border-color:var(--stop) }
-.set-note{ color:var(--muted); font-size:.8rem; margin:12px 0 0 }
-.row{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:13px 0; border-bottom:1px solid var(--line) }
-.row:last-child{ border-bottom:0 } .row label{ font-size:.95rem } .row small{ display:block; color:var(--muted); font-size:.8rem }
-.sw{ position:relative; width:50px; height:28px; flex:0 0 auto }
-.sw input{ position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer }
-.sw i{ position:absolute; inset:0; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; transition:.2s }
-.sw i::after{ content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--muted); transition:.2s }
-.sw input:checked + i{ background:var(--rowwash-green); border-color:var(--clear) }
-.sw input:checked + i::after{ left:25px; background:var(--clear) }
-html[data-reduce="1"] .sw i, html[data-reduce="1"] .sw i::after{ transition:none }
 /* Radio — mode switch (guided vs. call it yourself) + the test-mode readout */
 .mode-tabs{ display:flex; gap:8px; margin:10px 0 16px; flex-wrap:wrap }
 .mode-tab{ flex:1 1 220px; display:flex; flex-direction:column; gap:3px; text-align:left; font:inherit;
@@ -143,8 +80,6 @@ html[data-reduce="1"] .sw i, html[data-reduce="1"] .sw i::after{ transition:none
    surface is on Dusk parts. A rule here reads Dusk tokens and --cb- names only.
    Job B1 deletes the body rule in the commit that adds the Dusk app window. The sweep of job U1
    deletes each other rule of the block. */
-/* Dusk gives the body a gutter. The page column of today has its own padding. */
-body{ padding:0 }
 /* Dusk sets the margin of each paragraph to 0. These paragraphs have no margin rule of their own
    and get the browser default again. The rules have the weight of one element name, so each class
    rule of this sheet wins. They do not match a paragraph of a Dusk part or of a cb- part. */

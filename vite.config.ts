@@ -65,9 +65,13 @@ export default defineConfig({
         background_color: glass,
         theme_color: glass,
         icons: [
-          // The picked icon, the monogram (DECISIONS.md, D-0034): the master drawing, one SVG file.
-          // The tab icon is the 16 px drawing, public/favicon.svg. The PNG set is not made yet.
+          // The picked icon, the monogram (DECISIONS.md, D-0034): the master drawing as one SVG file,
+          // and the PNG set that is rendered from it at 192 and 512 px. The tab icon is the 16 px
+          // drawing, public/favicon.svg. The icon of the home screen of Safari, apple-touch-icon.png
+          // at 180 px, is a link in index.html.
           { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
         ],
       },
     }),
