@@ -49,7 +49,7 @@ const typeOf = (state: ModelState, mark: string): string => (state.type[mark] in
 /** One car. x0 is the end toward the switch on a track, and the end toward the engine on the lead. */
 export interface CarFact {
   mark: string;
-  /** The last word of the mark: the way a car is called (render.js:169 before Wave 2b). */
+  /** The last word of the mark: the way a car is called (line 169 of the canvas drawing that Wave 2b deleted). */
   number: string;
   type: string;
   tag: string;
@@ -80,7 +80,7 @@ export interface TrackFact {
 }
 
 export interface EngineFact {
-  /** The engine at rest on the lead (render.js:47-49 before Wave 2b): its ends and its centre. */
+  /** The engine at rest on the lead (lines 47 to 49 of the canvas drawing that Wave 2b deleted): its ends and its centre. */
   x0: number;
   x1: number;
   cx: number;
@@ -217,7 +217,7 @@ export function motionOf(state: ModelState, anim: MoveFrame | null, cine: Arriva
   const chains: ChainSpec[] = [];
   const hidden = new Set<string>();
   if (cine) {
-    // The arrival (render.js:33-45, :55-78 before Wave 2b): the learner's engine is not drawn; the
+    // The arrival (lines 33 to 45 and 55 to 78 of the canvas drawing that Wave 2b deleted): the learner's engine is not drawn; the
     // set-out cars ride the inbound train and stand on their track only from the depart phase.
     if (cine.phase !== 'depart') cine.setoutCars.forEach((m) => hidden.add(m));
     const train: Array<{ body: BodySpec; offset: number }> = [];
@@ -239,12 +239,12 @@ export function motionOf(state: ModelState, anim: MoveFrame | null, cine: Arriva
     for (let k = 0; k < 5; k++) filler(6 + k, k % 2 ? 'box' : 'hopper');
     chains.push({ path: { kind: 'through' }, anchorS: cine.introS + ENGLEN / 2, bodies: train });
     if (cine.phase === 'setout') {
-      // The set-out cars slide in from the throat (render.js:68-78 before Wave 2b).
+      // The set-out cars slide in from the throat (lines 68 to 78 of the canvas drawing that Wave 2b deleted).
       const i = TRACK_IDS.indexOf(cine.to);
       const marks = state.tracks[cine.to], P = state.pos[cine.to];
       const idx = marks.map((m, k) => (cine.setoutCars.includes(m) ? k : -1)).filter((k) => k >= 0);
       if (idx.length) {
-        // render.js:73: the cars start bunched at the throat, at SPOT_CLEAR, and slide deep.
+        // As line 73 of the canvas drawing that Wave 2b deleted: the cars start bunched at the throat, at SPOT_CLEAR, and slide deep.
         const shift = (P[idx[0]] - SPOT_CLEAR) * (1 - cine.spotProg);
         const last = idx[idx.length - 1];
         const deep = P[last] + carLen(typeOf(state, marks[last])) - shift;

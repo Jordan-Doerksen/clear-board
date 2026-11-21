@@ -54,16 +54,16 @@ export const S_MAX_TALL = 1.1;     // picture: the largest car scale of the tall
 export const GAUGE = 3;            // picture: units from the centre line to each rail
 export const TIE_STEP = 10;        // picture: units from one tie to the next
 export const MIN_W = 240;          // picture: px; under this host width no picture is laid out
-export const CAR_H = 20;           // picture: the height of a car in units (render.js:157 before Wave 2b)
-export const ENG_H = 24;           // picture: the height of the engine in units (render.js:160 before Wave 2b)
-export const LAMP_R = 2.6;         // picture: the radius of the headlight in units (render.js:162 before Wave 2b)
-export const FOUL_HALF = 9;        // picture: units of the foul point bar on each side of the track (render.js:133 before Wave 2b)
+export const CAR_H = 20;           // picture: the height of a car in units (line 157 of the canvas drawing that Wave 2b deleted)
+export const ENG_H = 24;           // picture: the height of the engine in units (line 160 of the canvas drawing that Wave 2b deleted)
+export const LAMP_R = 2.6;         // picture: the radius of the headlight in units (line 162 of the canvas drawing that Wave 2b deleted)
+export const FOUL_HALF = 9;        // picture: units of the foul point bar on each side of the track (line 133 of the canvas drawing that Wave 2b deleted)
 const TALL_XS = 34;                // picture: px, the x of the spine of the tall form
 const TALL_DZ = 14;                // picture: px, the corner from the spine into a row
 const TALL_CONT = 20;              // picture: px, the room of the hook of a row that goes on
 const TRACE_SIDE = 5.5;            // picture: units from the centre line to the trace
 
-/** The three labels of the drawing of today, with their places (render.js:92-94 before Wave 2b). */
+/** The three labels of the drawing of today, with their places (lines 92 to 94 of the canvas drawing that Wave 2b deleted). */
 export const LABELS = [
   { text: '◄ DEPARTURE · LEAD / DRILL', x: 10, y: LEAD_Y - 24, align: 'left' },
   { text: 'MAIN LINE → the road', x: 840, y: 18, align: 'left' },
