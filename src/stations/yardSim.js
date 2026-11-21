@@ -84,7 +84,7 @@ export function mount(root, ctx) {
   // of a click on the picture. The buttons move with each layout of the picture.
   const switches = createSwitchButtons(drawing, view.drawHost, TRACK_IDS, onPick);
 
-  let puzzle, state, anim = null, busy = false;
+  let puzzle, state, anim = null;
   // watched: the state of this job came from the optimal line. saved: a win of this run is in the
   // profile. (U-12: the Yard asks before it discards a run.)
   let watched = false, saved = false;
@@ -116,7 +116,7 @@ export function mount(root, ctx) {
     cancelEffect();                     // stop a move, the departure or a step of the watched line
     clearPauses();
     cancelCine();
-    puzzle = p; state = freshState(p); anim = null; busy = false;
+    puzzle = p; state = freshState(p); anim = null;
     watched = false; saved = false; demo = null; view.setDemo(null);
     ordered = !p.listed; flagged.clear();
     view.setDepart({ shown: !!p.goal.depart, enabled: false });
@@ -157,9 +157,9 @@ export function mount(root, ctx) {
   // switch that was hit, or with null. A click that hits no switch still resumes the sound.
   // A switch button calls it with its track id.
   function onPick(id) {
-    if (busy || cine) return;
     resume();
     if (id === null) return;
+    settle();
     // During the watched line the switches belong to the demonstration (R7-P8).
     if (demo) { demoRefusal(); return; }
     lineSwitch(state, id); sfx.points(); paint();
@@ -175,6 +175,7 @@ export function mount(root, ctx) {
   // --- the move builder ----------------------------------------------------
   $('work').addEventListener('click', () => {
     resume();
+    settle();
     const kind = $('act').value, id = $('track').value, n = +$('count').value;
     doMove(kind, id, n);
   });
@@ -184,14 +185,15 @@ export function mount(root, ctx) {
   $('optimal').addEventListener('click', () => {
     resume();
     if (demo) { load(puzzle, true); return; }
-    if (busy || cine || !puzzle.opt) return;
+    settle();
+    if (!puzzle.opt) return;
     if (!atRisk()) { startDemo(); return; }
     const g = gen;
     view.ask(`Watch the optimal line? You lose your ${movesWords()} on this job.`, (yes) => { if (yes && gen === g) startDemo(); });
   });
   view.bindDemo({ back: demoBack, next: demoNext, play: demoPlay });
-  $('depart').addEventListener('click', () => { resume(); departOut(); });
-  $('reset').addEventListener('click', () => { if (!busy) load(puzzle, true); });
+  $('depart').addEventListener('click', () => { resume(); settle(); departOut(); });
+  $('reset').addEventListener('click', () => { settle(); load(puzzle, true); });
   $('mute').addEventListener('click', () => { resume(); view.setMuted(toggleMute()); });
 
   // Full validation up front (lining + count + foul/clearance) so a fouling move is
@@ -213,6 +215,14 @@ export function mount(root, ctx) {
   // Ends the effect that runs now at its end state (its end runs in this call), or stops it with no end.
   function finishEffect() { const e = effect; effect = null; if (e) e.finish(); }
   function cancelEffect() { const e = effect; effect = null; if (e) e.cancel(); anim = null; }
+  // Nothing locks during motion (R7-P11, F4). Each input that acts on the yard calls this first: the
+  // running effect ends at its end state, "Play all" of the watched line stops, and the arrival ends
+  // at the yard that it sets out. Then the input runs on that state.
+  function settle() {
+    stopPlay();
+    finishEffect();
+    if (cine) { cancelCine(); paint(); }
+  }
 
   // One move of the engine on the state `st`. `quiet` is the reduced-motion value that the caller read
   // for this move: each step of the move then runs one time at its end value, in this call. Each step
@@ -284,8 +294,12 @@ export function mount(root, ctx) {
   }
   const MOVES = { pull, spot, kick };
 
+  // A call of the learner. The result shows at the start of the effect (R7-P11, R7 section 6 rule 4):
+  // the model runs on a copy of the state, and the banner, the counters, the Depart control and the
+  // region say the result of that copy. The motion follows; the model commits the move to the state of
+  // the game at the contact, as before, and the end state shows when the motion ends or when a new
+  // input ends it. The win sound plays when the end state shows.
   function doMove(kind, id, n) {
-    if (busy || cine) return;
     if (!ordered) {
       const text = 'Verify the switch list first — flag the bad lines and certify the order.';
       sfx.refuse(); banner(text, 'bad'); live.say(text); return;
@@ -299,9 +313,17 @@ export function mount(root, ctx) {
       return;
     }
     // SECURE is the conductor on the ground, not an engine leg — no animation, no move cost.
-    if (kind === 'secure') { secure(state, id); sfx.confirm(); afterMove(); return; }
-    busy = true;
-    animateMove(state, kind, id, n, still(), () => { busy = false; afterMove(); });
+    if (kind === 'secure') {
+      secure(state, id); sfx.confirm();
+      const won = announce(state);
+      syncBuilder(); paint();
+      if (won) sfx.win();
+      return;
+    }
+    const after = structuredClone(state);
+    MOVES[kind](after, id, n);
+    const won = announce(after);
+    animateMove(state, kind, id, n, still(), () => { syncBuilder(); paint(); if (won) sfx.win(); });
   }
 
   // The moves of the learner on this job are at risk: a change of job or the watched line would
@@ -442,25 +464,27 @@ export function mount(root, ctx) {
     sfx.refuse(); banner(text, 'bad'); live.say(text);
   }
 
-  // The banner shows the last of its texts. The region says the result of the move, the readout and
-  // the text that followed, in one message (R7 F14), so that no part of the result is lost.
-  function afterMove() {
-    const readout = view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
-    const said = [state.msg, `${readout}.`];
-    banner(state.msg, 'ok');
-    syncBuilder(); paint();
-    const done = checkWin(state, puzzle);
+  // The result of a call, from the state after it (`after`): the banner, the readout, the Depart
+  // control and the region. The banner shows the last of its texts. The region says the result of the
+  // move, the readout and the text that followed, in one message (R7 F14), so that no part of the
+  // result is lost. A win goes into the profile here. Returns true when the call wins the job.
+  function announce(after) {
+    const readout = view.setReadout({ moves: after.moves, par: puzzle.par, joints: after.joints });
+    const said = [after.msg, `${readout}.`];
+    banner(after.msg, 'ok');
+    const done = checkWin(after, puzzle);
+    let won = false;
     if (done && puzzle.goal.depart) {
       view.setDepart({ shown: true, enabled: true });   // built in order — let them depart
       const text = `✓ Outbound built${puzzle.goal.ordered ? ' in order' : ''} — call Depart ▸ to leave.`;
       banner(text, 'win'); said.push(text);
     } else {
       view.setDepart({ shown: !!puzzle.goal.depart, enabled: false });
-      if (done) said.push(winBanner());
+      if (done) { said.push(winBanner(after)); won = true; }
       else {
         // Built right but left loose. This is the one refusal that isn't a mistake in the work —
         // it's the step people forget, so name it plainly instead of just withholding the win.
-        const loose = unsecuredGoal(state, puzzle);
+        const loose = unsecuredGoal(after, puzzle);
         if (loose) {
           const text = `The cars are where they belong, but ${loose} is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE ${loose} to finish the job.`;
           refusalBanner(text, false); said.push(text);
@@ -468,6 +492,7 @@ export function mount(root, ctx) {
       }
     }
     live.say(said.join(' '));
+    return won;
   }
 
   // Returns the PREVIOUS best for this puzzle (before this win is folded in), or null.
@@ -478,7 +503,7 @@ export function mount(root, ctx) {
 
   // A win of the learner goes into the profile. A watched line never comes here (U-04): it gets no done
   // mark, no record and no mastery. The marks in old profiles stay.
-  function recordWin() {
+  function recordWin(st) {
     if (watched) return;
     saved = true;
     if (!ctx.profile.yard) ctx.profile.yard = { completed: [], best: {} };
@@ -494,8 +519,8 @@ export function mount(root, ctx) {
     // Per-puzzle best record (#14).
     const prev = y.best[puzzle.id];
     const now = {
-      moves: state.moves, joints: state.joints,
-      beatPar: state.moves <= puzzle.par, departed: !!puzzle.goal.depart,
+      moves: st.moves, joints: st.joints,
+      beatPar: st.moves <= puzzle.par, departed: !!puzzle.goal.depart,
     };
     // Fewer moves wins; joints break the tie. Never overwrite a better run with a worse one.
     const better = !prev || now.moves < prev.moves || (now.moves === prev.moves && now.joints < prev.joints);
@@ -510,45 +535,44 @@ export function mount(root, ctx) {
 
   // "Beat your best" (#14): compare against the record BEFORE this win is folded in. A first
   // clear says nothing (there is no best yet) rather than claiming a record.
-  function bestSuffix(prev) {
+  function bestSuffix(prev, st) {
     if (!prev) return '';
-    if (state.moves < prev.moves || (state.moves === prev.moves && state.joints < prev.joints)) {
+    if (st.moves < prev.moves || (st.moves === prev.moves && st.joints < prev.joints)) {
       return ` · new best (was ${prev.moves}m/${prev.joints}j)`;
     }
     return ` · your best: ${prev.moves}m/${prev.joints}j`;
   }
 
-  // Shows the win and returns its text.
-  function winBanner() {
-    const g = grade(state, puzzle);
+  // Shows the win of the state `st`, puts it into the profile and returns its text. The caller plays
+  // the win sound when the end state shows.
+  function winBanner(st) {
+    const g = grade(st, puzzle);
     const prev = bestRecord();
-    sfx.win();
-    const clean = state.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
-    const text = `${g.beatPar ? '✓ ' : ''}${g.head}${clean}${bestSuffix(prev)}`;
+    const clean = st.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
+    const text = `${g.beatPar ? '✓ ' : ''}${g.head}${clean}${bestSuffix(prev, st)}`;
     banner(text, g.beatPar ? 'win' : 'ok');
-    recordWin();
+    recordWin(st);
     return text;
   }
 
   // Depart — the deliberate final call once the outbound is assembled (P6). The
   // consist is already coupled to the loco; it leaves out the lead, off-frame.
   function departOut() {
-    if (busy || !puzzle.goal.depart || !checkWin(state, puzzle)) return;
+    if (!puzzle.goal.depart || !checkWin(state, puzzle)) return;
     const g = grade(state, puzzle);
     const prev = bestRecord();
     sfx.win();
     const clean = state.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
-    const departed = `✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev)}`;
+    const departed = `✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev, state)}`;
     banner(departed, g.beatPar ? 'win' : 'ok'); live.say(departed);   // win registered now
-    recordWin();
+    recordWin(state);
     view.setDepart({ shown: true, enabled: false });
     // flavor: pull the whole train out the lead, off-frame left
-    busy = true;
     const cutLen = state.engine.reduce((a, c) => a + carLen(state.type[c]), 0);
     const startS = restS(cutLen), endS = -(cutLen + ENGLEN + 220);
     const cut = state.engine.slice();
     run([{ dur: 1300, fn: (t) => { anim = { route: LEAD_ROUTE, engS: startS + (endS - startS) * t, cut }; } }],
-      still(), () => { anim = null; busy = false; paint(); });
+      still(), () => { anim = null; paint(); });
   }
 
   // The joint count of the solver-proven optimal line, baked into each puzzle by tools/solve.mjs
@@ -711,6 +735,7 @@ export function mount(root, ctx) {
   // A new job. If moves of the learner are at risk, the job stays and the Yard asks first (U-12,
   // A11Y-18); No keeps the moves, Yes loads the new job.
   picker.addEventListener('change', () => {
+    settle();                         // a move in motion ends first, so that its moves count below
     const next = PUZZLES[+picker.value];
     if (!atRisk()) { load(next, true); return; }
     picker.value = String(PUZZLES.indexOf(puzzle));
@@ -738,7 +763,6 @@ export function mount(root, ctx) {
     cancelEffect();
     cancelCine();
     clearPauses();
-    busy = true;                      // no input handler starts a new effect between this call and the end of the host
     view.closeAsk();                  // an open question closes with No; its answer finds a new gen and does nothing
     stopAll();                        // the timed notes of the win melody and each tone that sounds now
     drawing.destroy();
