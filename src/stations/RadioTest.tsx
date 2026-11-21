@@ -152,32 +152,39 @@ export function RadioTest() {
 
   return (
     <>
-      <div className="drill-top">
-        <span className="muted">Call {pos + 1} of {order.length}</span>
-        <span className="muted">{score} correct</span>
+      <div className="cb-radio-top">
+        <span>Call {pos + 1} of {order.length}</span>
+        <span className="dusk-count">{score} correct</span>
       </div>
 
-      <div className="radio-readout" aria-live="polite">{readout}</div>
+      <div className="dusk-strip cb-radio-readout" aria-live="polite">
+        <div className="dusk-cell dusk-cell--key"><b>{readout}</b></div>
+      </div>
 
       {step.pre && (
-        <p className="radio-incoming"><span className="who">Engineer · CN 2204</span> {step.pre}</p>
+        <p className="cb-tx cb-tx--eng"><span className="cb-who">Engineer · CN 2204</span> {step.pre}</p>
       )}
 
-      <h2 className="view-title">{step.pre ? 'What do you reply?' : 'What do you call?'}</h2>
+      <div className="dusk-panel dusk-panel--framed cb-radio-q">
+        <div className="dusk-panel-head">
+          <h2 className="dusk-panel-name">{step.pre ? 'What do you reply?' : 'What do you call?'}</h2>
+        </div>
+        <div className="dusk-panel-body">
+          {!graded && (
+            <p className="cb-chip cb-chip--caution">
+              {c.source === 'GOI'
+                ? '● CN practice (GOI), not a CROR rule — answered and explained, never scored'
+                : '● No CROR citation in the verified source — answered and explained, never scored'}
+            </p>
+          )}
 
-      {!graded && (
-        <p className="badge caution">
-          {c.source === 'GOI'
-            ? '● CN practice (GOI), not a CROR rule — answered and explained, never scored'
-            : '● No CROR citation in the verified source — answered and explained, never scored'}
-        </p>
-      )}
-
-      <div className="opts">
-        {opts.map((o, i) => {
-          const cls = answered ? (o === step.call ? 'opt right' : (o === picked ? 'opt wrong' : 'opt')) : 'opt';
-          return <button key={i} className={cls} disabled={answered} onClick={() => choose(o)}>{o}</button>;
-        })}
+          <div className="cb-opts">
+            {opts.map((o, i) => {
+              const cls = answered ? (o === step.call ? 'cb-opt cb-opt--right' : (o === picked ? 'cb-opt cb-opt--wrong' : 'cb-opt')) : 'cb-opt';
+              return <button key={i} className={cls} data-cb="opt" disabled={answered} onClick={() => choose(o)}>{o}</button>;
+            })}
+          </div>
+        </div>
       </div>
 
       {answered && (
