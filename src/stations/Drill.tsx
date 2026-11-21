@@ -7,8 +7,8 @@ import { LibraryNotice } from '../components/LookUp';
 import { Signal } from './Signal';
 import { DOMAINS } from '../core/store';
 import { severityOf } from '../core/severity';
-import { answerCounts, buildSession, dueGroups, withRecomputedMastery } from '../core/drill';
-import type { DrillQuestion, Session } from '../core/drill';
+import { answerCounts, buildSession, distinctAspects, dueGroups, withRecomputedMastery } from '../core/drill';
+import type { DrillQuestion, Screen, Session } from '../core/drill';
 
 // The station heading (U-29, 2c-plan C7): one visible h2 with the station name of Home, in the form
 // of the Reference title. The route /signals is the station Signals; each other route is the Drill.
@@ -33,6 +33,14 @@ const said = (text: string) => { const t = text.trim(); return /[.?!:…]$/.test
 function questionSpeech(q: DrillQuestion): string {
   const parts = [q.heading, ...(q.kind === 'signal' ? [] : [q.promptText]), ...q.options.map((o, i) => `${i + 1}. ${o}`)];
   return parts.filter(Boolean).map(said).join(' ');
+}
+
+// U-28 (LEARN-GAP): the words of a learn card, in the order of the card: the title, the chip and the
+// plain words. Read aloud speaks them when the card shows.
+const NEW_ITEM = 'New item';
+function screenSpeech(screen: Screen): string {
+  if (screen.kind === 'ask') return questionSpeech(screen.slot.q);
+  return [screen.item.title, NEW_ITEM, screen.item.plain].filter(Boolean).map(said).join(' ');
 }
 
 export function Drill({ domain }: { domain?: string }) {
@@ -84,15 +92,20 @@ export function Drill({ domain }: { domain?: string }) {
     setIdx(0); setScore(0); setPicked(null); setCounted(false);
   }
 
-  const slot = built && idx < built.slots.length ? built.slots[idx] : null;
+  // The screens of the session: a question, or a learn card before the first question about a new
+  // item (U-28). `idx` counts the screens.
+  const screen = built && idx < built.screens.length ? built.screens[idx] : null;
+  const slot = screen?.kind === 'ask' ? screen.slot : null;
+  const learn = screen?.kind === 'learn' ? screen.item : null;
   const item = slot?.item ?? null;
   const q = slot?.q ?? null;
 
-  // Read aloud a new question: its heading, its prompt (a signal question has a drawing and no
-  // prompt text) and its options (U-31). speak does nothing when Read aloud is off.
+  // Read aloud a new screen. A question: its heading, its prompt (a signal question has a drawing and
+  // no prompt text) and its options (U-31). A learn card: its words. speak does nothing when Read
+  // aloud is off.
   useEffect(() => {
-    if (q) speak(questionSpeech(q));
-  }, [q, speak]);
+    if (screen) speak(screenSpeech(screen));
+  }, [screen, speak]);
 
   if (!content || !built) return <div className="cb-drill-view">{title}<p className="dusk-lede">Loading…</p></div>;
 
@@ -112,7 +125,7 @@ export function Drill({ domain }: { domain?: string }) {
   }
 
   // Finished — show the session summary with mastery deltas.
-  if (!slot || !item || !q) {
+  if (!screen) {
     // U-15 (UX-27): the button of the review says the count of items and the count of questions of
     // the round that it starts.
     const reviewItems = new Set(reviewNext?.slots.map(s => s.item.id)).size;
@@ -162,6 +175,34 @@ export function Drill({ domain }: { domain?: string }) {
     );
   }
 
+  // U-28 (LEARN-GAP, 2c-plan C11): the learn card of a new item. It shows the text that the data
+  // holds: the title, the plain words and each different drawing of a signal; and one control to go
+  // on. It grades nothing. The question about the item comes later, after one other screen or more.
+  if (learn) {
+    const aspects = learn.type === 'signal' ? distinctAspects(learn.payload?.aspects ?? []) : [];
+    return (
+      <div className="cb-drill-view">
+        <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+        {title}
+        <div className="dusk-panel dusk-panel--framed cb-drill-learn" data-cb="learn">
+          <div className="dusk-panel-head"><h3 className="dusk-panel-name" ref={questionHeadRef} tabIndex={-1}>{learn.title}</h3></div>
+          <div className="dusk-panel-body">
+            <span className="cb-chip cb-chip--info">{NEW_ITEM}</span>
+            <p className="cb-prose cb-prose--lead">{learn.plain}</p>
+            {aspects.length > 0 && <div className="cb-drill-learn-aspects">{aspects.map((a, i) => <Signal key={i} aspect={a} />)}</div>}
+          </div>
+        </div>
+        <button className="dusk-btn cb-drill-learn-next" data-cb="learn-next" onClick={() => {
+          focusTo.current = 'question';
+          setIdx(i => i + 1);
+        }}>Next →</button>
+      </div>
+    );
+  }
+  if (!slot || !item || !q) return null;
+
+  // The number of this question among the questions of the session; a learn card is not counted.
+  const questionNumber = built.screens.slice(0, idx + 1).filter(s => s.kind === 'ask').length;
   const answered = picked !== null;
   const ok = picked === q.correct;
   const c = item.citation;
@@ -198,7 +239,7 @@ export function Drill({ domain }: { domain?: string }) {
     <div className="cb-drill-view">
       <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
       {title}
-      <div className="cb-drill-top"><span className="cb-sub">Question {idx + 1} of {built.slots.length}</span><span className="dusk-count">{score} correct</span></div>
+      <div className="cb-drill-top"><span className="cb-sub">Question {questionNumber} of {built.slots.length}</span><span className="dusk-count">{score} correct</span></div>
       {built.practiceOnly && <p className="cb-sub cb-drill-note">This session is practice only: no item in it was due at the start. {PRACTICE_NOTE}</p>}
       <div className="dusk-panel dusk-panel--framed cb-drill-q">
         <div className="dusk-panel-head"><h3 className="dusk-panel-name" ref={questionHeadRef} tabIndex={-1}>{q.heading}</h3></div>
@@ -236,13 +277,13 @@ export function Drill({ domain }: { domain?: string }) {
               entry opens in a dialog on top of the Drill, so the session stays. */}
           <button className="cb-link cb-drill-lookup" onClick={() => lookUp(item!.id)}>Look it up →</button>
           <button className="dusk-btn cb-drill-next" autoFocus aria-describedby="cb-drill-verdict" onClick={() => {
-            const last = idx + 1 >= built.slots.length;
+            const last = idx + 1 >= built.screens.length;
             focusTo.current = last ? 'any' : 'question';
             // At "Finish", build the review of the misses now, so that its button can count it (U-15).
             if (last && missedRef.current.size > 0) setReviewNext(buildSession({ content, profile: profileRef.current, domain, focusIds: [...missedRef.current] }));
             setIdx(i => i + 1); setPicked(null);
           }}>
-            {idx + 1 < built.slots.length ? 'Next →' : 'Finish'}
+            {idx + 1 < built.screens.length ? 'Next →' : 'Finish'}
           </button>
         </div>
       )}

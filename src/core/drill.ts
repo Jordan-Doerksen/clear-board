@@ -1,6 +1,6 @@
 // Clear Board — the Drill selection as pure functions (row U-44). The selection moved from
-// Drill.tsx with no change of behaviour; rows U-01, U-37, U-15 and U-26 then changed it, each in a
-// commit of its own. A function that draws takes the random source as its last parameter; with no
+// Drill.tsx with no change of behaviour; rows U-01, U-37, U-15, U-26 and U-28 then changed it, each
+// in a commit of its own. A function that draws takes the random source as its last parameter; with no
 // argument it is Math.random, as before the move. A test passes a fixed generator and gets the same
 // session each time. Nothing here reads the page or the storage. The clock (Date.now) is read by
 // the due test (isDue), by the decay of the mastery (withRecomputedMastery) and by dueGroups, which
@@ -85,12 +85,63 @@ export type DrillQuestion =
 
 export interface QuestionContext { pool: ContentItem[]; byType: Record<string, ContentItem[]>; ceiling: number }
 export interface Slot { item: ContentItem; q: DrillQuestion }
+// One screen of a session: a learn card of a new item (U-28), or a question.
+export type Screen = { kind: 'learn'; item: ContentItem } | { kind: 'ask'; slot: Slot };
 export interface Session {
-  slots: Slot[];
+  slots: Slot[];          // the questions, in the order of the screens
+  screens: Screen[];      // the questions and the learn cards, in the order of the session (U-28)
   drilledDomains: string[];
   startMastery: Record<string, number>;
   newIds: string[];       // the items of the session that were never answered before it (U-26)
   practiceOnly: boolean;  // no item of the session was due at its start (U-26)
+}
+
+// ---- Row U-28 (LEARN-GAP, 2c-plan C11): a learn card before the first question about a new item ----
+// A new item is an item that the learner never answered (seen 0). The Drill shows it one time, on a
+// learn card, before the first question about it. The first question never comes right after its
+// card: one other screen or more comes between them. The questions keep their order, except that
+// the questions of a new item wait until one other screen comes after its card. A card that would
+// be the last screen moves one screen earlier. When the session has no other screen (it asks about
+// one new item only), that item gets no card and no question in this session. A card grades
+// nothing: the mastery model does not change.
+export function withLearnCards(slots: Slot[], isNew: (item: ContentItem) => boolean): Screen[] {
+  const out: Screen[] = [];
+  const carded = new Set<string>();
+  let waiting: Screen[] = [];          // the questions of the item of the last card, which wait
+  let waitingId: string | null = null;
+  // The questions that wait go out when the last screen is not the card of their item.
+  const release = () => {
+    const last = out[out.length - 1];
+    if (!waiting.length || (last?.kind === 'learn' && last.item.id === waitingId)) return;
+    out.push(...waiting);
+    waiting = [];
+    waitingId = null;
+  };
+  for (const slot of slots) {
+    const { item } = slot;
+    if (isNew(item) && !carded.has(item.id)) {
+      carded.add(item.id);
+      out.push({ kind: 'learn', item });
+      release();
+      waiting = [{ kind: 'ask', slot }];
+      waitingId = item.id;
+    } else if (item.id === waitingId) {
+      waiting.push({ kind: 'ask', slot });
+    } else {
+      release();
+      out.push({ kind: 'ask', slot });
+      release();
+    }
+  }
+  release();
+  if (waiting.length) {
+    // The card of the waiting item is the last screen. The screen before it (a question of another
+    // item) moves after it. With no screen before it, the item is not asked in this session.
+    const card = out.pop()!;
+    const before = out.pop();
+    if (before) out.push(card, before, ...waiting);
+  }
+  return out;
 }
 
 // ---- The grading guards (U-44) ---------------------------------------------------------------------
@@ -242,11 +293,14 @@ export function buildSession({ content, profile: stored, domain, focusIds }: Ses
       progressed = true;
     }
   }
-  const finalSlots = (focusIds ? slots : shuffle(slots, rng)).slice(0, 10);   // a review round keeps the safety-first order
+  const ordered = (focusIds ? slots : shuffle(slots, rng)).slice(0, 10);   // a review round keeps the safety-first order
+  // U-28: a learn card before the first question about each new item (LEARN-GAP).
+  const screens = withLearnCards(ordered, i => (profile.items[i.id]?.seen ?? 0) === 0);
+  const finalSlots = screens.flatMap(s => (s.kind === 'ask' ? [s.slot] : []));
   const drilledDomains = [...new Set(finalSlots.map(s => s.item.domain))];
   const startMastery = Object.fromEntries(drilledDomains.map(d => [d, profile.domains[d]?.mastery || 0]));
   const sessionItems = [...new Map(finalSlots.map(s => [s.item.id, s.item])).values()];
   const newIds = sessionItems.filter(i => (profile.items[i.id]?.seen ?? 0) === 0).map(i => i.id);
   const practiceOnly = sessionItems.length > 0 && sessionItems.every(i => !answerCounts(i, profile.items[i.id], true));
-  return { slots: finalSlots, drilledDomains, startMastery, newIds, practiceOnly };
+  return { slots: finalSlots, screens, drilledDomains, startMastery, newIds, practiceOnly };
 }

@@ -66,6 +66,31 @@
   height: 170px;
 }
 
+/* ---- the learn card (U-28, LEARN-GAP): a framed Dusk panel, in the form of the Reference entry ----
+   The head holds the title of the item at the size of a question heading (20.8 px). The body is one
+   column with one gap: the chip "New item" with the width of its words, the plain words at the size
+   of a prompt, and for a signal each different drawing, 120 px high, in a row that wraps. "Next →"
+   is the one control: it takes the width of the column, and its word has the size of the "Next →"
+   of the feedback (14.4 px). */
+.cb-app .cb-drill-view .cb-drill-learn .dusk-panel-name { font-size: 1.3rem; }
+.cb-app .cb-drill-view .cb-drill-learn > .dusk-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.cb-app .cb-drill-view .cb-drill-learn .cb-chip { align-self: flex-start; }
+.cb-app .cb-drill-view .cb-drill-learn-aspects {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-3);
+}
+.cb-app .cb-drill-view .cb-drill-learn-aspects svg {
+  width: auto;
+  height: 120px;
+}
+.cb-app .cb-drill-view .cb-drill-learn-next { font-size: .9rem; }
+
 /* ---- the words on an answered option (U-06): a line under the answer text -------------------------
    "Correct answer" on the right option and "Your answer" on a picked wrong option. The words carry
    the state; the ink of the mark is a second carrier. The Radio test puts the same words on its
