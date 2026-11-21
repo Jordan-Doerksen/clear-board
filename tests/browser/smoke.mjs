@@ -1187,6 +1187,7 @@ const GATE_CASES = [
           const asked = new Set();
           let last = null;
           let screens = 0;
+          let ended = false;
           for (let k = 1; k <= 60; k++) {
             const state = await page.waitForFunction(([cardSel, optSel]) => {
               const shows = (s) => [...document.querySelectorAll(s)].some((el) => el.getClientRects().length > 0);
@@ -1194,7 +1195,7 @@ const GATE_CASES = [
               if (shows(optSel)) return 'question';
               return document.querySelector('#view h3') && !shows(cardSel) && !shows(optSel) ? 'end' : false;
             }, [LEARN_CARD, hook('opt')]).then((h) => h.jsonValue(), () => { throw new CaseFailure(`${where}, screen ${k}: no learn card, no question and no end of the session showed`); });
-            if (state === 'end') break;
+            if (state === 'end') { ended = true; break; }
             screens = k;
             if (state === 'card') {
               const item = k === 1 ? first : await checkCard(k);
@@ -1220,6 +1221,7 @@ const GATE_CASES = [
             await onControl(`${where}, screen ${k}: a click on "Next →" or "Finish"`, () => feedback.getByRole('button', { name: /^(Next →|Finish)$/ }).click());
             await feedback.waitFor({ state: 'detached' }).catch(() => { throw new CaseFailure(`${where}, screen ${k}: the feedback stays after its control "Next →" or "Finish"`); });
           }
+          ok(ended, `${where}: the session did not end in 60 screens`);
           ok(carded.size > 0, `${where}: the session shows no learn card`);
           const unasked = [...carded].filter((id) => !asked.has(id));
           ok(unasked.length === 0, `${where}: the items ${unasked.join(', ')} get a learn card and no question in the session`);
