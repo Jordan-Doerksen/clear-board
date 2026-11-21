@@ -4,6 +4,10 @@
 
 # Clear Board — Revamp Design (multi-agent synthesis)
 
+*This file records a design pass of 2026-06-25. It is not changed to follow the code, and some of its
+statements are not true today (for example, the tier counts of section 4, #16: D-0026). What is true
+now is in `SPEC.md` and `ARCHITECTURE.md`. A rule number in this file is not confirmed.*
+
 ## 1. Executive summary
 
 The throughline: **Clear Board is already "one brain" for content but only "panels" for practice** — Drill is the only station that writes to the mastery model, while The Yard, Radio, and the Signal Reader teach real skills and throw the result away. The revamp is mostly *wiring what exists together*, not building new systems. Top 3 moves: **(1)** make The Yard, Radio, and Signal Reader write to the one SM-2-lite mastery model (close the "switching = 0% forever" hole); **(2)** ship the missing `tools/solve.mjs` + `tools/content-check.mjs` gates and block the Pages deploy on them (today every par is an unverified claim and the F1 trust firewall is runtime-only); **(3)** make every error — a refused Yard move or a missed Drill — a cause→rule-category→correct-action teaching moment that feeds a severity-weighted remediation queue.

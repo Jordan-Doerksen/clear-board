@@ -4,6 +4,10 @@
 
 # Clear Board — Revamp Swarm: Full Specialist Outputs (appendix)
 
+*This file records a design pass of 2026-06-25. It is not changed to follow the code, and some of its
+statements are not true today. What is true now is in `SPEC.md` and `ARCHITECTURE.md`. A rule number
+in this file is not confirmed.*
+
 The synthesized, de-duplicated version is in **REVAMP-DESIGN.md** — read that first.
 This appendix preserves each of the 7 specialist agents' full reasoning for reference.
 
