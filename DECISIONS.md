@@ -571,6 +571,10 @@ for the two items is a note for the SME (S-01).
 attention colour of the skin. No file changes.
 **Exception to fence rule 4:** the icon files and the desktop window colour can keep a raw colour
 (row U-45). Each value is a copied Dusk token value.
+**Later (D-0045):** the values of the two SVG icon files are copied Dusk token values (D-0034). The
+desktop window colour in `src-tauri/tauri.conf.json` is still `#0e1116`, the page ground from before
+Wave 2a, and not a Dusk token value: `src-tauri/**` waits for a session that can make the Windows
+build (`TAURI`).
 
 ### D-0037 — The lead's rulings for Wave 2
 **Chosen:** the file `specs/briefs/lead-rulings.md` holds each ruling of the lead and each question
@@ -724,8 +728,9 @@ disagree. Job D1 made its documents say what is true. In this file:
   `src/styles/dusk/`, with `src/styles/dusk.lock.json`, which holds the source commit and a
   SHA-256 for each file. Step 2 of `npm run check` proves the copy.
 - **Corrected in place.** A note says what changed in D-0016 (GitHub Pages; the two sizes of the
-  desktop file, ~5 MB and ~18 MB, which no session of Wave 2 checked), in D-0019 (GitHub Pages) and
-  in D-0028 (D-0034 settled the origin of the favicon; row U-10 made the update a prompt). The
+  desktop file, ~5 MB and ~18 MB, which no session of Wave 2 checked), in D-0019 (GitHub Pages), in
+  D-0028 (D-0034 settled the origin of the favicon; row U-10 made the update a prompt) and in D-0036
+  (the desktop window colour is not yet a Dusk token value; job D1 found it). The
   wrong words are replaced in D-0026 ("byte-for-byte vanilla": the Yard engine is plain JavaScript,
   and its files changed after their copy, for example `model.js` in D-0029), in D-0028 ("the four
   content files": five JSON files, four of content items and one of questions) and in D-0029
