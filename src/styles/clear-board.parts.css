@@ -460,6 +460,10 @@
   padding: var(--sp-3) 0;
 }
 .cb-setrow + .cb-setrow { border-top: 1px solid var(--hair); }
+/* A button in a row keeps the width of its word. Without this rule it shrinks below its word on a
+   narrow screen and loses its padding. (Folded from surfaces/settings.css by job U1-B.) */
+.cb-setrow > .cb-btn--attn,
+.cb-app .cb-setrow > .dusk-btn { flex: none; }
 .cb-setrow small {
   display: block;
   color: var(--ink-2);

@@ -183,6 +183,49 @@ export function storedDataFile(): { name: string; text: string } {
   const text = JSON.stringify({ app: FILE_APP, kind: 'stored-data', saved: new Date().toISOString(), keys }, null, 2);
   return { name: `clear-board-stored-data-${today()}.json`, text };
 }
+
+// "Save my progress": the profile and the stored settings in one file (U-18; R4 UX-05).
+export function progressFile(profile: Profile, settings: Settings): { name: string; text: string } {
+  const text = JSON.stringify({ app: FILE_APP, kind: 'progress', saved: new Date().toISOString(), profile, settings }, null, 2);
+  return { name: `clear-board-progress-${today()}.json`, text };
+}
+
+// Each setting of `x` that is true or false, on top of `base`. Null when `x` holds no setting.
+function settingsFrom(x: unknown, base: Settings): Settings | null {
+  if (!isObj(x)) return null;
+  const out = { ...base };
+  let found = false;
+  for (const key of SETTING_KEYS) {
+    const value = x[key];
+    if (typeof value === 'boolean') { out[key] = value; found = true; }
+  }
+  return found ? out : null;
+}
+
+// "Load my progress": reads a file of "Save my progress" or of "Save a copy of the stored data".
+// The profile in the file gets the same repair as a stored profile. Null when the file holds no
+// profile of this app: then nothing changes.
+export function readProgressFile(text: string, settings: Settings): { profile: Profile; settings: Settings | null } | null {
+  let file: unknown;
+  try { file = JSON.parse(text); } catch { return null; }
+  if (!isObj(file) || file.app !== FILE_APP) return null;
+  if (file.kind === 'progress') {
+    const r = repairProfile(file.profile, settings);
+    return r ? { profile: r.profile, settings: settingsFrom(file.settings, settings) } : null;
+  }
+  if (file.kind === 'stored-data' && isObj(file.keys)) {
+    const keys = file.keys;
+    const parse = (key: string): unknown => {
+      try { return typeof keys[key] === 'string' ? JSON.parse(keys[key] as string) : null; } catch { return null; }
+    };
+    // The profile key first. The copy is the older profile.
+    for (const key of [PROFILE_KEY, PROFILE_COPY_KEY]) {
+      const r = repairProfile(parse(key), settings);
+      if (r) return { profile: r.profile, settings: settingsFrom(parse(SETTINGS_KEY), settings) };
+    }
+  }
+  return null;
+}
 export function saveProfile(p: Profile): void {
   p.updatedAt = new Date().toISOString();
   try { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); } catch { /* storage full / blocked */ }

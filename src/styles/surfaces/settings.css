@@ -42,10 +42,11 @@
 .cb-app .cb-settings-view .cb-settings-label { font-size: .95rem; }
 .cb-app .cb-settings-view .cb-setrow small { font-size: .8rem; }
 
-/* A defect of two shared parts, for job U1 to fold into the parts file: the attention button has a
-   least width of 44 px, so in a row (cb-setrow) it shrinks below the width of its word and loses
-   its padding on a narrow screen. In this row it keeps its own width. */
-.cb-app .cb-settings-view .cb-setrow > .cb-btn--attn { flex: none; }
+/* The line that gives the result of "Load my progress", under the second line of its row. It is a
+   live region, so it is there when it is empty; then it has no height. The words are ink, because
+   they report what happened. */
+.cb-app .cb-settings-view .cb-setrow .cb-settings-filenote { color: var(--ink); }
+.cb-app .cb-settings-view .cb-setrow .cb-settings-filenote:not(:empty) { padding-top: var(--sp-2); }
 
 /* ---- the note -------------------------------------------------------------------------------- */
 .cb-app .cb-settings-view .dusk-note {

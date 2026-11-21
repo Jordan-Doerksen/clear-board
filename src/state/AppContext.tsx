@@ -38,6 +38,8 @@ interface AppValue {
   settings: Settings;
   setSetting: (key: keyof Settings, value: boolean) => void;
   resetProgress: () => void;
+  // Replaces the profile, and the settings when the file holds them (U-18, "Load my progress").
+  replaceProgress: (profile: Profile, settings: Settings | null) => void;
   recordAnswer: (item: ContentItem, correct: boolean) => void;
   recordYardWin: (itemIds: string[], correct: boolean) => void;
   recordRadioStep: (itemId: string, correct: boolean) => void;
@@ -152,8 +154,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [settings, content]);
 
+  const replaceProgress = useCallback((next: Profile, nextSettings: Settings | null) => {
+    const p = structuredClone(next);
+    if (content) recomputeMastery(p, content);
+    saveProfile(p);
+    setProfile(p);
+    if (nextSettings) setSettings(nextSettings);
+  }, [content]);
+
   return (
-    <Ctx.Provider value={{ content, profile, settings, setSetting, resetProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak }}>
+    <Ctx.Provider value={{ content, profile, settings, setSetting, resetProgress, replaceProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak }}>
       {children}
     </Ctx.Provider>
   );

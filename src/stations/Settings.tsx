@@ -1,6 +1,8 @@
 // Settings — accessibility is core, not polish (SPEC Principle 4). A native <dialog> so ::backdrop works.
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { useApp } from '../state/AppContext';
+import { progressFile, readProgressFile, saveTextFile } from '../core/store';
 import type { Settings as SettingsType } from '../core/types';
 
 const TOGGLES: { key: keyof SettingsType; label: string; sub: string }[] = [
@@ -12,8 +14,30 @@ const TOGGLES: { key: keyof SettingsType; label: string; sub: string }[] = [
 ];
 
 export function Settings({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { settings, setSetting, resetProgress, speak } = useApp();
+  const { settings, setSetting, resetProgress, replaceProgress, speak, profile } = useApp();
   const ref = useRef<HTMLDialogElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [fileNote, setFileNote] = useState('');
+
+  // U-18: the file stays on this device. Nothing is sent anywhere.
+  function saveProgress() {
+    const file = progressFile(profile, settings);
+    saveTextFile(file.name, file.text);
+    setFileNote('');
+  }
+  async function loadProgress(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    const loaded = readProgressFile(await file.text(), settings);
+    if (!loaded) {
+      setFileNote('This file is not a Clear Board progress file. Nothing changed.');
+      return;
+    }
+    if (!confirm('Replace your progress on this device with the progress in this file? This cannot be undone.')) return;
+    replaceProgress(loaded.profile, loaded.settings);
+    setFileNote(loaded.settings ? 'Your progress and your settings are loaded from the file.' : 'Your progress is loaded from the file.');
+  }
 
   useEffect(() => {
     const dlg = ref.current;
@@ -45,6 +69,18 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
           </div>
         ))}
         <div className="cb-setrow">
+          <div><span className="cb-settings-label">Save my progress</span><small>Keep a copy in a file on this device</small></div>
+          <button className="dusk-btn" onClick={saveProgress}>Save to a file</button>
+        </div>
+        <div className="cb-setrow">
+          <div>
+            <span className="cb-settings-label">Load my progress</span><small>Replace the progress on this device with a saved file</small>
+            <small className="cb-settings-filenote" role="status">{fileNote}</small>
+          </div>
+          <button className="dusk-btn" onClick={() => fileRef.current?.click()}>Load a file</button>
+          <input ref={fileRef} type="file" accept=".json,application/json" hidden onChange={loadProgress} />
+        </div>
+        <div className="cb-setrow">
           <div><span className="cb-settings-label">Reset my progress</span><small>Clear mastery, drills &amp; yard wins on this device</small></div>
           <button className="cb-btn--attn" onClick={() => {
             if (confirm('Reset all your progress on this device? Mastery, drills and yard wins will be cleared. This cannot be undone.')) {
@@ -54,6 +90,7 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
           }}>Reset</button>
         </div>
         <p className="dusk-note">Everything is saved only on this device — no account, nothing sent anywhere.</p>
+        <p className="dusk-note">A clean-up of the data of this site in the browser deletes your progress.</p>
       </div>
     </dialog>
   );
