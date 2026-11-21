@@ -1,0 +1,4 @@
+/* drawing.css — the style of the Yard drawing. The drawing adapter imports it (../draw.ts).
+   Each selector starts with .yard-wrap .yd-view or with .yard-wrap .yd-legend.
+   The numbers 1340 and 460 are the width and the height of the drawing in geometry.js. */
+.yard-wrap .yd-view { display: block; width: 100%; height: auto; aspect-ratio: 1340 / 460; }

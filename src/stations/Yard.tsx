@@ -1,6 +1,6 @@
-// The Yard — the switch-list canvas sim. An imperative island: the 7 SHA-verified engine modules
-// (./yard/*.js) and the station (./yardSim.js) are kept byte-for-byte; this wrapper just lazy-loads
-// them and bridges ctx to React via useImperativeStation.
+// The Yard station. An imperative island: this wrapper loads the controller (./yardSim.js) lazily
+// and gives it a host element and the bridge object of useImperativeStation. The controller works
+// with the view, the drawing adapter and the engine in ./yard/. Four engine modules are frozen.
 import { useImperativeStation } from './imperativeStation';
 
 export function Yard() {

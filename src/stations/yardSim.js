@@ -1,22 +1,31 @@
-// yard.js — Clear Board station wrapping the switch-list canvas sim.
+// yardSim.js — the controller of the Yard station.
 //
-// The 7 engine modules in ./yard/ WERE byte-for-byte copies of switch-list/src. That is no longer
-// true: D-0029 made securement a player action, which required editing model.js, solver.js,
-// render.js and puzzles.js. Divergence from switch-list is now deliberate and gated —
-// tools/solve.mjs re-proves all 19 pars and tools/securement-check.mjs pins the new behaviour.
-// Treat those files as OWNED here, not mirrored: don't re-sync them from switch-list.
+// It holds the game state, the move logic, the records, the sound calls and the event wiring.
+// It exports mount(root, ctx) and nothing else. It works with these files in ./yard/:
+//   view.ts            each markup string, each class name and each DOM write of the chrome
+//   yard.css           the style of the chrome
+//   draw.ts            the drawing: the canvas, the hit test of a click and the one draw call
+//   anim.js, sound.js  the tween driver and the sounds
+//   model.js, puzzles.js, geometry.js, solver.js
+//                      the engine. These four modules are frozen: no job edits them. This file
+//                      imports the first three. tools/solve.mjs uses solver.js to prove each par.
 //
-// This file is the station adaptation:
-// switch-list/src/main.js, wrapped in mount(root, ctx) with all DOM scoped to
-// `root`, CSS scoped to `.yard-wrap`, and Clear Board hooks (profile/save,
-// back button, reduced-motion, sound default). No top-level side effects.
+// Two seam rules. This file holds no class name, no markup string and no inline style: it reaches
+// an element by its id or through a view function. This file draws only through the drawing
+// object: it does not import render.js.
+//
+// This file runs no statement of its own when it is imported. Its imports have two effects:
+// the two style files go into the page (yard.css, and drawing/drawing.css through draw.ts),
+// and sound.js reads the stored mute value.
 
-import { W, H, NTRACK, TRACK_IDS, switchPos, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
+import { TRACK_IDS, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
 import { freshState, lineSwitch, canPull, canSpot, canKick, canSecure, spotPlan, pull, spot, kick, secure, checkWin, unsecuredGoal, grade } from './yard/model.js';
-import { render } from './yard/render.js';
 import { play, setSpeed } from './yard/anim.js';
 import { sfx, resume, toggleMute, isMuted } from './yard/sound.js';
 import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
+import './yard/yard.css';
+import { createView } from './yard/view.ts';
+import { createDrawing } from './yard/draw.ts';
 
 // --- Clear Board: map the engine's rule chips → the content-library items a puzzle
 // exercises, so a genuine win feeds the SAME switching/securement mastery the Drill grades
@@ -37,210 +46,29 @@ function masteryItemsFor(puzzle) {
   return [...ids];
 }
 
-// Scoped CSS from switch-list/index.html — :root vars moved onto .yard-wrap and
-// every selector prefixed with .yard-wrap so nothing leaks into Clear Board.
-const YARD_CSS = `
-  .yard-wrap {
-    --bg: #0b0e12; --panel: #14181f; --panel2: #1b212a; --line: #2a313b;
-    --ink: #e7ebf0; --dim: #8b94a0; --steel: #7d8794;
-    --cror: #9cc3ff; --crorbg: #18243a; --si: #f2b134; --sibg: #2e2410;
-    --good: #39b58a; --bad: #e2574c;
-    background: radial-gradient(1200px 600px at 60% -10%, #161c25, var(--bg));
-    color: var(--ink); font: 15px/1.5 system-ui, -apple-system, Segoe UI, sans-serif;
-    display: block; padding: 4px 0 20px;
-  }
-  .yard-wrap * { box-sizing: border-box; }
-  .yard-wrap button.back {
-    font: 600 14px system-ui, sans-serif; color: var(--ink);
-    background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
-    padding: 8px 12px; cursor: pointer; margin-bottom: 10px;
-  }
-  .yard-wrap button.back:hover { border-color: #3a4554; }
-  /* fit the reading column — no break-out inside Clear Board (it mispositioned + clipped) */
-  .yard-wrap .yardframe {
-    width: 100%; margin: 12px 0 14px; border: 1px solid var(--line); border-radius: 12px;
-    background: #0f1216; overflow: hidden; box-shadow: 0 14px 50px rgba(0,0,0,.45);
-  }
-  .yard-wrap canvas#yard { display: block; width: 100%; height: auto; aspect-ratio: 1340 / 460; }
-  .yard-wrap .workorder {
-    margin-top: 10px; padding: 12px 16px; border-radius: 10px;
-    background: linear-gradient(180deg, #171c24, #11151b);
-    border: 1px solid var(--line); border-left: 4px solid #19b6d8;
-  }
-  .yard-wrap .wo-top { font: 700 11px ui-monospace, monospace; letter-spacing: .6px; color: var(--dim); }
-  .yard-wrap .wo-tag { color: #19b6d8; } .yard-wrap .wo-id { color: var(--ink); }
-  .yard-wrap .wo-job { font-size: 16px; margin-top: 5px; color: var(--ink); }
-  .yard-wrap .wo-job b { color: #cfe8ff; }
-  .yard-wrap .wo-from { color: var(--dim); font-weight: 600; font-size: 13px; }
-  .yard-wrap .wo-meta { font-size: 12.5px; color: var(--dim); margin-top: 5px; }
-  .yard-wrap .wo-tip { display: block; margin-top: 3px; color: #6f7884; font-style: italic; }
-  .yard-wrap .ord-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
-  .yard-wrap .ord-row {
-    display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer;
-    border: 1px solid var(--line); border-radius: 8px; background: var(--panel2);
-    font: 700 14px ui-monospace, monospace; user-select: none; max-width: 360px;
-  }
-  .yard-wrap .ord-row:hover { border-color: #3a4554; }
-  .yard-wrap .ord-row.flagged { border-color: var(--si); background: var(--sibg); }
-  .yard-wrap .ord-flag { font-size: 15px; width: 16px; color: var(--dim); }
-  .yard-wrap .ord-row.flagged .ord-flag { color: var(--si); }
-  .yard-wrap .ord-mark { color: var(--ink); } .yard-wrap .ord-arrow { color: var(--dim); } .yard-wrap .ord-trk { color: var(--cror); }
-  .yard-wrap .ord-fix { color: var(--si); font-size: 11px; font-style: italic; }
-  .yard-wrap #certify { margin: 4px 0 2px; }
-  /* note: Clear Board's home defines a global .bar (the 12px progress bar); these resets stop it leaking in */
-  .yard-wrap .bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; height: auto; overflow: visible; background: none; border: 0; border-radius: 0; margin: 12px 0; }
-  .yard-wrap .readout {
-    font: 700 16px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-    background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
-    padding: 10px 14px; color: var(--ink);
-  }
-  .yard-wrap select, .yard-wrap button {
-    font: 600 14px system-ui, sans-serif; color: var(--ink);
-    background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
-    padding: 9px 12px; cursor: pointer;
-  }
-  .yard-wrap button.go { background: #1d4ed8; border-color: #2c5bdc; }
-  .yard-wrap button.go:hover { background: #2356e6; }
-  .yard-wrap button#optimal { background: #14313a; border-color: #1d5563; color: #aee9f6; }
-  .yard-wrap button#optimal:hover { background: #1a3d48; }
-  .yard-wrap button#depart { background: #1f4a3c; border-color: #2a6b54; color: #bdf0db; }
-  .yard-wrap button#depart:hover { background: #245741; }
-  .yard-wrap button#depart:disabled { opacity: .4; cursor: default; }
-  .yard-wrap button:hover { border-color: #3a4554; }
-  .yard-wrap .spacer { flex: 1; }
-  .yard-wrap .banner {
-    min-height: 22px; margin: 12px 0; padding: 10px 14px; border-radius: 8px;
-    background: var(--panel); border: 1px solid var(--line); color: var(--dim); font-weight: 600;
-  }
-  .yard-wrap .banner.ok { color: var(--ink); }
-  .yard-wrap .banner.bad { color: var(--bad); border-color: #4a2723; background: #1d1413; }
-  .yard-wrap .banner.win { color: var(--good); border-color: #1f4a3c; background: #102019; }
-  .yard-wrap .legend { color: var(--dim); font-size: 12.5px; margin: 6px 0 2px; }
-  .yard-wrap .legend .k { color: var(--cror); font-weight: 700; }
-  .yard-wrap .legend .s { color: var(--si); font-weight: 700; }
-  .yard-wrap .rules { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-  .yard-wrap .chip {
-    display: flex; flex-direction: column; gap: 2px; padding: 8px 12px;
-    border-radius: 8px; border: 1px solid var(--line); background: var(--panel); min-width: 150px;
-  }
-  .yard-wrap .chip b { font: 700 12px ui-monospace, monospace; }
-  .yard-wrap .chip span { font-size: 12.5px; color: var(--dim); }
-  .yard-wrap .chip.cror { border-left: 3px solid var(--cror); } .yard-wrap .chip.cror b { color: var(--cror); }
-  .yard-wrap .chip.si { border-left: 3px solid var(--si); background: var(--sibg); } .yard-wrap .chip.si b { color: var(--si); }
-  .yard-wrap details { margin-top: 18px; color: var(--dim); font-size: 13px; }
-  .yard-wrap details summary { cursor: pointer; color: var(--ink); font-weight: 600; }
-  .yard-wrap code { background: var(--panel2); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
-  .yard-wrap .banner .lookup {
-    margin-left: 10px; padding: 4px 9px; font: 600 12px system-ui, sans-serif;
-    color: #cfe8ff; background: #14313a; border: 1px solid #1d5563; border-radius: 6px; cursor: pointer;
-  }
-  .yard-wrap .banner .lookup:hover { background: #1a3d48; }
-`;
-
-// The .wrap body contents from switch-list/index.html (header dropped — Clear
-// Board has its own), with a Back button prepended, wrapped in .yard-wrap.
-const YARD_HTML = `
-  <div class="yard-wrap">
-    <button class="back" data-go="">← Home</button>
-
-    <div class="bar">
-      <select id="picker" title="Pick a job"></select>
-      <span class="spacer"></span>
-      <div class="readout" id="readout">Moves 0 / par 0 · Joints 0</div>
-    </div>
-
-    <div class="workorder" id="workorder"></div>
-
-    <div class="yardframe"><canvas id="yard"></canvas></div>
-
-    <div class="bar">
-      <select id="act" title="Action">
-        <option value="pull">PULL</option>
-        <option value="spot">SPOT</option>
-        <option value="kick">KICK</option>
-        <option value="secure">SECURE</option>
-      </select>
-      <select id="count" title="How many cars"></select>
-      <span style="color:var(--dim)">cars</span>
-      <select id="track" title="Which track"></select>
-      <button class="go" id="work">Work it ▸</button>
-      <button id="optimal" title="Auto-line and play the fewest-moves line in slow motion">▶ Watch optimal</button>
-      <button id="depart" title="Depart the assembled outbound out the lead" style="display:none">Depart ▸</button>
-      <span class="spacer"></span>
-      <button id="reset">Reset</button>
-      <button id="mute" title="Sound">🔊</button>
-    </div>
-
-    <div class="banner" id="msg"></div>
-
-    <div class="legend">
-      Rules in play —
-      <span class="k">CROR</span> = the national rulebook (applies everywhere) ·
-      <span class="s">S.I.</span> = a <em>special instruction</em>, specific to <em>this</em> yard — <strong>you must know your yard's.</strong>
-    </div>
-    <div class="rules" id="rules"></div>
-
-    <div style="margin:10px 0 4px; padding:10px 13px; border-left:3px solid var(--si); background:var(--sibg); border-radius:6px; font-size:13px;">
-      <strong style="color:var(--si)">What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span style="color:var(--dim)">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span>
-    </div>
-
-    <details>
-      <summary>How to play & why these rules</summary>
-      <p><strong>You are the conductor, not the engineer.</strong> Click a switch target to line it
-      (<span style="color:var(--si)">yellow</span> = lined into the track / diverging,
-      <span style="color:var(--good)">green</span> = normal, straight up the ladder). Then call a move:</p>
-      <ul>
-        <li><strong>PULL n from a track</strong> — back in, couple the near (throat) cut, pull <code>n</code> cars onto the lead.</li>
-        <li><strong>SPOT n to a track</strong> — shove <code>n</code> cars in and leave them.</li>
-        <li><strong>KICK n to a track</strong> — shove and cut away; the cars coast in on their own with no coupling. Only where a special instruction allows it (<span style="color:var(--si)">⚡</span>), only onto a secured 2+ car cut, and only car types that can be kicked.</li>
-      </ul>
-      <p><strong>Score = fewest engine MOVES</strong> — beat or match <em>par</em>. A move is one run of the
-      engine in one direction, so every change of direction counts: a <strong>PULL = 2</strong> (back in, pull
-      out) and a <strong>SPOT = 2</strong> (shove in, pull out) — <em>except the spot that finishes the job is 1</em>,
-      because the engine just leaves the cars and is done (no pull-out). A <strong>KICK = 1</strong> (one shove,
-      the cars coast in by themselves). So <em>pull, pull, spot</em> = 5 moves, and kicking saves the pull-out.
-      <strong>Joints</strong> (couplings) is a second, "also good" stat: lower is cleaner. To reach a
-      track, line <em>its</em> switch reverse and the ones below it normal, or the engineer refuses
-      (<strong>CROR 104</strong>).</p>
-      <p><strong>Securing &amp; kicking.</strong> <strong>Rule 112</strong> — any car left unattended gets a hand brake.
-      A <strong>KICK</strong> (Rule 113.5) needs a <em>secured</em> cut of at least two cars as a <em>backstop</em> to
-      catch the rolling car — and a tank, autorack or centrebeam is never kicked. After coupling, the engineer
-      <em>stretches</em> the joint to confirm the knuckles are locked before moving (<strong>Rule 113.2</strong>).</p>
-    </details>
-  </div>
-`;
-
 export function mount(root, ctx) {
-  // CSS once — guard with an id so re-mounting (navigate away & back) doesn't duplicate it.
-  if (!document.getElementById('yard-style')) {
-    const st = document.createElement('style');
-    st.id = 'yard-style';
-    st.textContent = YARD_CSS;
-    document.head.appendChild(st);
-  }
-  // Inject the scoped markup into the container Clear Board gave us.
-  root.innerHTML = YARD_HTML;
+  // The view puts the scoped markup into the container Clear Board gave us.
+  const view = createView(root);
 
   // Back button → Clear Board home.
-  root.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => ctx.go(b.dataset.go)));
+  view.onGo((route) => ctx.go(route));
 
-  // reduced motion: animations near-instant when the user's setting asks for it.
+  // The reduce setting is read one time, here. With the setting on, the speed factor is 6.
+  // anim.js multiplies each duration by the factor, so a move takes about 6 times longer and
+  // motion does not stop. This is a known defect. It stays as it is in this file for now.
   const reduce = !!(ctx.settings && ctx.settings.reduce);
-  const fast = () => reduce ? 6 : 1;          // setSpeed(6) ≈ instant; setSpeed(1) = normal
+  const fast = () => reduce ? 6 : 1;          // setSpeed(6) = 6 times slower; setSpeed(1) = normal
 
-  // --- everything below is switch-list/src/main.js, scoped to `root` ----------
-  const canvas = root.querySelector('#yard');
-  const cctx = canvas.getContext('2d');
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  canvas.width = W * dpr; canvas.height = H * dpr; cctx.scale(dpr, dpr);
+  // The drawing adapter makes the canvas inside the frame that the view gives.
+  const drawing = createDrawing(view.drawHost, { onPick });
 
-  let puzzle, state, anim = null, busy = false, watching = false, fromDemo = false;
+  let puzzle, state, anim = null, busy = false, fromDemo = false;
   let gen = 0, stopAnim = null;       // gen invalidates in-flight loops on (re)load; stopAnim aborts the live tween
   let ordered = true;                 // is the switch list verified? (true when there's no list to check)
   const flagged = new Set();          // indices the player has flagged as wrong
   let cine = null, cineCancel = null, cineTimer = null;   // inbound-arrival cinematic state
 
-  const $ = (id) => root.querySelector('#' + id);
+  const $ = (id) => view.el(id);
 
   function cancelCine() {
     if (cineCancel) cineCancel();
@@ -253,15 +81,15 @@ export function mount(root, ctx) {
     if (stopAnim) stopAnim();          // abort the live tween (mid-move, depart, etc.)
     stopAnim = null;
     cancelCine();
-    puzzle = p; state = freshState(p); anim = null; busy = false; watching = false; setSpeed(fast());
+    puzzle = p; state = freshState(p); anim = null; busy = false; setSpeed(fast());
     ordered = !p.listed; flagged.clear();
-    const dep = $('depart'); dep.style.display = p.goal.depart ? '' : 'none'; dep.disabled = true;
+    view.setDepart({ shown: !!p.goal.depart, enabled: false });
     renderRules(); renderOrder(); syncBuilder(); paint(); banner('', '');
-    $('readout').textContent = `Moves 0 / par ${p.par} · Joints 0`;
+    view.setReadout({ moves: 0, par: p.par, joints: 0 });
     arrivalCinematic();
   }
 
-  function paint() { render(cctx, state, puzzle, { anim, cine }); }
+  function paint() { drawing.paint(state, puzzle, { anim, cine }); }
 
   // Inbound road train (only on `inbound` puzzles): in off the main, STOP, set out a
   // few cars onto the set-out track, then DEPART out the lead — your power is off-scene
@@ -282,18 +110,13 @@ export function mount(root, ctx) {
   }
 
   // --- input: line a switch by clicking its target -------------------------
-  canvas.addEventListener('click', (e) => {
+  // The drawing adapter calls this for each click on the drawing: with the track id of the
+  // switch that was hit, or with null. A click that hits no switch still resumes the sound.
+  function onPick(id) {
     if (busy || cine) return;
     resume();
-    const r = canvas.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
-    let best = -1, bd = 18;
-    for (let i = 0; i < NTRACK; i++) {
-      const s = switchPos(i), d = Math.hypot(s.x - x, s.y - y);
-      if (d < bd) { bd = d; best = i; }
-    }
-    if (best >= 0) { lineSwitch(state, TRACK_IDS[best]); sfx.points(); paint(); }
-  });
+    if (id !== null) { lineSwitch(state, id); sfx.points(); paint(); }
+  }
 
   // --- the move builder ----------------------------------------------------
   $('work').addEventListener('click', () => {
@@ -304,7 +127,7 @@ export function mount(root, ctx) {
   $('optimal').addEventListener('click', () => { resume(); watchOptimal(); });
   $('depart').addEventListener('click', () => { resume(); departOut(); });
   $('reset').addEventListener('click', () => { if (!busy) load(puzzle); });
-  $('mute').addEventListener('click', () => { $('mute').textContent = toggleMute() ? '🔇' : '🔊'; });
+  $('mute').addEventListener('click', () => { view.setMuted(toggleMute()); });
 
   // Full validation up front (lining + count + foul/clearance) so a fouling move is
   // refused before the engine ever moves.
@@ -407,7 +230,7 @@ export function mount(root, ctx) {
       puzzle.listed.forEach((e, i) => { if (e.error) flagged.add(i); });
       ordered = true; renderOrder();
     }
-    busy = true; watching = true; setSpeed(reduce ? 6 : 1.7);
+    busy = true; setSpeed(reduce ? 6 : 1.7);
     banner(`▶ Watching the optimal line — par ${puzzle.par} move${puzzle.par === 1 ? '' : 's'}`, 'ok');
     for (const [act, trk, n] of puzzle.opt) {
       if (gen !== myGen) return;
@@ -417,11 +240,11 @@ export function mount(root, ctx) {
       if (act === 'secure') { secure(state, trk); banner(state.msg, 'ok'); paint(); await sleep(420); }
       else await animateMove(act, trk, n);
       if (gen !== myGen) return;
-      $('readout').textContent = `Moves ${state.moves} / par ${puzzle.par} · Joints ${state.joints}`;
+      view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
       await sleep(320);
     }
     if (gen !== myGen) return;
-    setSpeed(fast()); busy = false; watching = false;
+    setSpeed(fast()); busy = false;
     fromDemo = true;                                                  // a watched line is not the player's win — don't grade mastery
     afterMove();
     if (puzzle.goal.depart && checkWin(state, puzzle)) departOut();   // finish the demo by departing
@@ -429,15 +252,15 @@ export function mount(root, ctx) {
   }
 
   function afterMove() {
-    $('readout').textContent = `Moves ${state.moves} / par ${puzzle.par} · Joints ${state.joints}`;
+    view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
     banner(state.msg, 'ok');
     syncBuilder(); paint();
     const done = checkWin(state, puzzle);
     if (done && puzzle.goal.depart) {
-      $('depart').disabled = false;                    // built in order — let them depart
+      view.setDepart({ shown: true, enabled: true });   // built in order — let them depart
       banner(`✓ Outbound built${puzzle.goal.ordered ? ' in order' : ''} — call Depart ▸ to leave.`, 'win');
     } else {
-      $('depart').disabled = true;
+      view.setDepart({ shown: !!puzzle.goal.depart, enabled: false });
       if (done) winBanner();
       else {
         // Built right but left loose. This is the one refusal that isn't a mistake in the work —
@@ -513,7 +336,7 @@ export function mount(root, ctx) {
     const clean = state.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
     banner(`✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev)}`, g.beatPar ? 'win' : 'ok');   // win registered now
     recordWin();
-    $('depart').disabled = true;
+    view.setDepart({ shown: true, enabled: false });
     // flavor: pull the whole train out the lead, off-frame left
     busy = true;
     const cutLen = state.engine.reduce((a, c) => a + carLen(state.type[c]), 0);
@@ -532,29 +355,20 @@ export function mount(root, ctx) {
   function syncBuilder() {
     // keep the count cap sensible for the chosen action
     const kind = $('act').value, id = $('track').value;
-    const cntSel = $('count');
-    // SECURE acts on the whole standing cut — a car count would be meaningless.
-    cntSel.disabled = kind === 'secure';
-    cntSel.style.opacity = kind === 'secure' ? '.45' : '';
+    const cur = +$('count').value;
     const max = kind === 'pull' ? (state.tracks[id]?.length || 1) : Math.max(1, state.engine.length);
-    const cnt = cntSel; const cur = +cnt.value;
-    cnt.innerHTML = '';
-    for (let k = 1; k <= Math.max(1, max); k++) {
-      const o = document.createElement('option'); o.value = k; o.textContent = k; cnt.appendChild(o);
-    }
-    cnt.value = Math.min(cur || 1, Math.max(1, max));
+    // SECURE acts on the whole standing cut — a car count would be meaningless.
+    view.setCount({ max: Math.max(1, max), value: Math.min(cur || 1, Math.max(1, max)), disabled: kind === 'secure' });
   }
   ['act', 'track'].forEach((id) => $(id).addEventListener('change', syncBuilder));
 
   function renderRules() {
-    const box = $('rules'); box.innerHTML = '';
+    const list = [];
     for (const key of puzzle.rules) {
       const r = RULES[key]; if (!r) continue;
-      const chip = document.createElement('div');
-      chip.className = `chip ${r.kind}`;
-      chip.innerHTML = `<b>${r.cite}</b><span>${r.label}</span>`;
-      box.appendChild(chip);
+      list.push({ kind: r.kind, cite: r.cite, label: r.label });
     }
+    view.renderRules(list);
   }
 
   // Route the work-order panel: a normal order, the interactive switch-list check
@@ -563,21 +377,16 @@ export function mount(root, ctx) {
     if (!puzzle.listed) { renderWorkOrder(); return; }
     if (ordered) { renderVerifiedOrder(); return; }
 
-    const rows = puzzle.listed.map((e, i) =>
-      `<div class="ord-row${flagged.has(i) ? ' flagged' : ''}" data-i="${i}">`
-      + `<span class="ord-flag">${flagged.has(i) ? '⚑' : '▢'}</span>`
-      + `<span class="ord-mark">${e.listedMark}</span><span class="ord-arrow">→</span><span class="ord-trk">${e.listedTrack}</span>`
-      + `</div>`).join('');
-    $('workorder').innerHTML =
-      `<div class="wo-top"><span class="wo-tag si">SWITCH LIST</span> <span class="wo-id">${puzzle.id.toUpperCase()}</span> · the list can be wrong</div>`
-      + `<div class="wo-job">Build <b>${puzzle.goal.track}</b> from these cars. Check each line against the yard — tap any that <b>don't match</b>, then certify.</div>`
-      + `<div class="ord-list">${rows}</div>`
-      + `<button class="go" id="certify">Certify order ▸</button>`
-      + `<div class="wo-meta"><span class="wo-tip">${puzzle.hint}</span></div>`;
-    $('workorder').querySelectorAll('.ord-row').forEach((row) => row.addEventListener('click', () => {
-      const i = +row.dataset.i; flagged.has(i) ? flagged.delete(i) : flagged.add(i); sfx.points(); renderOrder();
-    }));
-    $('certify').addEventListener('click', certify);
+    view.renderSwitchList({
+      id: puzzle.id, goalTrack: puzzle.goal.track, hint: puzzle.hint,
+      lines: puzzle.listed.map((e, i) => ({ mark: e.listedMark, track: e.listedTrack, flagged: flagged.has(i) })),
+    }, {
+      onFlag: (i) => {
+        if (flagged.has(i)) flagged.delete(i); else flagged.add(i);
+        sfx.points(); renderOrder();
+      },
+      onCertify: certify,
+    });
   }
 
   function certify() {
@@ -607,14 +416,10 @@ export function mount(root, ctx) {
   }
 
   function renderVerifiedOrder() {
-    const g = puzzle.goal;
-    const lines = puzzle.listed
-      .map((e) => `<b>${e.trueMark}</b> → ${e.trueTrack}${e.error ? ' <span class="ord-fix">(list was wrong)</span>' : ''}`)
-      .join(' · ');
-    $('workorder').innerHTML =
-      `<div class="wo-top"><span class="wo-tag">WORK ORDER ✓</span> <span class="wo-id">${g.track}</span> · verified</div>`
-      + `<div class="wo-job">Build <b>${g.track}</b>: ${lines}.</div>`
-      + `<div class="wo-meta">Target <b>${puzzle.par} move${puzzle.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.</div>`;
+    view.renderVerifiedOrder({
+      goalTrack: puzzle.goal.track, par: puzzle.par,
+      lines: puzzle.listed.map((e) => ({ mark: e.trueMark, track: e.trueTrack, corrected: !!e.error })),
+    });
   }
 
   // The job, stated like a switch list — derived from the puzzle goal.
@@ -624,34 +429,19 @@ export function mount(root, ctx) {
     for (const [trk, entries] of Object.entries(puzzle.start || {}))
       for (const e of entries) { const m = Array.isArray(e) ? e[0] : e; if (typeof m === 'string') src[m] = trk; }
     const from = [...new Set(g.cars.map((c) => src[c]).filter(Boolean))];
-    const nums = g.cars.map((c) => c.split(' ').pop());
-    const head = `<div class="wo-top"><span class="wo-tag">WORK ORDER</span> <span class="wo-id">${puzzle.id.toUpperCase()}</span> · ${puzzle.title}</div>`;
-    const meta = `<div class="wo-meta">Target <b>${puzzle.par} move${puzzle.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.<span class="wo-tip">${puzzle.hint}</span></div>`;
-    const job = g.depart
-      ? `<div class="wo-job">Build the outbound${g.ordered ? ' in order' : ''} — gather <b>${nums.join(' · ')}</b> onto your train${from.length ? ` <span class="wo-from">(set out on ${from.join(', ')})</span>` : ''}, then <b>Depart ▸</b>.</div>`
-      : `<div class="wo-job">Build <b>${g.track}</b> — gather <b>${nums.join(' · ')}</b> onto it${from.length ? ` <span class="wo-from">(now on ${from.join(', ')})</span>` : ''}.</div>`;
-    $('workorder').innerHTML = head + job + meta;
+    view.renderWorkOrder({
+      id: puzzle.id, title: puzzle.title, hint: puzzle.hint, par: puzzle.par,
+      depart: !!g.depart, ordered: !!g.ordered, goalTrack: g.track, cars: g.cars, from,
+    });
   }
 
-  function banner(text, tone) {
-    const el = $('msg');
-    el.textContent = text || '';
-    el.className = `banner ${tone || ''}`;
-  }
+  function banner(text, tone) { view.setBanner(text, tone); }
 
   // A refused move is a teaching moment: keep the cited rule, add a one-tap link to its
   // plain-language Reference entry (cause → rule → correct action; REVAMP §6).
   function refusalBanner(msg) {
-    const el = $('msg');
-    el.className = 'banner bad';
-    el.textContent = msg || '';
     const id = ruleItemFromMsg(msg);
-    if (id && ctx && typeof ctx.go === 'function') {
-      const b = document.createElement('button');
-      b.className = 'lookup'; b.textContent = 'Look it up →';
-      b.addEventListener('click', () => ctx.go(`reference?focus=${id}`));
-      el.appendChild(b);
-    }
+    view.setRefusal(msg, id && ctx && typeof ctx.go === 'function' ? () => ctx.go(`reference?focus=${id}`) : null);
   }
   // "…(CROR 113.4/113.5(a)(v))" → rule.113.4; special-instruction-only refusals have no CROR item.
   function ruleItemFromMsg(msg) {
@@ -666,8 +456,7 @@ export function mount(root, ctx) {
   }
 
   // --- track dropdown (kept in sync with geometry) -------------------------
-  const trackSel = $('track');
-  TRACK_IDS.forEach((id) => { const o = document.createElement('option'); o.value = id; o.textContent = id; trackSel.appendChild(o); });
+  view.setTracks(TRACK_IDS);
 
   // --- puzzle picker -------------------------------------------------------
   // Grouped by tier so the authored ramp is visible. It used to be a flat list of all 19, which
@@ -688,24 +477,23 @@ export function mount(root, ctx) {
       .filter((e) => e.p.tier === t.tier));
     const next = ordered.find((e) => !completed.includes(e.p.id));
 
-    picker.innerHTML = '';
+    const groups = [];
     for (const t of TIERS) {
       const inTier = ordered.filter((e) => e.p.tier === t.tier);
       if (!inTier.length) continue;                       // never render an empty group
-      const g = document.createElement('optgroup');
-      g.label = t.label;
-      for (const { p, k } of inTier) {
-        const mark = completed.includes(p.id) ? '✓ ' : (next && next.p.id === p.id ? '→ ' : '');
-        const b = best[p.id];
-        const yours = b ? ` · your best ${b.moves}m` : '';   // blank, never a guess, if unrecorded
-        const o = document.createElement('option');
-        o.value = k;
-        o.textContent = `${mark}${p.title} · par ${p.par}${yours}`;
-        g.appendChild(o);
-      }
-      picker.appendChild(g);
+      groups.push({
+        label: t.label,
+        options: inTier.map(({ p, k }) => {
+          const b = best[p.id];
+          return {
+            value: k, title: p.title, par: p.par,
+            state: completed.includes(p.id) ? 'done' : (next && next.p.id === p.id ? 'next' : ''),
+            best: b ? { moves: b.moves } : null,                // blank, never a guess, if unrecorded
+          };
+        }),
+      });
     }
-    if (keep !== '') picker.value = keep;                 // a rebuild must not change the selection
+    view.renderPicker(groups, keep);                      // a rebuild must not change the selection
   }
 
   buildPicker();
@@ -713,6 +501,6 @@ export function mount(root, ctx) {
 
   // sound default: start muted if Clear Board's audio setting is off.
   if (ctx.settings && !ctx.settings.audio && !isMuted()) toggleMute();
-  $('mute').textContent = isMuted() ? '🔇' : '🔊';
+  view.setMuted(isMuted());
   load(PUZZLES[0]);
 }

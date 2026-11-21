@@ -1,12 +1,22 @@
-// Shared "imperative island" bridge for stations that are byte-for-byte vanilla `mount(root, ctx)`
-// modules (The Yard, Radio). Keeps the verified engine untouched; React just provides a host element,
-// a ctx bridged to React state (navigate / settings / live profile / read-aloud / persist-on-win),
-// and a clean teardown on unmount. Lazy-loads the module so its code stays out of the main bundle.
+// The bridge hook for the two imperative islands, the Yard and the Radio. An island is a plain
+// module with mount(host, ctx). The hook gives it a host element and one bridge object, `ctx`, and
+// writes the latest React values into that object. It loads the module lazily, so the island code
+// stays out of the main bundle. The teardown empties the host: the module gets no call.
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
+import type { Profile, Settings } from '../core/types';
 
-type StationModule = { mount: (host: HTMLElement, ctx: unknown) => void };
+export type StationCtx = {
+  profile: Profile;
+  settings: Settings;
+  speak: (text: string) => void;
+  save: () => void;
+  recordYardWin: (itemIds: string[], correct: boolean) => void;
+  go: (route: string) => void;
+};
+
+type StationModule = { mount: (host: HTMLElement, ctx: StationCtx) => void };
 
 export function useImperativeStation(load: () => Promise<StationModule>) {
   const { profile, settings, persistProfile, speak, recordYardWin } = useApp();
@@ -14,7 +24,7 @@ export function useImperativeStation(load: () => Promise<StationModule>) {
   const hostRef = useRef<HTMLDivElement>(null);
 
   // Stable bridge the engine reads at mount; kept pointed at the latest React values.
-  const ctxRef = useRef({
+  const ctxRef = useRef<StationCtx>({
     profile,
     settings,
     speak,
