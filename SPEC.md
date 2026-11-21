@@ -109,7 +109,7 @@ ContentItem {
   plain:    string        // plain-language explanation (the front door)
   citation: {
     source:     "CROR" | "GOI" | "SME" | "derived"
-    ref:        string|null  // primary cite, e.g. "CROR 112(a)"
+    ref:        string|null  // primary cite as the data holds it, e.g. "CROR 112" (rule.112)
     relatedRef: string|null  // GOI anchored to a rule, e.g. "CROR 109"; else null (B3/D-0015)
     verbatim:   string|null  // the rule text — public document, OK to ship (D-0010); null when the data has none
     trust:      "verified" | "needs-review" | "operating-practice"
