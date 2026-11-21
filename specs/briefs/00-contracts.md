@@ -1462,3 +1462,25 @@ one. Where it and an older record differ, this record and the text above are the
 4. F item 16 stays not verified: a control can get 1 px smaller with the face change on the Linux
    test machine. It can show at the merge check of S1, in the look compare. The S1 brief
    (requirement 16) says what S1 does then.
+
+---
+
+# Part H. Updates after D-0038, D-0039 and the 2b briefs (the lead, 2026-11-21)
+
+This part wins over each earlier line of this contract where the two disagree.
+
+1. **D-0038 closed the 19 owner picks.** B.3, B.5, D.4 point 10 and the rows of E.1 that call them
+   open or PENDING are history. `data-tier` stays `"strict"`, with the written exception for travel
+   in the Yard drawing. Gold marks the lined route, the engine and the goal (B.5). The travel legs
+   are `--yard-run-in` (840 ms) and `--yard-run-out` (420 ms) (B.5, `LEG-ROLE`).
+2. **D-0039 changed `TOOLS`.** The gate tools of G1 can follow the owner's reskin tools.
+3. **C.2, line numbers.** On the wave branch after S1, the press rule of `src/index.css` is on
+   lines 127 to 128 and the reduced-motion block on lines 131 to 139 (they were 136 to 137 and 140
+   to 148 at `c2fb637`).
+4. **B.2 against C.4.** `.yard-wrap` comes first in each Yard selector (`YARD-SCOPE`). It meets
+   the namespace check of G1.
+5. **B.6.** The hook `data-cb="prompt"` joins the list at G1-close (`PROMPT-HOOK`).
+6. **The lead's rulings on the open points of the 2b briefs** are in `lead-rulings.md`, section 2.3.
+7. **After G1-close, the base of each 2b job** is the head of the wave branch `claude/cb2-wave-2a`
+   at the end of 2a. The lead names the commit in the start note of each job.
+
