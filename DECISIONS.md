@@ -733,5 +733,23 @@ disagree. Job D1 made its documents say what is true. In this file:
 **Why:** a document that says a false thing misleads the next reader (fence rule 15). An entry
 records its own day; a later note says what changed, and the old words stay readable.
 
+### D-0046 — The documents name a role, not a person (fence rule 14, P-25)
+**Chosen (job D1, 2026-11-21):** in the documents, a person's name becomes the role that its
+sentence gives. A call on the product, the mission, a feature or a gate names "the owner". A call on
+content names "the SME": a verification, a severity classification, the domain of a rule, a bar of
+the learning model. A sentence of personal history goes: a state of mind, a quoted personal phrase,
+a working habit. A sentence that gave the voice of a person as the voice of the app now gives the
+voice of the app with no person. A folder path of a personal machine goes. A web address with an
+account name goes, or becomes words ("the tip jar link").
+**Kept:** the licence keeps its holder (`LICENSE`). An address of the repository stays.
+**Why:** fence rule 14. R6 section 12 found that the documents treat the SME and one named person
+as one, and left the form to this job. One rule keeps each document in the same form.
+**Not in this job:** `src-tauri/Cargo.toml` (an author name and the address of the repository);
+`src/stations/Home.tsx` (the tip jar address, a working link that row U-42 keeps); the comments of
+the frozen `geometry.js`, `model.js` and `solver.js`, and a folder path in the frozen
+`src/core/signal.ts` (no job edits a frozen file); and two addresses of private repositories in
+`specs/clear-board-2-plan.md` (the owner's text: this job changed one pronoun in it). These places
+are for the lead.
+
 ---
 *V1. Edit as decisions are made or reversed.*
