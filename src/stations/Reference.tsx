@@ -43,20 +43,24 @@ export function Reference() {
 
   return (
     <div className="cb-reference-view">
-      <button className="back" onClick={() => navigate('/')}>← Home</button>
-      <h2 className="view-title">📖 Reference</h2>
-      <p className="muted">Look anything up. Plain words first — the rule text is one tap deeper, always cited.</p>
-      <input className="search" type="search" placeholder="Search a term…" aria-label="Search reference"
+      <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+      <div className="dusk-top cb-reference-head">
+        <div>
+          <h2 className="dusk-title cb-reference-title">📖 Reference</h2>
+          <p className="dusk-lede">Look anything up. Plain words first — the rule text is one tap deeper, always cited.</p>
+        </div>
+      </div>
+      <input className="cb-input" data-cb="ref-search" type="search" placeholder="Search a term…" aria-label="Search reference"
         value={q} onChange={e => setQ(e.target.value)} />
 
-      <div className="ref-list" role="list">
+      <div className="dusk-rows cb-reference-list" role="list">
         {rows.length
           ? rows.map(i => (
-            <button key={i.id} className="ref-row" role="listitem" onClick={() => setSelected(i)}>
-              <b>{i.title}</b><small>{i.plain}</small>
+            <button key={i.id} className="dusk-row cb-reference-row" data-cb="ref-row" role="listitem" onClick={() => setSelected(i)}>
+              <b>{i.title}</b><small className="cb-sub">{i.plain}</small>
             </button>
           ))
-          : <p className="muted">No match. Try another word.</p>}
+          : <p className="dusk-lede">No match. Try another word.</p>}
       </div>
 
       {selected && <Detail key={selected.id} item={selected} audio={settings.audio} onSpeak={speak}

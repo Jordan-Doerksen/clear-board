@@ -1,1 +1,40 @@
-/* surfaces/reference.css - the rules that only Reference needs. Owner in Wave 2b: job B2. Class prefix: cb-reference-. Job S1 made this file with no rule. */
+/* surfaces/reference.css - the rules that only Reference needs. Owner in Wave 2b: job B2. Class prefix: cb-reference-.
+   Each selector starts with .cb-app .cb-reference-view, the root of the Reference view. A rule of a
+   reading mode puts the attribute of the mode on html in front. A size is in rem, so that the text
+   scale reaches it. This sheet holds no raw colour, no transition, no animation and no movement. */
+
+/* ---- the view: one column of parts, one gap between them --------------------------------------- */
+.cb-app .cb-reference-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+/* "← Home" keeps the width of its word */
+.cb-app .cb-reference-view > .cb-btn--plain { align-self: flex-start; }
+
+/* ---- the title: a heading is reading text and keeps its size of today (20.8 px at a 16 px root) */
+.cb-app .cb-reference-view .cb-reference-title { font-size: 1.3rem; }
+
+/* ---- the result list: one column at each width ------------------------------------------------
+   Below 760 px Dusk makes .dusk-rows a grid of columns of 150 px or more. The list stays one column. */
+.cb-app .cb-reference-view .cb-reference-list { grid-template-columns: minmax(0, 1fr); }
+
+/* A result row has no icon square: the row is one column, so that the title does not fall into the
+   24 px column of the Dusk row. The title and its plain words have no gap between them, as in a
+   Dusk row where they share one cell, so that each row reads as one unit. */
+.cb-app .cb-reference-view .cb-reference-row {
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 0;
+}
+/* The plain words of a row are reading text. They keep their size of today (13.33 px at a 16 px
+   root) and take the line height of reading text, not the 1.25 of the Dusk rule for small text. */
+.cb-app .cb-reference-view .cb-reference-row .cb-sub {
+  font-size: calc(1rem / 1.2);
+  line-height: var(--lh-base);
+}
+
+/* ---- the dyslexia mode -------------------------------------------------------------------------
+   A Dusk part with a fixed line height or a fixed tracking takes the line height and the letter
+   spacing of the mode. The letter spacing comes from html, through inherit: no value is set here. */
+html[data-dys="1"] .cb-app .cb-reference-view .cb-reference-title { letter-spacing: inherit; }
+html[data-dys="1"] .cb-app .cb-reference-view .cb-reference-row b { line-height: var(--lh-base); }
