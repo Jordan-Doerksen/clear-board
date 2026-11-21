@@ -56,6 +56,18 @@
   line-height: var(--lh-base);
 }
 
+/* The trust mark of a row (U-02): the words of the trust mark of the entry, on their own line under
+   the title, at the size of the row text. The words carry the state; the ink of the tone is a second
+   carrier (green ink: verified; amber ink: each other mark). */
+.cb-app .cb-reference-view .cb-reference-trust {
+  display: block;
+  font-size: calc(1rem / 1.2);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-base);
+}
+.cb-app .cb-reference-view .cb-reference-trust--ok { color: var(--cb-ok-ink); }
+.cb-app .cb-reference-view .cb-reference-trust--caution { color: var(--cb-caution-ink); }
+
 /* ---- the entry: a framed Dusk panel. The head holds the title, the body holds the rest. ---------- */
 /* The entry title is reading text and keeps its size of today (18.72 px at a 16 px root). */
 .cb-app .cb-reference-view .cb-reference-detail .dusk-panel-name { font-size: 1.17rem; }
