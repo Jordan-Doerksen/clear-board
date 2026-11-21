@@ -35,7 +35,7 @@ function Shell() {
             </div>
             <p className="dusk-crumb">Become a conductor. Free, forever.</p>
             <span className="dusk-spacer" />
-            <button className="dusk-btn" aria-haspopup="dialog" data-cb="settings-open" onClick={() => setSettingsOpen(true)}>⚙ Settings</button>
+            <button className="dusk-btn" aria-haspopup="dialog" data-cb="settings-open" onClick={() => setSettingsOpen(true)}><span aria-hidden="true">⚙</span> Settings</button>
           </header>
           <div className="dusk-thread" aria-hidden="true" />
           <main className="dusk-main" id="view" ref={mainRef} tabIndex={-1}>
