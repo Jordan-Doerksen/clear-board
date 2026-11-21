@@ -2,7 +2,7 @@
 // Mirrors the vanilla `ctx` object (profile/content/settings/save/recompute/speak) as React context.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { freshProfile, keepProfileCopy, loadContent, readStoredProfile, recomputeMastery, saveProfile, SETTINGS_KEY } from '../core/store';
+import { freshProfile, keepProfileCopy, loadContent, PROFILE_KEY, readStoredProfile, recomputeMastery, saveProfile, SETTINGS_KEY, YARD_SOUND_KEY } from '../core/store';
 import { grade, isDue } from '../core/sr';
 import type { Content, ContentItem, Profile, Settings } from '../core/types';
 
@@ -199,8 +199,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProfile(prev => { saveProfile(prev); return prev; });
   }, []);
 
+  // "Reset my progress" also removes the stored sound choice of the Yard (U-36, 2c-plan C8).
   const resetProgress = useCallback(() => {
-    try { localStorage.removeItem('cb.profile.v1'); } catch { /* ignore */ }
+    try {
+      localStorage.removeItem(PROFILE_KEY);
+      localStorage.removeItem(YARD_SOUND_KEY);
+    } catch { /* storage blocked: nothing is stored */ }
     setProfile(() => {
       const p = freshProfile(choices);
       if (content) recomputeMastery(p, content);
