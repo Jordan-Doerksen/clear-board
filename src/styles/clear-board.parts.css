@@ -164,6 +164,9 @@
   outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
+/* A toggle that the app holds (aria-disabled): it keeps the look of its state. The words of its
+   row say why it cannot change. */
+.cb-toggle input[aria-disabled="true"] { cursor: not-allowed; }
 
 /* ---- G5 and G6: the text field and the select ------------------------------------------------
    One skin for both. The native arrow and the native list of a select stay. */

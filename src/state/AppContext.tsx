@@ -1,13 +1,33 @@
 // Clear Board — one provider for the whole app: content library, the single profile, and settings.
 // Mirrors the vanilla `ctx` object (profile/content/settings/save/recompute/speak) as React context.
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { freshProfile, keepProfileCopy, loadContent, readStoredProfile, recomputeMastery, saveProfile, SETTINGS_KEY } from '../core/store';
 import { grade, isDue } from '../core/sr';
 import type { Content, ContentItem, Profile, Settings } from '../core/types';
 
+// The device flags of the operating system (U-13; R5 A11Y-07, A11Y-27).
+const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
+const CONTRAST_QUERY = '(prefers-contrast: more)';
+const deviceAsks = (query: string) => matchMedia(query).matches;
+
+// The settings of a learner who made no choice. "Higher contrast" starts from the device. "Reduce
+// motion" stores only the choice of the learner: the device flag counts at each moment (below).
 function defaultSettings(): Settings {
-  return { dys: false, contrast: false, reduce: matchMedia('(prefers-reduced-motion: reduce)').matches, audio: false, big: false };
+  return { dys: false, contrast: deviceAsks(CONTRAST_QUERY), reduce: false, audio: false, big: false };
+}
+
+// Follows one device flag while the app is open.
+function useDeviceFlag(query: string): boolean {
+  const [on, setOn] = useState(() => deviceAsks(query));
+  useEffect(() => {
+    const list = matchMedia(query);
+    const follow = () => setOn(list.matches);
+    follow();
+    list.addEventListener('change', follow);
+    return () => list.removeEventListener('change', follow);
+  }, [query]);
+  return on;
 }
 // A stored setting counts only when it is true or false. Each other value gives the default.
 function loadSettings(): Settings {
@@ -33,6 +53,9 @@ function startProfile(): Profile {
 }
 
 interface AppValue {
+  // `settings` gives the value that each part of the app uses. Its `reduce` is on when the learner
+  // chose it or when the device asks for it (U-13, 2c-plan C4): the Yard reads it at each move.
+  // `choices` gives the choices of the learner, as they are stored.
   content: Content | null;
   // 2c-plan C9 (U-07): the names of the content files that did not load, for example "rules.json".
   // Empty when each file loaded. retryContent() loads the library again.
@@ -40,6 +63,10 @@ interface AppValue {
   retryContent: () => void;
   profile: Profile;
   settings: Settings;
+  choices: Settings;
+  // The device asks for less motion, or for more contrast, now.
+  deviceReduce: boolean;
+  deviceContrast: boolean;
   setSetting: (key: keyof Settings, value: boolean) => void;
   resetProgress: () => void;
   // Replaces the profile, and the settings when the file holds them (U-18, "Load my progress").
@@ -70,7 +97,10 @@ export function useApp(): AppValue {
 export function AppProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<Content | null>(null);
   const [contentFailed, setContentFailed] = useState<string[]>([]);
-  const [settings, setSettings] = useState<Settings>(loadSettings);
+  const [choices, setChoices] = useState<Settings>(loadSettings);
+  const deviceReduce = useDeviceFlag(REDUCE_QUERY);
+  const deviceContrast = useDeviceFlag(CONTRAST_QUERY);
+  const settings = useMemo<Settings>(() => ({ ...choices, reduce: choices.reduce || deviceReduce }), [choices, deviceReduce]);
   const [profile, setProfile] = useState<Profile>(startProfile);
 
   // Load the content library at the start, and again on retryContent(). A load that runs is not
@@ -91,18 +121,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProfile(prev => { const p = structuredClone(prev); recomputeMastery(p, content); saveProfile(p); return p; });
   }, [content]);
 
-  // Apply accessibility settings to <html> and persist them. CSS keys off these data-attrs + --fs.
+  // Apply the settings to <html>. CSS keys off these data-attrs + --fs. The store keeps the choices.
   useEffect(() => {
     const el = document.documentElement;
     el.dataset.dys = settings.dys ? '1' : '0';
     el.dataset.contrast = settings.contrast ? '1' : '0';
     el.dataset.reduce = settings.reduce ? '1' : '0';
     el.style.setProperty('--fs', settings.big ? '18.5px' : '16px');
-    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* ignore */ }
   }, [settings]);
+  useEffect(() => {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(choices)); } catch { /* ignore */ }
+  }, [choices]);
 
   const setSetting = useCallback((key: keyof Settings, value: boolean) => {
-    setSettings(s => ({ ...s, [key]: value }));
+    setChoices(s => ({ ...s, [key]: value }));
   }, []);
 
   const speak = useCallback((text: string) => {
@@ -170,11 +202,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const resetProgress = useCallback(() => {
     try { localStorage.removeItem('cb.profile.v1'); } catch { /* ignore */ }
     setProfile(() => {
-      const p = freshProfile(settings);
+      const p = freshProfile(choices);
       if (content) recomputeMastery(p, content);
       return p;
     });
-  }, [settings, content]);
+  }, [choices, content]);
 
   // C1: the look-up dialog. An id that the full library does not hold opens nothing.
   const [lookUpRequest, setLookUpRequest] = useState<LookUpRequest | null>(null);
@@ -193,11 +225,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (content) recomputeMastery(p, content);
     saveProfile(p);
     setProfile(p);
-    if (nextSettings) setSettings(nextSettings);
+    if (nextSettings) setChoices(nextSettings);
   }, [content]);
 
   return (
-    <Ctx.Provider value={{ content, contentFailed, retryContent, profile, settings, setSetting, resetProgress, replaceProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak, lookUp, lookUpRequest, closeLookUp }}>
+    <Ctx.Provider value={{ content, contentFailed, retryContent, profile, settings, choices, deviceReduce, deviceContrast, setSetting, resetProgress, replaceProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak, lookUp, lookUpRequest, closeLookUp }}>
       {children}
     </Ctx.Provider>
   );

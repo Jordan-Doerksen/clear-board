@@ -14,14 +14,14 @@ const TOGGLES: { key: keyof SettingsType; label: string; sub: string }[] = [
 ];
 
 export function Settings({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { settings, setSetting, resetProgress, replaceProgress, speak, profile } = useApp();
+  const { settings, choices, deviceReduce, deviceContrast, setSetting, resetProgress, replaceProgress, speak, profile } = useApp();
   const ref = useRef<HTMLDialogElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [fileNote, setFileNote] = useState('');
 
   // U-18: the file stays on this device. Nothing is sent anywhere.
   function saveProgress() {
-    const file = progressFile(profile, settings);
+    const file = progressFile(profile, choices);
     saveTextFile(file.name, file.text);
     setFileNote('');
   }
@@ -29,7 +29,7 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    const loaded = readProgressFile(await file.text(), settings);
+    const loaded = readProgressFile(await file.text(), choices);
     if (!loaded) {
       setFileNote('This file is not a Clear Board progress file. Nothing changed.');
       return;
@@ -59,15 +59,27 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
           <span className="cb-settings-aa">Aa</span>
           <div><b>The quick brown fox jumps.</b><small>Rule 112 — secure unattended equipment. This preview reflects your settings live.</small></div>
         </div>
-        {TOGGLES.map(t => (
-          <div className="cb-setrow" key={t.key}>
-            <div><label htmlFor={`t-${t.key}`}>{t.label}</label><small id={`t-${t.key}-sub`}>{t.sub}</small></div>
-            <span className="cb-toggle">
-              <input type="checkbox" id={`t-${t.key}`} aria-describedby={`t-${t.key}-sub`} checked={settings[t.key]} onChange={e => toggle(t.key, e.target.checked)} />
-              <i />
-            </span>
-          </div>
-        ))}
+        {TOGGLES.map(t => {
+          // U-13: while the device asks for less motion, motion stays reduced. The toggle shows it
+          // on, cannot be changed, and says why. It stays in the tab order, so that each learner
+          // can reach it and hear the reason.
+          const locked = t.key === 'reduce' && deviceReduce;
+          const reason = locked ? 'Your device asks for less motion, so this stays on.'
+            : t.key === 'contrast' && deviceContrast ? 'Your device asks for more contrast.' : '';
+          return (
+            <div className="cb-setrow" key={t.key}>
+              <div>
+                <label htmlFor={`t-${t.key}`}>{t.label}</label><small id={`t-${t.key}-sub`}>{t.sub}</small>
+                {reason && <small id={`t-${t.key}-why`}>{reason}</small>}
+              </div>
+              <span className="cb-toggle">
+                <input type="checkbox" id={`t-${t.key}`} aria-describedby={reason ? `t-${t.key}-sub t-${t.key}-why` : `t-${t.key}-sub`} aria-disabled={locked || undefined}
+                  checked={settings[t.key]} onChange={e => { if (!locked) toggle(t.key, e.target.checked); }} />
+                <i />
+              </span>
+            </div>
+          );
+        })}
         <div className="cb-setrow">
           <div><span className="cb-settings-label">Save my progress</span><small>Keep a copy in a file on this device</small></div>
           <button className="dusk-btn" onClick={saveProgress}>Save to a file</button>
