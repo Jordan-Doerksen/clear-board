@@ -148,6 +148,37 @@ option of each. A brief that says "open for the lead" for one of these names fol
 | `DISABLED-EDGE` | The edge of a disabled control can be under 3:1. Its words stay 4.5:1 or more. | WCAG 1.4.11 does not cover an inactive control; the words carry the state. |
 | `Y-FIX` | After Y2 is merged, a small follow-up job in `yard.css` and `view.ts`: the message well and the note panel take the full width of the Yard while their text keeps the cap at `--measure` (as `SURFACE-COLUMN` does for the boxes of the Radio); and only a car mark or a number of the job line takes the mono face (today each bold word does, so "don't match" and "Depart ▸" show in mono). | The review of Y3. A box and a panel line up with the panels around them. |
 
+### 2.6 Rulings of Wave 2c (2026-11-21)
+
+| Name | The ruling | The reason |
+|---|---|---|
+| `2C-SPLIT` | `specs/briefs/2c-plan.md` gives each file one job in each step of Wave 2c. `imperativeStation.ts` is U1-B's in 2c-1 (contracts C1 and C2); Y4a exports `unmount()` and does not edit it. This replaces the line of contract D.7 that gives the file to Y4. | One owner for each file in a step. The two contracts need the shell side and the Yard side. |
+| `SOUND-KEY` | The stored Yard sound choice keeps the key `sl_muted` (C8). | A new key needs a move of the stored value. Row U-36 asks that the choice holds and that a reset clears it, not for a new key. |
+| `U14-SCOPE` | Row U-14 in the Radio covers "Next call" of the Radio test as well as "Key the radio". | The text of the row says "After Next and after Key the radio". |
+| `C7-END` | An end heading under the station heading is an `h3`. Each view has one `h2`. | Contract C7. |
+| `RADIO-SEVERITY` | A miss in the Radio test is announced by the severity of its own item (S2 today, so the polite region), as the feedback tone uses today. | A link to the severity of the cited rule changes the classification. That is a question for the SME (note in the final report). |
+| `U06-RADIO`, `U15-RADIO` | The Radio test parts of rows U-06 and U-15 (UX-39) were in no brief of 2c-1. U1-D carries them in 2c-2. | A gap of the 2c-1 briefs, found by the review of U1-C. |
+| `LEARN-GAP` | Row U-28: a learn card shows a new item one time before its first question. The first question about that item never comes right after its card: one other screen or more comes between them. The mastery model does not change. The card has the hooks `data-cb="learn"` and `data-cb="learn-next"` (2c-plan C11). U1-D builds it; G1-2 adapts the smoke cases and the look shots. | UX-11 says "No change to the mastery model". The signals cap is a safety gate: a right answer right after the card is short-term memory, not a read on sight. The SME is asked whether one other screen between them is enough (final report). |
+| `U44-GUARDS` | `recordAnswer` and `gradeItems` call `answerCounts` of `src/core/drill.ts`, so that the tested guard is the guard that the app runs. U1-D. | The review of U1-A. |
+| `MASTERY-NOW` | The app context recomputes the mastery on a change of route, so that Home shows the same current value as the end of a Drill session. U1-D. The repair `b66fe16` of the U1-A review stays. | One value, true at each place. |
+| `U26-NOTE` | The end note "This session was practice only" shows only when no answer of the session counted. U1-D, with its words for the owner. | The note showed beside a fall of mastery after misses. |
+| `C7-DRILL` | The Drill and Signals keep one heading element from the loading state to the session, so that the focus of the shell stays on it after a change of route. U1-D. | The probe of the lead after the four merges: focus fell to the page body on `/drill` and `/signals` only. |
+| `LOAD-NEW-PROFILE` | A load of a progress file gives the profile a new `createdAt`, so that a second open copy replaces its profile (repair `3005ffa` of the U1-B review). | The question before a load says that the load replaces the progress. |
+| `RESET-COPY` | "Reset my progress" also removes `cb.profile.v1.copy`. U1-D. | A reset removes the progress. The copy holds old progress. |
+| `DIALOG-HEAD` | The sticky head of a dialog (`bc1bbdf`, no row) stays. | Row U-18 makes Settings scroll inside at 390 px. The head keeps the name and "Done" in view. No word or control changes. |
+| `TILE-BAR` | The progress bar inside a domain tile is hidden from a screen reader; the visible number stays in the name of the tile. U1-D. | The name said the number two times (review of U1-B). |
+| `ENTRY-ONE` | The look-up dialog and Reference show one entry component. U1-D. | `src/components/Entry.tsx` copied the entry of `49d3ba0`; U1-A changed the Reference entry. Two copies drift. |
+| `BRIDGE-DEAD` | The names `--surface`, `--clear`, `--caution`, `--stop` and `--r` of block 1 of the bridge go when nothing reads them. U1-D, with a search of each name first. | `SWEEP` removed their last readers. |
+| `LINT-ONE` | The last lint warning (`react(only-export-components)` in `AppContext.tsx`) stays. The G1 close of Wave 2c sets the limit to the count that remains. | A fix moves the hook into a new file and changes each import. The rule is about fast refresh in development only. |
+| `SW-NAME` | Each Yard switch button keeps `data-sw` and the name that says its lining. It loses `aria-pressed`. Y4b. | A screen reader said the state two times (review of Y4a). |
+| `SOUND-STOP` | `unmount()` also stops the notes that `sound.js` has timed. Y4b. | Up to three notes of the win melody played after a leave. |
+| `CERTIFY-FOCUS` | After Certify, focus stays in the work order. Y4b. | Focus fell to the page body. |
+| `TRACK-MONO` | A track id in the job line is a mark and takes the mono face. Y4b. | Y-FIX names "a car mark or a number"; a track id is a mark. |
+| `RESET-ASK` | "Reset" of the Yard discards the moves with no question. | Row U-12 names "Watch optimal" and a change of job only. Reset is the request to discard. |
+| `LOOK-MIRROR` | The look harness names a select by its label when it has no title, and does not count visually hidden text as page words. The mirror of the Yard gets a check of its own. G1-2. | The Yard shots listed the mirror words as new page words. |
+| `LOOK-REGISTER` | The element id `vite-plugin-pwa:register-sw` may go (`idsMayGo`). G1-2. | Row U-10 registers the worker from the app. The plugin no longer injects the element. |
+| `WEAK-REVIEW` | Not built. A review round with few items can build a question with one option, a repeated option or an option of another kind. No right answer is marked wrong. | No approved row covers it. It goes to the final report as a found defect. |
+
 ## 3. Closed by the owner after Gate A
 
 The owner answered the sheet of these 19 picks on 2026-11-21 with the words "yes to all
