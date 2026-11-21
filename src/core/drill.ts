@@ -6,7 +6,7 @@ import { DOMAINS, drillable, recomputeMastery } from './store';
 import { isDue } from './sr';
 import { severityOf, SEV_RANK } from './severity';
 import { drawSignal } from './signal';
-import type { Content, ContentItem, Profile, Question, SignalAspect } from './types';
+import type { Content, ContentItem, Profile, Question, SignalAspect, SRState } from './types';
 
 export type Rng = () => number;
 
@@ -82,7 +82,37 @@ export type DrillQuestion =
 
 export interface QuestionContext { pool: ContentItem[]; byType: Record<string, ContentItem[]>; ceiling: number }
 export interface Slot { item: ContentItem; q: DrillQuestion }
-export interface Session { slots: Slot[]; drilledDomains: string[]; startMastery: Record<string, number> }
+export interface Session {
+  slots: Slot[];
+  drilledDomains: string[];
+  startMastery: Record<string, number>;
+  newIds: string[];       // the items of the session that were never answered before it (U-26)
+  practiceOnly: boolean;  // no item of the session was due at its start, so a right answer counts nowhere (U-26)
+}
+
+// ---- The grading guards (U-44) ---------------------------------------------------------------------
+// The two guards of AppContext.tsx (recordAnswer and gradeItems) as one pure function. F1: an item
+// that is not verified is never graded. F2: a right answer counts only when the item is due; a miss
+// always counts. The Drill reads it for its words (U-26). AppContext.tsx is not a file of job U1-A:
+// it keeps its own copy until the job that owns it calls this function.
+export function answerCounts(item: ContentItem, state: SRState | undefined, correct: boolean): boolean {
+  if (item.citation?.trust !== 'verified') return false;
+  return !correct || isDue(state);
+}
+
+// U-26: when the items of a session come back, from the stored due dates: the count of items for
+// each number of days from now. 0 days is "due now". Items with no stored state are not counted.
+const DAY = 86400000;
+export function dueGroups(itemIds: string[], profile: Profile, now: number = Date.now()): { days: number; count: number }[] {
+  const byDays = new Map<number, number>();
+  for (const id of new Set(itemIds)) {
+    const due = profile.items[id]?.due;
+    if (!due) continue;
+    const days = Math.max(0, Math.ceil((new Date(due).getTime() - now) / DAY));
+    byDays.set(days, (byDays.get(days) ?? 0) + 1);
+  }
+  return [...byDays].sort((a, b) => a[0] - b[0]).map(([days, count]) => ({ days, count }));
+}
 
 export const TARGET = 8;        // aim for a ~8-question session
 export const PER_RULE_CAP = 3;  // …but no single rule may fill more than 3 of it (REVAMP §5, rule.112's 17)
@@ -211,5 +241,8 @@ export function buildSession({ content, profile: stored, domain, focusIds }: Ses
   const finalSlots = (focusIds ? slots : shuffle(slots, rng)).slice(0, 10);   // a review round keeps the safety-first order
   const drilledDomains = [...new Set(finalSlots.map(s => s.item.domain))];
   const startMastery = Object.fromEntries(drilledDomains.map(d => [d, profile.domains[d]?.mastery || 0]));
-  return { slots: finalSlots, drilledDomains, startMastery };
+  const sessionItems = [...new Map(finalSlots.map(s => [s.item.id, s.item])).values()];
+  const newIds = sessionItems.filter(i => (profile.items[i.id]?.seen ?? 0) === 0).map(i => i.id);
+  const practiceOnly = sessionItems.length > 0 && sessionItems.every(i => !answerCounts(i, profile.items[i.id], true));
+  return { slots: finalSlots, drilledDomains, startMastery, newIds, practiceOnly };
 }

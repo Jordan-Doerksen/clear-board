@@ -42,6 +42,14 @@
 .cb-app .cb-drill-view .cb-drill-top .cb-sub,
 .cb-app .cb-drill-view .cb-drill-top .dusk-count { font-size: 1rem; }
 
+/* The note of a practice-only session (U-26) is reading text at 16 px, in the second ink, and stops
+   at the measure. */
+.cb-app .cb-drill-view .cb-drill-note {
+  max-width: var(--measure);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
+
 /* ---- the question panel: the head holds the heading only, the body holds the prompt ------------- */
 /* The question heading is reading text and keeps its size of today (20.8 px). */
 .cb-app .cb-drill-view .cb-drill-q .dusk-panel-name { font-size: 1.3rem; }
@@ -109,6 +117,14 @@
 .cb-app .cb-drill-view .cb-drill-done .dusk-tile-sub {
   max-width: var(--measure);
   font-size: 1rem;
+}
+
+/* The lines of progress in words (U-26) keep the size and the ink of the mastery line. Each one has
+   the same space above it. Dusk keeps two lines of height for a tile sub line; a line of words here
+   takes the height of its text. */
+.cb-app .cb-drill-view .cb-drill-done .cb-drill-progress {
+  min-height: 0;
+  margin-top: var(--sp-3);
 }
 
 /* ---- the end actions: actions, not answers. A row of Dusk buttons that wraps, words at 16 px ---- */

@@ -6,7 +6,7 @@ import { useApp } from '../state/AppContext';
 import { Signal } from './Signal';
 import { DOMAINS } from '../core/store';
 import { severityOf } from '../core/severity';
-import { buildSession } from '../core/drill';
+import { buildSession, dueGroups } from '../core/drill';
 import type { DrillQuestion, Session } from '../core/drill';
 
 // The station heading (U-29, 2c-plan C7): one visible h2 with the station name of Home, in the form
@@ -21,6 +21,10 @@ function StationTitle({ signals }: { signals: boolean }) {
 
 // "1 item", "3 items": a count with its noun.
 const count = (n: number, noun: string) => `${n} ${noun}${n === 1 ? '' : 's'}`;
+
+// U-26: the note of a session in which no item was due at the start. It states the guard of the
+// grading (answerCounts in src/core/drill.ts), so it is true for each answer of the session.
+const PRACTICE_NOTE = 'A right answer counts only when the item is due. A miss always counts.';
 
 // U-31: Read aloud speaks the words of the screen, in the order of the screen. Each part ends as a
 // sentence, so that a voice makes a stop between two options.
@@ -102,6 +106,10 @@ export function Drill({ domain }: { domain?: string }) {
     // U-15 (UX-27): the button of the review says the count of items and the count of questions of
     // the round that it starts.
     const reviewItems = new Set(reviewNext?.slots.map(s => s.item.id)).size;
+    // U-26: items that were new and now have an answer; and when the items of the session come back.
+    const started = built.newIds.filter(id => (profile.items[id]?.seen ?? 0) > 0).length;
+    const due = dueGroups(built.slots.map(s => s.item.id), profile)
+      .map(g => (g.days === 0 ? `${g.count} now` : `${g.count} in ${count(g.days, 'day')}`));
     const lines = built.drilledDomains.map(d => {
       const name = (DOMAINS.find(x => x.id === d) || {}).name || d;
       const end = profile.domains[d]?.mastery || 0;
@@ -117,6 +125,10 @@ export function Drill({ domain }: { domain?: string }) {
           <div className="dusk-tile-body">
             <p className="dusk-tile-num">{score} / {built.slots.length}</p>
             <p className="dusk-tile-sub">{lines}. Spaced out over the next days so it sticks.</p>
+            {/* U-26: progress in words, from the stored profile */}
+            <p className="dusk-tile-sub cb-drill-progress">Right answers: {score} of {built.slots.length}.{started > 0 ? ` New items started: ${started}.` : ''}</p>
+            {due.length > 0 && <p className="dusk-tile-sub cb-drill-progress">Items due again: {due.join(', ')}.</p>}
+            {built.practiceOnly && <p className="dusk-tile-sub cb-drill-progress">This session was practice only: no item in it was due at the start. {PRACTICE_NOTE}</p>}
           </div>
         </div>
         <div className="cb-drill-actions">
@@ -167,6 +179,7 @@ export function Drill({ domain }: { domain?: string }) {
       <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
       {title}
       <div className="cb-drill-top"><span className="cb-sub">Question {idx + 1} of {built.slots.length}</span><span className="dusk-count">{score} correct</span></div>
+      {built.practiceOnly && <p className="cb-sub cb-drill-note">This session is practice only: no item in it was due at the start. {PRACTICE_NOTE}</p>}
       <div className="dusk-panel dusk-panel--framed cb-drill-q">
         <div className="dusk-panel-head"><h3 className="dusk-panel-name" ref={questionHeadRef} tabIndex={-1}>{q.heading}</h3></div>
         <div className="dusk-panel-body cb-drill-prompt" data-cb="prompt">
