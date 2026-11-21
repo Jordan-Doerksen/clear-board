@@ -56,7 +56,7 @@ export function LookUp() {
       </div>
       <div className="dusk-panel-body">
         {item
-          ? <Entry key={item.id} item={item} audio={settings.audio} onSpeak={speak} />
+          ? <Entry key={item.id} item={item} place="look-up" audio={settings.audio} onSpeak={speak} />
           : lookedUp && (content && contentFailed.length > 0
             // U-07: the entry is in a part of the library that did not load.
             ? <LibraryNotice />

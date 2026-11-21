@@ -4,10 +4,9 @@ import type { RefObject } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import { LibraryNotice } from '../components/LookUp';
-import { Signal } from './Signal';
-import { distinctAspects } from '../core/drill';
+import { Entry, TrustMark } from '../components/Entry';
 import { DOMAINS } from '../core/store';
-import type { Citation, ContentItem, ItemType } from '../core/types';
+import type { ContentItem, ItemType } from '../core/types';
 
 // U-32: the list has one group for each kind of entry, in this order. A group with no row is not shown.
 const KINDS: [ItemType, string][] = [
@@ -19,25 +18,10 @@ const domainName = (id: string) => DOMAINS.find(d => d.id === id)?.name ?? id;
 const searchText = (i: ContentItem) => [i.title, i.plain, i.citation.source, i.citation.ref, i.citation.relatedRef,
   i.citation.verbatim, domainName(i.domain)].filter(Boolean).join('\n').toLowerCase();
 
-// The trust mark of an entry, as words, and its tone. An item of operating practice takes its words
-// from its source in the data (U-08): the two labels that the Radio test shows for the same items.
-function trustMark(c: Citation): [string, 'ok' | 'caution'] {
-  if (c.trust === 'verified') return ['✓ verified', 'ok'];
-  if (c.trust === 'needs-review') return ['⚠ not yet verified — reference only', 'caution'];
-  return [c.source === 'GOI' ? '● CN practice (GOI), not a CROR rule' : '● No CROR citation in the verified source', 'caution'];
-}
-
-function Badge({ citation }: { citation: Citation }) {
-  const [label, tone] = trustMark(citation);
-  return <span className={`cb-chip cb-chip--${tone}`}>{label}</span>;
-}
-
-// U-02: each row of the list shows the trust mark of its entry as words, before the plain words. The
-// mark follows the name of the domain of the entry (U-32) on one line.
-function RowMark({ citation }: { citation: Citation }) {
-  const [label, tone] = trustMark(citation);
-  return <span className={`cb-reference-trust cb-reference-trust--${tone}`}>{label}</span>;
-}
+// The trust mark of an entry is TrustMark of src/components/Entry.tsx (ENTRY-ONE). An item of
+// operating practice takes its words from its source in the data (U-08): the two labels that the
+// Radio test shows for the same items. U-02: each row of the list shows the mark as words, before
+// the plain words. The mark follows the name of the domain of the entry (U-32) on one line.
 
 export function Reference() {
   const { content, contentFailed, settings, speak } = useApp();
@@ -104,7 +88,7 @@ export function Reference() {
                 <li key={i.id}>
                   <button className="dusk-row cb-reference-row" data-cb="ref-row" aria-expanded={selected?.id === i.id} onClick={() => press(i)}>
                     <b>{i.title}</b>
-                    <span className="cb-reference-meta">{domainName(i.domain)} · <RowMark citation={i.citation} /></span>
+                    <span className="cb-reference-meta">{domainName(i.domain)} · <TrustMark citation={i.citation} row /></span>
                     <small className="cb-sub">{i.plain}</small>
                   </button>
                   {selected?.id === i.id && <Detail key={i.id} item={i} audio={settings.audio} onSpeak={speak}
@@ -123,43 +107,15 @@ export function Reference() {
   );
 }
 
+// The Reference entry: a framed panel with the title in its head and the one entry component in its
+// body (ENTRY-ONE). The look-up dialog shows the same component under its own head.
 function Detail({ item, audio, onSpeak, onDrillSignals, headRef }:
   { item: ContentItem; audio: boolean; onSpeak: (t: string) => void; onDrillSignals: () => void; headRef: RefObject<HTMLHeadingElement | null> }) {
-  const c = item.citation;
-  const aspects = item.type === 'signal' ? distinctAspects(item.payload?.aspects ?? []) : [];   // U-37: each drawing one time
   return (
     <div className="dusk-panel dusk-panel--framed cb-reference-detail" data-cb="ref-detail">
       <div className="dusk-panel-head"><h4 className="dusk-panel-name" ref={headRef} tabIndex={-1}>{item.title}</h4></div>
       <div className="dusk-panel-body">
-        <Badge citation={c} />
-        {/* U-11: an entry with no text says so in app words. */}
-        {item.plain
-          ? <p className="cb-prose cb-prose--lead">{item.plain}</p>
-          : <p className="cb-reference-note">This entry has no text in the app.</p>}
-        {aspects.length > 0 && (
-          <>
-            <div className="cb-reference-aspects">{aspects.slice(0, 8).map((a, idx) => <Signal key={idx} aspect={a} />)}</div>
-            <p className="cb-sub">Hardware variants — all the same indication.</p>
-            {/* Browsing an aspect was a dead end: the graded read-the-aspect drill already exists at
-                /signals, so this is a route into it — not a second answer surface. */}
-            <button className="dusk-btn" onClick={onDrillSignals}>Open the Signals drill →</button>
-          </>
-        )}
-        {c.verbatim && (
-          <details className="cb-disclosure">
-            <summary>Show the rule text{c.ref ? ` — ${c.ref}` : ''}</summary>
-            <blockquote className="cb-quote">{c.verbatim}</blockquote>
-          </details>
-        )}
-        {/* U-11: an entry from the rule book with no rule text says so. An entry of practice has no
-            rule to show; its trust mark says so already. */}
-        {!c.verbatim && item.plain && c.source === 'CROR' && <p className="cb-reference-note">The rule text is not in the app.</p>}
-        <div className="cb-sub">
-          Source: {c.source}{c.ref ? ` · ${c.ref}` : ''}{c.relatedRef ? ` · related: ${c.relatedRef}` : ''}
-        </div>
-        {audio && (
-          <button className="dusk-btn" onClick={() => onSpeak(`${item.title}. ${item.plain || ''}. ${c.verbatim || ''}`)}><span aria-hidden="true">🔊</span> Read aloud</button>
-        )}
+        <Entry item={item} place="reference" audio={audio} onSpeak={onSpeak} onDrillSignals={onDrillSignals} />
       </div>
     </div>
   );
