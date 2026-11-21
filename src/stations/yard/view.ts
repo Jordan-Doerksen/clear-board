@@ -41,6 +41,8 @@ export interface WorkOrderData {
   cars: string[]; from: string[];
   /** The job has an inbound train: the work order holds the control "Show the arrival" (R7-P5). */
   arrival: boolean;
+  /** The first job: the work order says how to line a switch and how to call a move (U-16). */
+  first: boolean;
 }
 
 /** The car count of the move builder. `max` is 1 or more. */
@@ -396,7 +398,12 @@ export function createView(root: HTMLElement): YardView {
       const arrival = data.arrival
         ? `<button type="button" class="yd-go dusk-btn yd-arrival" id="yard-arrival"><span aria-hidden="true">▶</span> Show the arrival</button>`
         : '';
-      order(head + `<div class="yd-wo-body dusk-panel-body">` + job + meta + arrival + `</div>`);
+      // U-16: the first job says, in view, how to line a switch and how to call a move. The words name
+      // the controls; the refusal of the model keeps its words.
+      const how = data.first
+        ? `<p class="yd-wo-how cb-prose">To line a switch, press its box on the picture: the word at the switch changes from NORMAL to REVERSE. To call a move, choose the action, the number of cars and the track under the picture, then press <b>Work it ▸</b>.</p>`
+        : '';
+      order(head + `<div class="yd-wo-body dusk-panel-body">` + job + how + meta + arrival + `</div>`);
     },
 
     setCount({ max, value, disabled }) {

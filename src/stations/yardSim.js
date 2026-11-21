@@ -126,6 +126,10 @@ export function mount(root, ctx) {
     lastFrom = null; log = []; past = null; view.setViewLabel(null); renderLog();
     ordered = !p.listed; flagged.clear();
     view.setDepart({ shown: !!p.goal.depart, enabled: false });
+    // U-16: the move builder starts on a track of the job, the first track that holds a car of the goal.
+    const goalCars = new Set(p.goal.cars);
+    const startTrack = TRACK_IDS.find((t) => state.tracks[t].some((m) => goalCars.has(m)));
+    if (startTrack) $('track').value = startTrack;
     renderRules(); renderOrder(); syncBuilder(); paint(); banner('', '');
     const readout = view.setReadout({ moves: 0, par: p.par, joints: 0 });
     if (say) live.say(`${p.title}. ${readout}.`);
@@ -774,7 +778,7 @@ export function mount(root, ctx) {
     view.renderWorkOrder({
       id: puzzle.id, title: puzzle.title, hint: puzzle.hint, par: puzzle.par,
       depart: !!g.depart, ordered: !!g.ordered, goalTrack: g.track, cars: g.cars, from,
-      arrival: !!puzzle.inbound,
+      arrival: !!puzzle.inbound, first: puzzle === PUZZLES[0],
     });
   }
 

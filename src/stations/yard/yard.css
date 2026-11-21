@@ -211,3 +211,10 @@
 .yard-wrap .yd-headgoal { display: inline-flex; align-items: center; gap: var(--sp-2); }
 .yard-wrap .yd-headgoal-word { color: var(--yard-goal); font-size: var(--fs-s); font-weight: var(--fw-bold); letter-spacing: var(--track-label); }
 .yard-wrap .yd-headgoal-count { padding: 0 var(--sp-1); font-size: var(--fs-s); }
+/* The first job says how to line a switch and how to call a move (U-16): a line of reading text in the
+   work order, with a lit rule at its start, so that it reads as the first step. It stops at the Dusk
+   measure. */
+.yard-wrap .yd-wo-how {
+  margin: var(--sp-3) 0 var(--sp-2); padding-left: var(--sp-4); max-width: var(--measure);
+  border-left: 2px solid var(--lit-line); color: var(--ink);
+}
