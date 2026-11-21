@@ -39,3 +39,31 @@
    chip and the answer options. */
 .cb-app .cb-radio-view .cb-radio-q .dusk-panel-name { font-size: 1.3rem; }
 .cb-app .cb-radio-view .cb-radio-q .cb-chip { margin: 0 0 var(--sp-4); }
+
+/* ---- "Call it yourself": the feedback -----------------------------------------------------------------
+   A Dusk panel laid out as a column, in the order of today. The acknowledgement keeps 14.72 px (the
+   .cb-tx rule above), the GOI line 16 px in --ink-2, the source line 12.8 px (the part gives 14 px).
+   "Look it up →" keeps the width of the panel; "Next call →" keeps its own width at the start of its
+   line. Both button words keep 14.4 px (the floor rule gives 14 px) and the line height of the page.
+   The padding of today keeps each of the two buttons as wide and as high as today in each mode. */
+.cb-app .cb-radio-view .cb-radio-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+.cb-app .cb-radio-view .cb-radio-feedback > span { max-width: var(--measure); }
+.cb-app .cb-radio-view .cb-radio-goi { color: var(--ink-2); }
+.cb-app .cb-radio-view .cb-radio-feedback .cb-sub {
+  margin-top: 10px;
+  font-size: .8rem;
+}
+.cb-app .cb-radio-view .cb-radio-feedback .dusk-btn {
+  padding: 10px 14px;
+  font-size: .9rem;
+  line-height: var(--lh-base);
+}
+.cb-app .cb-radio-view .cb-radio-next {
+  align-self: flex-start;
+  margin-top: 6px;
+}

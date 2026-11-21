@@ -188,19 +188,19 @@ export function RadioTest() {
       </div>
 
       {answered && (
-        <div className="feedback" aria-live="polite">
-          <b className={ok ? 'fb-ok' : 'fb-no'}>{ok ? 'Right.' : 'Not quite.'}</b>
+        <div className="dusk-panel cb-radio-feedback" data-cb="feedback" aria-live="polite">
+          <b className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{ok ? 'Right.' : 'Not quite.'}</b>
           {/* Only on a correct call: the engineer would not acknowledge a transmission you didn't make. */}
-          {ok && step.ack && <span className="radio-ack"><span className="who">Engineer · CN 2204</span> {step.ack}</span>}
-          {step.goi && <span className="muted">{step.goi}</span>}
+          {ok && step.ack && <span className="cb-tx cb-tx--eng"><span className="cb-who">Engineer · CN 2204</span> {step.ack}</span>}
+          {step.goi && <span className="cb-radio-goi">{step.goi}</span>}
           <span><b>{step.rule}</b> — {step.note}</span>
-          <span className="cite">{c.source}{c.ref ? ` · ${c.ref}` : ''}{c.relatedRef ? ` · related: ${c.relatedRef}` : ''}</span>
+          <span className="cb-sub">{c.source}{c.ref ? ` · ${c.ref}` : ''}{c.relatedRef ? ` · related: ${c.relatedRef}` : ''}</span>
           {item.payload?.ruleId && (
-            <button className="iconbtn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(String(item.payload!.ruleId))}`)}>
+            <button className="dusk-btn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(String(item.payload!.ruleId))}`)}>
               Look it up →
             </button>
           )}
-          <button className="iconbtn next" autoFocus onClick={() => { setPos(p => p + 1); setPicked(null); }}>
+          <button className="dusk-btn cb-radio-next" autoFocus onClick={() => { setPos(p => p + 1); setPicked(null); }}>
             {pos + 1 < order.length ? 'Next call →' : 'Finish'}
           </button>
         </div>
