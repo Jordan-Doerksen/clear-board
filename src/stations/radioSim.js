@@ -4,7 +4,7 @@
 
 const RADIO_CSS = `
 .radio-wrap{ color:var(--ink) }
-.radio-wrap .scenario, .radio-wrap .tx, .radio-wrap .call, .radio-wrap #notebody, .radio-wrap .done, .radio-wrap .tip{ max-width:var(--measure) }
+.radio-wrap #notebody{ max-width:var(--measure) }
 html[data-reduce="1"] .radio-wrap button.rbtn{ transition:none } @media (prefers-reduced-motion: reduce){ html .radio-wrap button.rbtn{ transition:none } }
 .radio-wrap *{ box-sizing:border-box }
 .radio-wrap .scenario{ background:var(--well); border-left:3px solid var(--green-ink); border-radius:0 var(--r-control) var(--r-control) 0; padding:var(--sp-3) var(--sp-5); font-size:.84375rem; margin-bottom:14px }

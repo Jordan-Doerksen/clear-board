@@ -4,11 +4,16 @@
    text size is in rem, so that the text scale reaches it. A drawing keeps its height in px, as
    today. This sheet holds no raw colour, no transition, no animation and no movement. */
 
-/* ---- the view: one column of parts, one gap between them --------------------------------------- */
+/* ---- the view: one column of parts, one gap between them ---------------------------------------
+   The column is at most --maxw (920 px) wide and sits in the middle of the window, which fills the
+   browser (SURFACE-COLUMN). A box, a panel and a control take the width of the column. On a narrow
+   screen the column takes the full width. */
 .cb-app .cb-drill-view {
   display: flex;
   flex-direction: column;
   gap: var(--sp-5);
+  max-width: var(--maxw);
+  margin-inline: auto;
 }
 /* "← Home" keeps the width of its word */
 .cb-app .cb-drill-view > .cb-btn--plain { align-self: flex-start; }

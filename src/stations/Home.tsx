@@ -43,7 +43,7 @@ export function Home() {
           const liveCard = d.live && drillable(content.byDomain[d.id], content).length > 0;
           const inner = (
             <>
-              <span className="dusk-tile-cap"><span className="dusk-ico" aria-hidden="true" /><h3 className="dusk-tile-lab">{d.name}</h3></span>
+              <span className="dusk-tile-cap"><h3 className="dusk-tile-lab">{d.name}</h3></span>
               <span className="dusk-tile-body">
                 <p className="dusk-tile-sub">{d.desc}</p>
                 {liveCard

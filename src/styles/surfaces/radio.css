@@ -3,6 +3,16 @@
    attribute where a rule needs one. The guided island keeps its own rules in radioSim.js (RADIO_CSS). A rule here sets no
    transition, no animation and no transform other than transform: none. Each size keeps the size of today at a root of 16 px. */
 
+/* ---- the view: a column in the middle of the window ------------------------------------------------
+   The column is at most --maxw (920 px) wide and sits in the middle of the window, which fills the
+   browser (SURFACE-COLUMN). Both modes are in it: the guided island and "Call it yourself". A box,
+   a panel, a control and the scene of the island take the width of the column. On a narrow screen
+   the column takes the full width. */
+.cb-app .cb-radio-view {
+  max-width: var(--maxw);
+  margin-inline: auto;
+}
+
 /* ---- the mode tabs (part G10) ---------------------------------------------------------------------
    The sub-line keeps 12.16 px (the part gives 12 px). The tabs keep the space of today above and below. */
 .cb-app .cb-radio-view .cb-tabs { margin: 10px 0 16px; }
@@ -12,7 +22,7 @@
    The count line keeps its place above the readout. Both texts keep 16 px; "N correct" is a count
    chip (the part gives 11 px). The readout keeps 18.4 px in bold in the UI face (the part gives
    15 px) and the line height of reading text. The incoming call keeps 14.72 px (the part sets no
-   size). Each block of reading text is capped at the measure (TEXT-CAP). */
+   size). The incoming call is a box, so it takes the width of the column (SURFACE-COLUMN). */
 .cb-app .cb-radio-view .cb-radio-top {
   display: flex;
   flex-wrap: wrap;
@@ -28,10 +38,7 @@
   font-size: 1.15rem;
   line-height: var(--lh-base);
 }
-.cb-app .cb-radio-view .cb-tx {
-  max-width: var(--measure);
-  font-size: .92rem;
-}
+.cb-app .cb-radio-view .cb-tx { font-size: .92rem; }
 .cb-app .cb-radio-view .cb-radio-readout + .cb-tx { margin: 0 0 12px; }
 
 /* ---- "Call it yourself": the question panel ----------------------------------------------------------
@@ -45,14 +52,16 @@
    .cb-tx rule above), the GOI line 16 px in --ink-2, the source line 12.8 px (the part gives 14 px).
    "Look it up →" keeps the width of the panel; "Next call →" keeps its own width at the start of its
    line. Both button words keep 14.4 px (the floor rule gives 14 px) and the line height of the page.
-   The padding of today keeps each of the two buttons as wide and as high as today in each mode. */
+   The padding of today keeps each of the two buttons as wide and as high as today in each mode.
+   A line of text stops at the measure (TEXT-CAP). The acknowledgement is a box, so it takes the
+   width of the panel, as the other boxes of the column do (SURFACE-COLUMN). */
 .cb-app .cb-radio-view .cb-radio-feedback {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 16px;
 }
-.cb-app .cb-radio-view .cb-radio-feedback > span { max-width: var(--measure); }
+.cb-app .cb-radio-view .cb-radio-feedback > span:not(.cb-tx) { max-width: var(--measure); }
 .cb-app .cb-radio-view .cb-radio-goi { color: var(--ink-2); }
 .cb-app .cb-radio-view .cb-radio-feedback .cb-sub {
   margin-top: 10px;
