@@ -35,11 +35,13 @@ html[data-reduce="1"] .radio-wrap button.rbtn{ transition:none } @media (prefers
 .radio-wrap .done{ background:var(--rowwash-green); box-shadow:var(--rowneon-green); border-radius:var(--r-control); padding:12px; margin-top:10px; font-size:.84375rem; display:none }
 .radio-wrap .done.show{ display:block }
 .radio-wrap .tip{ font-size:.75rem; color:var(--ink-2); margin-top:10px; border-top:1px solid var(--lit-rule); padding-top:9px }
-/* Forced colours (ruling FORCED-MARKS, finding F-10). They remove the box shadows: the Key button
-   gets an edge, as each Dusk button beside it, and the stage gets an edge. The scene takes the
+/* Forced colours (ruling FORCED-MARKS, finding F-10). They remove the box shadows: the two panels
+   and the end box get an edge, as each Dusk panel does (the lead, after the review of job F2-B), the
+   Key button gets an edge, as each Dusk button beside it, and the stage gets an edge. The scene takes the
    system colours, as the Yard drawing does, so each label is CanvasText on Canvas in each palette.
    Each shape of the scene has a style attribute. A rule of a sheet wins over it only with !important. */
 @media (forced-colors: active){
+  .radio-wrap .radio, .radio-wrap .note, .radio-wrap .done{ border:1px solid }
   .radio-wrap button.key{ border:1px solid }
   .radio-wrap .stage{ border:1px solid }
   .radio-wrap .stage text{ fill:CanvasText !important }
