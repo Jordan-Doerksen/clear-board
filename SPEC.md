@@ -13,7 +13,7 @@ the CN conductor qualification"* — by drilling the real job (CROR rules, signa
 switching, securement, radio) under **one profile** that tracks mastery and **one path**
 that ramps gently.
 
-**Who:** not rule-lawyers. The person who'd have made a good railroader but **bounced off a
+**Who:** not rule-lawyers. The person who would have made a good railroader but **bounced off a
 dense rulebook** — anxious, never tested well, learns by doing. This reframes
 the product: it is **an on-ramp for people the book failed**, not a comprehensive reference
 that happens to quiz. The design follows from that (see Principles).
@@ -36,7 +36,7 @@ withheld.
    trust flag. **Show nothing rather than something false.** (Hard rule, carried from the trainer.)
 4. **Built for the people the book failed.** Accessibility is *core, not polish*:
    dyslexia-friendly type option, audio read-aloud, high contrast, big targets,
-   `prefers-reduced-motion` as law, screen-reader clean. If they can't use it, it failed its one job.
+   `prefers-reduced-motion` as law, screen-reader clean. If they cannot use it, it failed its one job.
    The state of each criterion is in "Accessibility", below.
 5. **One brain, not panels.** One content library, one profile, one path. Each station reads
    the same core. Each station that grades writes to the same mastery model: the Drill, a Yard
@@ -63,7 +63,7 @@ withheld.
 ## Failure modes that matter (named)
 - **F1 — a wrong rule/signal taught as correct.** The cardinal sin. → every item carries
   citation + trust; un-verified items **never** appear in graded drills; CROR-vs-GOI always distinguished.
-- **F2 — false "mastered."** Learner thinks they know it; they don't. → mastery needs spaced
+- **F2 — false "mastered."** Learner thinks they know it; they do not. → mastery needs spaced
   reps over time, never one correct answer. Familiarity is the interval divided by 30 days, and a
   right answer counts only when the item is due. The retention check is a plan (see below).
 - **F3 — false "test-ready."** Someone walks into the real qualification under-prepared. → the
