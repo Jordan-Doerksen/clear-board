@@ -21,7 +21,7 @@
 // so the build puts that file in the sheet of the app.
 
 import { TRACK_IDS, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
-import { freshState, lineSwitch, canPull, canSpot, canKick, canSecure, spotPlan, pull, spot, kick, secure, checkWin, unsecuredGoal, grade } from './yard/model.js';
+import { freshState, lineSwitch, routeReady, canPull, canSpot, canKick, canSecure, spotPlan, pull, spot, kick, secure, checkWin, unsecuredGoal, grade } from './yard/model.js';
 import { play, setSpeed } from './yard/anim.js';
 import { sfx, resume, toggleMute, isMuted } from './yard/sound.js';
 import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
@@ -94,6 +94,9 @@ export function mount(root, ctx) {
   let ordered = true;                 // is the switch list verified? (true when there's no list to check)
   const flagged = new Set();          // indices the player has flagged as wrong
   let cine = null, cineCancel = null, cineTimer = null;   // inbound-arrival cinematic state
+  // The refusal on the banner when it is about the lining of the route: the track of the call and the
+  // text of the model, or null (R7-P16). A throw of a switch clears it when it is no longer true.
+  let refusal = null;
 
   const $ = (id) => view.el(id);
 
@@ -153,7 +156,15 @@ export function mount(root, ctx) {
   function onPick(id) {
     if (busy || cine) return;
     resume();
-    if (id !== null) { lineSwitch(state, id); sfx.points(); paint(); live.say(`${id} switch, lined ${state.lined[id]}`); }
+    if (id === null) return;
+    lineSwitch(state, id); sfx.points(); paint();
+    // R7-P16, F8: a refusal about the lining of the route goes when the throw makes its text false. The
+    // model checks the same call again; a refusal of another kind stays.
+    if (refusal) {
+      const r = routeReady(state, refusal.id);
+      if (r.ok || r.msg !== refusal.msg) banner('', '');
+    }
+    live.say(`${id} switch, lined ${state.lined[id]}`);
   }
 
   // --- the move builder ----------------------------------------------------
@@ -263,7 +274,13 @@ export function mount(root, ctx) {
       sfx.refuse(); banner(text, 'bad'); live.say(text); return;
     }
     const chk = precheck(kind, id, n);
-    if (!chk.ok) { sfx.refuse(); refusalBanner(chk.msg); return; }
+    if (!chk.ok) {
+      sfx.refuse(); refusalBanner(chk.msg);
+      // Keep the call when its refusal is about the lining of the route (routeReady of the model).
+      const r = kind === 'secure' ? null : routeReady(state, id);
+      if (r && !r.ok && r.msg === chk.msg) refusal = { id, msg: chk.msg };
+      return;
+    }
     // SECURE is the conductor on the ground, not an engine leg — no animation, no move cost.
     if (kind === 'secure') { secure(state, id); sfx.points(); afterMove(); return; }
     busy = true;
@@ -527,7 +544,7 @@ export function mount(root, ctx) {
     });
   }
 
-  function banner(text, tone) { view.setBanner(text, tone); }
+  function banner(text, tone) { refusal = null; view.setBanner(text, tone); }
 
   // A refused move is a teaching moment: keep the cited rule, add a one-tap link to its
   // plain-language Reference entry (cause → rule → correct action; REVAMP §6).
@@ -535,6 +552,7 @@ export function mount(root, ctx) {
   // and the drawing stay, and the close of the dialog returns focus to the control.
   // The region says the refusal as the model wrote it, unless the caller says it in a longer message.
   function refusalBanner(msg, say = true) {
+    refusal = null;
     const id = ruleItemFromMsg(msg);
     view.setRefusal(msg, id && ctx && typeof ctx.lookUp === 'function' ? () => ctx.lookUp(id) : null);
     if (say) live.say(msg);
