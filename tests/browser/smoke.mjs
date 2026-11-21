@@ -14,8 +14,9 @@
 // Each gate case has a new browser context. The service worker is blocked, except in the
 // offline case. A case that needs the same questions on each run sets a seed before the page
 // loads: a fixed generator in place of `Math.random`. Each gate case fails on a page error, on
-// a console error, or on sideways scroll at 390 or 1440. The script prints PASS or FAIL and the
-// time for each gate case, and exits non-zero when one gate case fails.
+// a console error, or on sideways scroll at 390 or 1440: the page scrolls sideways, or the
+// content of `main` is wider than `main`. The script prints PASS or FAIL and the time for each
+// gate case, and exits non-zero when one gate case fails.
 //
 // A report-only case prints PENDING with a count and the job that owns the fix. It does not
 // change the exit code. A count of 0 means that the case passes on this build. The closing
@@ -157,8 +158,9 @@ async function withPage(options, body) {
     if (options.common !== false) {
       ok(errors.length === 0, errors.join('; '));
       if (size.width === 390 || size.width === 1440) {
-        const over = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-        ok(over <= 0, `sideways scroll of ${over} px at ${size.width} px wide, on ${page.url().replace(base, '')}`);
+        const over = await overflowOf(page);
+        ok(over.page === 0, `sideways scroll of ${over.page} px at ${size.width} px wide, on ${page.url().replace(base, '')}`);
+        ok(over.main === 0, `the content of main is ${over.main} px wider than main at ${size.width} px wide, on ${page.url().replace(base, '')}. The window clips it, so the page does not scroll sideways.`);
       }
     }
     return result;
