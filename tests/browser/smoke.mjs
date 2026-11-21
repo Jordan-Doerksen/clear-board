@@ -516,7 +516,9 @@ async function playToWin(how) {
 // recordLive starts the record: a MutationObserver keeps the text of each node that a write puts into
 // the region, also when two writes come in one task. liveTexts waits two animation frames, stops the
 // record and returns the texts in order.
-const recordLive = (page) => page.evaluate(() => {
+const recordLive = async (page) => ok(await page.evaluate(() => {
+  const region = document.querySelector('#yard-live');
+  if (!region) return false;
   const texts = [];
   const keep = (records) => {
     for (const r of records) {
@@ -525,9 +527,10 @@ const recordLive = (page) => page.evaluate(() => {
     }
   };
   const observer = new MutationObserver(keep);
-  observer.observe(document.querySelector('#yard-live'), { childList: true, characterData: true, subtree: true });
+  observer.observe(region, { childList: true, characterData: true, subtree: true });
   window.__cbLiveStop = () => { keep(observer.takeRecords()); observer.disconnect(); return texts; };
-});
+  return true;
+}), 'the status region #yard-live is not in the page');
 const liveTexts = (page) => page.evaluate(async () => {
   await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
   return window.__cbLiveStop();
@@ -564,7 +567,7 @@ async function bigControls(page, parts, where) {
       const shown = r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden';
       return { words: (el.getAttribute('aria-label') || el.innerText || '').replace(/\s+/g, ' ').trim(), width: r.width, height: r.height, shown };
     }));
-    if (list.length !== want) faults.push(`${list.length} controls ${selector} are in the page, and ${want} are expected`);
+    if (list.length !== want) faults.push(`${list.length} control${list.length === 1 ? '' : 's'} ${selector} ${list.length === 1 ? 'is' : 'are'} in the page, and ${want} ${want === 1 ? 'is' : 'are'} expected`);
     for (const c of list) {
       if (!c.shown) faults.push(`the control ${selector} "${c.words}" does not show`);
       else if (c.width < 44 || c.height < 44) faults.push(`the control ${selector} "${c.words}" is ${Math.round(c.width * 100) / 100} by ${Math.round(c.height * 100) / 100} px`);
@@ -573,7 +576,7 @@ async function bigControls(page, parts, where) {
   }
   ok(faults.length === 0, `${where}: ${faults.join('; ')}. Each control must show and be 44 by 44 px or more.`);
   const small = await smallControls(page);
-  ok(small.length === 0, `${where}: ${small.length} other controls are under 44 by 44 px: ${small.join('; ')}`);
+  ok(small.length === 0, `${where}: ${small.length} other control${small.length === 1 ? ' is' : 's are'} under 44 by 44 px: ${small.join('; ')}`);
   return found;
 }
 
@@ -787,7 +790,7 @@ const GATE_CASES = [
       // Case 23 checks "Play all" with "Reduce motion" on.
       const texts = await liveTexts(page);
       const each = texts.map(stepsSaid);
-      ok(texts.length === n && each.every((steps, k) => steps.length === 1 && steps[0] === k + 1), `with motion on, "▶ Play all" gave the status region #yard-live ${texts.length} texts with the steps ${each.map((steps) => `[${steps.join(', ')}]`).join(' ')}, and ${n} texts with one step each, in order, are expected`);
+      ok(texts.length === n && each.every((steps, k) => steps.length === 1 && steps[0] === k + 1), `with motion on, "▶ Play all" gave the status region #yard-live ${texts.length} text${texts.length === 1 ? '' : 's'} with the steps ${each.map((steps) => `[${steps.join(', ')}]`).join(' ')}, and ${n} texts with one step each, in order, are expected`);
       await waitText(page, '#readout', at(n), 'at the end of "▶ Play all"');
       const banner = await page.locator('#msg').textContent();
       ok(banner.includes(`Step ${n} of ${n}`), `at the end of "▶ Play all" the banner says "${banner}", and "Step ${n} of ${n}" is expected`);
@@ -1389,17 +1392,18 @@ const GATE_CASES = [
     // watched line and each control at the win of a job is 44 by 44 px or more (fence item 8, ruling
     // TARGETS-44). Case 13 measures the Yard only at the start of a job. The stepper is the controls
     // "Stop watching", "◂ Back", "Next ▸" and "▶ Play all". It is measured with motion on: at step 0,
-    // while "Play all" plays (its control says "Stop"), at step 1 after Stop, at step 2 after Next, and
-    // at the last step. The win is the first job, played along its optimal line with clicks, with
-    // "Reduce motion" on, so that each move ends at once. At the win the move log has "Play again" on
-    // each line of a move and "Before and after" on the last line. In each state each other control
-    // that shows is measured too (bigControls). A failure names the control and its size.
+    // while "Play all" plays (its control says "Stop"), at the middle step where Stop leaves it, at each
+    // step after it with Next, and at the last step. The win is the first job, played along its optimal
+    // line with clicks, with "Reduce motion" on, so that each move ends at once. At the win the move log
+    // has "Play again" on each line of a move and "Before and after" on the last line. In each state
+    // each other control that shows is measured too (bigControls). A failure names the control and its
+    // size.
     const job = YARD_JOB;
     const states = lineStates(job);
     const n = job.opt.length;
     const STEPPER = [['#optimal', 1], ['#yard-back', 1], ['#yard-next', 1], ['#yard-play', 1]];
     const LOG = [['#yard-log-list button[data-log="again"]', job.opt.filter(([act]) => act !== 'secure').length], ['#yard-log-list button[data-log="before-after"]', 1]];
-    ok(n >= 3, `the optimal line of ${job.id} has ${n} steps, and 3 or more are expected for a middle step`);
+    ok(n >= 2, `the optimal line of ${job.id} has ${n} steps, and 2 or more are expected for a middle step`);
     const notes = [];
     const px = (v) => Math.round(v * 100) / 100;
     for (const width of [390, 1440]) {
@@ -1430,16 +1434,16 @@ const GATE_CASES = [
         await click(page, '#yard-play');
         await page.waitForFunction(() => /Play all/.test(document.querySelector('#yard-play')?.textContent ?? ''))
           .catch(() => { throw new CaseFailure(`${where}: after a press of Stop its control does not say "Play all"`); });
-        await waitText(page, '#yard-demo-count', `1 / ${n}`, `${where}: after Stop`);
-        keep(await bigControls(page, STEPPER, `${where}, at step 1 after Stop`));
-        await click(page, '#yard-next');
-        await waitText(page, '#yard-demo-count', `2 / ${n}`, `${where}: after Next`);
-        keep(await bigControls(page, STEPPER, `${where}, at step 2`));
-        for (let k = 3; k <= n; k++) {
+        // Stop ends the running step at its end state, and the stepper stays at that step: a middle
+        // step. On a slow machine "Play all" can be at step 2 when Stop comes, so the case reads it.
+        const stopped = Number((await page.locator('#yard-demo-count').textContent()).split(' / ')[0]);
+        ok(stopped >= 1 && stopped < n, `${where}: after Stop the stepper is at step ${stopped}, and a middle step (1 to ${n - 1}) is expected`);
+        keep(await bigControls(page, STEPPER, `${where}, at step ${stopped} after Stop`));
+        for (let k = stopped + 1; k <= n; k++) {
           await click(page, '#yard-next');
           await waitText(page, '#yard-demo-count', `${k} / ${n}`, `${where}: after Next`);
+          keep(await bigControls(page, STEPPER, `${where}, at step ${k}${k === n ? ', the end' : ''}`));
         }
-        keep(await bigControls(page, STEPPER, `${where}, at step ${n}, the end`));
       });
       await withPage({ width, settings: { ...allOff, reduce: true } }, async (page) => {
         const where = `the win of ${job.id} at ${width}`;
