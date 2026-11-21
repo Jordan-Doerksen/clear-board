@@ -15,7 +15,8 @@ shell. It has no server, no account and no analytics. The progress stays on the 
   the source and a trust mark in words.
 - **Drill** — questions on a spaced schedule (SM-2-lite). A learn card shows a new item before its
   first question. "Look it up" opens the entry in a dialog on top of the session.
-- **Signals** — the Drill on the signal aspects.
+- **Signals** — the Drill on one domain, signals: the signal aspects and the rule items of that
+  domain.
 - **The Yard** — 19 switching jobs on a drawn yard (look C2), with a native button for each switch,
   a text list of the yard for a screen reader, a move log and a stepper for the optimal line.
 - **Radio walkthrough** — "Guided" (nothing is scored) and "Call it yourself" (scored).
