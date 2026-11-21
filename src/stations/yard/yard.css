@@ -23,7 +23,7 @@
    come from the parts. It takes the full width of .yard-wrap and the height of the drawing.
    This file sets no width, height, padding or side margin on it, and no rule for an element
    inside it: the drawing job owns each element inside the frame (contract D.6). */
-.yard-wrap .yd-yardframe { margin: 12px 0 14px; overflow: hidden; }
+.yard-wrap .yd-yardframe { margin-block: 12px 14px; overflow: hidden; }
 /* The work order: a framed Dusk panel. Each render function of the view writes a head bar (the tag,
    the id, the rest of the top line, in the order of today) and a body. The head words are labels:
    they take the Dusk sizes, 13, 11 and 12 px, none under the 11 px of today. */
