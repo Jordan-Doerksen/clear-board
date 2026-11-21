@@ -79,6 +79,16 @@ export interface YardView {
   /** `keep` is the value that the picker has before the call. An empty string selects nothing. */
   renderPicker(groups: PickerGroup[], keep: string): void;
   setDepart(data: DepartData): void;
+  /** While the optimal line plays, its button reads "Stop watching" and stops it (U-12). */
+  setWatching(on: boolean): void;
+  /**
+   * Asks a question in a modal dialog with the answers Yes and No (U-12). No has the focus first.
+   * `answer` gets true for Yes, and false for No, Escape or a close. Focus goes back to the control
+   * that had it before the question.
+   */
+  ask(question: string, answer: (yes: boolean) => void): void;
+  /** Closes the question with the answer No, if it is open. */
+  closeAsk(): void;
   setMuted(muted: boolean): void;
   /** `fn` gets the `data-go` value of the back button when the learner presses it. */
   onGo(fn: (route: string | undefined) => void): void;
@@ -135,6 +145,16 @@ const YARD_HTML = `
       <strong class="yd-note-head">What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span class="yd-note-more">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span>
     </div>
 
+    <dialog class="yd-ask cb-dialog" id="yard-ask" aria-labelledby="yard-ask-q">
+      <div class="dusk-panel-body">
+        <p class="yd-ask-q cb-prose" id="yard-ask-q"></p>
+        <div class="yd-ask-answers">
+          <button type="button" class="dusk-btn" id="yard-ask-yes">Yes</button>
+          <button type="button" class="dusk-btn" id="yard-ask-no">No</button>
+        </div>
+      </div>
+    </dialog>
+
     <details class="yd-help cb-disclosure">
       <summary>How to play & why these rules</summary>
       <p><strong>You are the conductor, not the engineer.</strong> Click a switch target to line it
@@ -172,6 +192,24 @@ export function createView(root: HTMLElement): YardView {
   const drawHost = root.querySelector('.yd-yardframe') as HTMLElement;
   // The picker element is kept between calls, as it was before the split.
   const picker = at<HTMLSelectElement>('picker');
+  // The title of "Watch optimal", for the time when it does not play.
+  const watchTitle = at('optimal').title;
+
+  // The question dialog. One answer at a time: `pending` holds the function of the open question.
+  let pending: ((yes: boolean) => void) | null = null;
+  let back: HTMLElement | null = null;
+  const dialog = at<HTMLDialogElement>('yard-ask');
+  const settle = (yes: boolean): void => {
+    const fn = pending;
+    pending = null;
+    if (dialog.open) dialog.close();
+    if (back && back.isConnected) back.focus();
+    back = null;
+    if (fn) fn(yes);
+  };
+  at('yard-ask-yes').addEventListener('click', () => settle(true));
+  at('yard-ask-no').addEventListener('click', () => settle(false));
+  dialog.addEventListener('close', () => { if (pending) settle(false); });   // Escape
 
   return {
     el,
@@ -298,6 +336,25 @@ export function createView(root: HTMLElement): YardView {
         picker.appendChild(g);
       }
       if (keep !== '') picker.value = keep;
+    },
+
+    setWatching(on) {
+      const b = at<HTMLButtonElement>('optimal');
+      b.textContent = on ? 'Stop watching' : '▶ Watch optimal';
+      if (on) b.removeAttribute('title'); else b.title = watchTitle;
+    },
+
+    ask(question, answer) {
+      if (pending) settle(false);
+      at('yard-ask-q').textContent = question;
+      pending = answer;
+      back = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      dialog.showModal();
+      at('yard-ask-no').focus();
+    },
+
+    closeAsk() {
+      if (pending || dialog.open) settle(false);
     },
 
     setDepart({ shown, enabled }) {

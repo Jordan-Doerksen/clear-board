@@ -86,6 +86,9 @@ export function mount(root, ctx) {
   const switches = createSwitchButtons(drawing, view.drawHost, TRACK_IDS, onPick);
 
   let puzzle, state, anim = null, busy = false, fromDemo = false;
+  // watching: the optimal line plays now. watched: the state of this job came from the optimal line.
+  // saved: a win of this run is in the profile. (U-12: the Yard asks before it discards a run.)
+  let watching = false, watched = false, saved = false;
   let gen = 0, stopAnim = null;       // gen invalidates in-flight loops on (re)load; stopAnim aborts the live tween
   let ordered = true;                 // is the switch list verified? (true when there's no list to check)
   const flagged = new Set();          // indices the player has flagged as wrong
@@ -107,6 +110,7 @@ export function mount(root, ctx) {
     stopAnim = null;
     cancelCine();
     puzzle = p; state = freshState(p); anim = null; busy = false; setSpeed(1);
+    watching = false; watched = false; saved = false; view.setWatching(false);
     ordered = !p.listed; flagged.clear();
     view.setDepart({ shown: !!p.goal.depart, enabled: false });
     renderRules(); renderOrder(); syncBuilder(); paint(); banner('', '');
@@ -157,7 +161,17 @@ export function mount(root, ctx) {
     const kind = $('act').value, id = $('track').value, n = +$('count').value;
     doMove(kind, id, n);
   });
-  $('optimal').addEventListener('click', () => { resume(); watchOptimal(); });
+  // "Watch optimal" plays the line; while it plays, the same button stops it (U-12, A11Y-29). The
+  // stop loads the job again at its start. Before the line discards moves of the learner, the Yard
+  // asks; No keeps the moves.
+  $('optimal').addEventListener('click', () => {
+    resume();
+    if (watching) { load(puzzle, true); return; }
+    if (busy || cine || !puzzle.opt) return;
+    if (!atRisk()) { watchOptimal(); return; }
+    const g = gen;
+    view.ask(`Watch the optimal line? You lose your ${movesWords()} on this job.`, (yes) => { if (yes && gen === g) watchOptimal(); });
+  });
   $('depart').addEventListener('click', () => { resume(); departOut(); });
   $('reset').addEventListener('click', () => { if (!busy) load(puzzle, true); });
   $('mute').addEventListener('click', () => { view.setMuted(toggleMute()); });
@@ -256,6 +270,11 @@ export function mount(root, ctx) {
     animateMove(kind, id, n, still()).then(() => { if (gen !== g) return; busy = false; afterMove(); });
   }
 
+  // The moves of the learner on this job are at risk: a change of job or the watched line would
+  // discard them. Moves of the watched line and a run with a saved win are not at risk.
+  function atRisk() { return state.moves > 0 && !watched && !saved; }
+  const movesWords = () => `${state.moves} move${state.moves === 1 ? '' : 's'}`;
+
   // Auto-line the ladder for the route to `id`: its switch reverse, all others normal.
   function autoLine(id) { for (const t of TRACK_IDS) state.lined[t] = (t === id) ? 'reverse' : 'normal'; }
   // A pause of the watched line. The teardown clears each pause that has not ended.
@@ -271,13 +290,14 @@ export function mount(root, ctx) {
     load(puzzle);
     const myGen = gen;                 // if the puzzle is switched mid-demo, bail out cleanly
     cancelCine();                      // skip the arrival cinematic for the demo
+    watching = true; watched = true; view.setWatching(true);
     if (!ordered) {                                   // auto-certify the list for the demo
       puzzle.listed.forEach((e, i) => { if (e.error) flagged.add(i); });
       ordered = true; renderOrder();
     }
     busy = true; setSpeed(1.7);
-    const watching = `▶ Watching the optimal line — par ${puzzle.par} move${puzzle.par === 1 ? '' : 's'}`;
-    banner(watching, 'ok'); live.say(watching);
+    const watchText = `▶ Watching the optimal line — par ${puzzle.par} move${puzzle.par === 1 ? '' : 's'}`;
+    banner(watchText, 'ok'); live.say(watchText);
     for (const [act, trk, n] of puzzle.opt) {
       if (gen !== myGen) return;
       autoLine(trk); sfx.points(); paint(); await sleep(520);
@@ -299,6 +319,7 @@ export function mount(root, ctx) {
     }
     if (gen !== myGen) return;
     setSpeed(1); busy = false;
+    watching = false; view.setWatching(false);
     fromDemo = true;                                                  // a watched line is not the player's win — don't grade mastery
     afterMove();
     if (puzzle.goal.depart && checkWin(state, puzzle)) departOut();   // finish the demo by departing
@@ -340,6 +361,7 @@ export function mount(root, ctx) {
   }
 
   function recordWin() {
+    saved = true;
     if (!ctx.profile.yard) ctx.profile.yard = { completed: [], best: {} };
     if (!ctx.profile.yard.best) ctx.profile.yard.best = {};   // migrate a pre-D-0027 profile
     const y = ctx.profile.yard;
@@ -568,7 +590,19 @@ export function mount(root, ctx) {
   }
 
   buildPicker();
-  picker.addEventListener('change', () => load(PUZZLES[+picker.value], true));
+  // A new job. If moves of the learner are at risk, the job stays and the Yard asks first (U-12,
+  // A11Y-18); No keeps the moves, Yes loads the new job.
+  picker.addEventListener('change', () => {
+    const next = PUZZLES[+picker.value];
+    if (!atRisk()) { load(next, true); return; }
+    picker.value = String(PUZZLES.indexOf(puzzle));
+    const g = gen;
+    view.ask(`Change to the job “${next.title}”? You lose your ${movesWords()} on this job.`, (yes) => {
+      if (!yes || gen !== g) return;
+      picker.value = String(PUZZLES.indexOf(next));
+      load(next, true);
+    });
+  });
 
   // sound default: start muted if Clear Board's audio setting is off.
   if (ctx.settings && !ctx.settings.audio && !isMuted()) toggleMute();
@@ -587,6 +621,7 @@ export function mount(root, ctx) {
     for (const t of pauses) clearTimeout(t);
     pauses.clear();
     busy = true;                      // no input handler starts a new effect between this call and the end of the host
+    view.closeAsk();                  // an open question closes with No; its answer finds a new gen and does nothing
     drawing.destroy();
   };
 }
