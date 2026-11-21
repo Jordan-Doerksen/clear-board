@@ -8,7 +8,35 @@ Sources: [`specs/briefs/00-contracts.md`](specs/briefs/00-contracts.md) (names, 
 - **Today** means: read from the code on 2026-11-20. Outside `specs/`, `DECISIONS.md` and this file, the tree is equal to commit `86cfef2` (`git diff --stat`). Each line number is a line of that tree.
 - **Planned** means: Wave 2, not built. Each planned statement comes from the contract. The lead accepted each file row of it (`FILES`).
 - **PENDING RULING `NAME`** means: the owner or the SME has not answered. Until an answer, each job keeps the behaviour of today. Section 10 lists each one that changes this map. **Not verified** means: no check was made (section 11).
-- State: Wave 1 is complete. Gate A is closed: the owner answered the four questions (D-0031 to D-0035) and the lead ruled (D-0037). Wave 2 has not started.
+- State: Wave 1 is complete. Gate A is closed (D-0031 to D-0035, D-0037), and the owner answered 19 more picks (D-0038). **Wave 2a is built and merged** on `claude/cb2-wave-2a` (section 0). Wave 2b and 2c are planned.
+
+
+## 0. State after Wave 2a (the lead, 2026-11-21)
+
+Wave 2a is merged on the wave branch at `beb3d14`. Sections 2 to 4 still describe the tree of
+`86cfef2`; the job D1 writes the final map in Wave 2c. What Wave 2a added or changed:
+
+- **The gates (G1).** `npm run check` runs 11 steps through `tools/check.mjs`: the frozen-file hash
+  gate (`tools/frozen-check.mjs`, `tools/frozen.lock.json`), the Dusk lock check
+  (`tools/dusk-lock-check.mjs`), the raw-colour lint, a ratchet (`tools/colour-lint.mjs`,
+  `tools/token-lint.baseline.json`), the name check (`tools/name-check.mjs`,
+  `tools/name-check.allow.json`), lint, the type check, 44 unit tests (`tests/unit/`), and the four
+  earlier scripts. On request: the browser smoke test (`tests/browser/smoke.mjs`, with the word tape
+  of the guided Radio) and the look harness (`tools/look/look.mjs`). `.github/workflows/check.yml`
+  runs the check on each branch and pull request. Node is pinned (`.nvmrc`). The tools follow the
+  owner's reskin tools with the owner's leave (D-0039).
+- **The skin floor (S1).** `src/main.tsx` imports five Dusk layers, the bridge
+  (`src/styles/clear-board.tokens.css`), the parts file (`src/styles/clear-board.parts.css`), six
+  surface sheets (`src/styles/surfaces/`) and the app sheet. `body` has the class `cb-app`; `html`
+  has `data-tier="strict"`. The browser bar colour and the manifest colour are read from `--glass`
+  at build time. The icons are the monogram (`public/favicon.svg`, `public/icon.svg`). The template
+  files are gone.
+- **The Yard split (Y1).** `src/stations/yardSim.js` is the controller. `yard/view.ts` holds the
+  markup and each write to the page; `yard/draw.ts` is the drawing adapter, with the canvas inside
+  until Y2; `yard/yard.css` and `yard/drawing/drawing.css` hold the style on bridge tokens.
+  `imperativeStation.ts` exports the type `StationCtx`. The reading modes reach the Yard text.
+- **Left, as planned:** the Yard drawing (`render.js`, 22 raw colours) and the guided Radio
+  (`radioSim.js`, 45) keep their old colours until Y2 and B3 in Wave 2b.
 
 ## 1. What the app is
 1. Clear Board is a free trainer for the conductor qualification under the Canadian Rail Operating Rules (CROR).
@@ -184,7 +212,7 @@ No edit, no reformat, no move (fence rule 1). No job owns a frozen file in any w
 - Frozen does not mean correct. Open items for the SME stay open (plan T11). A finding about content is a note for the SME, never an edit.
 - Locked, and not part of the frozen set: the six files in `src/styles/dusk/` and `src/styles/dusk.lock.json`. No job edits them. On 2026-11-20 each file hash was equal to the lock.
 
-## 5. The style layers (planned)
+## 5. The style layers (built in Wave 2a)
 Today there is one sheet (`src/index.css`) and two `<style>` elements that the islands add. Each statement below is planned.
 
 ### 5.1 Files and load order
@@ -232,7 +260,7 @@ Rules for each app sheet: no raw colour; a new custom property has the prefix `-
 - Dusk reads three attributes only: `data-tier`, `data-ambient`, and `data-label` on a table cell. A new attribute on `html` needs the lead.
 - Dusk stops its motion on the device flag only. The three rules in the parts file repeat that stop under `data-reduce` (R3 5.4).
 
-## 6. The Yard (planned)
+## 6. The Yard (the split is built in Wave 2a; the drawing is planned for Wave 2b)
 ```
 Yard.tsx ─► yardSim.js  THE CONTROLLER ─► yard/view.ts    THE VIEW (2a) ─► yard/yard.css
                                        ─► yard/draw.ts    THE DRAWING ADAPTER (2a) ─► yard/drawing/layout.ts, bodies.ts, svg.ts (2b), drawing.css
@@ -269,7 +297,7 @@ Yard.tsx ─► yardSim.js  THE CONTROLLER ─► yard/view.ts    THE VIEW (2a) 
 
 **File type (row U-46, approved).** `view`, `draw` and `access` are TypeScript files, and the three drawing files of Y2 follow the same row. `yardSim.js` stays a `.js` file at its path and imports `./yard/view.ts` and `./yard/draw.ts` by the full path. `imperativeStation.ts` exports a named type for the bridge object, `StationCtx`; the view object and the drawing object have the types `YardView` and `YardDrawing` (the three names are set in the contract, C.4, and the lead can change them). `tools/solve.mjs` and `tools/securement-check.mjs` import frozen `.js` modules only, so they run unchanged.
 
-## 7. The gates (planned)
+## 7. The gates (built in Wave 2a)
 After G1, `npm run check` is `node tools/check.mjs`. It runs each offline step in order, prints PASS or FAIL for each step, runs the remaining steps after a failure, and exits non-zero if one step failed. It needs no network, no `dist/` and no browser (contract B.4; R6 section 5).
 
 | Step | npm script | Proves |
