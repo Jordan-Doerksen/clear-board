@@ -1,6 +1,14 @@
 # Changelog
 
-## [Unreleased] — V1 in progress
+## Before 2.0.0 — no version number and no tag
+
+The work below had no release heading and no tag. `package.json` held the version 0.0.0 and
+`src-tauri/tauri.conf.json` held 0.1.0. Each entry describes its own day.
+
+### Line endings belong to the repository (2026-09-22)
+- `.gitattributes`: each text file is stored with LF line endings, so the bytes on disk do not
+  depend on a setting of the machine (commit `94a41c5`). Clear Board 2 later took this commit as
+  the baseline of the frozen files.
 
 ### Securement becomes a decision, not a flag (2026-07-28)
 - **Rule 112 is now something you do.** The engine used to tie down every cut for you — spotting 2+ cars
@@ -12,7 +20,7 @@
 - **Visible on the track:** a standing 2+ cut is tagged **TIED** or **LOOSE** on the canvas itself —
   words, not colour alone — instead of only surfacing in a banner after you try to leave. The refusal
   names the track and cites 112.
-- **New gate:** `tools/securement-check.mjs` (GATE 3 in `npm run check`) — 13 assertions so the mechanic
+- **New gate:** `tools/securement-check.mjs` (GATE 3 in `npm run check`) — 15 assertions so the mechanic
   can't quietly revert. Writing it caught a false pass in the first version of the test, where a kick was
   being refused for having an empty engine rather than an untied backstop. (D-0029)
 - **Deferred:** the point-protection acknowledgment on shove. It would add a confirmation to the primary
@@ -165,7 +173,7 @@
   copied verbatim) + `data/signals.json` (42 indications — 38 verified, 4 needs-review/reference-only).
   Reference renders the aspect variants; Drill is now type-aware (definitions → term↔def, signals →
   read-the-aspect) over one profile; plus a signals-only "🚦 Signals" station.
-- **Tip jar**: Ko-fi link (ko-fi.com/jordandoerksen) wired into the footer.
+- **Tip jar**: the tip jar link wired into the footer.
 - **Rules / operating content live**: `data/rules.json` (100 cited rule concepts) +
   `data/rule-questions.json` (226 authored MC, verbatim from the old CROR Quiz BANK; answer∈choices
   verified on all). A third drill type (authored operating-rule MC). The remaining domains go live —
@@ -180,9 +188,12 @@
 - **Radio station live**: the "Back to a Joint" call walkthrough ported **verbatim** from the CN
   trainer (14 SME-tuned steps, wording untouched; scoped CSS; completion → `profile.radio.done`).
   One walkthrough for now — flagged to grow.
-- **Deployed**: GitHub Pages is live at https://jordan-doerksen.github.io/clear-board/ (built).
+- **Deployed**: the build went live on GitHub Pages. (Not true now: GitHub Pages is off for this
+  repository, plan fact T13.)
 
-### Next
+### Next (as written before 2.0.0)
+PWA and offline came on 2026-07-28 (D-0028). The save and the load of the progress to a file came
+in 2.0.0 (row U-18). The Exam station stays deferred (D-0013).
 - More radio walkthroughs (only "Back to a Joint" exists — the weakest section).
 - The Exam station (needs the SME "test-ready" bar first).
 - PWA/offline (service worker + manifest); profile export/import.
