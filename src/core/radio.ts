@@ -1,7 +1,15 @@
 // Clear Board — the pure logic of "Call it yourself" (RadioTest.tsx). No React and no page.
 // Each function that draws at random takes the random source as its last parameter. With no
 // such parameter it uses Math.random, as the station does. A test gives a fixed source.
+import type { Severity } from './severity';
 import type { Citation } from './types';
+
+/** Where the verdict of an answer goes for a screen reader (row U-19): a miss on a
+ *  safety-critical item (S3 in severity.ts) goes into the alert, which a screen reader says at
+ *  once; each other verdict goes into the status, which it says when it is free. */
+export function verdictRegion(correct: boolean, severity: Severity): 'status' | 'alert' {
+  return !correct && severity === 'S3' ? 'alert' : 'status';
+}
 
 // The two labels of a call with no verified CROR citation. The badge of a call that is not
 // scored shows one of them. The source line shows the second one in place of the code "SME",

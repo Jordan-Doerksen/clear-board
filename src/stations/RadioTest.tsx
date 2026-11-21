@@ -11,7 +11,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
-import { LABEL_GOI, LABEL_NO_CITATION, optionsFor, sourceLine } from '../core/radio';
+import { LABEL_GOI, LABEL_NO_CITATION, optionsFor, sourceLine, verdictRegion } from '../core/radio';
+import { severityOf } from '../core/severity';
 import type { ContentItem } from '../core/types';
 
 interface Step {
@@ -122,6 +123,8 @@ export function RadioTest({ active = true }: { active?: boolean }) {
   const opts = runOptions[at] || [step.call];
   const answered = picked !== null;
   const ok = picked === step.call;
+  const verdict = ok ? 'Right.' : 'Not quite.';
+  const region = verdictRegion(ok, severityOf(item));
   const c = item.citation;
   const readout = step.status || step.read || READOUT_START;
 
@@ -170,9 +173,14 @@ export function RadioTest({ active = true }: { active?: boolean }) {
         </div>
       </div>
 
+      {/* The verdict for a screen reader (row U-19). Both regions are in the page, empty, before the
+          answer; the answer writes the verdict into one of them, so a screen reader announces it. */}
+      <div className="dusk-sr" role="status">{answered && region === 'status' ? verdict : ''}</div>
+      <div className="dusk-sr" role="alert">{answered && region === 'alert' ? verdict : ''}</div>
+
       {answered && (
-        <div className="dusk-panel cb-radio-feedback" data-cb="feedback" aria-live="polite">
-          <b className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{ok ? 'Right.' : 'Not quite.'}</b>
+        <div className="dusk-panel cb-radio-feedback" data-cb="feedback">
+          <b id="cb-radio-verdict" className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{verdict}</b>
           {/* Only on a correct call: the engineer would not acknowledge a transmission you didn't make. */}
           {ok && step.ack && <span className="cb-tx cb-tx--eng"><span className="cb-who">Engineer · CN 2204</span> {step.ack}</span>}
           {step.goi && <span className="cb-radio-goi">{step.goi}</span>}
@@ -183,7 +191,7 @@ export function RadioTest({ active = true }: { active?: boolean }) {
               Look it up →
             </button>
           )}
-          <button className="dusk-btn cb-radio-next" autoFocus onClick={() => { setPos(p => p + 1); setPicked(null); }}>
+          <button className="dusk-btn cb-radio-next" autoFocus aria-describedby="cb-radio-verdict" onClick={() => { setPos(p => p + 1); setPicked(null); }}>
             {pos + 1 < order.length ? 'Next call →' : 'Finish'}
           </button>
         </div>
