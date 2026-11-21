@@ -1,0 +1,271 @@
+{
+  "note": "The config of the look harness (tools/look/look.mjs). A selector is \"the hook, or the old selector\". idsMayGo and classesMayGo are the standing lists of the contract: a lost id or class of a list gives a warning only, and each other lost id or class fails. An entry of classesMayGo can end with *. A build job does not edit this file.",
+  "sizes": {
+    "w1440": {
+      "width": 1440,
+      "height": 900
+    },
+    "w390": {
+      "width": 390,
+      "height": 844
+    },
+    "w1280": {
+      "width": 1280,
+      "height": 800
+    }
+  },
+  "defaultSizes": [
+    "w1440",
+    "w390"
+  ],
+  "locale": "en-CA",
+  "timezone": "America/Winnipeg",
+  "clock": "2026-01-15T18:00:00Z",
+  "seed": 12345,
+  "pages": [
+    {
+      "name": "home",
+      "route": "/",
+      "waitFor": "[data-cb=\"domain-card\"], .grid .card"
+    },
+    {
+      "name": "reference",
+      "route": "/reference",
+      "waitFor": "[data-cb=\"ref-row\"], .ref-row"
+    },
+    {
+      "name": "drill",
+      "route": "/drill",
+      "seed": true,
+      "waitFor": "[data-cb=\"opt\"], .opt"
+    },
+    {
+      "name": "signals",
+      "route": "/signals",
+      "seed": true,
+      "waitFor": "[data-cb=\"prompt-signal\"] svg, .prompt-signal svg"
+    },
+    {
+      "name": "yard",
+      "route": "/yard",
+      "sizes": [
+        "w1440",
+        "w390",
+        "w1280"
+      ],
+      "waitFor": "#optimal"
+    },
+    {
+      "name": "radio",
+      "route": "/radio",
+      "waitFor": "#keyBtn"
+    },
+    {
+      "name": "radio-test",
+      "route": "/radio",
+      "seed": true,
+      "waitFor": "[role=\"tab\"]",
+      "steps": [
+        {
+          "click": "[role=\"tab\"] >> nth=1"
+        },
+        {
+          "waitFor": "[data-cb=\"opt\"], .opt"
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "route": "/",
+      "waitFor": "[data-cb=\"domain-card\"], .grid .card",
+      "steps": [
+        {
+          "click": "[data-cb=\"settings-open\"], header .iconbtn"
+        },
+        {
+          "waitFor": "dialog#settings[open]"
+        }
+      ]
+    },
+    {
+      "name": "home-dys",
+      "route": "/",
+      "waitFor": "[data-cb=\"domain-card\"], .grid .card",
+      "steps": [
+        {
+          "click": "[data-cb=\"settings-open\"], header .iconbtn"
+        },
+        {
+          "waitFor": "dialog#settings[open]"
+        },
+        {
+          "focus": "#t-dys"
+        },
+        {
+          "press": "Space"
+        },
+        {
+          "press": "Escape"
+        },
+        {
+          "waitGone": "dialog#settings[open]"
+        }
+      ]
+    },
+    {
+      "name": "home-contrast",
+      "route": "/",
+      "waitFor": "[data-cb=\"domain-card\"], .grid .card",
+      "steps": [
+        {
+          "click": "[data-cb=\"settings-open\"], header .iconbtn"
+        },
+        {
+          "waitFor": "dialog#settings[open]"
+        },
+        {
+          "focus": "#t-contrast"
+        },
+        {
+          "press": "Space"
+        },
+        {
+          "press": "Escape"
+        },
+        {
+          "waitGone": "dialog#settings[open]"
+        }
+      ]
+    },
+    {
+      "name": "home-big",
+      "route": "/",
+      "waitFor": "[data-cb=\"domain-card\"], .grid .card",
+      "steps": [
+        {
+          "click": "[data-cb=\"settings-open\"], header .iconbtn"
+        },
+        {
+          "waitFor": "dialog#settings[open]"
+        },
+        {
+          "focus": "#t-big"
+        },
+        {
+          "press": "Space"
+        },
+        {
+          "press": "Escape"
+        },
+        {
+          "waitGone": "dialog#settings[open]"
+        }
+      ]
+    }
+  ],
+  "idsMayGo": [
+    "yard-style",
+    "yard"
+  ],
+  "classesMayGo": [
+    "aspects",
+    "back",
+    "bad",
+    "badge",
+    "banner",
+    "bar",
+    "big-score",
+    "brand",
+    "card",
+    "caution",
+    "chip",
+    "cite",
+    "clear",
+    "cror",
+    "danger",
+    "dot",
+    "drill-top",
+    "fb-no",
+    "fb-ok",
+    "feedback",
+    "flagged",
+    "free",
+    "go",
+    "grid",
+    "grow",
+    "h",
+    "iconbtn",
+    "k",
+    "lede",
+    "legend",
+    "locked",
+    "lookup",
+    "mark",
+    "mini",
+    "mode-tab",
+    "mode-tabs",
+    "muted",
+    "next",
+    "ok",
+    "on",
+    "opt",
+    "opts",
+    "ord-arrow",
+    "ord-fix",
+    "ord-flag",
+    "ord-list",
+    "ord-mark",
+    "ord-row",
+    "ord-trk",
+    "path",
+    "plain",
+    "prompt",
+    "prompt-signal",
+    "radio-ack",
+    "radio-incoming",
+    "radio-readout",
+    "readout",
+    "ref-detail",
+    "ref-list",
+    "ref-row",
+    "right",
+    "row",
+    "rules",
+    "s",
+    "search",
+    "section",
+    "set-body",
+    "set-h",
+    "set-note",
+    "set-sample",
+    "si",
+    "signal",
+    "skip",
+    "small",
+    "soon",
+    "spacer",
+    "ss-aa",
+    "stage",
+    "station",
+    "stations",
+    "sw",
+    "tip",
+    "top",
+    "view-title",
+    "who",
+    "win",
+    "wo-from",
+    "wo-id",
+    "wo-job",
+    "wo-meta",
+    "wo-tag",
+    "wo-tip",
+    "wo-top",
+    "workorder",
+    "wrap",
+    "wrong",
+    "yard-wrap",
+    "yardframe",
+    "yd-*"
+  ]
+}

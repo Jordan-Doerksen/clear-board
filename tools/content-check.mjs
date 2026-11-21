@@ -34,9 +34,9 @@ const contentFiles = {
 };
 const allContent = [...definitions, ...signals, ...rules, ...radioScript];
 
-// The radio call wording lives in exactly ONE place — radioSim.js's STEPS. Read it as text (it is a
-// browser module: importing it here would drag in the DOM) so the gate can prove the JSON and the
-// script agree on how many steps exist and that every call has usable distractors.
+// The radio call wording lives in exactly ONE place — radioSim.js's STEPS. This script reads that
+// file as text and takes each `call` value by a pattern. It does not import the file. So the gate
+// can prove the JSON and the script agree on how many steps exist and that every call has usable distractors.
 const radioSimSrc = readFileSync(join(__dirname, '..', 'src', 'stations', 'radioSim.js'), 'utf8');
 const RADIO_CALLS = [...radioSimSrc.matchAll(/\bcall:\s*"((?:[^"\\]|\\.)*)"/g)].map((m) =>
   m[1].replace(/\\(.)/g, '$1'),
@@ -61,7 +61,7 @@ for (const [file, items] of Object.entries(contentFiles)) {
   }
 }
 
-// ── B. No duplicate ContentItem id across all three content files ──
+// ── B. No duplicate ContentItem id across the four content files ──
 {
   const seen = new Map(); // id -> file where first seen
   for (const [file, items] of Object.entries(contentFiles)) {
