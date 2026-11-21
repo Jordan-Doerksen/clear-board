@@ -150,7 +150,7 @@ export function RadioTest() {
 
       <div className="dusk-panel dusk-panel--framed cb-radio-q">
         <div className="dusk-panel-head">
-          <h2 className="dusk-panel-name">{step.pre ? 'What do you reply?' : 'What do you call?'}</h2>
+          <h3 className="dusk-panel-name">{step.pre ? 'What do you reply?' : 'What do you call?'}</h3>
         </div>
         <div className="dusk-panel-body">
           {!graded && (

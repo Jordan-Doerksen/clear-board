@@ -22,6 +22,10 @@ export function Radio() {
       {/* The island renders its own "← Home"; in test mode this station provides it. */}
       {mode === 'test' && <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>}
 
+      {/* One station heading for both modes, in the form of the Reference title (contract C7). The
+          name is the station name of Home.tsx; the icon is decoration and is not in the name. */}
+      <h2 className="dusk-title cb-radio-title"><span className="dusk-ico" aria-hidden="true">📻</span> Radio walkthrough</h2>
+
       <div className="cb-tabs" role="tablist" aria-label="Radio mode">
         <button role="tab" aria-selected={mode === 'guided'} className="cb-tab"
           onClick={() => setMode('guided')}>
