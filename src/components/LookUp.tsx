@@ -8,7 +8,7 @@ import type { LookUpRequest } from '../state/AppContext';
 import { Entry } from './Entry';
 
 export function LookUp() {
-  const { content, lookUpRequest, closeLookUp, settings, speak } = useApp();
+  const { content, contentFailed, retryContent, lookUpRequest, closeLookUp, settings, speak } = useApp();
   const ref = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLElement | null>(null);
   const shown = useRef<LookUpRequest | null>(null);
@@ -49,7 +49,10 @@ export function LookUp() {
       <div className="dusk-panel-body">
         {item
           ? <Entry key={item.id} item={item} audio={settings.audio} onSpeak={speak} />
-          : lookedUp && <p className="dusk-lede">Loading…</p>}
+          : lookedUp && (content && contentFailed.length > 0
+            // U-07: the entry is in a part of the library that did not load.
+            ? <p className="cb-shell-notice"><span>Part of the library did not load.</span><button className="dusk-btn" onClick={retryContent}>Try again</button></p>
+            : <p className="dusk-lede">Loading…</p>)}
       </div>
     </dialog>
   );

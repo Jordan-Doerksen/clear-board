@@ -23,3 +23,10 @@ No line here states, corrects or cites a rule. The words were not checked by the
 | U-18 | Settings: the result line of a file that is not a progress file | none | This file is not a Clear Board progress file. Nothing changed. |
 | U-18 | Settings: the sentence about a browser clean-up | none | A clean-up of the data of this site in the browser deletes your progress. |
 | U-18 | The name of the file of "Save to a file" | none | clear-board-progress-<date>.json |
+| U-17 | The look-up dialog: control | none (the look-up leaves the station) | Close |
+| U-17 | The look-up dialog: heading while the entry is not there | none | Reference (the station name of today) |
+| U-07 | The notice of the shell when a content file did not load | none ("Coming soon" on the domain tiles, a false statement) | Part of the library did not load. |
+| U-07 | The control of that notice (also in the look-up dialog) | none | Try again |
+| U-07 | A domain tile when a content file did not load | Coming soon | no words on the tile; the notice of the shell says what happened |
+| U-07 | The host of a station island that did not load | none (the station is blank) | This station did not load. |
+| U-07 | The control of that message | none | Reload |

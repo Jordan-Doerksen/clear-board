@@ -12,7 +12,7 @@ const STATIONS = [
 ];
 
 export function Home() {
-  const { content, profile } = useApp();
+  const { content, contentFailed, profile } = useApp();
   const navigate = useNavigate();
   if (!content) return <p className="muted">Loading…</p>;
 
@@ -48,7 +48,9 @@ export function Home() {
                 <p className="dusk-tile-sub">{d.desc}</p>
                 {liveCard
                   ? <div className="dusk-bar" role="progressbar" aria-label={`${d.name} mastery`} aria-valuenow={m} aria-valuemin={0} aria-valuemax={100}><i className="dusk-fill dusk-fill--teal" style={{ width: `${m}%` }} /></div>
-                  : <span className="dusk-tile-tag">Coming soon</span>}
+                  // A domain with no content says "Coming soon" only when each content file loaded.
+                  // When a file did not load, the notice of the shell says so (U-07).
+                  : contentFailed.length === 0 && <span className="dusk-tile-tag">Coming soon</span>}
               </span>
             </>
           );

@@ -20,6 +20,20 @@ export type StationCtx = {
 
 type StationModule = { mount: (host: HTMLElement, ctx: StationCtx) => void };
 
+// U-07 (R6 ENG-01 a): when the module of an island does not load, or its mount throws, the host
+// says so and offers a reload. A reload gets the files of the version that the app now holds.
+function showLoadFailure(host: HTMLElement) {
+  const notice = document.createElement('div');
+  notice.className = 'cb-banner cb-banner--bad cb-shell-island-fail';
+  notice.setAttribute('role', 'alert');
+  const reload = document.createElement('button');
+  reload.className = 'dusk-btn';
+  reload.textContent = 'Reload';
+  reload.addEventListener('click', () => window.location.reload());
+  notice.append('This station did not load. ', reload);
+  host.replaceChildren(notice);
+}
+
 export function useImperativeStation(load: () => Promise<StationModule>) {
   const { profile, settings, persistProfile, speak, recordYardWin, lookUp } = useApp();
   const navigate = useNavigate();
@@ -45,7 +59,9 @@ export function useImperativeStation(load: () => Promise<StationModule>) {
   useEffect(() => {
     let cancelled = false;
     const host = hostRef.current;
-    load().then(mod => { if (!cancelled && host) mod.mount(host, ctxRef.current); });
+    load()
+      .then(mod => { if (!cancelled && host) mod.mount(host, ctxRef.current); })
+      .catch(() => { if (!cancelled && host) showLoadFailure(host); });
     // Teardown drops the engine's DOM + listeners. These stations have no infinite loops,
     // so anything in flight resolves harmlessly against a detached node.
     return () => { cancelled = true; if (host) host.innerHTML = ''; };

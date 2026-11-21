@@ -232,21 +232,35 @@ export function saveProfile(p: Profile): void {
 }
 export function exportProfile(p: Profile): string { return JSON.stringify(p, null, 2); } // F6: progress is portable
 
-export async function loadContent(): Promise<Content> {
+// The library and the names of the content files that did not load (2c-plan C9, U-07; R6 ENG-02).
+// A file did not load when the request fails, the answer is not ok, or the file is not a JSON list.
+// A name is the file name, for example "rules.json". `failed` is empty when each file loaded.
+export interface ContentLoad { content: Content; failed: string[] }
+
+export async function loadContent(): Promise<ContentLoad> {
+  const failed: string[] = [];
+  async function read<T>(f: string): Promise<T[]> {
+    try {
+      const r = await fetch(url(f));
+      if (!r.ok) throw new Error(`answer ${r.status}`);
+      const list: unknown = await r.json();
+      if (!Array.isArray(list)) throw new Error('not a list');
+      return list as T[];
+    } catch {
+      failed.push(f.slice(f.lastIndexOf('/') + 1));
+      return [];
+    }
+  }
   const items: ContentItem[] = [];
-  for (const f of CONTENT_FILES) {
-    try { const r = await fetch(url(f)); if (r.ok) items.push(...(await r.json() as ContentItem[])); } catch { /* skip a missing file */ }
-  }
+  for (const f of CONTENT_FILES) items.push(...await read<ContentItem>(f));
   const questions: Question[] = [];
-  for (const f of QUESTION_FILES) {
-    try { const r = await fetch(url(f)); if (r.ok) questions.push(...(await r.json() as Question[])); } catch { /* skip */ }
-  }
+  for (const f of QUESTION_FILES) questions.push(...await read<Question>(f));
   const byId = Object.fromEntries(items.map(i => [i.id, i]));
   const byDomain: Record<string, ContentItem[]> = {};
   for (const i of items) (byDomain[i.domain] ||= []).push(i);
   const questionsByRule: Record<string, Question[]> = {};
   for (const q of questions) (questionsByRule[q.ruleId] ||= []).push(q);
-  return { items, byId, byDomain, questions, questionsByRule };
+  return { content: { items, byId, byDomain, questions, questionsByRule }, failed };
 }
 
 // F1: only verified content is ever drilled/graded. needs-review is reference-only.

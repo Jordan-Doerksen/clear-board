@@ -1,6 +1,6 @@
 // Clear Board — one provider for the whole app: content library, the single profile, and settings.
 // Mirrors the vanilla `ctx` object (profile/content/settings/save/recompute/speak) as React context.
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { freshProfile, keepProfileCopy, loadContent, readStoredProfile, recomputeMastery, saveProfile, SETTINGS_KEY } from '../core/store';
 import { grade, isDue } from '../core/sr';
@@ -34,6 +34,10 @@ function startProfile(): Profile {
 
 interface AppValue {
   content: Content | null;
+  // 2c-plan C9 (U-07): the names of the content files that did not load, for example "rules.json".
+  // Empty when each file loaded. retryContent() loads the library again.
+  contentFailed: string[];
+  retryContent: () => void;
   profile: Profile;
   settings: Settings;
   setSetting: (key: keyof Settings, value: boolean) => void;
@@ -65,11 +69,21 @@ export function useApp(): AppValue {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<Content | null>(null);
+  const [contentFailed, setContentFailed] = useState<string[]>([]);
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const [profile, setProfile] = useState<Profile>(startProfile);
 
-  // Load the content library once.
-  useEffect(() => { loadContent().then(setContent).catch(() => setContent(null)); }, []);
+  // Load the content library at the start, and again on retryContent(). A load that runs is not
+  // started a second time.
+  const loading = useRef(false);
+  const retryContent = useCallback(() => {
+    if (loading.current) return;
+    loading.current = true;
+    loadContent()
+      .then(({ content: library, failed }) => { setContent(library); setContentFailed(failed); })
+      .finally(() => { loading.current = false; });
+  }, []);
+  useEffect(() => { retryContent(); }, [retryContent]);
 
   // Recompute mastery as soon as content arrives (decay applies even before any new drill).
   useEffect(() => {
@@ -164,10 +178,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // C1: the look-up dialog. An id that the full library does not hold opens nothing.
   const [lookUpRequest, setLookUpRequest] = useState<LookUpRequest | null>(null);
+  // An id that the library does not hold opens nothing, unless part of the library did not load:
+  // then the dialog says so.
   const lookUp = useCallback((itemId: string) => {
-    if (content && !content.byId[itemId]) return;
+    if (content && !content.byId[itemId] && contentFailed.length === 0) return;
     setLookUpRequest({ itemId });
-  }, [content]);
+  }, [content, contentFailed]);
   const closeLookUp = useCallback((request: LookUpRequest) => {
     setLookUpRequest(current => (current === request ? null : current));
   }, []);
@@ -181,7 +197,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [content]);
 
   return (
-    <Ctx.Provider value={{ content, profile, settings, setSetting, resetProgress, replaceProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak, lookUp, lookUpRequest, closeLookUp }}>
+    <Ctx.Provider value={{ content, contentFailed, retryContent, profile, settings, setSetting, resetProgress, replaceProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak, lookUp, lookUpRequest, closeLookUp }}>
       {children}
     </Ctx.Provider>
   );

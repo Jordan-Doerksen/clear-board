@@ -2,7 +2,7 @@
 import { Component, useEffect, useId, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { AppProvider } from './state/AppContext';
+import { AppProvider, useApp } from './state/AppContext';
 import { clearProfileKeepCopy, saveTextFile, storedDataFile } from './core/store';
 import { Home } from './stations/Home';
 import { Reference } from './stations/Reference';
@@ -62,6 +62,24 @@ class RenderGuard extends Component<{ children: ReactNode; whole?: boolean }, { 
   }
 }
 
+// ---- The notices of the shell -----------------------------------------------------------------
+// One row under the thread. It is a live region that is always in the page, so that a screen reader
+// hears a notice when it comes. With no notice it is empty and takes no room.
+// U-07 (2c-plan C9): part of the library did not load.
+function Notices() {
+  const { contentFailed, retryContent } = useApp();
+  return (
+    <div className="cb-shell-notices" role="status">
+      {contentFailed.length > 0 && (
+        <p className="cb-shell-notice">
+          <span>Part of the library did not load.</span>
+          <button className="dusk-btn" onClick={retryContent}>Try again</button>
+        </p>
+      )}
+    </div>
+  );
+}
+
 function Shell() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -86,6 +104,7 @@ function Shell() {
             <button className="dusk-btn" aria-haspopup="dialog" data-cb="settings-open" onClick={() => setSettingsOpen(true)}><span aria-hidden="true">⚙</span> Settings</button>
           </header>
           <div className="dusk-thread" aria-hidden="true" />
+          <Notices />
           <main className="dusk-main" id="view" ref={mainRef} tabIndex={-1}>
             {/* A new route gives a new guard, so a screen for a render error goes with its route. */}
             <RenderGuard key={location.pathname}>

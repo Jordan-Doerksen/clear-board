@@ -73,3 +73,38 @@
   width: auto;
   height: 120px;
 }
+
+/* ---- the notices of the shell (U-07, U-10) ---------------------------------------------------
+   One row of the window under the thread. The Dusk window gives its third row the spare height,
+   for the content area; with the notices row the content area is the fourth row. The notices
+   span the window. With no notice the row is empty and has no height. */
+.cb-app .dusk-stage--app > .cb-shell-win { grid-template-rows: auto auto auto 1fr auto; }
+.cb-shell-notices { grid-column: 1 / -1; }
+/* A notice: its words, then its one control. The look-up dialog uses the same notice when its
+   entry is in a part of the library that did not load. */
+.cb-app .cb-shell-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3) var(--sp-5);
+  margin: 0;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
+.cb-app .cb-shell-notices > .cb-shell-notice {
+  padding: var(--sp-3) var(--gap);
+  border-bottom: 1px solid var(--lit-rule);
+  background: var(--well);
+}
+
+/* ---- a station island that did not load (U-07) ----------------------------------------------
+   A message banner in the host of the island: the words, then "Reload". The banner part gives the
+   mark and the red edge of a refusal; the words carry the state. */
+.cb-app .cb-shell-island-fail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3) var(--sp-5);
+  color: var(--ink);
+}
