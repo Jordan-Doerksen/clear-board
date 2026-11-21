@@ -85,43 +85,76 @@ html[data-contrast="1"] {
    No rule reads these names in Wave 2a. The Yard drawing job owns this block from Wave 2b. */
 /* yard:start */
 :root {
-  --yard-floor: var(--glass);
-  --yard-ballast: var(--panel-hi);
-  --yard-tie: var(--hair-2);
-  --yard-rail: var(--ink-3);
-  --yard-rail-lined: var(--ink);
-  --yard-route: var(--lit);
-  --yard-goal: var(--lit);
-  --yard-engine: var(--head);
-  --yard-engine-edge: var(--lit);
-  --yard-engine-lamp: var(--disc-hi);
-  --yard-foul: var(--ink-2);
-  --yard-normal: var(--green-ink);
-  --yard-reverse: var(--amber-ink);
-  --yard-reverse-fill: var(--amber);
-  --yard-tied: var(--ink-2);
-  --yard-loose: var(--amber-ink);
-  --yard-kickable: var(--ink-2);
-  --yard-refusal: var(--red-ink);
-  --yard-car-empty: var(--well);
-  --yard-on-car: var(--on-tile);
-  --yard-box-hi: var(--tile-grey-hi);
-  --yard-box-lo: var(--tile-grey-lo);
-  --yard-box-ink: var(--grey-ink);
-  --yard-hopper-hi: var(--tile-teal-hi);
-  --yard-hopper-lo: var(--tile-teal-lo);
-  --yard-hopper-ink: var(--teal-ink);
-  --yard-tank-hi: var(--tile-violet-hi);
-  --yard-tank-lo: var(--tile-violet-lo);
-  --yard-tank-ink: var(--violet-ink);
-  --yard-centerbeam-hi: var(--tile-amber-hi);
-  --yard-centerbeam-lo: var(--tile-amber-lo);
-  --yard-centerbeam-ink: var(--amber-ink);
-  --yard-autorack-hi: var(--tile-blue-hi);
-  --yard-autorack-lo: var(--tile-blue-lo);
-  --yard-autorack-ink: var(--blue-ink);
-  --yard-car-shadow: drop-shadow(0 2px 2px var(--ground-0));
-  --yard-lit-glow: drop-shadow(0 0 3px var(--lit));
-  --yard-refusal-glow: drop-shadow(0 0 4px var(--red));
+  --yard-floor: var(--glass); /* the ground of the picture and of a break mark */
+  --yard-ballast: var(--panel-hi); /* the band under a track */
+  --yard-tie: var(--hair-2); /* a tie */
+  --yard-rail: var(--ink-3); /* a rail */
+  --yard-rail-lined: var(--ink); /* a rail of the lined route, a point blade */
+  --yard-route: var(--lit); /* the chevrons of the lined route; the break mark on the lined track and on the lead */
+  --yard-goal: var(--lit); /* the word BUILD and its count; the landing outline and its number */
+  --yard-engine: var(--head); /* the body of the engine */
+  --yard-engine-edge: var(--lit); /* the edge, the cab edge, the light wedge and the word ENGINE of the engine */
+  --yard-engine-lamp: var(--disc-hi); /* the headlight */
+  --yard-foul: var(--ink-2); /* the foul point bar. SME to confirm the term */
+  --yard-normal: var(--green-ink); /* a switch lined normal. SME to confirm */
+  --yard-reverse: var(--amber-ink); /* a switch lined reverse. SME to confirm */
+  --yard-reverse-fill: var(--amber); /* the fill of a reverse switch stand. SME to confirm */
+  --yard-tied: var(--ink-2); /* TIED. SME to confirm the word */
+  --yard-loose: var(--amber-ink); /* LOOSE. SME to confirm the word */
+  --yard-kickable: var(--ink-2); /* KICKABLE */
+  --yard-refusal: var(--red-ink); /* the ring at the cause of a refusal. Not drawn in Wave 2b */
+  --yard-car-empty: var(--well); /* the body of an empty car */
+  --yard-on-car: var(--on-tile); /* a detail on a loaded car, and the type tag on it */
+  --yard-box-hi: var(--tile-grey-hi); /* type box. SME to confirm */
+  --yard-box-lo: var(--tile-grey-lo); /* type box. SME to confirm */
+  --yard-box-ink: var(--grey-ink); /* type box. SME to confirm */
+  --yard-hopper-hi: var(--tile-teal-hi); /* type hopper. SME to confirm */
+  --yard-hopper-lo: var(--tile-teal-lo); /* type hopper. SME to confirm */
+  --yard-hopper-ink: var(--teal-ink); /* type hopper. SME to confirm */
+  --yard-tank-hi: var(--tile-violet-hi); /* type tank. SME to confirm */
+  --yard-tank-lo: var(--tile-violet-lo); /* type tank. SME to confirm */
+  --yard-tank-ink: var(--violet-ink); /* type tank. SME to confirm */
+  --yard-centerbeam-hi: var(--tile-amber-hi); /* type centerbeam. SME to confirm */
+  --yard-centerbeam-lo: var(--tile-amber-lo); /* type centerbeam. SME to confirm */
+  --yard-centerbeam-ink: var(--amber-ink); /* type centerbeam. SME to confirm */
+  --yard-autorack-hi: var(--tile-blue-hi); /* type autorack. SME to confirm */
+  --yard-autorack-lo: var(--tile-blue-lo); /* type autorack. SME to confirm */
+  --yard-autorack-ink: var(--blue-ink); /* type autorack. SME to confirm */
+  --yard-car-shadow: drop-shadow(0 2px 2px var(--ground-0)); /* the still shadow under a car */
+  --yard-lit-glow: drop-shadow(0 0 3px var(--lit)); /* the glow of the engine edge and of the headlight */
+  --yard-refusal-glow: drop-shadow(0 0 4px var(--red)); /* the glow of the refusal ring. Not drawn in Wave 2b */
+
+  /* The two travel times (R7-P4, D-0038). anim.js reads them at the start of each play(). */
+  --yard-run-in: calc(var(--m-enter) * 2); /* the leg in: 840 ms. The @property rule below makes it read as a time */
+  --yard-run-out: var(--m-enter); /* the leg out: 420 ms */
+
+  /* Parts of the drawing that the first table of this block does not name. */
+  --yard-plate: var(--well); /* the ground of a plate: a car number, a word, a track end, a label */
+  --yard-plate-ring: var(--ring-well); /* the ring of a plate and of a switch box. A shadow value, not a colour */
+  --yard-plate-ink: var(--ink-2); /* the words of a plate */
+  --yard-number-ink: var(--ink); /* a car number and a track id */
+  --yard-tag-ground: var(--tile-glyph); /* the ground of the type tag on a loaded car */
+  --yard-stop: var(--ink-3); /* the end stop of a track */
+  --yard-coupler: var(--ink-3); /* the coupler mark between two cars of one cut */
+  --yard-rod: var(--ink-3); /* the rod of a switch stand */
+  --yard-normal-fill: var(--well); /* the hollow stand of a switch lined normal */
+  --yard-engine-hood: var(--panel-hi); /* the hoods of the engine */
+  --yard-engine-line: var(--ink-3); /* the hood edges and the fans of the engine */
+  --yard-engine-walk: var(--hair-2); /* the walkway of the engine */
+  --yard-engine-cab: var(--wash-2); /* the cab of the engine */
+  --yard-goal-edge: var(--lit-rule); /* the edge of the goal count */
+  --yard-cutline: var(--hair-2); /* the dashed line through the break marks */
+  --yard-break-edge: var(--ink-3); /* the dashed edges of a break mark */
+  --yard-break-ink: var(--ink-2); /* the glyph of a break mark off the lined route */
+  --yard-cont: var(--ink-2); /* the hook and the arrow of a row that goes on in the next line */
+  --yard-bar-edge: var(--ink-3); /* the edge of a room bar */
+  --yard-bar-fill: var(--ink-2); /* the part of a room bar that cars take */
+  --yard-trace: var(--ink-2); /* the trace of the last move */
+  --yard-legend-ground: var(--panel-lo); /* the ground of the legend */
+  --yard-legend-ink: var(--ink-2); /* the words of the legend */
+  --yard-legend-head: var(--ink-3); /* the head of each group of the legend */
 }
+/* --yard-run-in is a multiple of a Dusk time. A script reads a calc() as text, so the name is
+   registered as a time: a script then reads 0.84s (R7 4.4). */
+@property --yard-run-in { syntax: '<time>'; inherits: true; initial-value: 0s; }
 /* yard:end */
