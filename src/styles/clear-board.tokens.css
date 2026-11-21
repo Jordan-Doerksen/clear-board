@@ -148,6 +148,7 @@ html[data-contrast="1"] {
   /* The two travel times (R7-P4, D-0038). anim.js reads them at the start of each play(). */
   --yard-run-in: calc(var(--m-enter) * 2); /* the leg in: 840 ms. The @property rule below makes it read as a time */
   --yard-run-out: var(--m-enter); /* the leg out: 420 ms */
+  --yard-step-gap: var(--m-enter); /* the pause between two steps of "Play all" of the watched line: 420 ms */
 
   /* Parts of the drawing that the first table of this block does not name. */
   --yard-plate: var(--well); /* the ground of a plate: a car number, a word, a track end, a label */

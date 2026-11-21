@@ -21,7 +21,7 @@
 
 import { TRACK_IDS, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
 import { freshState, lineSwitch, routeReady, canPull, canSpot, canKick, canSecure, spotPlan, pull, spot, kick, secure, checkWin, unsecuredGoal, grade } from './yard/model.js';
-import { play, setSpeed } from './yard/anim.js';
+import { play, readTime } from './yard/anim.js';
 import { sfx, resume, toggleMute, loadMuted, stopAll } from './yard/sound.js';
 import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
 import './yard/yard.css';
@@ -84,11 +84,16 @@ export function mount(root, ctx) {
   // of a click on the picture. The buttons move with each layout of the picture.
   const switches = createSwitchButtons(drawing, view.drawHost, TRACK_IDS, onPick);
 
-  let puzzle, state, anim = null, busy = false, fromDemo = false;
-  // watching: the optimal line plays now. watched: the state of this job came from the optimal line.
-  // saved: a win of this run is in the profile. (U-12: the Yard asks before it discards a run.)
-  let watching = false, watched = false, saved = false;
-  let gen = 0, stopAnim = null;       // gen invalidates in-flight loops on (re)load; stopAnim aborts the live tween
+  let puzzle, state, anim = null, busy = false;
+  // watched: the state of this job came from the optimal line. saved: a win of this run is in the
+  // profile. (U-12: the Yard asks before it discards a run.)
+  let watched = false, saved = false;
+  let gen = 0;                        // gen invalidates the answers and the pauses of an earlier load
+  // The effect that runs now (a move, the departure, a step of the watched line), or null. Its handle
+  // ends it at once at its end state (finish) or stops it with no end (cancel).
+  let effect = null;
+  // The watched line (R7-P8), or null: see startDemo().
+  let demo = null;
   let ordered = true;                 // is the switch list verified? (true when there's no list to check)
   const flagged = new Set();          // indices the player has flagged as wrong
   let cine = null, cineCancel = null, cineTimer = null;   // inbound-arrival cinematic state
@@ -107,12 +112,12 @@ export function mount(root, ctx) {
   // `say` is true when the learner asked for the load (a new job, Reset): the region then says the
   // job and the readout at its start.
   function load(p, say = false) {
-    gen++;                              // invalidate any in-flight move / watch-optimal loop
-    if (stopAnim) stopAnim();          // abort the live tween (mid-move, depart, etc.)
-    stopAnim = null;
+    gen++;                              // invalidate the answers and the pauses of an earlier load
+    cancelEffect();                     // stop a move, the departure or a step of the watched line
+    clearPauses();
     cancelCine();
-    puzzle = p; state = freshState(p); anim = null; busy = false; setSpeed(1);
-    watching = false; watched = false; saved = false; view.setWatching(false);
+    puzzle = p; state = freshState(p); anim = null; busy = false;
+    watched = false; saved = false; demo = null; view.setDemo(null);
     ordered = !p.listed; flagged.clear();
     view.setDepart({ shown: !!p.goal.depart, enabled: false });
     renderRules(); renderOrder(); syncBuilder(); paint(); banner('', '');
@@ -138,13 +143,13 @@ export function mount(root, ctx) {
     cine = { introS: -220, setoutCars: puzzle.inbound.cars, to: puzzle.inbound.to, phase: 'arrive', spotProg: 0 };
     let ended = false;
     const finish = () => { ended = true; cancelCine(); paint(); };
-    const cancel = play([
+    const run = play([
       { dur: 2200, fn: (t) => { if (cine) { cine.phase = 'arrive'; cine.introS = -220 + (stopS + 220) * t; } } },   // arrive & stop
       { dur: 1100, fn: (t) => { if (cine) { cine.phase = 'setout'; cine.spotProg = t; } } },                        // spot the cars in
       { dur: 1700, fn: (t) => { if (cine) { cine.phase = 'depart'; cine.introS = stopS + (lenR + 420 - stopS) * t; } } }, // depart out the lead
     ], { onFrame: paint, onDone: finish, still: still() });
     // With reduced motion the arrival has ended in the call above: no frame and no timer stay.
-    if (!ended) { cineCancel = cancel; cineTimer = setTimeout(finish, 5800); }
+    if (!ended) { cineCancel = run.cancel; cineTimer = setTimeout(finish, 5800); }
   }
 
   // --- input: line a switch by clicking its target -------------------------
@@ -155,6 +160,8 @@ export function mount(root, ctx) {
     if (busy || cine) return;
     resume();
     if (id === null) return;
+    // During the watched line the switches belong to the demonstration (R7-P8).
+    if (demo) { demoRefusal(); return; }
     lineSwitch(state, id); sfx.points(); paint();
     // R7-P16, F8: a refusal about the lining of the route goes when the throw makes its text false. The
     // model checks the same call again; a refusal of another kind stays.
@@ -171,17 +178,18 @@ export function mount(root, ctx) {
     const kind = $('act').value, id = $('track').value, n = +$('count').value;
     doMove(kind, id, n);
   });
-  // "Watch optimal" plays the line; while it plays, the same button stops it (U-12, A11Y-29). The
-  // stop loads the job again at its start. Before the line discards moves of the learner, the Yard
-  // asks; No keeps the moves.
+  // "Watch optimal" opens the watched line; while it shows, the same button reads "Stop watching" and
+  // loads the job again at its start (U-12, A11Y-29). Before the line discards moves of the learner,
+  // the Yard asks; No keeps the moves.
   $('optimal').addEventListener('click', () => {
     resume();
-    if (watching) { load(puzzle, true); return; }
+    if (demo) { load(puzzle, true); return; }
     if (busy || cine || !puzzle.opt) return;
-    if (!atRisk()) { watchOptimal(); return; }
+    if (!atRisk()) { startDemo(); return; }
     const g = gen;
-    view.ask(`Watch the optimal line? You lose your ${movesWords()} on this job.`, (yes) => { if (yes && gen === g) watchOptimal(); });
+    view.ask(`Watch the optimal line? You lose your ${movesWords()} on this job.`, (yes) => { if (yes && gen === g) startDemo(); });
   });
+  view.bindDemo({ back: demoBack, next: demoNext, play: demoPlay });
   $('depart').addEventListener('click', () => { resume(); departOut(); });
   $('reset').addEventListener('click', () => { if (!busy) load(puzzle, true); });
   $('mute').addEventListener('click', () => { resume(); view.setMuted(toggleMute()); });
@@ -193,77 +201,88 @@ export function mount(root, ctx) {
     return kind === 'pull' ? canPull(state, id, n) : kind === 'kick' ? canKick(state, id, n) : canSpot(state, id, n);
   }
 
-  // `quiet` is the reduced-motion value that the caller read for this move: each step of the move
-  // then runs one time at its end value, in this call. Each step still runs, because the step after
-  // the run in commits the move to the model (commitOnce).
-  function animateMove(kind, id, n, quiet) {
-    return new Promise((resolve) => {
-      const i = TRACK_IDS.indexOf(id);
-      const route = engineRoute(i);
-      const sw = sSwitch(i);
-      const heldLen = state.engine.reduce((a, c) => a + carLen(state.type[c]), 0);
-      // where the cut's deepest car comes to rest on the track — the loco stops here,
-      // never driving past it into standing cars.
-      let coupleFar, shoveBase = null;
-      if (kind === 'pull') {
-        coupleFar = sw + state.pos[id][0];                       // the throat car's near edge
-      } else {
-        const plan = spotPlan(state, id, n);
-        const deepCar = state.engine[state.engine.length - 1];   // deepest spotted car
-        coupleFar = sw + plan.yourPos[plan.yourPos.length - 1] + carLen(state.type[deepCar]);
-        if (plan.shove) shoveBase = { id, from: state.pos[id].slice(), to: plan.newStanding, oldThroat: state.pos[id][0] };
-      }
-      const engIn = coupleFar - ENGLEN / 2 - heldLen;
-      const restStart = restS(heldLen);
-      const cutFarStart = restStart + ENGLEN / 2 + heldLen;
-      // the standing cut only starts moving once the loco's cut actually reaches it
-      const contactF = shoveBase && coupleFar !== cutFarStart
-        ? Math.min(0.92, Math.max(0, (sw + shoveBase.oldThroat - cutFarStart) / (coupleFar - cutFarStart)))
-        : 0;
-      const lerp = (a, b, t) => a + (b - a) * t;
-      let cut = state.engine.slice();        // what the loco carries on the way in
-      let committed = false, restEnd = restStart;
-      const commitOnce = () => {
-        if (committed) return;
-        committed = true;
-        const onto = kind === 'spot' && state.tracks[id].length > 0;
-        (kind === 'pull' ? pull : kind === 'kick' ? kick : spot)(state, id, n);
-        if (kind === 'kick') sfx.roll(); else if (kind === 'pull' || onto) sfx.couple(); else sfx.roll();
-        cut = state.engine.slice();          // what it carries on the way out
-        restEnd = restS(state.engine.reduce((a, c) => a + carLen(state.type[c]), 0));
-      };
-      const phases = [
-        {
-          dur: 600, fn: (t) => {
-            const shove = shoveBase
-              ? { id: shoveBase.id, from: shoveBase.from, to: shoveBase.to, prog: Math.min(1, Math.max(0, (t - contactF) / (1 - contactF))) }
-              : null;
-            anim = { route, engS: lerp(restStart, engIn, t), cut, shove };
-          },
-        },
-      ];
-      // CROR 113.2 — after coupling, the engineer STRETCHES the joint to confirm the knuckles
-      // are locked before pulling. PULL only (you've just coupled on). A subtle tug toward the
-      // lead to take up the slack, then settle — flavour, not a gate; the move is already committed.
-      if (kind === 'pull') {
-        phases.push({
-          dur: 280, fn: (t) => {
-            commitOnce();                                  // cars are now on the loco
-            anim = { route, engS: engIn - 6 * Math.sin(t * Math.PI), cut, shove: null };
-          },
-        });
-      }
-      phases.push({
+  // Runs the steps of one effect, with the frames painted. The effect stays in `effect` until it ends.
+  // `onEnd` runs when the end state shows: after the last frame, or at once when the effect is ended
+  // by finishEffect().
+  function run(steps, quiet, onEnd) {
+    const me = { finish() {}, cancel() {} };
+    effect = me;
+    const h = play(steps, { onFrame: paint, still: quiet, onDone: () => { if (effect === me) effect = null; onEnd(); } });
+    me.finish = h.finish; me.cancel = h.cancel;
+  }
+  // Ends the effect that runs now at its end state (its end runs in this call), or stops it with no end.
+  function finishEffect() { const e = effect; effect = null; if (e) e.finish(); }
+  function cancelEffect() { const e = effect; effect = null; if (e) e.cancel(); anim = null; }
+
+  // One move of the engine on the state `st`. `quiet` is the reduced-motion value that the caller read
+  // for this move: each step of the move then runs one time at its end value, in this call. Each step
+  // still runs, because the step after the run in commits the move to the model (commitOnce). `onEnd`
+  // runs when the end state shows.
+  function animateMove(st, kind, id, n, quiet, onEnd) {
+    const i = TRACK_IDS.indexOf(id);
+    const route = engineRoute(i);
+    const sw = sSwitch(i);
+    const heldLen = st.engine.reduce((a, c) => a + carLen(st.type[c]), 0);
+    // where the cut's deepest car comes to rest on the track — the loco stops here,
+    // never driving past it into standing cars.
+    let coupleFar, shoveBase = null;
+    if (kind === 'pull') {
+      coupleFar = sw + st.pos[id][0];                          // the throat car's near edge
+    } else {
+      const plan = spotPlan(st, id, n);
+      const deepCar = st.engine[st.engine.length - 1];         // deepest spotted car
+      coupleFar = sw + plan.yourPos[plan.yourPos.length - 1] + carLen(st.type[deepCar]);
+      if (plan.shove) shoveBase = { id, from: st.pos[id].slice(), to: plan.newStanding, oldThroat: st.pos[id][0] };
+    }
+    const engIn = coupleFar - ENGLEN / 2 - heldLen;
+    const restStart = restS(heldLen);
+    const cutFarStart = restStart + ENGLEN / 2 + heldLen;
+    // the standing cut only starts moving once the loco's cut actually reaches it
+    const contactF = shoveBase && coupleFar !== cutFarStart
+      ? Math.min(0.92, Math.max(0, (sw + shoveBase.oldThroat - cutFarStart) / (coupleFar - cutFarStart)))
+      : 0;
+    const lerp = (a, b, t) => a + (b - a) * t;
+    let cut = st.engine.slice();           // what the loco carries on the way in
+    let committed = false, restEnd = restStart;
+    const commitOnce = () => {
+      if (committed) return;
+      committed = true;
+      const onto = kind === 'spot' && st.tracks[id].length > 0;
+      MOVES[kind](st, id, n);
+      if (kind === 'kick') sfx.roll(); else if (kind === 'pull' || onto) sfx.couple(); else sfx.roll();
+      cut = st.engine.slice();             // what it carries on the way out
+      restEnd = restS(st.engine.reduce((a, c) => a + carLen(st.type[c]), 0));
+    };
+    const phases = [
+      {
         dur: 600, fn: (t) => {
-          commitOnce();
-          anim = { route, engS: lerp(engIn, restEnd, t), cut, shove: null };
+          const shove = shoveBase
+            ? { id: shoveBase.id, from: shoveBase.from, to: shoveBase.to, prog: Math.min(1, Math.max(0, (t - contactF) / (1 - contactF))) }
+            : null;
+          anim = { route, engS: lerp(restStart, engIn, t), cut, shove };
+        },
+      },
+    ];
+    // CROR 113.2 — after coupling, the engineer STRETCHES the joint to confirm the knuckles
+    // are locked before pulling. PULL only (you've just coupled on). A subtle tug toward the
+    // lead to take up the slack, then settle — flavour, not a gate; the move is already committed.
+    if (kind === 'pull') {
+      phases.push({
+        dur: 280, fn: (t) => {
+          commitOnce();                                  // cars are now on the loco
+          anim = { route, engS: engIn - 6 * Math.sin(t * Math.PI), cut, shove: null };
         },
       });
-      let ended = false;
-      const cancel = play(phases, { onFrame: paint, still: quiet, onDone: () => { ended = true; stopAnim = null; anim = null; resolve(); } });
-      if (!ended) stopAnim = () => { cancel(); resolve(); };   // load() can abort this move mid-flight
+    }
+    phases.push({
+      dur: 600, fn: (t) => {
+        commitOnce();
+        anim = { route, engS: lerp(engIn, restEnd, t), cut, shove: null };
+      },
     });
+    run(phases, quiet, () => { anim = null; onEnd(); });
   }
+  const MOVES = { pull, spot, kick };
 
   function doMove(kind, id, n) {
     if (busy || cine) return;
@@ -282,8 +301,7 @@ export function mount(root, ctx) {
     // SECURE is the conductor on the ground, not an engine leg — no animation, no move cost.
     if (kind === 'secure') { secure(state, id); sfx.confirm(); afterMove(); return; }
     busy = true;
-    const g = gen;
-    animateMove(kind, id, n, still()).then(() => { if (gen !== g) return; busy = false; afterMove(); });
+    animateMove(state, kind, id, n, still(), () => { busy = false; afterMove(); });
   }
 
   // The moves of the learner on this job are at risk: a change of job or the watched line would
@@ -293,53 +311,135 @@ export function mount(root, ctx) {
 
   // Auto-line the ladder for the route to `id`: its switch reverse, all others normal.
   function autoLine(id) { for (const t of TRACK_IDS) state.lined[t] = (t === id) ? 'reverse' : 'normal'; }
-  // A pause of the watched line. The teardown clears each pause that has not ended.
+  // A pause between two steps of "Play all". A load, a stop and the teardown clear each pause that has
+  // not ended.
   const pauses = new Set();
-  const sleep = (ms) => new Promise((r) => {
-    const t = setTimeout(() => { pauses.delete(t); r(); }, ms);
+  function later(ms, fn) {
+    const t = setTimeout(() => { pauses.delete(t); fn(); }, ms);
     pauses.add(t);
-  });
+  }
+  function clearPauses() { for (const t of pauses) clearTimeout(t); pauses.clear(); }
+  // The state `st` takes the values of the copy `copy`; the copy does not change (a step back of the
+  // watched line works on the copies of its steps).
+  function restore(st, copy) {
+    const c = structuredClone(copy);
+    for (const k of Object.keys(st)) if (!(k in c)) delete st[k];
+    Object.assign(st, c);
+  }
+  // A call in words, in the form of the help text: PULL 3 from AS73, SPOT 6 to AS75, SECURE AS75.
+  function callWords(act, trk, n) {
+    return act === 'secure' ? `SECURE ${trk}` : `${act.toUpperCase()} ${n} ${act === 'pull' ? 'from' : 'to'} ${trk}`;
+  }
 
-  // ▶ Watch optimal — reset, then auto-line + play the fewest-moves line in slow-mo.
-  async function watchOptimal() {
-    if (busy || cine || !puzzle.opt) return;
+  // ---- The watched line (R7-P8, U-04) -------------------------------------------------------------
+  // A stepper over the optimal line of the job. It replaces the run of the learner (the Yard asks
+  // first, U-12). Next plays the next step with the times of a move of the learner; Back shows the
+  // state after the step before; "Play all" plays the rest in turn, and Stop ends it. Each step lines
+  // the switches for the learner, as the film of the line did before. The words, the counters and the
+  // region say each step at its start. A step back works on copies: `post[k]` is the state after step
+  // k, and `pre[k]` the state before step k with its lining. A watched line gets no done mark and no
+  // win sound: it never reaches recordWin().
+  function startDemo() {
     load(puzzle);
-    const myGen = gen;                 // if the puzzle is switched mid-demo, bail out cleanly
-    cancelCine();                      // skip the arrival cinematic for the demo
-    watching = true; watched = true; view.setWatching(true);
-    if (!ordered) {                                   // auto-certify the list for the demo
+    cancelCine();                      // the demonstration starts from the yard after the arrival
+    watched = true;
+    if (!ordered) {                    // the line starts with the switch list certified
       puzzle.listed.forEach((e, i) => { if (e.error) flagged.add(i); });
       ordered = true; renderOrder();
     }
-    busy = true; setSpeed(1.7);
-    const watchText = `▶ Watching the optimal line — par ${puzzle.par} move${puzzle.par === 1 ? '' : 's'}`;
-    banner(watchText, 'ok'); live.say(watchText);
-    for (const [act, trk, n] of puzzle.opt) {
-      if (gen !== myGen) return;
-      autoLine(trk); sfx.points(); paint(); await sleep(520);
-      if (gen !== myGen) return;
-      // SECURE has no engine movement to animate — show it as the beat it is.
-      if (act === 'secure') { secure(state, trk); banner(state.msg, 'ok'); paint(); live.say(state.msg); await sleep(420); }
-      else {
-        // With reduced motion the step ends at once. Its end state is painted with no frame, so
-        // the trace of the step shows during the pause after it.
-        const quiet = still();
-        await animateMove(act, trk, n, quiet);
-        if (gen !== myGen) return;
-        if (quiet) paint();
-      }
-      if (gen !== myGen) return;
-      const readout = view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
-      if (act !== 'secure') live.say(`${state.msg} ${readout}.`);
-      await sleep(320);
+    demo = { line: puzzle.opt, at: 0, pre: [null], post: [structuredClone(state)], playing: false };
+    const text = `▶ Watching the optimal line — par ${puzzle.par} move${puzzle.par === 1 ? '' : 's'}`;
+    showDemo();
+    banner(text, 'ok');
+    live.say(`${text}. ${demoWords(0)}`);
+  }
+
+  function showDemo() { view.setDemo({ steps: demo.line.map(([a, t, n]) => callWords(a, t, n)), at: demo.at, playing: demo.playing }); }
+
+  // The words of the state after step k.
+  function demoWords(k) {
+    const N = demo.line.length;
+    if (k === 0) return `Step 0 of ${N}: the yard at the start of the job.`;
+    const [act, trk, n] = demo.line[k - 1];
+    const end = k === N ? ' The demonstration is over. A watched line gets no done mark.' : '';
+    return `Step ${k} of ${N}: ${callWords(act, trk, n)}. ${demo.post[k].msg}${end}`;
+  }
+
+  // The banner, the counters and the region say step k.
+  function sayStep(k) {
+    const st = demo.post[k];
+    const readout = view.setReadout({ moves: st.moves, par: puzzle.par, joints: st.joints });
+    const text = demoWords(k);
+    banner(text, 'ok');
+    live.say(`${text} ${readout}.`);
+    showDemo();
+  }
+
+  // Plays the next step. Its end state is known at its start (the model on a copy), so the words come
+  // first and the motion follows.
+  function demoStep() {
+    const k = demo.at + 1;
+    const [act, trk, n] = demo.line[k - 1];
+    autoLine(trk); sfx.points();
+    demo.pre[k] = structuredClone(state);
+    demo.at = k;
+    if (act === 'secure') {
+      secure(state, trk); sfx.confirm();
+      demo.post[k] = structuredClone(state);
+      sayStep(k); paint(); demoNextOfPlay();
+      return;
     }
-    if (gen !== myGen) return;
-    setSpeed(1); busy = false;
-    watching = false; view.setWatching(false);
-    fromDemo = true;                                                  // a watched line is not the player's win — don't grade mastery
-    afterMove();
-    if (puzzle.goal.depart && checkWin(state, puzzle)) departOut();   // finish the demo by departing
-    fromDemo = false;
+    const after = structuredClone(state);
+    MOVES[act](after, trk, n);
+    demo.post[k] = after;
+    sayStep(k);
+    animateMove(state, act, trk, n, still(), () => { paint(); demoNextOfPlay(); });
+  }
+
+  // "Play all" goes on after a step: the next step after a pause, or at once with reduced motion.
+  function demoNextOfPlay() {
+    if (!demo || !demo.playing) return;
+    if (demo.at >= demo.line.length) { demo.playing = false; showDemo(); return; }
+    if (still()) { demoStep(); return; }
+    const g = gen;
+    later(readTime('--yard-step-gap'), () => { if (gen === g && demo && demo.playing) demoStep(); });
+  }
+
+  function stopPlay() {
+    if (!demo || !demo.playing) return;
+    demo.playing = false; clearPauses(); showDemo();
+  }
+
+  function demoNext() {
+    if (!demo) return;
+    stopPlay(); finishEffect();        // a new input ends the running step at its end state
+    if (demo.at < demo.line.length) demoStep();
+  }
+
+  function demoBack() {
+    if (!demo) return;
+    stopPlay(); finishEffect();
+    if (demo.at === 0) return;
+    const k = demo.at - 1;
+    restore(state, demo.post[k]);
+    demo.at = k;
+    sayStep(k); paint();
+  }
+
+  // "Play all", or Stop while it plays. Stop ends the running step at its end state.
+  function demoPlay() {
+    if (!demo) return;
+    if (demo.playing) { stopPlay(); finishEffect(); return; }
+    finishEffect();
+    if (demo.at >= demo.line.length) return;
+    demo.playing = true; showDemo();
+    demoStep();
+  }
+
+  // A switch during the watched line: the line is a demonstration, not the run of the learner.
+  function demoRefusal() {
+    const text = 'This is the demonstration. Press Stop watching to play the job yourself.';
+    sfx.refuse(); banner(text, 'bad'); live.say(text);
   }
 
   // The banner shows the last of its texts. The region says the result of the move, the readout and
@@ -376,7 +476,10 @@ export function mount(root, ctx) {
     return (b && b[puzzle.id]) || null;
   }
 
+  // A win of the learner goes into the profile. A watched line never comes here (U-04): it gets no done
+  // mark, no record and no mastery. The marks in old profiles stay.
   function recordWin() {
+    if (watched) return;
     saved = true;
     if (!ctx.profile.yard) ctx.profile.yard = { completed: [], best: {} };
     if (!ctx.profile.yard.best) ctx.profile.yard.best = {};   // migrate a pre-D-0027 profile
@@ -388,29 +491,27 @@ export function mount(root, ctx) {
       buildPicker();   // ✓ / → move as you play instead of going stale until the station re-mounts
     }
 
-    // Per-puzzle best record (#14). A watched-optimal demo is NOT your record — it's the answer.
-    if (!fromDemo) {
-      const prev = y.best[puzzle.id];
-      const now = {
-        moves: state.moves, joints: state.joints,
-        beatPar: state.moves <= puzzle.par, departed: !!puzzle.goal.depart,
-      };
-      // Fewer moves wins; joints break the tie. Never overwrite a better run with a worse one.
-      const better = !prev || now.moves < prev.moves || (now.moves === prev.moves && now.joints < prev.joints);
-      if (better) { y.best[puzzle.id] = now; dirty = true; }
-    }
+    // Per-puzzle best record (#14).
+    const prev = y.best[puzzle.id];
+    const now = {
+      moves: state.moves, joints: state.joints,
+      beatPar: state.moves <= puzzle.par, departed: !!puzzle.goal.depart,
+    };
+    // Fewer moves wins; joints break the tie. Never overwrite a better run with a worse one.
+    const better = !prev || now.moves < prev.moves || (now.moves === prev.moves && now.joints < prev.joints);
+    if (better) { y.best[puzzle.id] = now; dirty = true; }
 
     if (dirty) ctx.save();
 
-    // One brain: a genuine player win feeds the SAME rule mastery the Drill grades. Skipped
-    // on a watched demo (fromDemo); AppContext only writes verified, currently-due items.
-    if (!fromDemo && typeof ctx.recordYardWin === 'function') ctx.recordYardWin(masteryItemsFor(puzzle), true);
+    // One brain: a genuine player win feeds the SAME rule mastery the Drill grades. AppContext only
+    // writes verified, currently-due items.
+    if (typeof ctx.recordYardWin === 'function') ctx.recordYardWin(masteryItemsFor(puzzle), true);
   }
 
   // "Beat your best" (#14): compare against the record BEFORE this win is folded in. A first
   // clear says nothing (there is no best yet) rather than claiming a record.
   function bestSuffix(prev) {
-    if (fromDemo || !prev) return '';
+    if (!prev) return '';
     if (state.moves < prev.moves || (state.moves === prev.moves && state.joints < prev.joints)) {
       return ` · new best (was ${prev.moves}m/${prev.joints}j)`;
     }
@@ -446,10 +547,8 @@ export function mount(root, ctx) {
     const cutLen = state.engine.reduce((a, c) => a + carLen(state.type[c]), 0);
     const startS = restS(cutLen), endS = -(cutLen + ENGLEN + 220);
     const cut = state.engine.slice();
-    let ended = false;
-    const cancel = play([{ dur: 1300, fn: (t) => { anim = { route: LEAD_ROUTE, engS: startS + (endS - startS) * t, cut }; } }],
-      { onFrame: paint, still: still(), onDone: () => { ended = true; stopAnim = null; anim = null; busy = false; paint(); } });
-    if (!ended) stopAnim = cancel;
+    run([{ dur: 1300, fn: (t) => { anim = { route: LEAD_ROUTE, engS: startS + (endS - startS) * t, cut }; } }],
+      still(), () => { anim = null; busy = false; paint(); });
   }
 
   // The joint count of the solver-proven optimal line, baked into each puzzle by tools/solve.mjs
@@ -630,17 +729,15 @@ export function mount(root, ctx) {
   view.setMuted(loadMuted());
   load(PUZZLES[0]);
 
-  // The teardown (UNMOUNT). A move, the watched line and the arrival stop at once: the new gen ends
-  // each loop at its next check, the frame of a tween and of the arrival is cancelled, and each pause
-  // is cleared. The drawing removes its observers and its listeners of the window. The listeners of
+  // The teardown (UNMOUNT). A move, a step of the watched line, the departure and the arrival stop at
+  // once: the frame of each is cancelled, each pause is cleared, and the new gen makes a late answer
+  // do nothing. The drawing removes its observers and its listeners of the window. The listeners of
   // the elements of the Yard go with the elements when the host is emptied.
   teardown = () => {
     gen++;
-    if (stopAnim) stopAnim();
-    stopAnim = null;
+    cancelEffect();
     cancelCine();
-    for (const t of pauses) clearTimeout(t);
-    pauses.clear();
+    clearPauses();
     busy = true;                      // no input handler starts a new effect between this call and the end of the host
     view.closeAsk();                  // an open question closes with No; its answer finds a new gen and does nothing
     stopAll();                        // the timed notes of the win melody and each tone that sounds now

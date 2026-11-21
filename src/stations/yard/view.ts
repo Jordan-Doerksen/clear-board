@@ -57,6 +57,15 @@ export interface PickerGroup { label: string; options: PickerOption[] }
 /** The Depart control. */
 export interface DepartData { shown: boolean; enabled: boolean }
 
+/**
+ * The watched line (R7-P8): the calls of the optimal line, the number of steps that show, and true
+ * while "Play all" plays.
+ */
+export interface DemoData { steps: string[]; at: number; playing: boolean }
+
+/** What the controller does on Back, Next and "Play all" (or Stop) of the watched line. */
+export interface DemoHandlers { back: () => void; next: () => void; play: () => void }
+
 /** The view object. `createView` makes it. */
 export interface YardView {
   /** The element with this id inside the Yard, or null. It is found again at each call. */
@@ -81,6 +90,13 @@ export interface YardView {
   setDepart(data: DepartData): void;
   /** While the optimal line plays, its button reads "Stop watching" and stops it (U-12). */
   setWatching(on: boolean): void;
+  /**
+   * Shows the stepper of the watched line in place of the controls of a move, and the list of its
+   * steps (R7-P8). `null` hides them and shows the controls of a move again.
+   */
+  setDemo(data: DemoData | null): void;
+  /** The handlers of Back, Next and "Play all". */
+  bindDemo(handlers: DemoHandlers): void;
   /**
    * Asks a question in a modal dialog with the answers Yes and No (U-12). No has the focus first.
    * `answer` gets true for Yes, and false for No, Escape or a close. Focus goes back to the control
@@ -109,18 +125,21 @@ const YARD_HTML = `
     <ul class="yd-mirror dusk-sr" id="yard-mirror" role="list"></ul>
 
     <div class="yd-bar yd-builder dusk-panel">
-      <div class="yd-field"><label class="yd-label" for="act">Action</label><select class="cb-select" id="act">
+      <div class="yd-field yd-move-part"><label class="yd-label" for="act">Action</label><select class="cb-select" id="act">
         <option value="pull">PULL</option>
         <option value="spot">SPOT</option>
         <option value="kick">KICK</option>
         <option value="secure">SECURE</option>
       </select></div>
-      <select class="cb-select" id="count" title="How many cars"></select>
-      <label class="yd-unit cb-sub" for="count">cars</label>
-      <div class="yd-field"><label class="yd-label" for="track">Which track</label><select class="cb-select" id="track"></select></div>
-      <button class="yd-go dusk-btn" id="work">Work it ▸</button>
-      <button class="yd-go dusk-btn" id="optimal" title="Auto-line and play the fewest-moves line in slow motion">▶ Watch optimal</button>
-      <button class="yd-go dusk-btn" id="depart" title="Depart the assembled outbound out the lead" style="display:none">Depart ▸</button>
+      <select class="cb-select yd-move-part" id="count" title="How many cars"></select>
+      <label class="yd-unit cb-sub yd-move-part" for="count">cars</label>
+      <div class="yd-field yd-move-part"><label class="yd-label" for="track">Which track</label><select class="cb-select" id="track"></select></div>
+      <button class="yd-go dusk-btn yd-move-part" id="work">Work it ▸</button>
+      <button class="yd-go dusk-btn" id="optimal" title="Auto-line and show the fewest-moves line, one step at a time">▶ Watch optimal</button>
+      <button type="button" class="yd-go dusk-btn yd-demo-part" id="yard-back" hidden><span aria-hidden="true">◂</span> Back</button>
+      <button type="button" class="yd-go dusk-btn yd-demo-part" id="yard-next" hidden>Next <span aria-hidden="true">▸</span></button>
+      <button type="button" class="yd-go dusk-btn yd-demo-part" id="yard-play" hidden></button>
+      <button class="yd-go dusk-btn yd-move-part" id="depart" title="Depart the assembled outbound out the lead" style="display:none">Depart ▸</button>
       <span class="dusk-spacer"></span>
       <button class="cb-btn--plain" id="reset">Reset</button>
       <button class="cb-btn--plain" id="mute"><span aria-hidden="true">🔊</span> Sound on</button>
@@ -128,6 +147,11 @@ const YARD_HTML = `
 
     <div class="yd-banner cb-banner" id="msg"></div>
     <div class="yd-live dusk-sr" id="yard-live" role="status" aria-live="polite"></div>
+
+    <div class="yd-demo dusk-panel dusk-panel--framed" id="yard-demo" hidden>
+      <div class="dusk-panel-head"><h3 class="dusk-panel-name yd-demo-name">The optimal line</h3><span class="dusk-panel-sub yd-demo-sub">a demonstration, not your run · it gets no done mark</span><span class="dusk-spacer"></span><span class="dusk-count yd-demo-count" id="yard-demo-count"></span></div>
+      <ol class="yd-demo-list dusk-panel-body" id="yard-demo-list"></ol>
+    </div>
 
     <div class="yd-rules-panel dusk-panel">
       <div class="yd-rules-legend dusk-rule">
@@ -355,6 +379,49 @@ export function createView(root: HTMLElement): YardView {
       const b = at<HTMLButtonElement>('optimal');
       b.textContent = on ? 'Stop watching' : '▶ Watch optimal';
       if (on) b.removeAttribute('title'); else b.title = watchTitle;
+    },
+
+    // The stepper sits in the place of the controls of a move: a move is not called during the
+    // demonstration. Back, Next and "Play all" keep focus when they cannot act: they take
+    // aria-disabled, not disabled, so that focus does not fall to the page body at the first or the
+    // last step. The list is made one time for each line and then changes in place.
+    setDemo(data) {
+      const on = !!data;
+      root.querySelectorAll<HTMLElement>('.yd-move-part').forEach((e) => { e.hidden = on; });
+      root.querySelectorAll<HTMLElement>('.yd-demo-part').forEach((e) => { e.hidden = !on; });
+      at('yard-demo').hidden = !on;
+      this.setWatching(on);
+      if (!data) { at('yard-demo-list').replaceChildren(); return; }
+      const n = data.steps.length;
+      const list = at('yard-demo-list');
+      if (list.childElementCount !== n || list.dataset.line !== data.steps.join('|')) {
+        list.dataset.line = data.steps.join('|');
+        list.innerHTML = data.steps.map((call, k) =>
+          `<li class="yd-demo-step"><span class="yd-demo-n dusk-num">${k + 1}</span><span class="yd-demo-mark" aria-hidden="true"></span><span class="yd-demo-call dusk-num">${call}</span></li>`).join('');
+      }
+      list.querySelectorAll<HTMLElement>('.yd-demo-step').forEach((li, k) => {
+        const state = k < data.at ? 'done' : k === data.at ? 'next' : '';
+        if (li.dataset.state !== state) li.dataset.state = state;
+        (li.querySelector('.yd-demo-mark') as HTMLElement).textContent = k < data.at ? '✓' : k === data.at ? '▸' : '';
+        if (k === data.at - 1) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+      });
+      at('yard-demo-count').textContent = `${data.at} / ${n}`;
+      const dis = (id: string, off: boolean): void => { at(id).setAttribute('aria-disabled', String(off)); };
+      dis('yard-back', data.at === 0 || data.playing);
+      dis('yard-next', data.at >= n);
+      dis('yard-play', data.at >= n && !data.playing);
+      at('yard-play').innerHTML = data.playing
+        ? '<span aria-hidden="true">■</span> Stop'
+        : '<span aria-hidden="true">▶</span> Play all';
+    },
+
+    bindDemo({ back, next, play }) {
+      const on = (id: string, fn: () => void): void => {
+        at(id).addEventListener('click', () => { if (at(id).getAttribute('aria-disabled') !== 'true') fn(); });
+      };
+      on('yard-back', back);
+      on('yard-next', next);
+      on('yard-play', play);
     },
 
     ask(question, answer) {

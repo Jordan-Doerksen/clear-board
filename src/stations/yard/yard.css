@@ -161,3 +161,22 @@
 .yard-wrap .yd-key-reverse { color: var(--amber-ink); }
 .yard-wrap .yd-key-normal { color: var(--green-ink); }
 .yard-wrap .yd-key-kick { color: var(--amber-ink); }
+/* An element with the hidden attribute does not show, also when a part gives it a display value
+   (the stepper of the watched line takes the place of the controls of a move). */
+.yard-wrap [hidden] { display: none !important; }
+/* The watched line (R7-P8): a framed Dusk panel under the message. The head bar names the line and
+   says that it is a demonstration; the count chip gives the steps that show. The list has one line
+   for each step: its number, a mark (✓ shown, ▸ the next step) and the call in the mono face. The
+   words carry the state: the count, the banner and the region say the step. */
+.yard-wrap .yd-demo { margin: 12px 0; }
+.yard-wrap .yd-demo-name { font-size: var(--fs-data); }
+.yard-wrap .yd-demo-list { display: flex; flex-direction: column; gap: var(--sp-1); margin: 0; list-style: none; }
+.yard-wrap .yd-demo-step {
+  display: flex; align-items: baseline; gap: var(--sp-3); padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-control); color: var(--ink-2); font-size: var(--fs-base);
+}
+.yard-wrap .yd-demo-step[data-state="done"] { color: var(--ink); }
+.yard-wrap .yd-demo-step[data-state="next"] { color: var(--ink); background: var(--wash-2); }
+.yard-wrap .yd-demo-n { min-width: 1.5em; color: var(--ink-3); text-align: right; }
+.yard-wrap .yd-demo-mark { flex: none; width: 1em; color: var(--cb-link); }
+.yard-wrap .yd-demo-call { font-weight: var(--fw-bold); overflow-wrap: anywhere; }
