@@ -5,19 +5,9 @@ html,body{ margin:0 }
 html{ font-size:var(--fs) }   /* "Bigger text" sets --fs → drives rem → scales the whole app */
 body{ background:var(--bg); color:var(--ink); font-family:var(--font); font-size:1rem; line-height:var(--space); -webkit-font-smoothing:antialiased; }
 a{ color:var(--cb-link) }
-.wrap{ max-width:var(--maxw); margin:0 auto; padding:20px 18px 80px }
 .muted{ color:var(--muted) }
 :focus-visible{ outline:3px solid var(--focus); outline-offset:2px; border-radius:6px }
-/* The skip link: dark ink on the green ground. The ink is the Dusk well colour. */
-.skip{ position:absolute; left:-999px; top:0; background:var(--clear); color:var(--well); padding:8px 12px; border-radius:0 0 8px 0; z-index:50 }
-.skip:focus{ left:0 }
 
-header.top{ display:flex; align-items:center; gap:14px; padding:6px 0 18px; border-bottom:1px solid var(--line); margin-bottom:22px }
-.mark{ width:42px; height:42px; border-radius:10px; background:var(--surface-2); border:1px solid var(--line); display:grid; place-items:center; flex:0 0 auto; cursor:pointer }
-.mark span{ width:14px; height:14px; border-radius:50%; background:var(--clear); box-shadow:0 0 12px var(--clear) }
-.brand h1{ font-size:1.35rem; margin:0; letter-spacing:.2px }
-.brand p{ margin:2px 0 0; color:var(--muted); font-size:.86rem }
-.top .grow{ flex:1 }
 .iconbtn{ background:var(--surface-2); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:9px 13px; font:inherit; font-size:.9rem; cursor:pointer; min-height:44px }
 .iconbtn:hover{ border-color:var(--muted) }
 
@@ -143,8 +133,6 @@ html[data-reduce="1"] .sw i, html[data-reduce="1"] .sw i::after{ transition:none
    surface is on Dusk parts. A rule here reads Dusk tokens and --cb- names only.
    Job B1 deletes the body rule in the commit that adds the Dusk app window. The sweep of job U1
    deletes each other rule of the block. */
-/* Dusk gives the body a gutter. The page column of today has its own padding. */
-body{ padding:0 }
 /* Dusk sets the margin of each paragraph to 0. These paragraphs have no margin rule of their own
    and get the browser default again. The rules have the weight of one element name, so each class
    rule of this sheet wins. They do not match a paragraph of a Dusk part or of a cb- part. */

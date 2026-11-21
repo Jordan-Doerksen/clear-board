@@ -1,1 +1,27 @@
 /* surfaces/shell.css - the rules that only the shell needs. Owner in Wave 2b: job B1. Class prefix: cb-shell-. Job S1 made this file with no rule. */
+
+/* ---- the window ------------------------------------------------------------------------------
+   One Dusk window fills the browser (D-0038, PAGE-WIDTH). A Dusk content area is a flex column,
+   so each top-level element of a station would be a flex item: a button would take the full
+   width, and the space between the elements would change. The content area keeps the flow of
+   today. It keeps the padding of the Dusk part and its place in the window grid. */
+.cb-app .cb-shell-win > .dusk-main { display: block; }
+
+/* The content area takes focus at each change of the route. The window cuts each pixel outside
+   its box, so the ring of the content area is drawn inside its edge, at the width of the ring. */
+.cb-app .cb-shell-win > .dusk-main:focus-visible { outline-offset: -3px; }
+
+/* ---- the skip link ---------------------------------------------------------------------------
+   The Dusk skip link has a see-through wash. An opaque ground under the wash hides the title bar
+   under the link. */
+.cb-app .cb-shell-skip {
+  background-color: var(--glass);
+  background-image: linear-gradient(var(--btn-bg), var(--btn-bg));
+}
+
+/* ---- the title bar ---------------------------------------------------------------------------
+   Each text keeps its size of today (D-0038, TEXT-SIZE). Each value is in rem, so it follows the
+   text scale. */
+.cb-app .cb-shell-win > .dusk-titlebar h1 { font-size: 1.35rem; }
+.cb-app .cb-shell-win > .dusk-titlebar .dusk-crumb { font-size: .86rem; }
+.cb-app .cb-shell-win > .dusk-titlebar .dusk-btn { font-size: .9rem; }
