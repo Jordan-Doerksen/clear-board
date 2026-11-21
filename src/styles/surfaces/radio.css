@@ -1,1 +1,9 @@
-/* surfaces/radio.css - the rules that only the Radio tabs and the Radio test need. Owner in Wave 2b: job B3. Class prefix: cb-radio-. Job S1 made this file with no rule. */
+/* surfaces/radio.css - the rules that only the Radio tabs and the Radio test need. Owner in Wave 2b: job B3. Class prefix: cb-radio-.
+   The root of the Radio view is .cb-radio-view. Each selector item starts with .cb-app .cb-radio-view, after a reading-mode
+   attribute where a rule needs one. The guided island keeps its own rules in radioSim.js (RADIO_CSS). A rule here sets no
+   transition, no animation and no transform other than transform: none. Each size keeps the size of today at a root of 16 px. */
+
+/* ---- the mode tabs (part G10) ---------------------------------------------------------------------
+   The sub-line keeps 12.16 px (the part gives 12 px). The tabs keep the space of today above and below. */
+.cb-app .cb-radio-view .cb-tabs { margin: 10px 0 16px; }
+.cb-app .cb-radio-view .cb-tab small { font-size: .76rem; }
