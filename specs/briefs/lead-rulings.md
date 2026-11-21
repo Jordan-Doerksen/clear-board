@@ -199,6 +199,20 @@ option of each. A brief that says "open for the lead" for one of these names fol
 | `P16-NIT` | A throw that changes the first reason of the model can clear a refusal whose text is still true. Kept. | No false text shows; the banner goes empty. R7-P16 asks that a refusal that is no longer true goes. |
 | `PICKER-CUT` | On a phone the closed job picker cuts a long option (17 of 19 options with a record). Kept until the owner rules on the words of the record. | The record words are in the words of Y4b (U-23, U-40), which the owner approves. The open list shows the whole text. |
 
+### 2.8 Rulings for fix round 2 after the last review of Wave 2c (2026-11-21)
+
+The plan of the round is `specs/briefs/2c-F2-plan.md`.
+
+| Name | The ruling | The reason |
+|---|---|---|
+| `HEAD-ONE` | The icon of a station heading is decoration (`aria-hidden="true"`). The spoken name of each station heading is the station name, as on the Yard and the Radio. The words on the screen do not change. F2-A. | Finding F-14. Contract C7 asks one form for each station heading. Row U-41, item P-15 and R4 UX-33 name the icon as decoration, and the owner approved the words of U1-C, where the icon is hidden (D-0047). |
+| `SIGN-NAME` | The sign ▶ of "▶ Watch optimal" and of "Key the radio ▶", and the trust signs ✓ ⚠ ● of an entry and of a Reference row, are decoration for a screen reader (row U-41). The words carry each state. F2-A. | Item K-1 of the final report. Other signs in names go to the lead as a list. |
+| `FORCED-MARKS` | With forced colours each state and edge stays visible: an edge on each Radio mode tab and a heavier edge on the selected tab, `GrayText` on a control that cannot act, an edge on the Key button, and a scene that keeps its contrast. With forced colours off nothing changes. F2-B. | Finding F-10. |
+| `PLAY-ALL-ONE` | With Reduce motion, one press of "Play all" sends one message to the status region, with each step that it played, in order. With motion on, each step keeps its own message. F2-C. | Finding F-11. R7 F14 asks one message for the parts of one action, as `announce()` does for a move. |
+| `GATE-44` | A gate case measures the controls of the Yard stepper and of the win state at 390 and 1440. F2-C. | Item K-4 of the final report. |
+| `LEARN-TWIN` | `LEARN-GAP` counts items that share a `citation.ref` that names one rule as one item. A question never comes right after the learn card of its twin. The items, the cards and the counts of a session do not change; only the order changes. F2-D. | Finding F-12: in 20,000 seeded first sessions on `/signals`, the card of `rule.N` came right before the question of `sig.N` 203 times. The SME is asked whether one other screen between them is enough (`LEARN-GAP`). |
+| `REGISTER-FORM` | The look register holds no word of the text of an item. F2-D. | Item K-3 of the final report. `TAPE-FORM` keeps content words out of the gates. |
+
 ## 3. Closed by the owner after Gate A
 
 The owner answered the sheet of these 19 picks on 2026-11-21 with the words "yes to all
