@@ -46,9 +46,9 @@ headless Chromium.
 - Each word of the drawing is 12 px or larger. A still trace shows the last move. A travel leg
   takes 840 ms in and 420 ms out (600 and 600 before). Before a print, the drawing lays out for
   the page. (`TEXT-FLOOR`, R7-P15, R7-P4)
-- Each switch, AS71 to AS76, has a native button on its 44 px box. Tab, Enter and Space line a
-  switch, and the name of the button says the track and the lining. The lines of a switch list are
-  buttons. (P-02, U-09, `SW-NAME`)
+- Each switch, AS71 to AS76, has a native button on its 44 px box. Tab reaches each button, and
+  Enter or Space lines the switch. The name of the button says the track and the lining. The lines
+  of a switch list are buttons. (P-02, U-09, `SW-NAME`)
 - A text list of the yard (`#yard-mirror`) and one status region (`#yard-live`) give the state of
   the yard and the result of each move as text. The SME reads the words of the list before the
   change reaches `main` (`MIRROR-WORDS`). (P-03)
