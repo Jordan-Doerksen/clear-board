@@ -75,14 +75,18 @@ export function Drill({ domain }: { domain?: string }) {
   });
 
   // Build the first session once per (content, domain). profileRef → pre-session snapshot.
-  // The selection is the pure function buildSession of src/core/drill.ts (row U-44).
+  // The selection is the pure function buildSession of src/core/drill.ts (row U-44). A reset or a
+  // load in Settings replaces the stored profile (a new createdAt): the session then starts again
+  // from the profile that is stored now, so that its end does not count the loaded progress as its
+  // own gain (finding F-3 of the last review of Wave 2c).
+  const profileId = profile.createdAt;
   useEffect(() => {
     if (!content) return;
     missedRef.current = new Set();
     setBuilt(buildSession({ content, profile: profileRef.current, domain }));
     setIsReview(false); setReviewNext(null);
     setIdx(0); setScore(0); setPicked(null); setCounted(false);
-  }, [content, domain]);
+  }, [content, domain, profileId]);
 
   // Start a new session from the end screen ("Drill again", or the review of the misses).
   function start(session: Session, review: boolean) {

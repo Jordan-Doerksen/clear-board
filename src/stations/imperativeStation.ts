@@ -4,7 +4,7 @@
 // loads the module lazily, so the island code stays out of the main bundle. At the teardown the
 // hook calls unmount() of the module, when the module exports it, and then empties the host
 // (2c-plan C2). When the module does not load, the host says so (U-07).
-import { useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import type { Profile, Settings } from '../core/types';
@@ -20,7 +20,7 @@ export type StationCtx = {
   lookUp: (itemId: string) => void;
 };
 
-type StationModule = { mount: (host: HTMLElement, ctx: StationCtx) => void; unmount?: () => void };
+type StationModule = { mount: (host: HTMLElement, ctx: StationCtx) => void; unmount?: () => void; profileChanged?: () => void };
 
 // U-07 (R6 ENG-01 a): when the module of an island does not load, or its mount throws, the host
 // says so and offers a reload. A reload gets the files of the version that the app now holds.
@@ -60,6 +60,16 @@ export function useImperativeStation(load: () => Promise<StationModule>) {
 
   // The loader is read one time, at mount: it is a constant thunk of a dynamic import.
   const loadRef = useRef(load);
+  // The module that is mounted now, or null.
+  const modRef = useRef<StationModule | null>(null);
+
+  // A reset or a load in Settings replaces the stored profile, with a new createdAt. The module
+  // then shows the progress that is stored now (finding F-3 of the last review of Wave 2c). The
+  // bridge object already points at the new profile when this effect runs.
+  const profileId = profile.createdAt;
+  useEffect(() => {
+    try { modRef.current?.profileChanged?.(); } catch { /* the station keeps what it shows */ }
+  }, [profileId]);
 
   useLayoutEffect(() => {
     let cancelled = false;
@@ -70,6 +80,7 @@ export function useImperativeStation(load: () => Promise<StationModule>) {
         if (cancelled || !host) return;
         mod.mount(host, ctxRef.current);
         mounted = mod;
+        modRef.current = mod;
       })
       .catch(() => { if (!cancelled && host) showLoadFailure(host); });
     // The teardown calls unmount() of the module first, so that the module stops the work that it
@@ -79,6 +90,7 @@ export function useImperativeStation(load: () => Promise<StationModule>) {
     // before it takes the host out of the page, so unmount() sees the host as the module left it.
     return () => {
       cancelled = true;
+      modRef.current = null;
       try { mounted?.unmount?.(); } finally { if (host) host.innerHTML = ''; }
     };
   }, []);

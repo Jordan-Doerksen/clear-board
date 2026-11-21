@@ -39,6 +39,18 @@ export function RadioTest({ active = true }: { active?: boolean }) {
   const profileRef = useRef(profile);
   profileRef.current = profile;
 
+  // A reset or a load in Settings replaces the stored profile (a new createdAt): the run then starts
+  // again from the profile that is stored now, so that its end does not count the loaded progress as
+  // its own gain (finding F-3 of the last review of Wave 2c). The first render starts no new run.
+  const profileId = profile.createdAt;
+  const lastProfileId = useRef(profileId);
+  useEffect(() => {
+    if (lastProfileId.current === profileId) return;
+    lastProfileId.current = profileId;
+    setFocus(null); missedRef.current = new Set();
+    setPos(0); setPicked(null); setScore(0); setRunKey(k => k + 1);
+  }, [profileId]);
+
   // Row U-14: after "Next call →" the keyboard focus stays in the task. The control that had the
   // focus goes away, so the focus goes to the heading of the next call, or to the end heading after
   // "Finish". "Run it again" and "Practice the N you missed →" send it to the heading of the first

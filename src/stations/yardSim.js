@@ -50,6 +50,15 @@ function masteryItemsFor(puzzle) {
 
 // The teardown of the Yard that is mounted now, or null (UNMOUNT, 2c-plan C2).
 let teardown = null;
+// The rebuild of the job picker of the Yard that is mounted now, or null.
+let rebuildPicker = null;
+
+// The stored profile was replaced (a reset or a load in Settings): the job picker shows the done
+// marks and the records of the profile that is stored now (finding F-3 of the last review of
+// Wave 2c). The job in progress and its moves stay. The bridge calls it.
+export function profileChanged() {
+  if (rebuildPicker) rebuildPicker();
+}
 
 // Stops each timer, each animation frame, each loop, each listener and each sound of the mounted
 // Yard: also the notes of the win melody that sound.js has timed and not played yet (SOUND-STOP).
@@ -58,6 +67,7 @@ export function unmount() {
   if (!teardown) return;
   const stop = teardown;
   teardown = null;
+  rebuildPicker = null;
   stop();
 }
 
@@ -878,6 +888,7 @@ export function mount(root, ctx) {
   }
 
   buildPicker();
+  rebuildPicker = buildPicker;
   // A new job. If moves of the learner are at risk, the job stays and the Yard asks first (U-12,
   // A11Y-18); No keeps the moves, Yes loads the new job.
   picker.addEventListener('change', () => {
