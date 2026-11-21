@@ -38,7 +38,10 @@ export function Drill({ domain }: { domain?: string }) {
   const { content, profile, recordAnswer, speak } = useApp();
   const navigate = useNavigate();
   const onSignals = useLocation().pathname === '/signals';
-  const title = <StationTitle signals={onSignals} />;
+  // C7-DRILL: each state draws the heading with the same key. The loading state draws it first and
+  // each other state draws "← Home" first, so with no key React would make a new heading and the
+  // focus that the shell puts on the heading after a change of route would fall to the page body.
+  const title = <StationTitle key="station-title" signals={onSignals} />;
   const profileRef = useRef(profile);
   profileRef.current = profile;
 
