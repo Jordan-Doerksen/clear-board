@@ -461,8 +461,15 @@
 /* An open dialog cuts each pixel outside its box, and the Dusk panel head puts its control 4 px
    below the top edge, but the focus ring reaches 5 px out. With 8 px above and below the control,
    the whole ring shows, on the ground of the head and clear of the lit edge of the dialog.
-   (Folded from surfaces/settings.css by job U1-B.) */
-.cb-app .cb-dialog > .dusk-panel-head { padding-block: var(--sp-3); }
+   (Folded from surfaces/settings.css by job U1-B.)
+   A dialog that is taller than the window scrolls inside. Its head stays at the top edge, so the
+   name of the dialog and its control to close stay in view (job U1-B). */
+.cb-app .cb-dialog > .dusk-panel-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-block: var(--sp-3);
+}
 .cb-setrow {
   display: flex;
   align-items: center;
