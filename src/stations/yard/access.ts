@@ -11,7 +11,7 @@
 // The status region repeats the words of the banner and the readout. A refusal of the model is
 // frozen text: the region says it as it is and does not change it.
 
-import { yardFacts } from './drawing/bodies.ts';
+import { yardFacts, routeReaches } from './drawing/bodies.ts';
 import type { ModelState, ModelPuzzle, TrackFact, CarFact, Lining } from './drawing/bodies.ts';
 import type { SwitchBox } from './draw.ts';
 
@@ -35,24 +35,45 @@ function trackLine(t: TrackFact, lin: Lining): string {
   return parts.join(' ');
 }
 
+/**
+ * The route words of the lining (ROUTE-WORDS, C2-WORDS): "LEAD → AS73" to the track of the first
+ * reverse switch from AS71, or "LEAD → MAIN LINE" when each switch is lined normal (bodies.ts,
+ * routeReaches, with the logic of model.js).
+ */
+export const routeWords = (lined: Record<string, Lining>): string => `LEAD → ${routeReaches(lined) ?? 'MAIN LINE'}`;
+
+/** The goal of a job with a goal track: the track, the goal cars on it now and the goal cars in all (BUILD k / m). */
+export function goalOf(state: object, puzzle: object): { track: string; have: number; want: number } | null {
+  const t = yardFacts(state as ModelState, puzzle as ModelPuzzle).tracks.find((x) => x.goal);
+  return t && t.goal ? { track: t.id, have: t.goal.have, want: t.goal.want } : null;
+}
+
+/** What the mirror needs to know besides the state of the model. */
+export interface MirrorOptions {
+  /** The train has departed out the lead (R7-P14): the engine line says so, with its cars. */
+  departed?: boolean;
+}
+
 /** The lines of the mirror for one state: the engine and the cars it holds, then the six tracks from AS71 to AS76. */
-export function mirrorLines(state: ModelState, puzzle: ModelPuzzle): string[] {
+export function mirrorLines(state: ModelState, puzzle: ModelPuzzle, opts: MirrorOptions = {}): string[] {
   const F = yardFacts(state, puzzle);
-  const engine = `ENGINE holding ${carList(F.engine.held, 'from the engine')}`;
-  return [engine, ...F.tracks.map((t) => trackLine(t, F.lined[t.id]))];
+  const engine = opts.departed
+    ? `ENGINE departed out the lead with ${carList(F.engine.held, 'from the engine')}`
+    : `ENGINE holding ${carList(F.engine.held, 'from the engine')}`;
+  return [`${engine} Route: ${routeWords(F.lined)}.`, ...F.tracks.map((t) => trackLine(t, F.lined[t.id]))];
 }
 
 /** The text mirror: a list with one item for each line. */
 export interface YardMirror {
   /** Writes the lines of this state. An item is written only when its text changed. */
-  update(state: object, puzzle: object): void;
+  update(state: object, puzzle: object, opts?: MirrorOptions): void;
 }
 
 export function createMirror(list: HTMLElement): YardMirror {
   const items: HTMLLIElement[] = [];
   return {
-    update(state, puzzle) {
-      const lines = mirrorLines(state as ModelState, puzzle as ModelPuzzle);
+    update(state, puzzle, opts) {
+      const lines = mirrorLines(state as ModelState, puzzle as ModelPuzzle, opts);
       lines.forEach((text, k) => {
         let li = items[k];
         if (!li) { li = document.createElement('li'); items[k] = li; list.appendChild(li); }
@@ -95,7 +116,7 @@ export interface SwitchPlaces {
 
 /** The six buttons. */
 export interface SwitchButtons {
-  /** Writes the lining of each switch into the name and the pressed state of its button. */
+  /** Writes the lining of each switch into the name of its button. */
   setLining(lined: Record<string, Lining>): void;
 }
 
@@ -106,6 +127,9 @@ export interface SwitchButtons {
  * focus stays on the pressed button (R2 C15). A press, Enter or Space calls `onPress` with the
  * track id. The click does not reach the click listener of the picture, so that one press throws
  * the switch one time. `host` is the frame that switchBoxes() measures from.
+ *
+ * The name says the lining ("AS73 switch, lined reverse"). The button has no pressed state, so that
+ * a screen reader says the lining one time (ruling SW-NAME).
  */
 export function createSwitchButtons(places: SwitchPlaces, host: HTMLElement, ids: readonly string[], onPress: (id: string) => void): SwitchButtons {
   const layer = places.controls;
@@ -115,7 +139,6 @@ export function createSwitchButtons(places: SwitchPlaces, host: HTMLElement, ids
     b.type = 'button';
     b.className = 'yd-view-sw';
     b.dataset.sw = id;
-    b.setAttribute('aria-pressed', 'false');
     b.setAttribute('aria-label', switchName(id, 'normal'));
     b.addEventListener('click', (e) => { e.stopPropagation(); onPress(id); });
     layer.appendChild(b);
@@ -143,10 +166,8 @@ export function createSwitchButtons(places: SwitchPlaces, host: HTMLElement, ids
   return {
     setLining(lined) {
       for (const [id, b] of buttons) {
-        const lin = lined[id] === 'reverse' ? 'reverse' : 'normal';
-        const name = switchName(id, lin), pressed = lin === 'reverse' ? 'true' : 'false';
+        const name = switchName(id, lined[id] === 'reverse' ? 'reverse' : 'normal');
         if (b.getAttribute('aria-label') !== name) b.setAttribute('aria-label', name);
-        if (b.getAttribute('aria-pressed') !== pressed) b.setAttribute('aria-pressed', pressed);
       }
     },
   };

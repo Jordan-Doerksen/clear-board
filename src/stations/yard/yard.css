@@ -161,3 +161,66 @@
 .yard-wrap .yd-key-reverse { color: var(--amber-ink); }
 .yard-wrap .yd-key-normal { color: var(--green-ink); }
 .yard-wrap .yd-key-kick { color: var(--amber-ink); }
+/* An element with the hidden attribute does not show, also when a part gives it a display value
+   (the stepper of the watched line takes the place of the controls of a move). */
+.yard-wrap [hidden] { display: none !important; }
+/* The watched line (R7-P8): a framed Dusk panel under the message. The head bar names the line and
+   says that it is a demonstration; the count chip gives the steps that show. The list has one line
+   for each step: its number, a mark (✓ shown, ▸ the next step) and the call in the mono face. The
+   words carry the state: the count, the banner and the region say the step. */
+.yard-wrap .yd-demo { margin: 12px 0; }
+.yard-wrap .yd-demo-name { font-size: var(--fs-data); }
+.yard-wrap .yd-demo-list { display: flex; flex-direction: column; gap: var(--sp-1); margin: 0; list-style: none; }
+.yard-wrap .yd-demo-step {
+  display: flex; align-items: baseline; gap: var(--sp-3); padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-control); color: var(--ink-2); font-size: var(--fs-base);
+}
+.yard-wrap .yd-demo-step[data-state="done"] { color: var(--ink); }
+.yard-wrap .yd-demo-step[data-state="next"] { color: var(--ink); background: var(--wash-2); }
+.yard-wrap .yd-demo-n { min-width: 1.5em; color: var(--ink-3); text-align: right; }
+.yard-wrap .yd-demo-mark { flex: none; width: 1em; color: var(--cb-link); }
+.yard-wrap .yd-demo-call { font-weight: var(--fw-bold); overflow-wrap: anywhere; }
+/* The control "Show the arrival" of the work order (R7-P5): a Dusk button under the meta line. */
+.yard-wrap .yd-arrival { margin-top: var(--sp-4); }
+/* The words of a past state of the move log in the head bar of the picture (R7-P10), for example
+   "Before move 3": an information state of the parts, with its word. */
+.yard-wrap .yd-yardhead { gap: var(--sp-1) var(--sp-4); }
+.yard-wrap .yd-viewlabel { font-size: var(--fs-data); }
+/* The move log (R7-P10): a framed Dusk panel under the message. One line for each call of the run:
+   its number, the call in the mono face, the result of the model and the cost in words, then the
+   plain buttons "Play again" and, on the last line, "Before and after". In a narrow window the
+   buttons go under the text. */
+.yard-wrap .yd-log { margin: 12px 0; }
+.yard-wrap .yd-log-name { font-size: var(--fs-data); }
+.yard-wrap .yd-log-list { display: flex; flex-direction: column; gap: var(--sp-2); margin: 0; list-style: none; }
+.yard-wrap .yd-log-line { display: grid; grid-template-columns: 1.5em minmax(0, 1fr) auto; align-items: baseline; gap: var(--sp-1) var(--sp-4); }
+.yard-wrap .yd-log-n { color: var(--ink-3); font-size: var(--fs-base); text-align: right; }
+.yard-wrap .yd-log-text { min-width: 0; color: var(--ink-2); font-size: var(--fs-base); }
+.yard-wrap .yd-log-call { color: var(--ink); }
+.yard-wrap .yd-log-ctl { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--sp-2); }
+.yard-wrap .yd-log-btn { padding-inline: 12px; border: 1px solid transparent; font-size: var(--fs-base); font-weight: var(--fw-medium); }
+@media (max-width: 640px) {
+  .yard-wrap .yd-log-line { grid-template-columns: 1.5em minmax(0, 1fr); }
+  .yard-wrap .yd-log-ctl { grid-column: 2; justify-content: flex-start; }
+}
+/* The head bar of the yard panel (YARD-HEAD, ROUTE-WORDS): the route words at the left, the words of a
+   past state of the move log beside them, and BUILD with the goal track and its count at the right,
+   in the gold of the goal of the picture. The route words keep the width of their longest form,
+   "Route: LEAD → MAIN LINE", so that a throw does not move the head bar or the picture under it. */
+.yard-wrap .yd-route { min-width: 15.5em; font-size: var(--fs-data); }
+.yard-wrap .yd-headgoal { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.yard-wrap .yd-headgoal-word { color: var(--yard-goal); font-size: var(--fs-s); font-weight: var(--fw-bold); letter-spacing: var(--track-label); }
+.yard-wrap .yd-headgoal-count { padding: 0 var(--sp-1); font-size: var(--fs-s); }
+/* The first job says how to line a switch and how to call a move (U-16): a line of reading text in the
+   work order, with a lit rule at its start, so that it reads as the first step. It stops at the Dusk
+   measure. */
+.yard-wrap .yd-wo-how {
+  margin: var(--sp-3) 0 var(--sp-2); padding-left: var(--sp-4); max-width: var(--measure);
+  border-left: 2px solid var(--lit-line); color: var(--ink);
+}
+/* The name of the button in that line stays on one line, so that "▸" does not stand alone. */
+.yard-wrap .yd-wo-how-go { white-space: nowrap; }
+/* The key of the marks of the picker (U-39), under the select: 12 px in the second ink. */
+.yard-wrap .yd-pickkey { color: var(--ink-2); font-size: var(--fs-s); }
+/* The message shows no empty box (U-39): with no text it takes no room. */
+.yard-wrap .yd-banner:empty { display: none; }

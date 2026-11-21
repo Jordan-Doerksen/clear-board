@@ -37,15 +37,27 @@ export type YardPuzzle = Readonly<Record<string, unknown>>;
 export type YardMotion = Readonly<Record<string, unknown>> | null;
 
 /**
- * The values of one paint. `departed` and `builder` are for a later job (R7-P14, LANDING): with
- * `departed` the lead shows no engine and no held car; with `builder` the picture shows where the
- * move in the builder lands. No caller sets them in Wave 2b.
+ * The values of one paint. With `departed` the train has left (R7-P14): the lead shows no engine and
+ * no held car, and its room bar is empty. With `builder` the picture shows where the move in the
+ * builder lands (LANDING).
  */
 export interface PaintOptions {
   anim: YardMotion;
   cine: YardMotion;
   departed?: boolean;
   builder?: { act: string; n: number; track: string };
+  /**
+   * The job that the paint belongs to. A new value starts a new job: the form of the picture is chosen
+   * again (FORM-KEEP). With no value, the state object is the job. With a value, a copy of a past state
+   * of the job (a view of the move log, R7-P10) keeps the form of the job.
+   */
+  job?: unknown;
+  /**
+   * The state before the last move: the trace of that move runs from it to this state (R7-P15). `null`
+   * draws no trace. With no value, the trace follows the change of the state between two paints with no
+   * frame.
+   */
+  from?: YardState | null;
 }
 
 /** The box of one switch, in CSS px. The origin is the top left corner of the padding box of the host. */
@@ -84,7 +96,7 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
 
   let M: Measures | null = null;
   let frame: Frame | null = null;
-  let job: { state: object; puzzle: ModelPuzzle; line: YardFacts[]; legendBelow: boolean } | null = null;
+  let job: { key: unknown; puzzle: ModelPuzzle; line: YardFacts[]; legendBelow: boolean } | null = null;
   let last: { state: ModelState; puzzle: ModelPuzzle; opts: PaintOptions } | null = null;
   let width = 0;
   let L: Layout | null = null;
@@ -202,7 +214,9 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
     if (!frame) { selectFrame(null); if (!frame) return; }
     const m = M as Measures;
     const st = last.state, pz = last.puzzle, opts = last.opts;
-    const F = yardFacts(st, pz);
+    const departed = !!opts.departed;
+    // After the departure the facts of the picture have no cut on the engine: the lead is empty.
+    const F = yardFacts(departed ? { ...st, engine: [] } : st, pz);
     const land = landingOf(st, F, opts.builder as Builder | undefined);
     // FORM-KEEP: a state that the kept frame cannot draw turns the job to the tall form one time.
     if (frame.form === 'wide' && !wideHolds(frame, F, m, land)) { frame = tallFrame(width, job.line.concat([F]), m); }
@@ -226,26 +240,22 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
         couplers.push({ p: at.p, dx: at.dx, dy: at.dy });
       }
     }
-    // The trace of the last move (R7-P15): found from the change of the state between two paints with
-    // no frame. The held cut grew: a pull from the track that lost cars. It shrank: a spot or a kick
-    // into the track that gained cars. A move can also change `secured` (model.js clears or sets it),
-    // so only the lining tells a move of the demo (the next lining comes with no paint between).
+    // The trace of the last move (R7-P15). With `from`, the controller gives the state before the move.
+    // With no `from`, it is found from the change of the state between two paints with no frame. A move
+    // can also change `secured` (model.js clears or sets it), so only the lining tells a move of the
+    // demo (the next lining comes with no paint between).
     if (anim || cine) trace = null;
-    else {
+    else if (opts.from !== undefined) {
+      trace = opts.from ? traceOf(snap(opts.from as unknown as ModelState), snap(st)) : null;
+      rest = snap(st);
+    } else {
       const now = snap(st);
       if (rest && now.lined === rest.lined && now.engine.length !== rest.engine.length) {
-        const prev = rest;
-        if (now.engine.length > prev.engine.length) {
-          const id = TRACK_IDS.find((t) => now.tracks[t].length < prev.tracks[t].length);
-          if (id) trace = { track: id, contactX: switchPos(TRACK_IDS.indexOf(id)).x + prev.pos[id][0], toLead: true };
-        } else {
-          const id = TRACK_IDS.find((t) => now.tracks[t].length > prev.tracks[t].length);
-          if (id) trace = { track: id, contactX: switchPos(TRACK_IDS.indexOf(id)).x + now.pos[id][0], toLead: false };
-        }
+        const t = traceOf(rest, now);
+        if (t) trace = t;
       } else if (rest && (now.lined !== rest.lined || now.secured !== rest.secured)) trace = null;
       rest = now;
     }
-    const departed = !!opts.departed;
     const landU: Record<string, number> = {};
     if (land) landU[land.track] = land.fit.reduce((a, l) => a + (l.x1 - l.x0), 0);
     const sc: Scene = {
@@ -263,6 +273,19 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
       boxesKey = key;
       for (const f of layoutFns) f();
     }
+  }
+
+  /** The trace from one state to the next: the held cut grew, a pull from the track that lost cars; it shrank, a spot or a kick into the track that gained cars. */
+  function traceOf(prev: Snapshot, now: Snapshot): { track: string; contactX: number; toLead: boolean } | null {
+    if (now.engine.length > prev.engine.length) {
+      const id = TRACK_IDS.find((t) => now.tracks[t].length < prev.tracks[t].length);
+      return id ? { track: id, contactX: switchPos(TRACK_IDS.indexOf(id)).x + prev.pos[id][0], toLead: true } : null;
+    }
+    if (now.engine.length < prev.engine.length) {
+      const id = TRACK_IDS.find((t) => now.tracks[t].length > prev.tracks[t].length);
+      return id ? { track: id, contactX: switchPos(TRACK_IDS.indexOf(id)).x + now.pos[id][0], toLead: false } : null;
+    }
+    return null;
   }
 
   function boxesOf(lay: Layout): SwitchBox[] {
@@ -321,8 +344,9 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
 
   return {
     paint(state, puzzle, opts) {
-      if (!job || state !== job.state) {
-        job = { state, puzzle: puzzle as unknown as ModelPuzzle, line: lineFacts(puzzle as unknown as ModelPuzzle), legendBelow: false };
+      const key = opts.job !== undefined ? opts.job : state;
+      if (!job || key !== job.key) {
+        job = { key, puzzle: puzzle as unknown as ModelPuzzle, line: lineFacts(puzzle as unknown as ModelPuzzle), legendBelow: false };
         last = { state: state as unknown as ModelState, puzzle: puzzle as unknown as ModelPuzzle, opts };
         frame = null; rest = null; trace = null;
         selectFrame(null);
