@@ -295,11 +295,12 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
   mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-dys', 'data-contrast', 'style'] });
   // Print: the whole yard on the page. Before printing, the picture is laid out for the width of a
   // printed page (PRINT_W at most), in the form that suits that width. After printing, the frame of the
-  // screen comes back as it was, so a print does not change the form of the job.
+  // screen comes back as it was, so a print does not change the form of the job. A second beforeprint
+  // before the afterprint keeps the frame of the screen that the first one saved.
   let printKeep: { frame: Frame | null; legendBelow: boolean } | null = null;
   const onBeforePrint = (): void => {
     if (!job) return;
-    printKeep = { frame, legendBelow: job.legendBelow };
+    if (!printKeep) printKeep = { frame, legendBelow: job.legendBelow };
     frame = null;
     selectFrame(last ? yardFacts(last.state, last.puzzle) : null, Math.min(host.clientWidth, PRINT_W));
     render();
