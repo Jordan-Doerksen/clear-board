@@ -112,7 +112,7 @@ offline PWA for GitHub Pages and (later) a Tauri desktop exe. The React pilot li
 becomes reference, then retires).
 **Weighed:** stay vanilla ES modules (D-0005); Electron instead of Tauri.
 **Why:** Vite still ships a static, offline-first PWA (the *spirit* of D-0005 — train-side offline, zero
-hosting cost), and Tauri adds the ~5 MB clean exe Electron can't (an estimate: the Status below gives
+hosting cost), and Tauri adds the ~5 MB clean exe Electron cannot (an estimate: the Status below gives
 ~18 MB for the built exe; no session of Wave 2 checked either size, D-0045). React's default escaping also
 removes the hand-rolled `esc()` from every station — a safety win for rendering verbatim CROR text.
 **Consequence:** the SPEC §Hard-constraints "No build step" line is superseded for this project;
