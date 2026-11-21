@@ -62,8 +62,9 @@ Wave 2b is merged on the wave branch `claude/cb2-wave-2b`. What it added or chan
 
 ## 0c. State after Wave 2c (job D1, 2026-11-21)
 
-Wave 2c is merged on `claude/cb2-wave-2c` in two steps. Step 2c-1: U1-A, U1-C, Y4a and U1-B (head
-`6d74633`). Step 2c-2: G1-2, U1-D, Y4b and two commits of the lead (head `c3bc4db`). The notes of
+Steps 2c-1 and 2c-2 of Wave 2c are merged on `claude/cb2-wave-2c`. Step 2c-1: U1-A, U1-C, Y4a and
+U1-B (head `6d74633`). Step 2c-2: G1-2, U1-D, Y4b and two commits of the lead (head `c3bc4db`).
+Step 2c-3 (the G1 close and job D1) is not merged in this tree. The notes of
 the lead are `specs/briefs/2c-1-merge-notes.md` and `specs/briefs/2c-2-merge-notes.md`. The
 decisions are D-0040 to D-0044. What Wave 2c added or changed:
 
@@ -283,7 +284,7 @@ another open copy ── storage event ─► merge (the same createdAt) or repl
 | Learn card | `withLearnCards` (`drill.ts`) | A card grades nothing. The first question about the item comes after one other screen or more (`LEARN-GAP`). |
 | Yard map | `RULE_ITEMS` (`yardSim.js`) | A win grades only the content items that `RULE_ITEMS` names for the rule chips of the job. |
 | Watched line | `recordWin` (`yardSim.js`) | A watched line writes no done mark, no best record and no mastery (row U-04). The done marks of an older profile stay. |
-| No "test-ready" claim | `stageFor` (`store.ts`) | The stage names make no such claim (D-0013). No code sets `testReady`. |
+| No "test-ready" claim | `stageFor` (`store.ts`) | The stage names make no such claim (D-0013). No code sets `testReady` to true: `freshProfile` sets it to false. |
 
 The rows U-04, U-05, U-07, U-10, U-13, U-34 and U-44, which change this section, are built (section 0c). Row U-50 has a no.
 
