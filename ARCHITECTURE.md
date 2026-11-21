@@ -103,7 +103,7 @@ decisions are D-0040 to D-0044. What Wave 2c added or changed:
   805,685 bytes, 15.4 % of the budget of 5 MB. `npm run test:browser`: 22 of 22 gate cases pass.
   The ten frozen files and the `STEPS` region are equal to `94a41c5`.
 - **Left after Wave 2c:** the open items for the SME (section 10); the items of the final report of the lead (`NOTICE-TWICE`,
-  `RETRY-RESTART`, `TAG-HOME`, `SESSION-LENGTH`, `P16-NIT`, `PICKER-CUT`, `WEAK-REVIEW`); and
+  `RETRY-RESTART`, `TAG-HOME`, `SESSION-LENGTH`, `P16-NIT`, `PICKER-CUT`; `WEAK-REVIEW` is fixed by `3076815`, finding F-1); and
   `src-tauri/**` (`TAURI`).
 
 ## 1. What the app is
@@ -189,14 +189,14 @@ An island is a plain JavaScript module that draws its own DOM inside one host el
 | Item | Today | Where |
 |---|---|---|
 | Entry and host | A lazy `import()`. Each island is its own chunk in the build. The hosts are `<div class="yard-host">` and `<div class="radio-host">`. | `Yard.tsx`; `Radio.tsx`; `RadioTest.tsx` (for `STEPS`) |
-| Module shape | `{ mount(host, ctx), unmount?() }`. `yardSim.js` exports `mount` and `unmount`. `radioSim.js` exports `mount` and `STEPS`. | `imperativeStation.ts`; `yardSim.js`; `radioSim.js` |
+| Module shape | `{ mount(host, ctx), unmount?(), profileChanged?() }`. `yardSim.js` exports `mount`, `unmount` and `profileChanged`: the bridge calls `profileChanged()` when a Reset or a Load in Settings replaces the profile (finding F-3). `radioSim.js` exports `mount` and `STEPS`. | `imperativeStation.ts`; `yardSim.js`; `radioSim.js` |
 | Bridge object `ctx` | Seven fields: `profile`, `settings`, `speak`, `save`, `recordYardWin`, `go(route)`, `lookUp(itemId)`. One object for the life of the mount. React writes the new values into the same object on each render. | `imperativeStation.ts` |
 | Style and scope | The style of the Yard is two sheets: `yard/yard.css` (imported by `Yard.tsx` and `yardSim.js`; the build puts it in the main sheet) and `yard/drawing/drawing.css` (in the sheet of the Yard chunk). The Radio island adds one `<style id="radio-style">` element. Each island rule is under `.yard-wrap` or `.radio-wrap`. | `Yard.tsx`; `yardSim.js`; `draw.ts`; `radioSim.js` |
 | Teardown | In a layout effect, the hook calls `unmount()` of the module when it exports one, then empties the host (C2). | `imperativeStation.ts` |
 | A failed load | When the module does not load, or its mount throws, the host says "This station did not load." with "Reload" (row U-07). | `imperativeStation.ts`; `RadioTest.tsx` |
 | What an island reads | The Yard: `ctx.settings.reduce` (at each effect), `ctx.profile.yard`, `ctx.save`, `ctx.recordYardWin`, `ctx.lookUp`. It does not call `ctx.go` or `ctx.speak`. The Radio: `ctx.settings.audio` and `ctx.speak`. It writes nothing to the profile. | `yardSim.js`; `radioSim.js` |
 
-The island comments of `Yard.tsx`, `imperativeStation.ts` and `Radio.tsx` no longer call an island byte-for-byte (Y1, B3; `ISLAND-COMMENT`). Line 9 of `tsconfig.app.json` still calls the Yard engine byte-for-byte (R6 section 11, row 20). No job of Wave 2c owns that file.
+The island comments of `Yard.tsx`, `imperativeStation.ts` and `Radio.tsx` no longer call an island byte-for-byte (Y1, B3; `ISLAND-COMMENT`). Line 9 of `tsconfig.app.json` no longer calls the Yard engine byte-for-byte: it says that the engine and the islands ship as `.js` and are not type-checked (`62cedd7`, item K-2 of the final report; R6 section 11, row 20).
 
 ### 2.4 `src/stations/yard`: the engine, the motion and the sound
 | File | Owns | Imported by |
@@ -365,7 +365,7 @@ Yard.tsx ─► yardSim.js  THE CONTROLLER ─► yard/view.ts     THE VIEW ─�
 | Layer | File | Owns | Must not contain | Writer in 2a / 2b / 2c |
 |---|---|---|---|---|
 | Engine | `model.js`, `solver.js`, `puzzles.js`, `geometry.js` | Section 2.4. | A change. | frozen |
-| Controller | `yardSim.js` | The game state, the move logic, the records, `RULE_ITEMS`, the sound calls, the event wiring, the stepper of the watched line and the move log. It exports `mount(root, ctx)` and `unmount()`. It reaches an element by an id or through a view function. | A class name. A markup string. An inline style. | Y1 / closed / Y4a, Y4b, the lead (`c3bc4db`) |
+| Controller | `yardSim.js` | The game state, the move logic, the records, `RULE_ITEMS`, the sound calls, the event wiring, the stepper of the watched line and the move log. It exports `mount(root, ctx)`, `unmount()` and `profileChanged()`. It reaches an element by an id or through a view function. | A class name. A markup string. An inline style. | Y1 / closed / Y4a, Y4b, the lead (`c3bc4db`) |
 | View | `yard/view.ts` | `createView(root)`: each markup string, each class name and each write to the page of the chrome: the job picker and its key line, the readout, the work order, the move builder, the banner and the refusal with "Look it up", the question dialog (`#yard-ask`), the stepper (`#yard-back`, `#yard-next`, `#yard-play`), the move log (`#yard-log-list`), the head bar (`#yard-route`, `#yard-goal`) and the label of a past view (`#yard-view-label`). It sets `data-cb="yard-drawing"` on the frame of the drawing. | Game state. An import of a function of `model.js`. | Y1 / Y3 / Y4a, Y4b |
 | Drawing adapter | `yard/draw.ts` | `createDrawing(host, { onPick })` gives `paint(state, puzzle, opts)`, `switchBoxes()`, `onLayout(fn)` and `destroy()`. `paint` takes the motion, the job, the departed state and the move in the builder (`LANDING`). It calls no sound and changes no game state. | A colour in script. A change of a number of `geometry.js`. | Y1 / Y2 / Y4a, Y4b |
 | Drawing | `yard/drawing/layout.ts`, `bodies.ts`, `svg.ts`, `legend.ts`, `drawing.css` | Look C2 as one inline SVG with its words as DOM text: the view transform over `geometry.js` and the choice of the form (`layout.ts`); the facts of the yard and the motion from the state (`bodies.ts`); the elements (`svg.ts`); the legend (`legend.ts`). | A canvas. A raw colour. A typed fallback for a missing custom property. | — / Y2 / Y4a, Y4b |

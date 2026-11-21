@@ -148,7 +148,7 @@ export interface Scene {
   hidden: Set<string>;
   /** The engine and its held cut at rest are not drawn (a chain draws them, or the arrival hides them). */
   engineMoves: boolean;
-  /** After Depart, for a later job: the lead shows no engine and no held car. */
+  /** After Depart (R7-P14): the lead shows no engine and no held car. */
   departed: boolean;
   /** The trace of the last move: px runs from the lead to the place of contact; toLead points the arrow at the lead. */
   trace: { runs: Pt[][]; toLead: boolean } | null;

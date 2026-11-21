@@ -12,6 +12,7 @@ import { Yard } from './stations/Yard';
 import { Radio } from './stations/Radio';
 import { Settings } from './stations/Settings';
 import { LookUp } from './components/LookUp';
+import { focusViewHeading } from './components/viewFocus';
 
 function DrillRoute() {
   const { domain } = useParams();
@@ -64,9 +65,11 @@ class RenderGuard extends Component<{ children: ReactNode; whole?: boolean }, { 
 }
 
 // ---- The update of the app (U-10; R6 ENG-01) ------------------------------------------------------
-// The worker of a new version waits. The notice says so, and the page reloads only when the learner
-// presses "Reload". When the learner comes back to the app, it asks for a new version: that is an
-// event of the page, not a timer.
+// When a new version is ready, the notice says so, and the page reloads only when the learner presses
+// "Reload". The worker of the new version waits while a copy of the app runs on the old worker; on a
+// page that no worker controls it can take over at once (finding F-8 of the last review of Wave 2c).
+// When the learner comes back to the app, it asks for a new version: that is an event of the page,
+// not a timer.
 function UpdateNotice() {
   const asked = useRef(false);     // the learner pressed "Reload" in this copy of the app
   const takenOver = useRef(false); // the new version controls this copy already: another copy chose it
@@ -86,12 +89,20 @@ function UpdateNotice() {
     },
   });
   if (!needRefresh) return null;
-  // With no new worker in waiting (the new version took control already, or no worker controls this
-  // page), only a reload of the page loads the new version (finding F-8 of the last review of Wave 2c).
+  // "Reload" loads the new version in this copy.
+  // - The new version took control already, or no new worker waits: a reload of the page loads it
+  //   (finding F-8 of the last review of Wave 2c).
+  // - A new worker waits: it takes control first. A copy that a worker controls reloads on the
+  //   "controlling" event of the plugin. A copy that no worker controls gets no such event, so it
+  //   reloads when the new worker is active (finding R-3 of the second reader: two open copies).
   function reload() {
     asked.current = true;
-    if (takenOver.current || !registered.current?.waiting) window.location.reload();
-    else void updateServiceWorker(true);
+    const waiting = registered.current?.waiting;
+    if (takenOver.current || !waiting) { window.location.reload(); return; }
+    if (!navigator.serviceWorker.controller) {
+      waiting.addEventListener('statechange', () => { if (waiting.state === 'activated') window.location.reload(); });
+    }
+    void updateServiceWorker(true);
   }
   return (
     <p className="cb-shell-notice">
@@ -127,27 +138,6 @@ function stationName(pathname: string): string {
   return STATIONS.find(s => s.go === pathname)?.name ?? 'Home';
 }
 
-// Focus goes to the first h2 of the view. The heading gets tabindex="-1", so that a script can
-// focus it. Each station draws its heading with React (Wave 2c). When the view has no h2 yet,
-// focus is on the view, and it moves to the heading when the heading comes, if it is still on the
-// view. The return value stops the wait.
-function focusViewHeading(main: HTMLElement): () => void {
-  const toHeading = (heading: HTMLElement) => {
-    if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
-    heading.focus();
-  };
-  const now = main.querySelector('h2');
-  if (now) { toHeading(now); return () => {}; }
-  main.focus();
-  const wait = new MutationObserver(() => {
-    if (document.activeElement !== main) { wait.disconnect(); return; }
-    const heading = main.querySelector('h2');
-    if (heading) { wait.disconnect(); toHeading(heading); }
-  });
-  wait.observe(main, { childList: true, subtree: true });
-  return () => wait.disconnect();
-}
-
 function Shell() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -155,17 +145,19 @@ function Shell() {
   const lastPath = useRef<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { contentFailed } = useApp();
-  const hadFailed = useRef(false);
+  const failedBefore = useRef(false);
 
-  // After a "Try again" that loads the library, the notice and its control go, and focus fell to the
-  // page body. It now goes to the heading of the view, as after a change of route (finding F-7 of the
-  // last review of Wave 2c). An open dialog moves focus inside itself (LookUp.tsx).
+  // After a "Try again", a notice and its control can go, and focus falls to the page body. Focus
+  // then goes to the heading of the view, as after a change of route: after a try that loads each
+  // file (finding F-7 of the last review of Wave 2c), and after a try that loads only some files, so
+  // that the notice of the station goes and the notice of the shell stays (finding R-1 of the second
+  // reader). The first load moves no focus: a try comes only after a load that failed. An open dialog
+  // moves focus inside itself (LookUp.tsx), and its effect runs first.
   useEffect(() => {
-    const failed = contentFailed.length > 0;
-    const loaded = hadFailed.current && !failed;
-    hadFailed.current = failed;
+    const tried = failedBefore.current;
+    if (contentFailed.length > 0) failedBefore.current = true;
     const lost = !document.activeElement || document.activeElement === document.body;
-    if (loaded && lost && mainRef.current) return focusViewHeading(mainRef.current);
+    if (tried && lost && mainRef.current) return focusViewHeading(mainRef.current);
   }, [contentFailed]);
 
   // Each route sets the page title. Focus does not move at the first load, so the first Tab stop is

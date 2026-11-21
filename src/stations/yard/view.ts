@@ -2,10 +2,11 @@
 // of the Yard chrome. It holds no game state and it imports no engine module. The controller
 // (../yardSim.js) sends plain data, and this file builds the words and the elements from it.
 //
-// A view function finds its element at the time of each call, and it does not test for a missing
-// element. When a learner leaves the Yard, the bridge calls unmount() of the controller first
-// (2c-plan C2): it stops each move, pause, question and sound, so no view function runs after the
-// host is emptied.
+// A view function finds its element at the time of each call. Most view functions do not test for a
+// missing element: when a learner leaves the Yard, the bridge calls unmount() of the controller
+// first (2c-plan C2), and it stops each move, pause, question and sound, so no view function runs
+// after the host is emptied. setCarsNow and setArrival test for their element, because only some
+// jobs have it.
 
 /** The tone of the banner. The view adds the class `yd-` and the tone. */
 export type BannerTone = '' | 'ok' | 'bad' | 'win';

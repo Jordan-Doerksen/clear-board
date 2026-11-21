@@ -2,18 +2,44 @@
 // bridge object of an island, opens the entry of the item in a native modal dialog on top of the
 // current route. The station under it stays mounted, so the session, the Yard job and the Radio run
 // stay. Closing the dialog (Close, Escape) returns focus to the control that opened it.
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import type { LookUpRequest } from '../state/AppContext';
 import { Entry } from './Entry';
+import { focusViewHeading } from './viewFocus';
 
 // U-07 (2c-plan C9): the notice of the shell, with its retry control, for a place in the page that
 // shows nothing true while a content file did not load: the look-up dialog, the Drill, Reference
 // and the Radio test. The words are the words of the shell notice (App.tsx).
 export function LibraryNotice() {
   const { retryContent } = useApp();
-  return <p className="cb-shell-notice"><span>Part of the library did not load.</span><button className="dusk-btn" onClick={retryContent}>Try again</button></p>;
+  const ref = useRef<HTMLParagraphElement>(null);
+  // A try that loads the file of this place takes the notice and its control away. When the control
+  // has focus then, focus goes to the heading of the place: the look-up dialog, or the view (findings
+  // F-7 and R-1). The cleanup of a layout effect runs while the notice is still in the page, so focus
+  // moves before the control goes. A station can take the notice away one render after the change of
+  // the library (the Drill builds its session first), so the shell alone cannot see it.
+  useLayoutEffect(() => {
+    const notice = ref.current;
+    return () => {
+      if (!notice || !notice.contains(document.activeElement)) return;
+      const dialog = notice.closest('dialog');
+      if (dialog) focusDialogHeading(dialog);
+      else { const view = document.getElementById('view'); if (view) focusViewHeading(view); }
+    };
+  }, []);
+  return <p className="cb-shell-notice" ref={ref}><span>Part of the library did not load.</span><button className="dusk-btn" onClick={retryContent}>Try again</button></p>;
+}
+
+// Focus on the heading of a dialog. The tabindex is for this move only: a heading that keeps it takes
+// the first focus of each later look-up (finding R-2 of the second reader).
+function focusDialogHeading(dialog: HTMLDialogElement): void {
+  const heading = dialog.querySelector('h2');
+  if (!heading) return;
+  heading.setAttribute('tabindex', '-1');
+  heading.addEventListener('blur', () => heading.removeAttribute('tabindex'), { once: true });
+  heading.focus();
 }
 
 export function LookUp() {
@@ -53,12 +79,21 @@ export function LookUp() {
     if (ref.current?.open) return;
     const back = opener.current;
     opener.current = null;
-    if (back && back.isConnected) back.focus();
+    if (!back) return;
+    if (back.isConnected) back.focus();
+    else {
+      // The control that opened the dialog is gone: a Reset or a Load in another copy started the
+      // station again under the dialog (finding R-4 of the second reader). Focus goes to the heading
+      // of the view, as after a change of route (C7).
+      const view = document.getElementById('view');
+      if (view) focusViewHeading(view);
+    }
   }
 
   // The head of the dialog stays at its top edge (job U1-B), and a long name takes more lines at a
   // narrow width. The dialog gets the height of its head, so that the scroll keeps a control that has
-  // focus below the head (finding F-6 of the last review of Wave 2c; the rule of .cb-dialog).
+  // focus below the head (finding F-6 of the last review of Wave 2c; the rule of .cb-dialog > .dusk-panel-body
+  // in clear-board.parts.css).
   useEffect(() => {
     const dialog = ref.current;
     const head = dialog?.querySelector<HTMLElement>('.dusk-panel-head');
@@ -82,8 +117,7 @@ export function LookUp() {
     if (!dialog?.open || !itemId) return;
     const active = document.activeElement;
     if (active && active !== document.body && dialog.contains(active)) return;
-    const heading = dialog.querySelector('h2');
-    if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus(); }
+    focusDialogHeading(dialog);
   }, [itemId]);
   return (
     <dialog className="cb-dialog cb-shell-lookup" ref={ref} aria-labelledby={headingId} onClose={onClose}>

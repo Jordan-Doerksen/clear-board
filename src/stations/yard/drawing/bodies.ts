@@ -2,8 +2,8 @@
 //
 // Each function here is pure. It reads the state of model.js, the job of puzzles.js and the motion
 // values that the controller sends (anim, cine), and it writes nothing. It calls no function of
-// model.js. The text mirror of a later job can state the same facts as the picture from these
-// functions (yardFacts, routeReaches, trackCuts).
+// model.js. The text mirror and the status region (access.ts) state the same facts as the picture
+// from these functions (yardFacts, routeReaches).
 //
 // Units: the units of geometry.js. On a track, x is the x of geometry.js. On the lead, x is the x of
 // the lead (LEAD_ROUTE runs from LEAD_LEFT to the right).

@@ -177,7 +177,7 @@ option of each. A brief that says "open for the lead" for one of these names fol
 | `RESET-ASK` | "Reset" of the Yard discards the moves with no question. | Row U-12 names "Watch optimal" and a change of job only. Reset is the request to discard. |
 | `LOOK-MIRROR` | The look harness names a select by its label when it has no title, and does not count visually hidden text as page words. The mirror of the Yard gets a check of its own. G1-2. | The Yard shots listed the mirror words as new page words. |
 | `LOOK-REGISTER` | The element id `vite-plugin-pwa:register-sw` may go (`idsMayGo`). G1-2. | Row U-10 registers the worker from the app. The plugin no longer injects the element. |
-| `WEAK-REVIEW` | Not built. A review round with few items can build a question with one option, a repeated option or an option of another kind. No right answer is marked wrong. | No approved row covers it. It goes to the final report as a found defect. |
+| `WEAK-REVIEW` | Not built. A review round with few items can build a question with one option, a repeated option or an option of another kind. No right answer is marked wrong. | No approved row covers it. It goes to the final report as a found defect. The lead fixed it later in `3076815` (finding F-1 of the last review of Wave 2c). |
 
 ### 2.7 Rulings at the merges of Wave 2c-2 (2026-11-21)
 
