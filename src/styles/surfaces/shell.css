@@ -7,9 +7,11 @@
    today. It keeps the padding of the Dusk part and its place in the window grid. */
 .cb-app .cb-shell-win > .dusk-main { display: block; }
 
-/* The content area takes focus at each change of the route. The window cuts each pixel outside
-   its box, so the ring of the content area is drawn inside its edge, at the width of the ring. */
-.cb-app .cb-shell-win > .dusk-main:focus-visible { outline-offset: -3px; }
+/* The content area can take focus (the target of the skip link, and the place of focus until the
+   heading of an island is there). It draws no outline: a ring round the whole view tells nothing
+   (U-29, R5 A11Y-23). The heading of the view takes the focus ring. */
+.cb-app .cb-shell-win > .dusk-main:focus,
+.cb-app .cb-shell-win > .dusk-main:focus-visible { outline: none; }
 
 /* ---- the skip link ---------------------------------------------------------------------------
    The Dusk skip link has a see-through wash. An opaque ground under the wash hides the title bar

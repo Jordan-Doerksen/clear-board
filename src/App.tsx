@@ -3,7 +3,7 @@ import { Component, useEffect, useId, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AppProvider, useApp } from './state/AppContext';
-import { clearProfileKeepCopy, saveTextFile, storedDataFile } from './core/store';
+import { clearProfileKeepCopy, saveTextFile, storedDataFile, STATIONS } from './core/store';
 import { Home } from './stations/Home';
 import { Reference } from './stations/Reference';
 import { Drill } from './stations/Drill';
@@ -80,18 +80,54 @@ function Notices() {
   );
 }
 
+// ---- The page title and the focus of a route (U-29, 2c-plan C7; R5 A11Y-22, A11Y-23) -------------
+// The title is the station name of Home, then " — Clear Board". Home has the name "Home".
+function stationName(pathname: string): string {
+  if (pathname === '/drill' || pathname.startsWith('/drill/')) return 'Drill';
+  return STATIONS.find(s => s.go === pathname)?.name ?? 'Home';
+}
+
+// Focus goes to the first h2 of the view. The heading gets tabindex="-1", so that a script can
+// focus it. An island draws its heading after its module loads: until the heading is there, focus
+// is on the view, and it moves to the heading when the heading comes, if it is still on the view.
+// The return value stops the wait.
+function focusViewHeading(main: HTMLElement): () => void {
+  const toHeading = (heading: HTMLElement) => {
+    if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
+    heading.focus();
+  };
+  const now = main.querySelector('h2');
+  if (now) { toHeading(now); return () => {}; }
+  main.focus();
+  const wait = new MutationObserver(() => {
+    if (document.activeElement !== main) { wait.disconnect(); return; }
+    const heading = main.querySelector('h2');
+    if (heading) { wait.disconnect(); toHeading(heading); }
+  });
+  wait.observe(main, { childList: true, subtree: true });
+  return () => wait.disconnect();
+}
+
 function Shell() {
   const location = useLocation();
   const navigate = useNavigate();
   const mainRef = useRef<HTMLElement>(null);
+  const lastPath = useRef<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // Move focus to the view on navigation (screen-reader + keyboard friendly).
-  useEffect(() => { mainRef.current?.focus(); }, [location.pathname]);
+  // Each route sets the page title. Focus does not move at the first load, so the first Tab stop is
+  // "Skip to content". After a change of route, focus goes to the heading of the new view.
+  useEffect(() => {
+    document.title = `${stationName(location.pathname)} — Clear Board`;
+    const before = lastPath.current;
+    lastPath.current = location.pathname;
+    if (before === null || before === location.pathname) return;
+    if (mainRef.current) return focusViewHeading(mainRef.current);
+  }, [location.pathname]);
 
   return (
     <>
-      <a className="dusk-skip cb-shell-skip" href="#view" onClick={e => { e.preventDefault(); mainRef.current?.focus(); }}>Skip to content</a>
+      <a className="dusk-skip cb-shell-skip" href="#view" onClick={e => { e.preventDefault(); if (mainRef.current) focusViewHeading(mainRef.current); }}>Skip to content</a>
       <div className="dusk-stage dusk-stage--app">
         <section className="dusk-win cb-win cb-shell-win">
           <header className="dusk-titlebar" role="banner">

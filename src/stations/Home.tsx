@@ -1,15 +1,7 @@
 // Home — the qualification path. Mastery bars per domain + the ways to learn. (vanilla renderHome)
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
-import { DOMAINS, drillable, stageFor } from '../core/store';
-
-const STATIONS = [
-  { go: '/reference', icon: '📖', name: 'Reference', sub: 'Look anything up — cited' },
-  { go: '/drill', icon: '🎯', name: 'Drill', sub: 'Adaptive practice' },
-  { go: '/yard', icon: '🚂', name: 'The Yard', sub: 'Work the cuts' },
-  { go: '/signals', icon: '🚦', name: 'Signals', sub: 'Read the aspect' },
-  { go: '/radio', icon: '📻', name: 'Radio walkthrough', sub: 'Back to a joint' },
-];
+import { DOMAINS, drillable, stageFor, STATIONS } from '../core/store';
 
 export function Home() {
   const { content, contentFailed, profile } = useApp();

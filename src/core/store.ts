@@ -13,6 +13,16 @@ export const DOMAINS: DomainDef[] = [
   { id: 'operating',   name: 'Operating', desc: 'Speeds, crew duties, time, crossings, bulletins.', live: true },
 ];
 
+// The stations of Home, in the order of Home. The shell reads the names for the page title of each
+// route (2c-plan C7).
+export const STATIONS = [
+  { go: '/reference', icon: '📖', name: 'Reference', sub: 'Look anything up — cited' },
+  { go: '/drill', icon: '🎯', name: 'Drill', sub: 'Adaptive practice' },
+  { go: '/yard', icon: '🚂', name: 'The Yard', sub: 'Work the cuts' },
+  { go: '/signals', icon: '🚦', name: 'Signals', sub: 'Read the aspect' },
+  { go: '/radio', icon: '📻', name: 'Radio walkthrough', sub: 'Back to a joint' },
+];
+
 export const PROFILE_KEY = 'cb.profile.v1';
 // The second key: a copy of a stored profile that the app could not use whole (it was repaired or
 // could not be read), or the profile before "Start fresh". The app reads it only to save it to a

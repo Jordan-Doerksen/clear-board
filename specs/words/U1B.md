@@ -30,3 +30,4 @@ No line here states, corrects or cites a rule. The words were not checked by the
 | U-07 | A domain tile when a content file did not load | Coming soon | no words on the tile; the notice of the shell says what happened |
 | U-07 | The host of a station island that did not load | none (the station is blank) | This station did not load. |
 | U-07 | The control of that message | none | Reload |
+| U-29 | The page title of each route (the station names of Home, 2c-plan C7) | Clear Board — become a conductor, free (on each route) | Home — Clear Board · Reference — Clear Board · Drill — Clear Board · The Yard — Clear Board · Signals — Clear Board · Radio walkthrough — Clear Board. The title in index.html stays until the app runs. |
