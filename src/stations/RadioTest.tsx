@@ -57,7 +57,7 @@ export function RadioTest() {
   const missedRef = useRef<Set<number>>(new Set());
   const startRef = useRef(0);
 
-  // radioSim is loaded dynamically here as well as in guided mode, so the byte-for-byte island
+  // radioSim is loaded dynamically here as well as in guided mode, so the island module
   // keeps its own code-split chunk instead of being pulled into the main bundle.
   const [allSteps, setAllSteps] = useState<Step[] | null>(null);
   useEffect(() => {

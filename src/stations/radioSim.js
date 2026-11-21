@@ -1,6 +1,6 @@
 // Clear Board — Radio station. Ported VERBATIM from the CN Conductor Trainer "Back to a Joint"
 // walkthrough. The call wording is real-world-accurate and tuned by the SME — do NOT reword it.
-// One walkthrough for now (Jordan: weakest section, port as-is, grow later).
+// One walkthrough for now (the SME: weakest section, port as-is, grow later).
 
 const RADIO_CSS = `
 .radio-wrap{ --rbg:#14181d; --rcard:#1d222b; --rcard2:#232a34; --rline:#2c3340; --rink:#eef2f6;

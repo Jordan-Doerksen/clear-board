@@ -1,6 +1,6 @@
 // Radio — the "Back to a Joint" procedure, in two modes.
-//   Guided      — the SME-tuned walkthrough. Imperative island (./radioSim.js is byte-for-byte
-//                 vanilla), and UNGRADED on purpose: REVAMP §5 — merging the walkthrough with
+//   Guided      — the SME-tuned walkthrough. Imperative island (./radioSim.js: mount(root, ctx);
+//                 its STEPS wording is frozen), and UNGRADED on purpose: REVAMP §5 — merging the walkthrough with
 //                 grading turns a confidence-builder into a test.
 //   Call it yourself — the same procedure with the call hidden; this is where mastery is earned.
 import { useState } from 'react';
