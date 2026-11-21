@@ -16,13 +16,13 @@ overwhelm. One product, one source of truth, one progress.
 ### D-0002 — Spine = the qualification path
 **Chosen:** a trainee → test-ready progression with one mastery profile and a progress-map home.
 **Weighed:** one-living-yard sim; study→drill→certify course; pure adaptive-brain.
-**Why:** matches the emotional goal (confidence, *"not scared"*), motivates return, and
+**Why:** matches the goal of confidence, motivates return, and
 naturally orders disparate content into a journey rather than a launcher.
 
 ### D-0003 — Free, always — tip jar only
 **Chosen:** every station free; no paid tier; a Ko-fi / Buy-Me-a-Coffee tip jar.
 **Weighed:** free core + paid Pro; a commercial store product.
-**Why:** Jordan's call — the mission is helping people the rulebook failed *become railroaders*,
+**Why:** the owner's call — the mission is helping people the rulebook failed *become railroaders*,
 not profit. Also removes the ethics of paywalling safety knowledge, and deletes the entire
 free/paid architecture.
 **Consequence:** cror-signals stops being a separate paid product (its content folds in free);
@@ -55,22 +55,22 @@ with their citations intact.
 SME/CROR-verified. The rebuild is the *shell + unified core + migration*, not a re-write of
 the rules. (mitigates F1)
 
-### D-0008 — Jordan (SME) is the verifier; what "verified" means
+### D-0008 — The SME is the verifier; what "verified" means
 **Chosen:** `trust:"verified"` = the item is cited to a specific CROR rule (or explicitly flagged GOI)
-and has been cross-checked by Jordan against the **Jan 2025 CROR** by him. Jordan holds the flag;
-he re-checks affected items when the CROR is reissued.
+and has been cross-checked by the SME against the **Jan 2025 CROR**. The SME holds the flag and
+re-checks the affected items when the CROR is reissued.
 **Why:** safety-critical content needs a named, accountable verifier and a concrete bar, not a vibe. (B2)
 
 ### D-0009 — Migration carries honest trust state; `needs-review` is reference-only
 **Chosen:** content migrates with its *real* current status. Anything not fully verified — the 4
 unencoded signal indications (410, 418, 433A, 440), the `ASPECTS_DRAFT` set, the 407 conflict —
 migrates as `needs-review`: it may appear in **Reference** (clearly flagged) but **never** in a
-graded Drill/Exam until Jordan verifies it.
+graded Drill/Exam until the SME verifies it.
 **Weighed:** copy everything in as verified (fast, wrong).
 **Why:** F1. A wrong rule taught as correct is the cardinal sin; honesty over coverage. (B1)
 
 ### D-0010 — CROR verbatim text may ship (it is a public document)
-**Chosen:** the CROR is a **public regulatory document** (Jordan, SME), so `citation.verbatim`
+**Chosen:** the CROR is a **public regulatory document** (the SME), so `citation.verbatim`
 text may be bundled in the public offline app. The official **PDF** is still never committed
 (D-0007 / existing rule). Plain-language stays the front door by *pedagogy* (Principle 1), with
 verbatim one tap deeper.
@@ -90,7 +90,7 @@ familiarity — full numbers in SPEC §Retention.
 
 ### D-0013 — Exam + "test-ready" are deferred past V1
 **Chosen:** V1 ships **no Exam station and makes no "test-ready" claim.** The per-domain mastery
-threshold + retention bar for `testReady` are set *with Jordan (SME)* when the Exam station is built.
+threshold + retention bar for `testReady` are set *with the SME* when the Exam station is built.
 **Why:** B5/F3 — a safety claim ("you're ready") won't ship on a guessed number.
 
 ### D-0014 — Solvability verification is a committed harness + pre-ship checklist
@@ -111,8 +111,7 @@ offline PWA for GitHub Pages and (later) a Tauri desktop exe. The React pilot li
 `../clear-board-react` until it reaches parity, then it replaces this folder (the vanilla build
 becomes reference, then retires).
 **Weighed:** stay vanilla ES modules (D-0005); Electron instead of Tauri.
-**Why:** Jordan is standardizing on React for tools with real UI state, and on a clean-exe stack.
-Vite still ships a static, offline-first PWA (the *spirit* of D-0005 — train-side offline, zero
+**Why:** Vite still ships a static, offline-first PWA (the *spirit* of D-0005 — train-side offline, zero
 hosting cost), and Tauri adds the ~5 MB clean exe Electron can't. React's default escaping also
 removes the hand-rolled `esc()` from every station — a safety win for rendering verbatim CROR text.
 **Consequence:** the SPEC §Hard-constraints "No build step" line is superseded for this project;
@@ -130,11 +129,11 @@ Drill · The Yard · Radio) + settings + profile run on React, 0 console errors.
 VERIFIED RUNNING (2026-06-24)** — `npm run tauri build` produces a self-contained `Clear Board.exe`
 (~18 MB, OS WebView2) + a `Clear Board_0.1.0_x64-setup.exe` NSIS installer (~4 MB); launched the exe,
 native window "Clear Board" opened, 35 MB resident, no crash. Build needed a complete MinGW-w64 on
-PATH (`C:\projects\.toolchains\mingw64\bin`) — rustup's bundled GNU MinGW lacks `as.exe`.
+PATH — rustup's bundled GNU MinGW lacks `as.exe`.
 **CONSOLIDATED (2026-06-24)** — the React build IS now `clear-board` (the vanilla folder was deleted;
 its tree is preserved in git history before this rebuild commit). Pushed to `main` and the repo's
 GitHub Pages switched from legacy root-serve to a GitHub Actions build (`.github/workflows/deploy.yml`);
-verified live at https://jordan-doerksen.github.io/clear-board/ serving the React bundle. `map.md` updated.
+verified live on GitHub Pages, serving the React bundle. `map.md` updated.
 Remaining: PWA service worker (vite-plugin-pwa already a dep), custom app icon (currently default Tauri
 logo), and the Observatory card-collapse (four rail cards → one Clear Board card, tied to retiring the
 old rail apps per D-0011).
@@ -172,7 +171,7 @@ worked. This is the single biggest "one brain, not panels" fix (REVAMP-DESIGN §
 `p2-kick` win moves Switching 0 → 0.017 and Securement 0 → 0.011. The nudge is deliberately modest
 (one rep → `fam` ≈ 0.03, averaged over the domain) and still decays, so sim completion alone can never
 certify a rule.
-**Open (Jordan / SME):** should an over-par or refusal-heavy win grade *softer* than a clean one, and
+**Open (the SME):** should an over-par or refusal-heavy win grade *softer* than a clean one, and
 what exact `fam` weight? SM-2-lite is boolean today; this needs a quality signal. Tracked as tuning,
 not a blocker.
 
@@ -222,7 +221,7 @@ severity-ladder/remediation-queue (REVAMP §6) stays deferred.
 But the data item titled "Rule 12" / cited "CROR 12" (which *is* hand signals in the CROR) carries the
 plain text *"Doubt = STOP… on the radio (123.2(v))"* — the 123.2 doubt principle, **not** hand signals.
 So it is mislabeled or mis-authored, not merely mis-filed; the correct fix (retitle/recite, or rewrite
-the plain text) is a CROR-accuracy call left to Jordan/SME — never guessed.
+the plain text) is a CROR-accuracy call left to the SME — never guessed.
 **Verified live:** signals capped at 0.33 with no aspect recalled, lifts to full on first recall; the
 securement drill now builds a 5-question session (was dead); cross-domain + signals drills unaffected;
 0 console errors; `npm run check` green.
@@ -244,7 +243,7 @@ values (`+0.05` correct / `−0.2` miss — no easy/hard buttons yet).
 wrong text). The verified source made a proper, non-guessed fix possible.
 **Why:** safety-critical content must be right *and* sourced; cramming must not read as retention; the
 retention engine must provably match its docs.
-**rule.12 domain — flagged for Jordan:** placed in `operating` to mirror the verified source's own
+**rule.12 domain — flagged for the SME:** placed in `operating` to mirror the verified source's own
 classification (its tags were signals / hand-signals / switching). If you'd rather it sit under `signals`
 or `switching`, that's a one-line change — flagging the bucket, not the content.
 **Verified live:** rule.12 reference shows the hand-signals text in `operating`; the marathon gate holds (a
@@ -265,7 +264,7 @@ order; hand-tagging all 226 questions with a severity.
 The end-of-session review is contained, calm (the audience is anxious learners — a miss is a UX gap to
 scaffold, never a scolding), and rides the existing SM-2 + due-gate: a missed item is now due, so the review
 correctly re-advances it on a clean recall.
-**Deferred — flagged for SME/Jordan:** the full S1/S2/S3 ladder requires deciding which rules are
+**Deferred — flagged for the SME:** the full S1/S2/S3 ladder requires deciding which rules are
 safety-critical (the same kind of CROR-judgment call as rule.12 — won't guess); and Yard mistake-attempt
 tracking (repeated illegal-move attempts feeding remediation). `severity.ts`'s core/standard split is a
 reviewable starting point, not the final ladder.
@@ -286,13 +285,13 @@ genuinely safety-relevant; to make S3 more selective, tune `DOMAIN_SEV` / `SEV_O
 default S2 with S3 only for the STOP/Restricting family).
 **Weighed:** hand-classifying all 100 rules (false precision); a live mid-session re-queue that jumps the
 SM-2 due order (deferred — the end-of-session review + S3-first order already weights safety).
-**Why:** Jordan asked for the real S1/S2/S3. Domain-default + overrides is the honest, reviewable shape — he
-owns the classification and can retune any rule in one line. The Yard already gives the strongest possible
+**Why:** the owner asked for the real S1/S2/S3. Domain-default + overrides is the honest, reviewable shape — the
+SME owns the classification and can retune any rule in one line. The Yard already gives the strongest possible
 S3 response (it *blocks* unsafe moves) and an over-par win already reads as gentle S1, so the ladder's main
 learner-facing home is the Drill.
 **Deferred:** Yard refusal severity-tagging (emphasis only — moves are already blocked + cited); the live
 mid-session S3 re-queue.
-**rule.12 = `operating`: CONFIRMED by Jordan** (was flagged in D-0022). Resolved.
+**rule.12 = `operating`: CONFIRMED by the SME** (was flagged in D-0022). Resolved.
 **Verified live:** `severityOf` spot-checks all correct (rule.112 / 114 / 439 / 12 / 123.2 → S3; rule.405 /
 104.1 → S2; definitions → S1); a securement miss shows the S3 cue; `tsc -b` + lint + `npm run check` green;
 0 console errors.
