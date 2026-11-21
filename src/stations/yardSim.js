@@ -1,10 +1,11 @@
 // yardSim.js — the controller of the Yard station.
 //
 // It holds the game state, the move logic, the records, the sound calls and the event wiring.
-// It exports mount(root, ctx) and nothing else. It works with these files in ./yard/:
+// It exports mount(root, ctx) and unmount(), and nothing else. It works with these files in ./yard/:
 //   view.ts            each markup string, each class name and each DOM write of the chrome
 //   yard.css           the style of the chrome
-//   draw.ts            the drawing: the canvas, the hit test of a click and the one draw call
+//   draw.ts            the drawing: the picture, the hit test of a click and the one draw call
+//   access.ts          the access layer: the six switch buttons, the text mirror, the status region
 //   anim.js, sound.js  the tween driver and the sounds
 //   model.js, puzzles.js, geometry.js, solver.js
 //                      the engine. These four modules are frozen: no job edits them. This file
@@ -16,7 +17,8 @@
 //
 // This file runs no statement of its own when it is imported. Its imports have two effects:
 // the two style files go into the page (yard.css, and drawing/drawing.css through draw.ts),
-// and sound.js reads the stored mute value.
+// and sound.js reads the stored mute value. The station wrapper (Yard.tsx) also imports yard.css,
+// so the build puts that file in the sheet of the app.
 
 import { TRACK_IDS, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
 import { freshState, lineSwitch, canPull, canSpot, canKick, canSecure, spotPlan, pull, spot, kick, secure, checkWin, unsecuredGoal, grade } from './yard/model.js';
@@ -26,6 +28,7 @@ import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
 import './yard/yard.css';
 import { createView } from './yard/view.ts';
 import { createDrawing } from './yard/draw.ts';
+import { createMirror, createLive, createSwitchButtons } from './yard/access.ts';
 
 // --- Clear Board: map the engine's rule chips → the content-library items a puzzle
 // exercises, so a genuine win feeds the SAME switching/securement mastery the Drill grades
@@ -46,23 +49,47 @@ function masteryItemsFor(puzzle) {
   return [...ids];
 }
 
+// The teardown of the Yard that is mounted now, or null (UNMOUNT, 2c-plan C2).
+let teardown = null;
+
+// Stops each timer, each animation frame, each loop and each listener of the mounted Yard. The bridge
+// calls it before it empties the host. A second call does nothing. One limit: sound.js holds the
+// timers of the notes of the win melody, so a note that has not played yet still starts after the
+// call, the last one at most 270 ms after the win.
+export function unmount() {
+  if (!teardown) return;
+  const stop = teardown;
+  teardown = null;
+  stop();
+}
+
 export function mount(root, ctx) {
-  // The view puts the scoped markup into the container Clear Board gave us.
+  unmount();                          // one Yard at a time
+  // The view puts the scoped markup into the container Clear Board gave us. The way back to Home and
+  // the heading are drawn by the station wrapper (Yard.tsx).
   const view = createView(root);
 
-  // Back button → Clear Board home.
-  view.onGo((route) => ctx.go(route));
+  // Reduced motion (P-01, MOTION-STOP-OWNER). The setting is read at the time of each effect, not at
+  // mount, so that a change in Settings acts on the next effect (2c-plan C4: the app sets the value).
+  // With it on, each move, kick, arrival, departure and watched step ends at once: play() runs each
+  // step one time with its end value, and the end state is painted with its words and the trace of
+  // the last move. No effect is slower. With it off, each effect keeps its times.
+  const still = () => !!(ctx.settings && ctx.settings.reduce);
 
-  // The reduce setting is read one time, here. With the setting on, the speed factor is 6.
-  // anim.js multiplies each duration by the factor, so a move takes about 6 times longer and
-  // motion does not stop. This is a known defect. It stays as it is in this file for now.
-  const reduce = !!(ctx.settings && ctx.settings.reduce);
-  const fast = () => reduce ? 6 : 1;          // setSpeed(6) = 6 times slower; setSpeed(1) = normal
-
-  // The drawing adapter makes the canvas inside the frame that the view gives.
+  // The drawing adapter makes the picture inside the frame that the view gives.
   const drawing = createDrawing(view.drawHost, { onPick });
+  // The access layer (P-03): the text mirror of the yard, and the one status region. The region says
+  // the result of each move and the words of each refusal, with the words of the banner as they are.
+  const mirror = createMirror(view.el('yard-mirror'));
+  const live = createLive(view.el('yard-live'));
+  // The six switch buttons (P-02): a press, Enter or Space throws the switch through onPick, the path
+  // of a click on the picture. The buttons move with each layout of the picture.
+  const switches = createSwitchButtons(drawing, view.drawHost, TRACK_IDS, onPick);
 
   let puzzle, state, anim = null, busy = false, fromDemo = false;
+  // watching: the optimal line plays now. watched: the state of this job came from the optimal line.
+  // saved: a win of this run is in the profile. (U-12: the Yard asks before it discards a run.)
+  let watching = false, watched = false, saved = false;
   let gen = 0, stopAnim = null;       // gen invalidates in-flight loops on (re)load; stopAnim aborts the live tween
   let ordered = true;                 // is the switch list verified? (true when there's no list to check)
   const flagged = new Set();          // indices the player has flagged as wrong
@@ -76,20 +103,28 @@ export function mount(root, ctx) {
     cineCancel = cineTimer = null; cine = null;
   }
 
-  function load(p) {
+  // `say` is true when the learner asked for the load (a new job, Reset): the region then says the
+  // job and the readout at its start.
+  function load(p, say = false) {
     gen++;                              // invalidate any in-flight move / watch-optimal loop
     if (stopAnim) stopAnim();          // abort the live tween (mid-move, depart, etc.)
     stopAnim = null;
     cancelCine();
-    puzzle = p; state = freshState(p); anim = null; busy = false; setSpeed(fast());
+    puzzle = p; state = freshState(p); anim = null; busy = false; setSpeed(1);
+    watching = false; watched = false; saved = false; view.setWatching(false);
     ordered = !p.listed; flagged.clear();
     view.setDepart({ shown: !!p.goal.depart, enabled: false });
     renderRules(); renderOrder(); syncBuilder(); paint(); banner('', '');
-    view.setReadout({ moves: 0, par: p.par, joints: 0 });
+    const readout = view.setReadout({ moves: 0, par: p.par, joints: 0 });
+    if (say) live.say(`${p.title}. ${readout}.`);
     arrivalCinematic();
   }
 
-  function paint() { drawing.paint(state, puzzle, { anim, cine }); }
+  // The mirror and the names of the switch buttons state the model at each paint with no motion frame.
+  function paint() {
+    drawing.paint(state, puzzle, { anim, cine });
+    if (!anim && !cine) { mirror.update(state, puzzle); switches.setLining(state.lined); }
+  }
 
   // Inbound road train (only on `inbound` puzzles): in off the main, STOP, set out a
   // few cars onto the set-out track, then DEPART out the lead — your power is off-scene
@@ -100,22 +135,25 @@ export function mount(root, ctx) {
     if (!puzzle.inbound) { paint(); return; }
     const lenR = routeLength(THROUGH_ROUTE), stopS = lenR - 110;
     cine = { introS: -220, setoutCars: puzzle.inbound.cars, to: puzzle.inbound.to, phase: 'arrive', spotProg: 0 };
-    const finish = () => { cancelCine(); paint(); };
-    cineCancel = play([
+    let ended = false;
+    const finish = () => { ended = true; cancelCine(); paint(); };
+    const cancel = play([
       { dur: 2200, fn: (t) => { if (cine) { cine.phase = 'arrive'; cine.introS = -220 + (stopS + 220) * t; } } },   // arrive & stop
       { dur: 1100, fn: (t) => { if (cine) { cine.phase = 'setout'; cine.spotProg = t; } } },                        // spot the cars in
       { dur: 1700, fn: (t) => { if (cine) { cine.phase = 'depart'; cine.introS = stopS + (lenR + 420 - stopS) * t; } } }, // depart out the lead
-    ], { onFrame: paint, onDone: finish });
-    cineTimer = setTimeout(finish, 5800);
+    ], { onFrame: paint, onDone: finish, still: still() });
+    // With reduced motion the arrival has ended in the call above: no frame and no timer stay.
+    if (!ended) { cineCancel = cancel; cineTimer = setTimeout(finish, 5800); }
   }
 
   // --- input: line a switch by clicking its target -------------------------
   // The drawing adapter calls this for each click on the drawing: with the track id of the
   // switch that was hit, or with null. A click that hits no switch still resumes the sound.
+  // A switch button calls it with its track id.
   function onPick(id) {
     if (busy || cine) return;
     resume();
-    if (id !== null) { lineSwitch(state, id); sfx.points(); paint(); }
+    if (id !== null) { lineSwitch(state, id); sfx.points(); paint(); live.say(`${id} switch, lined ${state.lined[id]}`); }
   }
 
   // --- the move builder ----------------------------------------------------
@@ -124,9 +162,19 @@ export function mount(root, ctx) {
     const kind = $('act').value, id = $('track').value, n = +$('count').value;
     doMove(kind, id, n);
   });
-  $('optimal').addEventListener('click', () => { resume(); watchOptimal(); });
+  // "Watch optimal" plays the line; while it plays, the same button stops it (U-12, A11Y-29). The
+  // stop loads the job again at its start. Before the line discards moves of the learner, the Yard
+  // asks; No keeps the moves.
+  $('optimal').addEventListener('click', () => {
+    resume();
+    if (watching) { load(puzzle, true); return; }
+    if (busy || cine || !puzzle.opt) return;
+    if (!atRisk()) { watchOptimal(); return; }
+    const g = gen;
+    view.ask(`Watch the optimal line? You lose your ${movesWords()} on this job.`, (yes) => { if (yes && gen === g) watchOptimal(); });
+  });
   $('depart').addEventListener('click', () => { resume(); departOut(); });
-  $('reset').addEventListener('click', () => { if (!busy) load(puzzle); });
+  $('reset').addEventListener('click', () => { if (!busy) load(puzzle, true); });
   $('mute').addEventListener('click', () => { view.setMuted(toggleMute()); });
 
   // Full validation up front (lining + count + foul/clearance) so a fouling move is
@@ -136,7 +184,10 @@ export function mount(root, ctx) {
     return kind === 'pull' ? canPull(state, id, n) : kind === 'kick' ? canKick(state, id, n) : canSpot(state, id, n);
   }
 
-  function animateMove(kind, id, n) {
+  // `quiet` is the reduced-motion value that the caller read for this move: each step of the move
+  // then runs one time at its end value, in this call. Each step still runs, because the step after
+  // the run in commits the move to the model (commitOnce).
+  function animateMove(kind, id, n, quiet) {
     return new Promise((resolve) => {
       const i = TRACK_IDS.indexOf(id);
       const route = engineRoute(i);
@@ -199,26 +250,40 @@ export function mount(root, ctx) {
           anim = { route, engS: lerp(engIn, restEnd, t), cut, shove: null };
         },
       });
-      const cancel = play(phases, { onFrame: paint, onDone: () => { stopAnim = null; anim = null; resolve(); } });
-      stopAnim = () => { cancel(); resolve(); };          // load() can abort this move mid-flight
+      let ended = false;
+      const cancel = play(phases, { onFrame: paint, still: quiet, onDone: () => { ended = true; stopAnim = null; anim = null; resolve(); } });
+      if (!ended) stopAnim = () => { cancel(); resolve(); };   // load() can abort this move mid-flight
     });
   }
 
   function doMove(kind, id, n) {
     if (busy || cine) return;
-    if (!ordered) { sfx.refuse(); banner('Verify the switch list first — flag the bad lines and certify the order.', 'bad'); return; }
+    if (!ordered) {
+      const text = 'Verify the switch list first — flag the bad lines and certify the order.';
+      sfx.refuse(); banner(text, 'bad'); live.say(text); return;
+    }
     const chk = precheck(kind, id, n);
     if (!chk.ok) { sfx.refuse(); refusalBanner(chk.msg); return; }
     // SECURE is the conductor on the ground, not an engine leg — no animation, no move cost.
     if (kind === 'secure') { secure(state, id); sfx.points(); afterMove(); return; }
     busy = true;
     const g = gen;
-    animateMove(kind, id, n).then(() => { if (gen !== g) return; busy = false; afterMove(); });
+    animateMove(kind, id, n, still()).then(() => { if (gen !== g) return; busy = false; afterMove(); });
   }
+
+  // The moves of the learner on this job are at risk: a change of job or the watched line would
+  // discard them. Moves of the watched line and a run with a saved win are not at risk.
+  function atRisk() { return state.moves > 0 && !watched && !saved; }
+  const movesWords = () => `${state.moves} move${state.moves === 1 ? '' : 's'}`;
 
   // Auto-line the ladder for the route to `id`: its switch reverse, all others normal.
   function autoLine(id) { for (const t of TRACK_IDS) state.lined[t] = (t === id) ? 'reverse' : 'normal'; }
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  // A pause of the watched line. The teardown clears each pause that has not ended.
+  const pauses = new Set();
+  const sleep = (ms) => new Promise((r) => {
+    const t = setTimeout(() => { pauses.delete(t); r(); }, ms);
+    pauses.add(t);
+  });
 
   // ▶ Watch optimal — reset, then auto-line + play the fewest-moves line in slow-mo.
   async function watchOptimal() {
@@ -226,49 +291,68 @@ export function mount(root, ctx) {
     load(puzzle);
     const myGen = gen;                 // if the puzzle is switched mid-demo, bail out cleanly
     cancelCine();                      // skip the arrival cinematic for the demo
+    watching = true; watched = true; view.setWatching(true);
     if (!ordered) {                                   // auto-certify the list for the demo
       puzzle.listed.forEach((e, i) => { if (e.error) flagged.add(i); });
       ordered = true; renderOrder();
     }
-    busy = true; setSpeed(reduce ? 6 : 1.7);
-    banner(`▶ Watching the optimal line — par ${puzzle.par} move${puzzle.par === 1 ? '' : 's'}`, 'ok');
+    busy = true; setSpeed(1.7);
+    const watchText = `▶ Watching the optimal line — par ${puzzle.par} move${puzzle.par === 1 ? '' : 's'}`;
+    banner(watchText, 'ok'); live.say(watchText);
     for (const [act, trk, n] of puzzle.opt) {
       if (gen !== myGen) return;
       autoLine(trk); sfx.points(); paint(); await sleep(520);
       if (gen !== myGen) return;
       // SECURE has no engine movement to animate — show it as the beat it is.
-      if (act === 'secure') { secure(state, trk); banner(state.msg, 'ok'); paint(); await sleep(420); }
-      else await animateMove(act, trk, n);
+      if (act === 'secure') { secure(state, trk); banner(state.msg, 'ok'); paint(); live.say(state.msg); await sleep(420); }
+      else {
+        // With reduced motion the step ends at once. Its end state is painted with no frame, so
+        // the trace of the step shows during the pause after it.
+        const quiet = still();
+        await animateMove(act, trk, n, quiet);
+        if (gen !== myGen) return;
+        if (quiet) paint();
+      }
       if (gen !== myGen) return;
-      view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
+      const readout = view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
+      if (act !== 'secure') live.say(`${state.msg} ${readout}.`);
       await sleep(320);
     }
     if (gen !== myGen) return;
-    setSpeed(fast()); busy = false;
+    setSpeed(1); busy = false;
+    watching = false; view.setWatching(false);
     fromDemo = true;                                                  // a watched line is not the player's win — don't grade mastery
     afterMove();
     if (puzzle.goal.depart && checkWin(state, puzzle)) departOut();   // finish the demo by departing
     fromDemo = false;
   }
 
+  // The banner shows the last of its texts. The region says the result of the move, the readout and
+  // the text that followed, in one message (R7 F14), so that no part of the result is lost.
   function afterMove() {
-    view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
+    const readout = view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
+    const said = [state.msg, `${readout}.`];
     banner(state.msg, 'ok');
     syncBuilder(); paint();
     const done = checkWin(state, puzzle);
     if (done && puzzle.goal.depart) {
       view.setDepart({ shown: true, enabled: true });   // built in order — let them depart
-      banner(`✓ Outbound built${puzzle.goal.ordered ? ' in order' : ''} — call Depart ▸ to leave.`, 'win');
+      const text = `✓ Outbound built${puzzle.goal.ordered ? ' in order' : ''} — call Depart ▸ to leave.`;
+      banner(text, 'win'); said.push(text);
     } else {
       view.setDepart({ shown: !!puzzle.goal.depart, enabled: false });
-      if (done) winBanner();
+      if (done) said.push(winBanner());
       else {
         // Built right but left loose. This is the one refusal that isn't a mistake in the work —
         // it's the step people forget, so name it plainly instead of just withholding the win.
         const loose = unsecuredGoal(state, puzzle);
-        if (loose) refusalBanner(`The cars are where they belong, but ${loose} is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE ${loose} to finish the job.`);
+        if (loose) {
+          const text = `The cars are where they belong, but ${loose} is standing loose — a cut left unattended gets hand brakes before you walk away (CROR 112). SECURE ${loose} to finish the job.`;
+          refusalBanner(text, false); said.push(text);
+        }
       }
     }
+    live.say(said.join(' '));
   }
 
   // Returns the PREVIOUS best for this puzzle (before this win is folded in), or null.
@@ -278,6 +362,7 @@ export function mount(root, ctx) {
   }
 
   function recordWin() {
+    saved = true;
     if (!ctx.profile.yard) ctx.profile.yard = { completed: [], best: {} };
     if (!ctx.profile.yard.best) ctx.profile.yard.best = {};   // migrate a pre-D-0027 profile
     const y = ctx.profile.yard;
@@ -317,13 +402,16 @@ export function mount(root, ctx) {
     return ` · your best: ${prev.moves}m/${prev.joints}j`;
   }
 
+  // Shows the win and returns its text.
   function winBanner() {
     const g = grade(state, puzzle);
     const prev = bestRecord();
     sfx.win();
     const clean = state.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
-    banner(`${g.beatPar ? '✓ ' : ''}${g.head}${clean}${bestSuffix(prev)}`, g.beatPar ? 'win' : 'ok');
+    const text = `${g.beatPar ? '✓ ' : ''}${g.head}${clean}${bestSuffix(prev)}`;
+    banner(text, g.beatPar ? 'win' : 'ok');
     recordWin();
+    return text;
   }
 
   // Depart — the deliberate final call once the outbound is assembled (P6). The
@@ -334,7 +422,8 @@ export function mount(root, ctx) {
     const prev = bestRecord();
     sfx.win();
     const clean = state.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
-    banner(`✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev)}`, g.beatPar ? 'win' : 'ok');   // win registered now
+    const departed = `✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev)}`;
+    banner(departed, g.beatPar ? 'win' : 'ok'); live.say(departed);   // win registered now
     recordWin();
     view.setDepart({ shown: true, enabled: false });
     // flavor: pull the whole train out the lead, off-frame left
@@ -342,8 +431,10 @@ export function mount(root, ctx) {
     const cutLen = state.engine.reduce((a, c) => a + carLen(state.type[c]), 0);
     const startS = restS(cutLen), endS = -(cutLen + ENGLEN + 220);
     const cut = state.engine.slice();
-    stopAnim = play([{ dur: 1300, fn: (t) => { anim = { route: LEAD_ROUTE, engS: startS + (endS - startS) * t, cut }; } }],
-      { onFrame: paint, onDone: () => { stopAnim = null; anim = null; busy = false; paint(); } });
+    let ended = false;
+    const cancel = play([{ dur: 1300, fn: (t) => { anim = { route: LEAD_ROUTE, engS: startS + (endS - startS) * t, cut }; } }],
+      { onFrame: paint, still: still(), onDone: () => { ended = true; stopAnim = null; anim = null; busy = false; paint(); } });
+    if (!ended) stopAnim = cancel;
   }
 
   // The joint count of the solver-proven optimal line, baked into each puzzle by tools/solve.mjs
@@ -383,7 +474,7 @@ export function mount(root, ctx) {
     }, {
       onFlag: (i) => {
         if (flagged.has(i)) flagged.delete(i); else flagged.add(i);
-        sfx.points(); renderOrder();
+        sfx.points(); view.setLineFlag(i, flagged.has(i));   // in place: focus stays on the line
       },
       onCertify: certify,
     });
@@ -396,7 +487,8 @@ export function mount(root, ctx) {
     if (ok) {
       ordered = true; sfx.couple();
       renderOrder(); syncBuilder();
-      banner(`✓ Order verified — now work the real cars onto ${puzzle.goal.track}.`, 'win');
+      const text = `✓ Order verified — now work the real cars onto ${puzzle.goal.track}.`;
+      banner(text, 'win'); live.say(text);
       return;
     }
     sfx.refuse();
@@ -412,7 +504,7 @@ export function mount(root, ctx) {
       const e = puzzle.listed[over];
       why = `${e.listedMark} on ${e.listedTrack} checks out — don't flag a good line.`;
     }
-    banner(`Not so fast — ${why}`, 'bad');
+    banner(`Not so fast — ${why}`, 'bad'); live.say(`Not so fast — ${why}`);
   }
 
   function renderVerifiedOrder() {
@@ -439,9 +531,11 @@ export function mount(root, ctx) {
 
   // A refused move is a teaching moment: keep the cited rule, add a one-tap link to its
   // plain-language Reference entry (cause → rule → correct action; REVAMP §6).
-  function refusalBanner(msg) {
+  // The region says the refusal as the model wrote it, unless the caller says it in a longer message.
+  function refusalBanner(msg, say = true) {
     const id = ruleItemFromMsg(msg);
     view.setRefusal(msg, id && ctx && typeof ctx.go === 'function' ? () => ctx.go(`reference?focus=${id}`) : null);
+    if (say) live.say(msg);
   }
   // "…(CROR 113.4/113.5(a)(v))" → rule.113.4; special-instruction-only refusals have no CROR item.
   function ruleItemFromMsg(msg) {
@@ -497,10 +591,38 @@ export function mount(root, ctx) {
   }
 
   buildPicker();
-  picker.addEventListener('change', () => load(PUZZLES[+picker.value]));
+  // A new job. If moves of the learner are at risk, the job stays and the Yard asks first (U-12,
+  // A11Y-18); No keeps the moves, Yes loads the new job.
+  picker.addEventListener('change', () => {
+    const next = PUZZLES[+picker.value];
+    if (!atRisk()) { load(next, true); return; }
+    picker.value = String(PUZZLES.indexOf(puzzle));
+    const g = gen;
+    view.ask(`Change to the job “${next.title}”? You lose your ${movesWords()} on this job.`, (yes) => {
+      if (!yes || gen !== g) return;
+      picker.value = String(PUZZLES.indexOf(next));
+      load(next, true);
+    });
+  });
 
   // sound default: start muted if Clear Board's audio setting is off.
   if (ctx.settings && !ctx.settings.audio && !isMuted()) toggleMute();
   view.setMuted(isMuted());
   load(PUZZLES[0]);
+
+  // The teardown (UNMOUNT). A move, the watched line and the arrival stop at once: the new gen ends
+  // each loop at its next check, the frame of a tween and of the arrival is cancelled, and each pause
+  // is cleared. The drawing removes its observers and its listeners of the window. The listeners of
+  // the elements of the Yard go with the elements when the host is emptied.
+  teardown = () => {
+    gen++;
+    if (stopAnim) stopAnim();
+    stopAnim = null;
+    cancelCine();
+    for (const t of pauses) clearTimeout(t);
+    pauses.clear();
+    busy = true;                      // no input handler starts a new effect between this call and the end of the host
+    view.closeAsk();                  // an open question closes with No; its answer finds a new gen and does nothing
+    drawing.destroy();
+  };
 }

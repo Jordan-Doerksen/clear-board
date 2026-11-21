@@ -63,12 +63,15 @@ export interface YardView {
   el(id: string): HTMLElement | null;
   /** The element that the drawing adapter fills. */
   readonly drawHost: HTMLElement;
-  setReadout(data: ReadoutData): void;
+  /** Writes the readout and returns its text. */
+  setReadout(data: ReadoutData): string;
   setBanner(text: string | null | undefined, tone: BannerTone): void;
   /** A refusal. With `onLookup`, the banner gets the control "Look it up". */
   setRefusal(text: string | null | undefined, onLookup: (() => void) | null): void;
   renderRules(list: RuleChip[]): void;
   renderSwitchList(data: SwitchListData, handlers: SwitchListHandlers): void;
+  /** Flags or unflags line `index` of the switch list in place, so that focus stays on it. */
+  setLineFlag(index: number, flagged: boolean): void;
   renderVerifiedOrder(data: VerifiedOrderData): void;
   renderWorkOrder(data: WorkOrderData): void;
   setCount(data: CountData): void;
@@ -76,18 +79,25 @@ export interface YardView {
   /** `keep` is the value that the picker has before the call. An empty string selects nothing. */
   renderPicker(groups: PickerGroup[], keep: string): void;
   setDepart(data: DepartData): void;
+  /** While the optimal line plays, its button reads "Stop watching" and stops it (U-12). */
+  setWatching(on: boolean): void;
+  /**
+   * Asks a question in a modal dialog with the answers Yes and No (U-12). No has the focus first.
+   * `answer` gets true for Yes, and false for No, Escape or a close. Focus goes back to the control
+   * that had it before the question.
+   */
+  ask(question: string, answer: (yes: boolean) => void): void;
+  /** Closes the question with the answer No, if it is open. */
+  closeAsk(): void;
   setMuted(muted: boolean): void;
-  /** `fn` gets the `data-go` value of the back button when the learner presses it. */
-  onGo(fn: (route: string | undefined) => void): void;
 }
 
-// The body of the Yard page. The app has its own header, so this markup starts with a back button.
+// The body of the Yard page. The station wrapper (../Yard.tsx) draws "← Home" and the heading above
+// the host, so this markup starts with the strip.
 const YARD_HTML = `
   <div class="yard-wrap">
-    <button class="yd-back cb-btn--plain" data-go="">← Home</button>
-
     <div class="yd-bar yd-strip dusk-strip">
-      <select class="cb-select" id="picker" title="Pick a job"></select>
+      <div class="yd-field yd-field--job"><label class="yd-label" for="picker">Pick a job</label><select class="cb-select" id="picker"></select></div>
       <span class="dusk-spacer"></span>
       <div class="dusk-cell"><b class="yd-readout" id="readout">Moves 0 / par 0 · Joints 0</b></div>
     </div>
@@ -96,25 +106,28 @@ const YARD_HTML = `
 
     <div class="yd-yardframe dusk-panel dusk-panel--framed" data-cb="yard-drawing"></div>
 
+    <ul class="yd-mirror dusk-sr" id="yard-mirror" role="list"></ul>
+
     <div class="yd-bar yd-builder dusk-panel">
-      <select class="cb-select" id="act" title="Action">
+      <div class="yd-field"><label class="yd-label" for="act">Action</label><select class="cb-select" id="act">
         <option value="pull">PULL</option>
         <option value="spot">SPOT</option>
         <option value="kick">KICK</option>
         <option value="secure">SECURE</option>
-      </select>
+      </select></div>
       <select class="cb-select" id="count" title="How many cars"></select>
-      <span class="yd-unit cb-sub">cars</span>
-      <select class="cb-select" id="track" title="Which track"></select>
+      <label class="yd-unit cb-sub" for="count">cars</label>
+      <div class="yd-field"><label class="yd-label" for="track">Which track</label><select class="cb-select" id="track"></select></div>
       <button class="yd-go dusk-btn" id="work">Work it ▸</button>
       <button class="yd-go dusk-btn" id="optimal" title="Auto-line and play the fewest-moves line in slow motion">▶ Watch optimal</button>
       <button class="yd-go dusk-btn" id="depart" title="Depart the assembled outbound out the lead" style="display:none">Depart ▸</button>
       <span class="dusk-spacer"></span>
       <button class="cb-btn--plain" id="reset">Reset</button>
-      <button class="cb-btn--plain" id="mute" title="Sound">🔊</button>
+      <button class="cb-btn--plain" id="mute"><span aria-hidden="true">🔊</span> Sound on</button>
     </div>
 
     <div class="yd-banner cb-banner" id="msg"></div>
+    <div class="yd-live dusk-sr" id="yard-live" role="status" aria-live="polite"></div>
 
     <div class="yd-rules-panel dusk-panel">
       <div class="yd-rules-legend dusk-rule">
@@ -128,6 +141,16 @@ const YARD_HTML = `
     <div class="yd-note dusk-panel">
       <strong class="yd-note-head">What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span class="yd-note-more">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span>
     </div>
+
+    <dialog class="yd-ask cb-dialog" id="yard-ask" aria-labelledby="yard-ask-q">
+      <div class="dusk-panel-body">
+        <p class="yd-ask-q cb-prose" id="yard-ask-q"></p>
+        <div class="yd-ask-answers">
+          <button type="button" class="dusk-btn" id="yard-ask-yes">Yes</button>
+          <button type="button" class="dusk-btn" id="yard-ask-no">No</button>
+        </div>
+      </div>
+    </dialog>
 
     <details class="yd-help cb-disclosure">
       <summary>How to play & why these rules</summary>
@@ -166,13 +189,33 @@ export function createView(root: HTMLElement): YardView {
   const drawHost = root.querySelector('.yd-yardframe') as HTMLElement;
   // The picker element is kept between calls, as it was before the split.
   const picker = at<HTMLSelectElement>('picker');
+  // The title of "Watch optimal", for the time when it does not play.
+  const watchTitle = at('optimal').title;
+
+  // The question dialog. One answer at a time: `pending` holds the function of the open question.
+  let pending: ((yes: boolean) => void) | null = null;
+  let back: HTMLElement | null = null;
+  const dialog = at<HTMLDialogElement>('yard-ask');
+  const settle = (yes: boolean): void => {
+    const fn = pending;
+    pending = null;
+    if (dialog.open) dialog.close();
+    if (back && back.isConnected) back.focus();
+    back = null;
+    if (fn) fn(yes);
+  };
+  at('yard-ask-yes').addEventListener('click', () => settle(true));
+  at('yard-ask-no').addEventListener('click', () => settle(false));
+  dialog.addEventListener('close', () => { if (pending) settle(false); });   // Escape
 
   return {
     el,
     drawHost,
 
     setReadout({ moves, par, joints }) {
-      at('readout').textContent = `Moves ${moves} / par ${par} · Joints ${joints}`;
+      const text = `Moves ${moves} / par ${par} · Joints ${joints}`;
+      at('readout').textContent = text;
+      return text;
     },
 
     setBanner(text, tone) {
@@ -207,16 +250,18 @@ export function createView(root: HTMLElement): YardView {
       }
     },
 
+    // Each line is a native button (U-09, A11Y-02): Tab reaches it, Enter or Space flags it, and
+    // aria-pressed gives its state. The glyph shows the state and is hidden from a screen reader.
     renderSwitchList(data, { onFlag, onCertify }) {
       const rows = data.lines.map((e, i) =>
-        `<div class="yd-ord-row dusk-row dusk-row--amber${e.flagged ? ' dusk-row--on yd-flagged' : ''}" data-i="${i}">`
-        + `<span class="yd-ord-flag dusk-ico">${e.flagged ? '⚑' : '▢'}</span>`
+        `<button type="button" class="yd-ord-row dusk-row dusk-row--amber${e.flagged ? ' dusk-row--on yd-flagged' : ''}" data-i="${i}" aria-pressed="${e.flagged}">`
+        + `<span class="yd-ord-flag dusk-ico" aria-hidden="true">${e.flagged ? '⚑' : '▢'}</span>`
         + `<span class="yd-ord-line"><span class="yd-ord-mark">${e.mark}</span><span class="yd-ord-arrow">→</span><span class="yd-ord-trk">${e.track}</span></span>`
-        + `</div>`).join('');
+        + `</button>`).join('');
       at('workorder').innerHTML =
         `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag yd-si dusk-panel-name">SWITCH LIST</span> <span class="yd-wo-id dusk-count">${data.id.toUpperCase()}</span> <span class="yd-wo-sub dusk-panel-sub">· the list can be wrong</span></div>`
         + `<div class="yd-wo-body dusk-panel-body">`
-        + `<div class="yd-wo-job cb-prose">Build <b class="dusk-num">${data.goalTrack}</b> from these cars. Check each line against the yard — tap any that <b class="dusk-num">don't match</b>, then certify.</div>`
+        + `<div class="yd-wo-job cb-prose">Build <b>${data.goalTrack}</b> from these cars. Check each line against the yard — tap any that <b>don't match</b>, then certify.</div>`
         + `<div class="yd-ord-list">${rows}</div>`
         + `<button class="yd-go dusk-btn" id="certify">Certify order ▸</button>`
         + `<div class="yd-wo-meta cb-sub"><span class="yd-wo-tip">${data.hint}</span></div>`
@@ -227,6 +272,16 @@ export function createView(root: HTMLElement): YardView {
       at('certify').addEventListener('click', onCertify);
     },
 
+    setLineFlag(index, flagged) {
+      const row = at('workorder').querySelector(`.yd-ord-row[data-i="${index}"]`) as HTMLElement;
+      row.classList.toggle('dusk-row--on', flagged);
+      row.classList.toggle('yd-flagged', flagged);
+      row.setAttribute('aria-pressed', String(flagged));
+      (row.querySelector('.yd-ord-flag') as HTMLElement).textContent = flagged ? '⚑' : '▢';
+    },
+
+    // The job line (Y-FIX): only a car mark or a car number takes the mono face (dusk-num). A track
+    // id and a word stay in the face of the line, in bold.
     renderVerifiedOrder(data) {
       const lines = data.lines
         .map((e) => `<b class="dusk-num">${e.mark}</b> → ${e.track}${e.corrected ? ' <span class="yd-ord-fix">(list was wrong)</span>' : ''}`)
@@ -234,7 +289,7 @@ export function createView(root: HTMLElement): YardView {
       at('workorder').innerHTML =
         `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag dusk-panel-name">WORK ORDER ✓</span> <span class="yd-wo-id dusk-count">${data.goalTrack}</span> <span class="yd-wo-sub dusk-panel-sub">· verified</span></div>`
         + `<div class="yd-wo-body dusk-panel-body">`
-        + `<div class="yd-wo-job cb-prose">Build <b class="dusk-num">${data.goalTrack}</b>: ${lines}.</div>`
+        + `<div class="yd-wo-job cb-prose">Build <b>${data.goalTrack}</b>: ${lines}.</div>`
         + `<div class="yd-wo-meta cb-sub">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.</div>`
         + `</div>`;
     },
@@ -244,8 +299,8 @@ export function createView(root: HTMLElement): YardView {
       const head = `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag dusk-panel-name">WORK ORDER</span> <span class="yd-wo-id dusk-count">${data.id.toUpperCase()}</span> <span class="yd-wo-sub dusk-panel-sub">· ${data.title}</span></div>`;
       const meta = `<div class="yd-wo-meta cb-sub">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.<span class="yd-wo-tip">${data.hint}</span></div>`;
       const job = data.depart
-        ? `<div class="yd-wo-job cb-prose">Build the outbound${data.ordered ? ' in order' : ''} — gather <b class="dusk-num">${nums.join(' · ')}</b> onto your train${data.from.length ? ` <span class="yd-wo-from">(set out on ${data.from.join(', ')})</span>` : ''}, then <b class="dusk-num">Depart ▸</b>.</div>`
-        : `<div class="yd-wo-job cb-prose">Build <b class="dusk-num">${data.goalTrack}</b> — gather <b class="dusk-num">${nums.join(' · ')}</b> onto it${data.from.length ? ` <span class="yd-wo-from">(now on ${data.from.join(', ')})</span>` : ''}.</div>`;
+        ? `<div class="yd-wo-job cb-prose">Build the outbound${data.ordered ? ' in order' : ''} — gather <b class="dusk-num">${nums.join(' · ')}</b> onto your train${data.from.length ? ` <span class="yd-wo-from">(set out on ${data.from.join(', ')})</span>` : ''}, then <b>Depart ▸</b>.</div>`
+        : `<div class="yd-wo-job cb-prose">Build <b>${data.goalTrack}</b> — gather <b class="dusk-num">${nums.join(' · ')}</b> onto it${data.from.length ? ` <span class="yd-wo-from">(now on ${data.from.join(', ')})</span>` : ''}.</div>`;
       at('workorder').innerHTML = head + `<div class="yd-wo-body dusk-panel-body">` + job + meta + `</div>`;
     },
 
@@ -282,18 +337,34 @@ export function createView(root: HTMLElement): YardView {
       if (keep !== '') picker.value = keep;
     },
 
+    setWatching(on) {
+      const b = at<HTMLButtonElement>('optimal');
+      b.textContent = on ? 'Stop watching' : '▶ Watch optimal';
+      if (on) b.removeAttribute('title'); else b.title = watchTitle;
+    },
+
+    ask(question, answer) {
+      if (pending) settle(false);
+      at('yard-ask-q').textContent = question;
+      pending = answer;
+      back = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      dialog.showModal();
+      at('yard-ask-no').focus();
+    },
+
+    closeAsk() {
+      if (pending || dialog.open) settle(false);
+    },
+
     setDepart({ shown, enabled }) {
       const dep = at<HTMLButtonElement>('depart');
       dep.style.display = shown ? '' : 'none';
       dep.disabled = !enabled;
     },
 
+    // The sound button says its state in words (U-20). The glyph is decoration (U-41).
     setMuted(muted) {
-      at('mute').textContent = muted ? '🔇' : '🔊';
-    },
-
-    onGo(fn) {
-      root.querySelectorAll<HTMLElement>('[data-go]').forEach((b) => b.addEventListener('click', () => fn(b.dataset.go)));
+      at('mute').innerHTML = `<span aria-hidden="true">${muted ? '🔇' : '🔊'}</span> Sound ${muted ? 'off' : 'on'}`;
     },
   };
 }
