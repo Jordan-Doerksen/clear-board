@@ -5,7 +5,18 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import { Signal } from './Signal';
 import { distinctAspects } from '../core/drill';
-import type { Citation, ContentItem } from '../core/types';
+import { DOMAINS } from '../core/store';
+import type { Citation, ContentItem, ItemType } from '../core/types';
+
+// U-32: the list has one group for each kind of entry, in this order. A group with no row is not shown.
+const KINDS: [ItemType, string][] = [
+  ['definition', 'Definitions'], ['signal', 'Signals'], ['rule', 'Rules'], ['radio-script', 'Radio calls'], ['scenario', 'Scenarios'],
+];
+const domainName = (id: string) => DOMAINS.find(d => d.id === id)?.name ?? id;
+// U-32: the words that the search reads: the title, the plain words, the source line, the rule text
+// and the name of the domain.
+const searchText = (i: ContentItem) => [i.title, i.plain, i.citation.source, i.citation.ref, i.citation.relatedRef,
+  i.citation.verbatim, domainName(i.domain)].filter(Boolean).join('\n').toLowerCase();
 
 // The trust mark of an entry, as words, and its tone. An item of operating practice takes its words
 // from its source in the data (U-08): the two labels that the Radio test shows for the same items.
@@ -20,7 +31,8 @@ function Badge({ citation }: { citation: Citation }) {
   return <span className={`cb-chip cb-chip--${tone}`}>{label}</span>;
 }
 
-// U-02: each row of the list shows the trust mark of its entry as words, before the plain words.
+// U-02: each row of the list shows the trust mark of its entry as words, before the plain words. The
+// mark follows the name of the domain of the entry (U-32) on one line.
 function RowMark({ citation }: { citation: Citation }) {
   const [label, tone] = trustMark(citation);
   return <span className={`cb-reference-trust cb-reference-trust--${tone}`}>{label}</span>;
@@ -61,12 +73,13 @@ export function Reference() {
   }, [focusId, content]);
 
   const items = useMemo(
-    () => (content ? content.items.slice().sort((a, b) => a.title.localeCompare(b.title)) : []),
+    () => (content ? content.items.slice().sort((a, b) => a.title.localeCompare(b.title)).map(i => ({ item: i, text: searchText(i) })) : []),
     [content],
   );
-  const rows = useMemo(() => {
+  const groups = useMemo(() => {
     const f = q.trim().toLowerCase();
-    return items.filter(i => !f || i.title.toLowerCase().includes(f) || (i.plain || '').toLowerCase().includes(f));
+    const rows = items.filter(r => !f || r.text.includes(f)).map(r => r.item);
+    return KINDS.map(([type, name]) => ({ type, name, rows: rows.filter(i => i.type === type) })).filter(g => g.rows.length);
   }, [items, q]);
 
   return (
@@ -81,20 +94,25 @@ export function Reference() {
       <input className="cb-input" data-cb="ref-search" type="search" placeholder="Search a term…" aria-label="Search reference"
         value={q} onChange={e => setQ(e.target.value)} />
 
-      {rows.length
-        ? (
-          <ul className="dusk-rows cb-reference-list" role="list">
-            {rows.map(i => (
-              <li key={i.id}>
-                <button className="dusk-row cb-reference-row" data-cb="ref-row" aria-expanded={selected?.id === i.id} onClick={() => press(i)}>
-                  <b>{i.title}</b><RowMark citation={i.citation} /><small className="cb-sub">{i.plain}</small>
-                </button>
-                {selected?.id === i.id && <Detail key={i.id} item={i} audio={settings.audio} onSpeak={speak}
-                  onDrillSignals={() => navigate('/signals')} headRef={entryHeadRef} />}
-              </li>
-            ))}
-          </ul>
-        )
+      {groups.length
+        ? groups.map(g => (
+          <div key={g.type} className="cb-reference-group">
+            <h3 className="dusk-grp cb-reference-group-name">{g.name}</h3>
+            <ul className="dusk-rows cb-reference-list" role="list">
+              {g.rows.map(i => (
+                <li key={i.id}>
+                  <button className="dusk-row cb-reference-row" data-cb="ref-row" aria-expanded={selected?.id === i.id} onClick={() => press(i)}>
+                    <b>{i.title}</b>
+                    <span className="cb-reference-meta">{domainName(i.domain)} · <RowMark citation={i.citation} /></span>
+                    <small className="cb-sub">{i.plain}</small>
+                  </button>
+                  {selected?.id === i.id && <Detail key={i.id} item={i} audio={settings.audio} onSpeak={speak}
+                    onDrillSignals={() => navigate('/signals')} headRef={entryHeadRef} />}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
         : <p className="dusk-lede">No match. Try another word.</p>}
     </div>
   );
@@ -106,7 +124,7 @@ function Detail({ item, audio, onSpeak, onDrillSignals, headRef }:
   const aspects = item.type === 'signal' ? distinctAspects(item.payload?.aspects ?? []) : [];   // U-37: each drawing one time
   return (
     <div className="dusk-panel dusk-panel--framed cb-reference-detail" data-cb="ref-detail">
-      <div className="dusk-panel-head"><h3 className="dusk-panel-name" ref={headRef} tabIndex={-1}>{item.title}</h3></div>
+      <div className="dusk-panel-head"><h4 className="dusk-panel-name" ref={headRef} tabIndex={-1}>{item.title}</h4></div>
       <div className="dusk-panel-body">
         <Badge citation={c} />
         {/* U-11: an entry with no text says so in app words. */}
