@@ -18,8 +18,9 @@
 // time for each gate case, and exits non-zero when one gate case fails.
 //
 // A report-only case prints PENDING with a count and the job that owns the fix. It does not
-// change the exit code. A count of 0 means that the case passes on this build. The closing commit of the G1 line turns a report-only case into a gate
-// when its owner is merged and the case passes.
+// change the exit code. A count of 0 means that the case passes on this build. The closing
+// commit of the G1 line turns a report-only case into a gate when its owner is merged and the
+// case passes.
 //
 // An element is selected by "the hook, or the old selector" (the table HOOKS), so that a later
 // job can replace an old class and put the hook on the same element, with no edit of this file.
@@ -92,6 +93,7 @@ const HOOKS = {
   'ref-detail': '.ref-detail',
   'opt': '.opt',
   'feedback': '.feedback',
+  'prompt': '.prompt',
   'prompt-signal': '.prompt-signal',
   'yard-drawing': 'canvas#yard',
 };
@@ -102,6 +104,8 @@ const SEED = 12345;
 const PROFILE_KEY = 'cb.profile.v1';
 const SETTINGS_KEY = 'cb.settings.v1';
 const TOGGLES = ['t-dys', 't-contrast', 't-reduce', 't-audio', 't-big'];
+// The stored settings with each setting off. A case turns one setting on before the page loads.
+const allOff = { dys: false, contrast: false, reduce: false, audio: false, big: false };
 
 // The seed: a fixed generator in place of Math.random. It runs before each page script.
 function seedScript(start) {
@@ -187,9 +191,22 @@ const ROUTES = [
 const storedJson = (page, key) => page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), key);
 
 // The text of the guided Radio, as the tape reads it: the visible text of `.radio-wrap`, with
-// each run of white space made one space.
+// each run of white space made one space. The words are read as the markup writes them (ruling
+// TAPE-CASE). A rule with text-transform changes the look of a word, not the word. So
+// text-transform is off while the text is read, as in the look harness. A word or a letter case
+// that the markup changes still changes the text.
 async function radioText(page) {
-  return (await page.locator('.radio-wrap').innerText()).replace(/\s+/g, ' ').trim();
+  const text = await page.locator('.radio-wrap').evaluate((el) => {
+    const asWritten = document.createElement('style');
+    asWritten.textContent = '*, *::first-letter, *::first-line { text-transform: none !important; }';
+    document.head.append(asWritten);
+    try {
+      return el.innerText;
+    } finally {
+      asWritten.remove();
+    }
+  });
+  return text.replace(/\s+/g, ' ').trim();
 }
 const record = (text) => ({ sha256: createHash('sha256').update(text).digest('hex'), words: text.split(' ').length });
 
@@ -415,14 +432,55 @@ const GATE_CASES = [
       });
     }
   } },
+
+  // Cases 11 and 12 were report-only cases in Wave 2a. Their owner S1 is merged and each one
+  // passes, so the closing commit of the G1 line made each one a gate.
+  { name: '11 dyslexia spacing', async run() {
+    // With the dyslexia setting on, an answer option has the letter spacing of the prompt.
+    await withPage({ settings: { ...allOff, dys: true } }, async (page) => {
+      await open(page, '/drill');
+      await page.locator(hook('opt')).first().waitFor();
+      ok(await page.evaluate(() => document.documentElement.dataset.dys) === '1', 'the dyslexia setting is not on');
+      const spacing = (selector) => page.locator(selector).first().evaluate((el) => getComputedStyle(el).letterSpacing);
+      const option = await spacing(hook('opt'));
+      const prompt = await spacing(hook('prompt'));
+      ok(option === prompt, `with the dyslexia setting on, the letter spacing of an answer option is ${option} and that of the prompt is ${prompt}`);
+    });
+  } },
+
+  { name: '12 motion rules', async run() {
+    // With "Reduce motion" on, no element and no ::before or ::after part has a transition time
+    // or an animation name, on the six routes and in the Settings dialog.
+    const moving = (page) => page.evaluate(() => [...document.querySelectorAll('*')]
+      .filter((el) => [null, '::before', '::after'].some((pseudo) => {
+        const style = getComputedStyle(el, pseudo);
+        return style.transitionDuration.split(',').some((d) => parseFloat(d) > 0) || style.animationName !== 'none';
+      }))
+      .map((el) => `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ''}${[...el.classList].map((c) => `.${c}`).join('')}`));
+    for (const r of ROUTES) {
+      await withPage({ settings: { ...allOff, reduce: true } }, async (page) => {
+        await open(page, r.route);
+        await r.check(page);
+        ok(await page.evaluate(() => document.documentElement.dataset.reduce) === '1', `"Reduce motion" is not on, on ${r.name}`);
+        const found = (await moving(page)).map((el) => `${r.name}: ${el}`);
+        if (r.route === '/') {
+          await page.locator(hook('settings-open')).first().click();
+          await page.locator('dialog#settings[open]').waitFor();
+          found.push(...(await moving(page)).map((el) => `settings dialog: ${el}`));
+        }
+        ok(found.length === 0, `with "Reduce motion" on, ${found.length} elements have a transition time or an animation name: ${found.slice(0, 8).join(', ')}${found.length > 8 ? ', ...' : ''}`);
+      });
+    }
+  } },
 ];
 
 // ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after
 // the closing commit of the G1 line makes it one.
-const allOff = { dys: false, contrast: false, reduce: false, audio: false, big: false };
 const reportPage = (options, body) => withPage({ common: false, ...options }, body);
 
 const REPORT_CASES = [
+  // The floor is 44 px, not 43.5 px (ruling TARGETS-44). The case becomes a gate when its count
+  // is 0, in a later wave.
   { name: 'targets', owner: 'P-05: B1, B2, B3, Y3', what: 'controls under 44 by 44 px, on the six routes and the Settings dialog, at 390 and 1440', async run() {
     let small = 0;
     const measure = (page) => page.evaluate(() => {
@@ -435,7 +493,7 @@ const REPORT_CASES = [
         let r = el.getBoundingClientRect();
         const label = el.tagName === 'INPUT' ? el.closest('label') : null;
         if (label) { const l = label.getBoundingClientRect(); if (l.width * l.height > r.width * r.height) r = l; }
-        if (r.width < 43.5 || r.height < 43.5) n++;
+        if (r.width < 44 || r.height < 44) n++;
       }
       return n;
     });
@@ -461,15 +519,6 @@ const REPORT_CASES = [
     });
   } },
 
-  { name: 'dyslexia spacing', owner: 'P-10: S1', what: 'an option whose letter spacing is not that of the prompt, with the dyslexia setting on', async run() {
-    return reportPage({ settings: { ...allOff, dys: true } }, async (page) => {
-      await open(page, '/drill');
-      await page.locator(hook('opt')).first().waitFor();
-      const spacing = (selector) => page.locator(selector).first().evaluate((el) => getComputedStyle(el).letterSpacing);
-      return (await spacing(hook('opt'))) === (await spacing('.prompt')) ? 0 : 1;
-    });
-  } },
-
   { name: 'type modes in the islands', owner: 'P-06: Y1, Y3, B3', what: 'text elements of the Yard and the guided Radio that are not larger with "Bigger text" on', async run() {
     const sizes = (big, route, ready) => reportPage({ settings: { ...allOff, big } }, async (page) => {
       await open(page, route);
@@ -487,29 +536,6 @@ const REPORT_CASES = [
     }
     return notLarger;
   } },
-
-  { name: 'motion rules', owner: 'P-14: S1', what: 'elements with a transition time or an animation name, with "Reduce motion" on, on the six routes and the Settings dialog', async run() {
-    const measure = (page) => page.evaluate(() => [...document.querySelectorAll('*')].filter((el) =>
-      [null, '::before', '::after'].some((pseudo) => {
-        const style = getComputedStyle(el, pseudo);
-        return style.transitionDuration.split(',').some((d) => parseFloat(d) > 0) || style.animationName !== 'none';
-      })).length);
-    let moving = 0;
-    for (const r of ROUTES) {
-      moving += await reportPage({ settings: { ...allOff, reduce: true } }, async (page) => {
-        await open(page, r.route);
-        await r.check(page);
-        if (r.route === '/') {
-          const onHome = await measure(page);
-          await page.locator(hook('settings-open')).first().click();
-          await page.locator('dialog#settings[open]').waitFor();
-          return onHome + await measure(page);
-        }
-        return measure(page);
-      });
-    }
-    return moving;
-  } },
 ];
 
 // ---- Record the tape, or run the cases.
@@ -522,7 +548,7 @@ try {
     const records = [];
     await withPage({}, (page) => walkGuidedRadio(page, (press, text) => { records.push({ press, ...record(text) }); }));
     const tape = {
-      note: 'The word tape of the guided Radio. tests/browser/smoke.mjs recorded it and compares the page with it. A record is the SHA-256 and the word count of the visible text of .radio-wrap, with each run of white space made one space: before the first press of the key control (press 0) and after each of the 14 presses. The file holds no text of the page. A build job does not edit this file.',
+      note: 'The word tape of the guided Radio. tests/browser/smoke.mjs recorded it and compares the page with it. A record is the SHA-256 and the word count of the visible text of .radio-wrap, with each run of white space made one space: before the first press of the key control (press 0) and after each of the 14 presses. The text is read as the markup writes it: text-transform is off while it is read. The file holds no text of the page. A build job does not edit this file.',
       commit,
       selector: '.radio-wrap',
       records,

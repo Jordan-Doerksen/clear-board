@@ -18,8 +18,8 @@
 //      and with no fallback is declared by a file of the copy or by a file of the app folder.
 //      A name that a script sets with `setProperty` counts as declared. The files of the copy
 //      give declared names only: the check does not read them for their `var()` reads.
-//      While the file REPORT_ONLY_WHILE exists, a name that no file declares gives one report
-//      line and does not fail. When that file does not exist, such a name fails.
+//      A name that no file declares fails. The check is strict at all times: no file makes it
+//      a report.
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
@@ -27,9 +27,6 @@ import { fileURLToPath } from 'node:url';
 import { chunks, customProperties, quiet } from './lib/css-scan.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-// The uses check is a report while this dead file of the app template exists. The file holds
-// each read of today that no file declares. The job that removes the file makes the check strict.
-const REPORT_ONLY_WHILE = 'src/App.css';
 const HEADER = /^\/\* dusk (\d+\.\d+\.\d+) /;
 
 const args = process.argv.slice(2);
@@ -147,17 +144,12 @@ for (const file of appFiles) {
   }
 }
 const undeclared = [...reads.entries()].filter(([name]) => !declared.has(name)).sort(([a], [b]) => a.localeCompare(b));
-const strict = !existsSync(join(root, REPORT_ONLY_WHILE));
 const where = [...new Set(undeclared.flatMap(([, files]) => [...files]))].sort();
 report.push(`custom properties that an app file reads and no file declares: ${undeclared.length}${undeclared.length ? ` (in ${where.join(', ')})` : ''}`);
 for (const [name, files] of undeclared) {
-  const line = `${name} is read in ${[...files].sort().join(', ')} and no file declares it`;
-  if (strict) failures.push(`${line}. A read of a name that no file declares gives the initial value, with no error.`);
-  else report.push(`  reported: ${line}`);
+  failures.push(`${name} is read in ${[...files].sort().join(', ')} and no file declares it. A read of a name that no file declares gives the initial value, with no error.`);
 }
-report.push(strict
-  ? `the uses check is strict: ${REPORT_ONLY_WHILE} does not exist`
-  : `the uses check is a report: ${REPORT_ONLY_WHILE} exists. The check turns strict when that file is gone.`);
+report.push('the uses check is strict: a read of a name that no file declares fails');
 
 // ---- The report.
 console.log(`dusk-lock-check: ${lock ? `${wholeFiles} of ${Object.keys(lock.files).length} files equal to the lock; Dusk ${lock.version}; commit ${lock.commit}` : 'no lock'}`);
