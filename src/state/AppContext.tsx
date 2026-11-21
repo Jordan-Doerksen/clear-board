@@ -44,6 +44,13 @@ function loadSettings(): Settings {
   return settings;
 }
 
+// Read aloud. The browser speaks; with no speech in the browser, or no voice, nothing happens and
+// nothing breaks. Speech stops on a change of route (App.tsx).
+const READ_ALOUD_ON = 'Read aloud is on. Definitions, rules and questions will be read to you.';
+function speakNow(text: string) {
+  try { speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance(text)); } catch { /* no speech */ }
+}
+
 // The profile at the start. A stored profile that needed a repair, or that the app cannot read,
 // is kept under the second key before the app writes over it (U-05).
 function startProfile(): Profile {
@@ -137,9 +144,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setChoices(s => ({ ...s, [key]: value }));
   }, []);
 
+  // Read aloud (2c-plan C10). speak() says the text when the learner turned "Read aloud" on.
   const speak = useCallback((text: string) => {
-    if (!settings.audio) return;
-    try { speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance(text)); } catch { /* no voice */ }
+    if (settings.audio) speakNow(text);
+  }, [settings.audio]);
+
+  // U-31: the confirmation is spoken after the setting is on, not in the same event (R5 A11Y-25).
+  // The first value of the setting at the start is no change.
+  const audioBefore = useRef<boolean | null>(null);
+  useEffect(() => {
+    const before = audioBefore.current;
+    audioBefore.current = settings.audio;
+    if (before === false && settings.audio) speakNow(READ_ALOUD_ON);
   }, [settings.audio]);
 
   const recordAnswer = useCallback((item: ContentItem, correct: boolean) => {

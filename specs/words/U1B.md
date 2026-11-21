@@ -35,3 +35,5 @@ No line here states, corrects or cites a rule. The words were not checked by the
 | U-10 | The control of that notice | none | Reload |
 | U-13 | Settings, the row "Reduce motion", a second line while the device asks for less motion | none (the device flag was read one time, at the first load) | Your device asks for less motion, so this stays on. |
 | U-13 | Settings, the row "Higher contrast", a second line while the device asks for more contrast | none | Your device asks for more contrast. |
+| U-31 | Settings, the row "Read aloud", a second line when the browser has no voice | none | No voice on this device. |
+| U-31 | The spoken confirmation when Read aloud turns on | the same words, not spoken (the call came before the setting was on) | Read aloud is on. Definitions, rules and questions will be read to you. (no change of words; it is now spoken) |

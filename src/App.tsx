@@ -158,6 +158,8 @@ function Shell() {
     const before = lastPath.current;
     lastPath.current = location.pathname;
     if (before === null || before === location.pathname) return;
+    // U-31 (2c-plan C10): the speech of the last route stops.
+    try { speechSynthesis.cancel(); } catch { /* no speech in this browser */ }
     if (mainRef.current) return focusViewHeading(mainRef.current);
   }, [location.pathname]);
 

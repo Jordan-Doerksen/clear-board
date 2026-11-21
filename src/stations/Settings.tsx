@@ -13,8 +13,26 @@ const TOGGLES: { key: keyof SettingsType; label: string; sub: string }[] = [
   { key: 'big', label: 'Bigger text', sub: 'Scales the whole app' },
 ];
 
+// U-31: the count of the voices of the browser; 0 when the browser has no speech. A browser can
+// load its voices after the start, so the count is read again when the list changes.
+function voiceCount(): number {
+  try { return speechSynthesis.getVoices().length; } catch { return 0; }
+}
+function useHasVoice(): boolean {
+  const [has, setHas] = useState(() => voiceCount() > 0);
+  useEffect(() => {
+    if (typeof speechSynthesis === 'undefined') return;
+    const read = () => setHas(voiceCount() > 0);
+    read();
+    speechSynthesis.addEventListener('voiceschanged', read);
+    return () => speechSynthesis.removeEventListener('voiceschanged', read);
+  }, []);
+  return has;
+}
+
 export function Settings({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { settings, choices, deviceReduce, deviceContrast, setSetting, resetProgress, replaceProgress, speak, profile } = useApp();
+  const { settings, choices, deviceReduce, deviceContrast, setSetting, resetProgress, replaceProgress, profile } = useApp();
+  const hasVoice = useHasVoice();
   const ref = useRef<HTMLDialogElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [fileNote, setFileNote] = useState('');
@@ -46,9 +64,9 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
     else if (!open && dlg.open) dlg.close();
   }, [open]);
 
+  // The app context speaks the confirmation of "Read aloud" after the setting is on (U-31).
   function toggle(key: keyof SettingsType, value: boolean) {
     setSetting(key, value);
-    if (key === 'audio' && value) speak('Read aloud is on. Definitions, rules and questions will be read to you.');
   }
 
   return (
@@ -65,7 +83,8 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
           // can reach it and hear the reason.
           const locked = t.key === 'reduce' && deviceReduce;
           const reason = locked ? 'Your device asks for less motion, so this stays on.'
-            : t.key === 'contrast' && deviceContrast ? 'Your device asks for more contrast.' : '';
+            : t.key === 'contrast' && deviceContrast ? 'Your device asks for more contrast.'
+            : t.key === 'audio' && !hasVoice ? 'No voice on this device.' : '';
           return (
             <div className="cb-setrow" key={t.key}>
               <div>
