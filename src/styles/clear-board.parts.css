@@ -575,6 +575,17 @@
     border-bottom-width: 3px;
     padding-bottom: calc(var(--sp-3) - 2px);
   }
+
+  /* A control that cannot act shows its words and its edge in GrayText. The browser does this for
+     a control with the attribute disabled. The Yard stepper and a toggle that the app holds use
+     aria-disabled, so that they keep the focus. The browser does not see them as disabled, so
+     these rules give them the same look. */
+  .cb-app .dusk-btn[aria-disabled="true"] {
+    color: GrayText;
+    border-color: GrayText;
+  }
+  .cb-toggle input[aria-disabled="true"] + i,
+  .cb-toggle input[aria-disabled="true"] + i::after { border-color: GrayText; }
 }
 
 /* ---- the reading modes ----------------------------------------------------------------------------
