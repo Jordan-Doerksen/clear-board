@@ -39,6 +39,10 @@ import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { LEARN_CARD, passLearnCards } from '../../tools/lib/learn-card.mjs';
+// The engine of the Yard, frozen (fence item 1). The case of a win reads the job and its optimal line
+// from the data, and the numbers that the readout must show from the model. It changes no file.
+import { PUZZLES } from '../../src/stations/yard/puzzles.js';
+import { freshState, kick, pull, secure, spot, checkWin } from '../../src/stations/yard/model.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
@@ -155,11 +159,23 @@ const overflowOf = (page) => page.evaluate(() => {
   return { page: Math.max(0, root.scrollWidth - root.clientWidth), main: main ? Math.max(0, main.scrollWidth - main.clientWidth) : 0 };
 });
 
+// The inputs that reach a page, from its first script on: the count of key presses and the count of
+// pointer presses of each kind (touch, mouse, pen). A case of one kind of input proves with it that
+// it used no other kind. It runs before each page script.
+function countInputs() {
+  const seen = { keys: 0, touch: 0, mouse: 0, pen: 0, other: 0 };
+  Object.defineProperty(window, '__cbInputs', { value: seen });
+  addEventListener('keydown', () => { seen.keys++; }, true);
+  addEventListener('pointerdown', (e) => { seen[['touch', 'mouse', 'pen'].includes(e.pointerType) ? e.pointerType : 'other']++; }, true);
+}
+const inputsOf = (page) => page.evaluate(() => ({ ...window.__cbInputs }));
+
 // Open one page in a new context, run `body`, then make the common checks.
 // Options: width (390 or 1440, or another width), seed, serviceWorker, settings (stored before
 // the page loads), reduce (the device flag for reduced motion), storage (false: the browser refuses
-// the storage of the site), expectedError (a function of the text and the address of a console
-// error: true for an error that the case causes on purpose), common (false: no common checks).
+// the storage of the site), touch (true: a phone with a touch screen), expectedError (a function of
+// the text and the address of a console error: true for an error that the case causes on purpose),
+// common (false: no common checks).
 async function withPage(options, body) {
   const size = SIZES[options.width ?? 1440] ?? { width: options.width, height: 800 };
   const context = await browser.newContext({
@@ -169,6 +185,7 @@ async function withPage(options, body) {
     timezoneId: 'America/Winnipeg',
     reducedMotion: options.reduce ? 'reduce' : 'no-preference',
     serviceWorkers: options.serviceWorker ? 'allow' : 'block',
+    ...(options.touch ? { hasTouch: true, isMobile: true } : {}),
   });
   const errors = [];
   try {
@@ -285,6 +302,160 @@ async function walkGuidedRadio(page, each) {
     await page.locator('#log .tx').nth(press - 1).waitFor();
     await each(press, await radioText(page));
   }
+}
+
+// Wait until the text of an element is `text`. On a time-out the case fails with a sentence.
+const waitText = (page, selector, text, when) => page.waitForFunction(([s, t]) => document.querySelector(s)?.textContent === t, [selector, text])
+  .catch(async () => { throw new CaseFailure(`${when}: ${selector} says "${await page.locator(selector).textContent().catch(() => '(not in the page)')}", and "${text}" is expected`); });
+
+// ---- The Yard (Y4a, Y4b). The six switch buttons have the hook data-sw and a name that says the
+// lining, for example "AS73 switch, lined reverse" (ruling SW-NAME). The move builder is the selects
+// #act, #count and #track and the button #work. The text mirror #yard-mirror says the yard in words.
+// It changes at the end paint of a move and not during the motion, so a case waits on it and not on
+// time. The status region #yard-live says the result of each call; the banner #msg shows it.
+const YARD_JOB = PUZZLES[0];                      // p0-1, the first job of the picker
+const READOUT = (moves, par, couplings) => `Moves ${moves} / par ${par} · Couplings ${couplings}`;
+const mirrorText = (page) => page.locator('#yard-mirror').evaluate((el) => el.textContent);
+const mirrorChange = (page, before, what) => page.waitForFunction((was) => document.querySelector('#yard-mirror')?.textContent !== was, before, { timeout: 15000 })
+  .catch(async () => { throw new CaseFailure(`${what} did not end: the text mirror did not change in 15 s. The banner says "${await page.locator('#msg').textContent()}"`); });
+const callWords = ([act, track, n]) => (act === 'secure' ? `SECURE ${track}` : `${act.toUpperCase()} ${n} ${act === 'pull' ? 'from' : 'to'} ${track}`);
+
+// The counters of the model along the optimal line of a job: entry k is the state after call k. Each
+// call is made on the lining that the case makes: the switch of the track of the call reverse and
+// each other switch normal. The case states no rule: the model (frozen) gives the numbers.
+function lineStates(job) {
+  const st = freshState(job);
+  const states = [{ moves: st.moves, joints: st.joints, won: false }];
+  for (const call of job.opt) {
+    const [act, track, n] = call;
+    if (act !== 'secure') for (const id of Object.keys(st.lined)) st.lined[id] = id === track ? 'reverse' : 'normal';
+    const r = act === 'secure' ? secure(st, track) : { pull, spot, kick }[act](st, track, n);
+    if (!r.ok) throw new CaseFailure(`the model refuses the call ${callWords(call)} of the optimal line of ${job.id}: ${r.msg}`);
+    states.push({ moves: st.moves, joints: st.joints, won: checkWin(st, job) });
+  }
+  return states;
+}
+
+// Press Tab, or Shift+Tab, until the control of `selector` has the focus. The direction is the order
+// of the document, which is the order of Tab in the Yard (no positive tabindex).
+async function tabTo(page, selector, max = 80) {
+  for (let presses = 0; presses <= max; presses++) {
+    const where = await page.evaluate((s) => {
+      const target = document.querySelector(s);
+      const active = document.activeElement;
+      if (!target) return 'none';
+      if (active === target) return 'here';
+      if (!active || active === document.body) return 'after';
+      return active.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_FOLLOWING ? 'after' : 'before';
+    }, selector);
+    if (where === 'here') return;
+    if (where === 'none') throw new CaseFailure(`the control ${selector} is not in the page`);
+    await page.keyboard.press(where === 'after' ? 'Tab' : 'Shift+Tab');
+  }
+  throw new CaseFailure(`the keyboard did not reach the control ${selector} in ${max} presses of Tab`);
+}
+
+// The two ways to play. `press` presses a button and `choose` sets a select. `only` is true when the
+// counts of the inputs of the page show this way and no other.
+const TOUCH = {
+  name: 'touch', width: 390, touch: true,
+  press: (page, selector) => page.locator(selector).tap(),
+  // The list of a select is a part of the system, not of the page. The case taps the select, and then
+  // picks the option as that list does: selectOption sets the option and sends input and change.
+  async choose(page, selector, value) {
+    await page.locator(selector).tap();
+    await page.locator(selector).selectOption(value);
+  },
+  only: (seen) => seen.touch > 0 && seen.keys + seen.mouse + seen.pen + seen.other === 0,
+};
+const KEYBOARD = {
+  name: 'keyboard', width: 1440, touch: false,
+  // Space presses a switch button, and Enter each other button.
+  async press(page, selector) {
+    await tabTo(page, selector);
+    await page.keyboard.press(selector.startsWith('[data-sw') ? 'Space' : 'Enter');
+  },
+  // A closed select of the browser changes its option with the arrow keys.
+  async choose(page, selector, value) {
+    await tabTo(page, selector);
+    const values = await page.locator(`${selector} option`).evaluateAll((els) => els.map((o) => o.value));
+    ok(values.includes(value), `the select ${selector} has no option "${value}": ${values.join(', ')}`);
+    for (let k = 0; k < values.length; k++) {
+      const now = await page.locator(selector).inputValue();
+      if (now === value) break;
+      await page.keyboard.press(values.indexOf(value) > values.indexOf(now) ? 'ArrowDown' : 'ArrowUp');
+    }
+    const now = await page.locator(selector).inputValue();
+    ok(now === value, `the arrow keys did not move the select ${selector} to "${value}": it is on "${now}"`);
+  },
+  only: (seen) => seen.keys > 0 && seen.touch + seen.mouse + seen.pen + seen.other === 0,
+};
+
+// One press of a switch button, and a wait until its name says the lining `want`.
+async function throwSwitch(page, how, id, want, where) {
+  const selector = `[data-sw="${id}"]`;
+  const name = `${id} switch, lined ${want}`;
+  await how.press(page, selector);
+  await page.waitForFunction(([s, n]) => document.querySelector(s)?.getAttribute('aria-label') === n, [selector, name])
+    .catch(async () => { throw new CaseFailure(`${where}: after a press the switch button ${id} is named "${await page.locator(selector).getAttribute('aria-label')}", and "${name}" is expected`); });
+}
+
+// Play the first job to a win along its optimal line, one way. The case first presses each of the six
+// switch buttons two times. For each call it lines the switches, sets the move builder, presses "Work
+// it" and waits for the end paint of the move; the readout must then show the counters of the model.
+// At the end it checks the win words, the readout at par, the status region and the done mark, and
+// that the page got the inputs of this way only. Returns a note.
+async function playToWin(how) {
+  const job = YARD_JOB;
+  const states = lineStates(job);
+  const where = `${job.id} by ${how.name} at ${how.width}`;
+  ok(states.at(-1).won && states.at(-1).moves === job.par, `the optimal line of ${job.id} does not win at par in the model`);
+  return withPage({ width: how.width, touch: how.touch }, async (page, context) => {
+    await context.addInitScript(countInputs);
+    await open(page, '/yard');
+    await page.locator('#work').waitFor();
+    ok(await page.evaluate(() => document.documentElement.dataset.reduce) === '0', `${where}: "Reduce motion" is not off`);
+    ok(await page.locator('#picker').inputValue() === String(PUZZLES.indexOf(job)), `${where}: the picker is not on the first job`);
+    await waitText(page, '#readout', READOUT(0, job.par, 0), `${where}, at the start`);
+    const ids = await page.locator('[data-sw]').evaluateAll((els) => els.map((el) => el.dataset.sw));
+    ok(ids.length === 6, `${where}: the Yard has ${ids.length} switch buttons, and 6 are expected`);
+    for (const id of ids) for (const want of ['reverse', 'normal']) await throwSwitch(page, how, id, want, where);
+    for (const [k, call] of job.opt.entries()) {
+      const [act, track, n] = call;
+      if (act !== 'secure') {
+        for (const id of ids) {
+          const want = id === track ? 'reverse' : 'normal';
+          if (!(await page.locator(`[data-sw="${id}"]`).getAttribute('aria-label')).endsWith(want)) await throwSwitch(page, how, id, want, where);
+        }
+      }
+      await how.choose(page, '#act', act);
+      await how.choose(page, '#track', track);
+      if (act !== 'secure') await how.choose(page, '#count', String(n));
+      const before = await mirrorText(page);
+      await how.press(page, '#work');
+      await mirrorChange(page, before, `${where}: the call ${callWords(call)}`);
+      await waitText(page, '#readout', READOUT(states[k + 1].moves, job.par, states[k + 1].joints), `${where}: after the call ${callWords(call)}`);
+    }
+    // The win words, the readout at par, the status region and the done mark.
+    const banner = (await page.locator('#msg').textContent()).trim();
+    ok(banner.startsWith('Job done.'), `${where}: after the last call the banner says "${banner}", and the win words "Job done." are expected`);
+    const readout = READOUT(job.par, job.par, states.at(-1).joints);
+    await waitText(page, '#readout', readout, `${where}, at the win`);
+    const region = page.locator('#yard-live');
+    ok(await region.getAttribute('role') === 'status', `${where}: #yard-live is not a status region`);
+    const said = await region.textContent();
+    ok(said.includes('Job done.') && said.includes(readout), `${where}: the status region says "${said}"; it must hold "Job done." and "${readout}"`);
+    const option = `#picker option[value="${PUZZLES.indexOf(job)}"]`;
+    ok((await page.locator(option).textContent()).startsWith('✓'), `${where}: after the win the picker shows "${await page.locator(option).textContent()}", with no done mark ✓`);
+    ok((await storedJson(page, PROFILE_KEY))?.yard?.completed?.includes(job.id), `${where}: after the win ${PROFILE_KEY} holds no done mark for ${job.id}`);
+    const seen = await inputsOf(page);
+    ok(how.only(seen), `${where}: the page got inputs of another way: ${JSON.stringify(seen)}`);
+    // The done mark stays after a reload.
+    await page.reload();
+    await page.locator('#picker').waitFor();
+    ok((await page.locator(option).textContent()).startsWith('✓'), `${where}: after a reload the picker shows "${await page.locator(option).textContent()}", with no done mark ✓`);
+    return `${where}: ${how.touch ? `${seen.touch} taps` : `${seen.keys} key presses`}, "${banner}"`;
+  });
 }
 
 // ---- The gate cases.
@@ -427,16 +598,53 @@ const GATE_CASES = [
   } },
 
   { name: '8 yard', async run() {
+    // The watched line of the first job (R7-P8, U-04): "▶ Watch optimal" opens a stepper at step 0 in
+    // the place of the move builder. Next plays one step, Back shows the yard after the step before,
+    // and "▶ Play all" plays each step to the end. The readout says "Couplings" (U-23). "Reduce motion"
+    // is off, so a step moves the engine: each wait is on the state of the page. The numbers of the
+    // readout after each step come from the model. A watched line gets no done mark.
+    const job = YARD_JOB;
+    const states = lineStates(job);
+    const n = job.opt.length;
+    const at = (k) => READOUT(states[k].moves, job.par, states[k].joints);
     await withPage({}, async (page) => {
       await open(page, '/yard');
       await page.locator('#optimal').waitFor();
       ok(await page.evaluate(() => document.documentElement.dataset.reduce) === '0', '"Reduce motion" is not off');
-      ok(await page.locator('#picker').evaluate((el) => el.selectedIndex) === 0, 'the picker is not on the first job');
-      const start = await page.locator('#readout').textContent();
-      ok(start.startsWith('Moves 0 / par 5'), `the readout of the first job starts as "${start}", and "Moves 0 / par 5" is expected`);
+      ok(await page.locator('#picker').inputValue() === String(PUZZLES.indexOf(job)), `the picker is not on the first job ${job.id}`);
+      await waitText(page, '#readout', at(0), `the first job ${job.id} at its start`);
+      // The stepper opens at step 0, and the move builder goes.
       await page.locator('#optimal').click();
-      await page.waitForFunction(() => document.querySelector('#readout').textContent.startsWith('Moves 5 / par 5'), null, { timeout: 30000 })
-        .catch(async () => { throw new CaseFailure(`after 30 s the readout is "${await page.locator('#readout').textContent()}", and "Moves 5 / par 5" is expected`); });
+      await page.locator('#yard-next').waitFor();
+      await waitText(page, '#yard-demo-count', `0 / ${n}`, 'after "▶ Watch optimal"');
+      await waitText(page, '#readout', at(0), 'after "▶ Watch optimal"');
+      ok(await page.locator('#work').isHidden(), 'the control "Work it" shows while the optimal line is watched');
+      ok((await page.locator('#yard-live').textContent()).includes(`Step 0 of ${n}`), `after "▶ Watch optimal" the status region does not say "Step 0 of ${n}"`);
+      // Next plays step 1. The words and the readout say its end state at its start; the text mirror
+      // changes at its end paint.
+      const before = await mirrorText(page);
+      await page.locator('#yard-next').click();
+      await waitText(page, '#yard-demo-count', `1 / ${n}`, 'after Next');
+      await waitText(page, '#readout', at(1), 'after Next');
+      await mirrorChange(page, before, 'step 1 of the optimal line after Next');
+      // Back shows the yard at step 0.
+      await page.locator('#yard-back').click();
+      await waitText(page, '#yard-demo-count', `0 / ${n}`, 'after Back');
+      await waitText(page, '#readout', at(0), 'after Back');
+      // "▶ Play all" plays each step on its own, and then the control says "Play all" again and is off.
+      await page.locator('#yard-play').click();
+      await page.waitForFunction((count) => {
+        const play = document.querySelector('#yard-play');
+        return document.querySelector('#yard-demo-count')?.textContent === count && /Play all/.test(play?.textContent ?? '') && play?.getAttribute('aria-disabled') === 'true';
+      }, `${n} / ${n}`, { timeout: 30000 }).catch(async () => {
+        throw new CaseFailure(`after "▶ Play all" and 30 s the stepper is at "${await page.locator('#yard-demo-count').textContent()}" and its control says "${(await page.locator('#yard-play').textContent()).trim()}"; "${n} / ${n}" and "▶ Play all" (off) are expected`);
+      });
+      await waitText(page, '#readout', at(n), 'at the end of "▶ Play all"');
+      const banner = await page.locator('#msg').textContent();
+      ok(banner.includes(`Step ${n} of ${n}`), `at the end of "▶ Play all" the banner says "${banner}", and "Step ${n} of ${n}" is expected`);
+      ok(!/Joints/.test(await page.locator('#readout').textContent()), 'the readout says "Joints"');
+      const option = await page.locator(`#picker option[value="${PUZZLES.indexOf(job)}"]`).textContent();
+      ok(!option.startsWith('✓'), `a watched line gave the job ${job.id} the done mark: "${option}"`);
     });
   } },
 
@@ -778,6 +986,18 @@ const GATE_CASES = [
     ok(total <= CACHE_BUDGET, `the offline cache is ${total} bytes in ${list.length} files, over the budget of ${CACHE_BUDGET} bytes (5 MB). The largest files: ${largest}`);
     return `the offline cache is ${total} bytes (${(total / 1024).toFixed(2)} KiB) in ${list.length} files: ${(100 * total / CACHE_BUDGET).toFixed(1)} % of the budget of ${CACHE_BUDGET} bytes (5 MB). The largest files: ${largest}.`;
   } },
+
+  // The cases from 20 on enter the gate at the closing commit of the G1 line after Wave 2c-2.
+  { name: '20 yard to a win', async run() {
+    // Gate A, question 2 (D-0033): a learner plays a job to a win at phone width. The first job is
+    // played to a win along its optimal line two times: at 390 by 844 px by touch only (taps on the
+    // six switch buttons and on the move builder), and at 1440 by 900 px by the keyboard only (Tab and
+    // Shift+Tab, Space and Enter, and the arrow keys in a select). See playToWin.
+    const notes = [];
+    for (const how of [TOUCH, KEYBOARD]) notes.push(await playToWin(how));
+    return notes.join('. ');
+  } },
+
 ];
 
 // ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after
