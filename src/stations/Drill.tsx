@@ -34,6 +34,17 @@ export function Drill({ domain }: { domain?: string }) {
   const [picked, setPicked] = useState<string | null>(null);
   const [focusIds, setFocusIds] = useState<string[] | null>(null);   // set ⇒ a "practice your misses" round
   const missedRef = useRef<Set<string>>(new Set());                  // items missed in the current session
+  // U-14: after "Next" keyboard focus stays in the task. The control that had focus is removed, so
+  // focus goes to the heading of the next question, or to the end heading after "Finish".
+  const questionHeadRef = useRef<HTMLHeadingElement>(null);
+  const doneHeadRef = useRef<HTMLHeadingElement>(null);
+  const focusTo = useRef<'question' | 'any' | null>(null);
+  useEffect(() => {
+    const want = focusTo.current;
+    if (!want) return;
+    const el = questionHeadRef.current ?? (want === 'any' ? doneHeadRef.current : null);
+    if (el) { focusTo.current = null; el.focus(); }
+  });
 
   // Build the session once per (content, domain, sessionKey). profileRef → pre-session snapshot.
   // The selection is the pure function buildSession of src/core/drill.ts (row U-44).
@@ -79,7 +90,7 @@ export function Drill({ domain }: { domain?: string }) {
         <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
         {title}
         <div className="dusk-tile dusk-tile--teal cb-drill-done">
-          <div className="dusk-tile-cap"><h3 className="dusk-tile-lab">{focusIds ? 'Review done' : 'Session done'}</h3></div>
+          <div className="dusk-tile-cap"><h3 className="dusk-tile-lab" ref={doneHeadRef} tabIndex={-1}>{focusIds ? 'Review done' : 'Session done'}</h3></div>
           <div className="dusk-tile-body">
             <p className="dusk-tile-num">{score} / {built.slots.length}</p>
             <p className="dusk-tile-sub">{lines}. Spaced out over the next days so it sticks.</p>
@@ -87,11 +98,11 @@ export function Drill({ domain }: { domain?: string }) {
         </div>
         <div className="cb-drill-actions">
           {missedRef.current.size > 0 && (
-            <button className="dusk-btn" onClick={() => { setFocusIds([...missedRef.current]); setSessionKey(k => k + 1); }}>
+            <button className="dusk-btn" onClick={() => { focusTo.current = 'question'; setFocusIds([...missedRef.current]); setSessionKey(k => k + 1); }}>
               Practice the {missedRef.current.size} you missed →
             </button>
           )}
-          <button className="dusk-btn" onClick={() => { setFocusIds(null); setSessionKey(k => k + 1); }}>Drill again</button>
+          <button className="dusk-btn" onClick={() => { focusTo.current = 'question'; setFocusIds(null); setSessionKey(k => k + 1); }}>Drill again</button>
           <button className="dusk-btn" onClick={() => navigate('/')}>Back to the path</button>
         </div>
       </div>
@@ -121,7 +132,7 @@ export function Drill({ domain }: { domain?: string }) {
       {title}
       <div className="cb-drill-top"><span className="cb-sub">Question {idx + 1} of {built.slots.length}</span><span className="dusk-count">{score} correct</span></div>
       <div className="dusk-panel dusk-panel--framed cb-drill-q">
-        <div className="dusk-panel-head"><h3 className="dusk-panel-name">{q.heading}</h3></div>
+        <div className="dusk-panel-head"><h3 className="dusk-panel-name" ref={questionHeadRef} tabIndex={-1}>{q.heading}</h3></div>
         <div className="dusk-panel-body cb-drill-prompt" data-cb="prompt">
           {q.kind === 'signal'
             ? <div className="cb-drill-signal" data-cb="prompt-signal"><Signal aspect={q.aspect} /></div>
@@ -154,7 +165,10 @@ export function Drill({ domain }: { domain?: string }) {
           <span className="cb-sub">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
           {/* U-38: "Next" is the main control; "Look it up" is a text link. */}
           <button className="cb-link cb-drill-lookup" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
-          <button className="dusk-btn cb-drill-next" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>
+          <button className="dusk-btn cb-drill-next" autoFocus onClick={() => {
+            focusTo.current = idx + 1 < built.slots.length ? 'question' : 'any';
+            setIdx(i => i + 1); setPicked(null);
+          }}>
             {idx + 1 < built.slots.length ? 'Next →' : 'Finish'}
           </button>
         </div>
