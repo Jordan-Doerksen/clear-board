@@ -2,10 +2,12 @@
 // Reference entry shows: the trust mark, the plain words, the drawings of a signal, the rule text
 // when the data holds it, the source line, and "Read aloud" when that setting is on.
 //
-// It is a copy of the entry of Reference.tsx at 49d3ba0, with one difference: an item with the
-// trust "operating-practice" takes its label from its source. A GOI item says "CN practice (GOI)";
-// an item from another source says that no CROR paragraph is cited, with the words that the Radio
-// test shows for it (R4 UX-38). No word here is new.
+// It is a copy of the entry of Reference.tsx at 49d3ba0, with three differences. (1) An item with
+// the trust "operating-practice" takes its label from its source. A GOI item says "CN practice
+// (GOI)"; an item from another source says that no CROR paragraph is cited, with the first part of
+// the label that the Radio test shows for it (R4 UX-38). (2) There is no "Drill these aspects"
+// control: the dialog does not leave the station. (3) An item with no plain words shows no empty
+// paragraph. The heading of the item is the heading of the dialog (LookUp.tsx).
 // The Reference entry changes in Wave 2c (rows U-02, U-08, U-11, U-37, job U1-A). When the callers
 // switch to the dialog (job U1-D), the two entries must show the same thing: one component for both.
 import { Signal } from '../stations/Signal';

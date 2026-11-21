@@ -25,6 +25,8 @@ No line here states, corrects or cites a rule. The words were not checked by the
 | U-18 | The name of the file of "Save to a file" | none | clear-board-progress-<date>.json |
 | U-17 | The look-up dialog: control | none (the look-up leaves the station) | Close |
 | U-17 | The look-up dialog: heading while the entry is not there | none | Reference (the station name of today) |
+| U-17 | The look-up dialog: the text while the library loads | none | Loading… (the word that Home shows today while the library loads) |
+| U-17 | The look-up dialog: the trust mark of an entry of CN practice whose source in the data is not "GOI" (`radio.joint.06`, `.08`, `.09`, `.10`) | none (Reference shows "● CN practice (GOI), not a CROR rule" for these four) | ● No CROR citation in the verified source (the first part of the label that the Radio test shows today for the same items; job U1-A proposes the same words for Reference, U-08) |
 | U-07 | The notice of the shell when a content file did not load | none ("Coming soon" on the domain tiles, a false statement) | Part of the library did not load. |
 | U-07 | The control of that notice (also in the look-up dialog) | none | Try again |
 | U-07 | A domain tile when a content file did not load | Coming soon | no words on the tile; the notice of the shell says what happened |
