@@ -119,13 +119,12 @@
   font-size: 1rem;
 }
 
-/* The lines of progress in words (U-26) keep the size and the ink of the mastery line. Each one has
-   the same space above it. Dusk keeps two lines of height for a tile sub line; a line of words here
-   takes the height of its text. */
-.cb-app .cb-drill-view .cb-drill-done .cb-drill-progress {
-  min-height: 0;
-  margin-top: var(--sp-3);
-}
+/* The lines of progress in words (U-26) keep the size and the ink of the mastery line, and each one
+   has the same space above it. Dusk keeps two lines of height for a tile sub line; with the lines of
+   U-26 under it, a line here takes the height of its text, so that the space between two lines is
+   the same when the mastery line has one line of text or two. */
+.cb-app .cb-drill-view .cb-drill-done .dusk-tile-sub { min-height: 0; }
+.cb-app .cb-drill-view .cb-drill-done .cb-drill-progress { margin-top: var(--sp-3); }
 
 /* ---- the end actions: actions, not answers. A row of Dusk buttons that wraps, words at 16 px ---- */
 .cb-app .cb-drill-view .cb-drill-actions {
