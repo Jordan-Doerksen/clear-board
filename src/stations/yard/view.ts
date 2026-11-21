@@ -246,7 +246,6 @@ export function createView(root: HTMLElement): YardView {
     setCount({ max, value, disabled }) {
       const cnt = at<HTMLSelectElement>('count');
       cnt.disabled = disabled;
-      cnt.style.opacity = disabled ? '.45' : '';
       cnt.innerHTML = '';
       for (let k = 1; k <= max; k++) {
         const o = document.createElement('option'); o.value = String(k); o.textContent = String(k); cnt.appendChild(o);

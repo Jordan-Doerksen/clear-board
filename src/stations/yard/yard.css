@@ -55,6 +55,10 @@
 .yard-wrap .yd-strip #picker { margin: var(--sp-2) var(--sp-4); max-width: calc(100% - 2 * var(--sp-4)); }
 /* The four selects keep the type of today: 14 px, weight 600. */
 .yard-wrap .yd-bar .cb-select { font-size: var(--fs-base); font-weight: var(--fw-medium); }
+/* A disabled select shows its state by the disabled look of the part, with no opacity. The part
+   does not undo the opacity of .7 that the browser gives a disabled select: this rule does it for
+   the Yard (a defect of the part, reported for U1). */
+.yard-wrap .yd-bar .cb-select:disabled { opacity: 1; }
 /* The readout keeps 16 px, mono, bold. The cell gives the mono face. */
 .yard-wrap .yd-readout { font-size: 1rem; font-weight: var(--fw-bold); }
 /* The button of the message. The rule names the box of the chrome, so that it does not reach into
