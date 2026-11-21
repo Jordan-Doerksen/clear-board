@@ -36,13 +36,24 @@
 // `compare` fails on these facts: an element id that is gone (an id of `idsMayGo` gives a
 // warning only); a class name that is gone (a class of `classesMayGo` gives a warning only; an
 // entry can end with `*`); a new script error; more sideways scroll; a smaller smallest text;
-// a word or a number that is gone or new (a new word of the list `wordsMayCome` of its page gives
-// a warning only); a control that is gone or smaller (with `--look`, a control that stays 44 by
-// 44 px or more gives a warning only, with both sizes). A word and the name of a control are
-// read as the markup writes them: a letter case that a style sets (text-transform) changes the
-// picture only. With no `--look` a pixel difference fails also. The pixels are counted with no
-// package: the SHA-256 of the two files is compared, and where they differ both are decoded in a
-// browser page.
+// a word or a number that is gone or new; a control that is gone or smaller (with `--look`, a
+// control that stays 44 by 44 px or more gives a warning only, with both sizes); a text mirror
+// that a page names and that is not whole. A word and the name of a control are read as the
+// markup writes them: a letter case that a style sets (text-transform) changes the picture only.
+// Text that is visually hidden (a box of 1 by 1 px or less that clips its content, as the class
+// dusk-sr does) is not page text: its words and its size are not read (ruling LOOK-MIRROR). A
+// select with no aria-label and no title is named by its label. With no `--look` a pixel
+// difference fails also. The pixels are counted with no package: the SHA-256 of the two files is
+// compared, and where they differ both are decoded in a browser page.
+//
+// The allowed changes. Each entry of the list `changes` of the config names the row that asks for
+// the change, and the pages it holds for (all pages when it names none). An entry can hold:
+// `idsMayGo` (ids); `wordsMayGo` and `wordsMayCome` (a list of words, each with any count, or an
+// object of words, each with the most that its count may fall or rise); `controlsMayGo` (the keys
+// of controls, `tag "name"`); `controlsMayGainWords` (a list of words: a control that is gone is
+// the same control under a new name when a new control of the same tag holds each word of the old
+// name, and each other word of the new name is in this list). An allowed change gives a warning
+// that names its row. Each other change of these facts fails.
 //
 // A baseline is compared only with pictures from the same machine.
 import { execFileSync } from 'node:child_process';
@@ -52,6 +63,7 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { passLearnCards } from '../lib/learn-card.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -138,15 +150,27 @@ function seedScript(start) {
   };
 }
 
-// The facts of the page. This function runs in the page.
-function collectFacts() {
+// The facts of the page. This function runs in the page. `mirror` is the text mirror that the
+// config of the page names, or null.
+function collectFacts(mirror) {
   const shown = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
   const collapse = (text) => (text ?? '').replace(/\s+/g, ' ').trim();
+  // Visually hidden: a box of 1 by 1 px or less that clips its content (ruling LOOK-MIRROR). A
+  // screen reader reads such text; the screen does not show it.
+  const visuallyHidden = (el) => {
+    const style = getComputedStyle(el);
+    if (style.display === 'none') return false;
+    const box = el.getBoundingClientRect();
+    const clips = style.overflow === 'hidden' || style.overflowX === 'hidden' || style.clipPath !== 'none' || (style.clip !== '' && style.clip !== 'auto');
+    return box.width <= 1 && box.height <= 1 && clips;
+  };
+  const hidden = [...document.body.querySelectorAll('*')].filter(visuallyHidden);
+  const inHidden = (el) => hidden.some((h) => h.contains(el));
   const ids = [...new Set([...document.querySelectorAll('[id]')].map((el) => el.id))].sort();
   const classes = [...new Set([...document.querySelectorAll('[class]')].flatMap((el) => [...el.classList]))].sort();
   let smallest = null;
   for (const el of document.body.querySelectorAll('*')) {
-    if (!shown(el)) continue;
+    if (!shown(el) || inHidden(el)) continue;
     if (![...el.childNodes].some((node) => node.nodeType === 3 && node.textContent.trim())) continue;
     const px = parseFloat(getComputedStyle(el).fontSize);
     if (!smallest || px < smallest.px) smallest = { px, where: `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ''}: ${collapse(el.textContent).slice(0, 40)}` };
@@ -154,16 +178,23 @@ function collectFacts() {
   // The words and the names of the controls are read as the markup writes them. A rule with
   // text-transform changes the look of a word, not the word: the picture shows that change.
   // So text-transform is off while the text is read, and on again before a control is measured.
+  // While the words are read, each visually hidden element is out of the layout, so that its text
+  // is not page text. The mark and the rule go before the controls are named.
   const asWritten = document.createElement('style');
-  asWritten.textContent = '*, *::first-letter, *::first-line { text-transform: none !important; }';
+  asWritten.textContent = '*, *::first-letter, *::first-line { text-transform: none !important; } [data-look-hidden] { display: none !important; }';
   document.head.append(asWritten);
+  for (const el of hidden) el.setAttribute('data-look-hidden', '');
   const words = {};
   for (const word of collapse(document.body.innerText).split(' ')) if (word) words[word] = (words[word] ?? 0) + 1;
+  for (const el of hidden) el.removeAttribute('data-look-hidden');
+  // The name of a control: its aria-label, its text (not for a select), its placeholder, its title,
+  // the text of its label (a select only: ruling LOOK-MIRROR), or its id.
+  const labelOf = (el) => collapse([...(el.labels ?? [])].map((label) => label.innerText).join(' '));
   const named = [];
   for (const el of document.querySelectorAll('button, a[href], select, input, textarea, summary, [role="tab"], [role="button"]')) {
     if (!shown(el)) continue;
     const tag = el.tagName.toLowerCase();
-    const name = collapse(el.getAttribute('aria-label')) || (tag === 'select' ? '' : collapse(el.innerText)) || collapse(el.getAttribute('placeholder')) || collapse(el.getAttribute('title')) || (el.id ? `#${el.id}` : '');
+    const name = collapse(el.getAttribute('aria-label')) || (tag === 'select' ? '' : collapse(el.innerText)) || collapse(el.getAttribute('placeholder')) || collapse(el.getAttribute('title')) || (tag === 'select' ? labelOf(el) : '') || (el.id ? `#${el.id}` : '');
     named.push({ el, key: `${tag} "${name}"` });
   }
   asWritten.remove();
@@ -171,12 +202,49 @@ function collectFacts() {
     const box = el.getBoundingClientRect();
     return { key, width: Math.round(box.width * 100) / 100, height: Math.round(box.height * 100) / 100 };
   });
+  // The text mirror: its lines, and the ids of the tracks that the page names in the attribute of
+  // the config. The words of the lines are not compared: the mirror check reads the lines.
+  let textMirror = null;
+  if (mirror) {
+    const list = document.querySelector(mirror.list);
+    textMirror = {
+      found: Boolean(list),
+      lines: list ? [...list.children].map((li) => collapse(li.textContent)) : [],
+      tracks: [...document.querySelectorAll(`[${mirror.trackAttribute}]`)].map((el) => el.getAttribute(mirror.trackAttribute)),
+    };
+  }
   const page = document.documentElement;
-  return { ids, classes, smallestText: smallest, words, controls, sidewaysScroll: Math.max(0, page.scrollWidth - page.clientWidth), pageWidth: page.scrollWidth, pageHeight: page.scrollHeight };
+  return { ids, classes, smallestText: smallest, words, controls, textMirror, sidewaysScroll: Math.max(0, page.scrollWidth - page.clientWidth), pageWidth: page.scrollWidth, pageHeight: page.scrollHeight };
 }
 
+// The check of a text mirror (ruling LOOK-MIRROR): the mirror is in the page, and it has one line for
+// the engine and one line for each track. A track line starts with the id of its track. The engine
+// line is the first line, and it starts with no track id. The ids come from the page (the attribute
+// of the config), and the config gives their count.
+function mirrorFails(mirror, facts) {
+  const m = facts.textMirror;
+  if (!m || !m.found) return [`the text mirror ${mirror.list} is not in the page`];
+  const fails = [];
+  const tracks = [...new Set(m.tracks)];
+  if (tracks.length !== mirror.tracks) fails.push(`the page names ${tracks.length} tracks in [${mirror.trackAttribute}], and ${mirror.tracks} are expected`);
+  const startsWith = (line, id) => line === id || (line.startsWith(id) && !/[\w]/.test(line[id.length]));
+  const trackOf = (line) => tracks.filter((id) => startsWith(line, id));
+  for (const id of tracks) {
+    const n = m.lines.filter((line) => startsWith(line, id)).length;
+    if (n !== 1) fails.push(`the text mirror has ${n} lines for the track ${id}, and 1 is expected`);
+  }
+  const other = m.lines.filter((line) => trackOf(line).length === 0).length;
+  if (other !== 1) fails.push(`the text mirror has ${other} lines that name no track, and 1 (the engine) is expected`);
+  else if (trackOf(m.lines[0]).length !== 0) fails.push('the first line of the text mirror names a track, and the engine line is expected');
+  if (m.lines.length !== tracks.length + 1) fails.push(`the text mirror has ${m.lines.length} lines, and ${tracks.length + 1} are expected (the engine and each track)`);
+  return fails;
+}
+
+// A step of the config. `learnCards` presses the control of each learn card of the Drill that shows
+// (2c-plan C11), until the element of its selector shows; with no learn card it presses nothing.
 async function runStep(page, step) {
-  if (step.click) await page.locator(step.click).first().click();
+  if (step.learnCards) await passLearnCards(page, step.learnCards);
+  else if (step.click) await page.locator(step.click).first().click();
   else if (step.focus) await page.locator(step.focus).first().focus();
   else if (step.press) await page.keyboard.press(step.press);
   else if (step.fill) await page.locator(step.fill).first().fill(step.text ?? '');
@@ -225,7 +293,7 @@ async function take(shot) {
       for (const svg of document.querySelectorAll('svg')) { svg.pauseAnimations(); svg.setCurrentTime(0); }
       await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
     });
-    const facts = await page.evaluate(collectFacts);
+    const facts = await page.evaluate(collectFacts, shot.page.mirror ?? null);
     // The picture is taken until two pictures in a row of this page are equal. A page can
     // paint one more time after its content is there, and one pixel of an edge can change.
     const shoot = () => page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide', scale: 'css' });
@@ -289,11 +357,52 @@ async function pixelDiff(a, b) {
 // LOOK-SMALLER). A control under the floor in width or in height fails.
 const TARGET_FLOOR = 44;
 const mayGo = (name, list) => (list ?? []).some((entry) => (entry.endsWith('*') ? name.startsWith(entry.slice(0, -1)) : name === entry));
+
+// The entries of `changes` that hold for a page: the entries that name the page, and the entries
+// that name no page.
+const changesFor = (page) => (config.changes ?? []).filter((c) => !c.pages || c.pages.includes(page.name));
+// How far the entries let the count of a word move in one direction (`key` is wordsMayGo or
+// wordsMayCome), and the rows of those entries. A list lets any count move.
+function wordAllowance(entries, key, word) {
+  let most = 0;
+  const rows = [];
+  for (const c of entries) {
+    const allowed = c[key];
+    if (!allowed) continue;
+    const n = Array.isArray(allowed) ? (allowed.includes(word) ? Infinity : 0) : (allowed[word] ?? 0);
+    if (n > 0) { most += n; rows.push(c.row); }
+  }
+  return { most, rows };
+}
+// The words of the name of a control, from its key `tag "name"`.
+const tagOf = (key) => key.slice(0, key.indexOf(' '));
+const nameWords = (key) => key.slice(key.indexOf('"') + 1, -1).split(' ').filter(Boolean);
+// The words of `next` that `old` does not hold, or null when `next` does not hold each word of `old`.
+function gainedWords(old, next) {
+  const left = new Map();
+  for (const w of nameWords(old)) left.set(w, (left.get(w) ?? 0) + 1);
+  const gained = [];
+  for (const w of nameWords(next)) {
+    if (left.get(w) > 0) left.set(w, left.get(w) - 1);
+    else gained.push(w);
+  }
+  return [...left.values()].every((n) => n === 0) ? gained : null;
+}
+
 function compareFacts(before, now, page) {
   const fails = [];
   const warnings = [];
+  const entries = changesFor(page);
+  const byRow = (lines) => {
+    const map = new Map();
+    for (const { rows, text } of lines) { const key = rows.join(', '); map.set(key, [...(map.get(key) ?? []), text]); }
+    return map;
+  };
   for (const id of before.ids.filter((x) => !now.ids.includes(x))) {
-    (mayGo(id, config.idsMayGo) ? warnings : fails).push(`an element id is gone: ${id}${mayGo(id, config.idsMayGo) ? ' (in idsMayGo)' : ''}`);
+    const entry = entries.find((c) => (c.idsMayGo ?? []).includes(id));
+    if (mayGo(id, config.idsMayGo)) warnings.push(`an element id is gone: ${id} (in idsMayGo)`);
+    else if (entry) warnings.push(`an element id is gone: ${id} (row ${entry.row})`);
+    else fails.push(`an element id is gone: ${id}`);
   }
   const lostClasses = before.classes.filter((x) => !now.classes.includes(x));
   const allowed = lostClasses.filter((c) => mayGo(c, config.classesMayGo));
@@ -304,27 +413,46 @@ function compareFacts(before, now, page) {
   if (before.smallestText && now.smallestText && now.smallestText.px < before.smallestText.px - 0.01) {
     fails.push(`smaller smallest text: ${before.smallestText.px} px in the baseline, ${now.smallestText.px} px now (${now.smallestText.where})`);
   }
-  // A new word of the list wordsMayCome of the page gives a warning only. Each other new word
-  // fails. A word that is gone always fails.
-  const mayCome = new Set(page.wordsMayCome ?? []);
+  // A word whose count moves no further than the changes of the page allow gives a warning with
+  // its rows. Each other word that is gone or new fails.
   const gone = [];
   const added = [];
-  const addedMayCome = [];
+  const allowedWords = [];
   for (const word of new Set([...Object.keys(before.words), ...Object.keys(now.words)])) {
     const was = before.words[word] ?? 0;
     const is = now.words[word] ?? 0;
+    if (is === was) continue;
+    const allowance = wordAllowance(entries, is < was ? 'wordsMayGo' : 'wordsMayCome', word);
+    if (Math.abs(is - was) <= allowance.most) {
+      allowedWords.push({ rows: allowance.rows, text: `${word} (${was} -> ${is})` });
+      continue;
+    }
     if (is < was) gone.push(was - is > 1 || is > 0 ? `${word} (${was} -> ${is})` : word);
-    if (is > was) (mayCome.has(word) ? addedMayCome : added).push(is - was > 1 || was > 0 ? `${word} (${was} -> ${is})` : word);
+    else added.push(is - was > 1 || was > 0 ? `${word} (${was} -> ${is})` : word);
   }
   if (gone.length) fails.push(`words or numbers that are gone: ${gone.slice(0, 40).join(' | ')}${gone.length > 40 ? ` | and ${gone.length - 40} more` : ''}`);
   if (added.length) fails.push(`words or numbers that are new: ${added.slice(0, 40).join(' | ')}${added.length > 40 ? ` | and ${added.length - 40} more` : ''}`);
-  if (addedMayCome.length) warnings.push(`${addedMayCome.length} words or numbers are new and are in wordsMayCome of the page: ${addedMayCome.join(' | ')}`);
+  for (const [rows, texts] of byRow(allowedWords)) warnings.push(`row ${rows}: ${texts.length} ${texts.length === 1 ? 'word or number' : 'words or numbers'} changed as the row allows: ${texts.join(' | ')}`);
   const group = (controls) => { const map = new Map(); for (const c of controls) map.set(c.key, [...(map.get(c.key) ?? []), c]); return map; };
   const was = group(before.controls);
   const is = group(now.controls);
+  // The controls of the current page that the baseline does not hold: a renamed control can be one.
+  const newKeys = [];
+  for (const [key, list] of is) for (let i = was.get(key)?.length ?? 0; i < list.length; i++) newKeys.push(key);
+  const allowedControls = [];
   for (const [key, list] of was) {
     const current = is.get(key) ?? [];
-    if (current.length < list.length) fails.push(`a control is gone: ${key} (${list.length} -> ${current.length})`);
+    for (let k = current.length; k < list.length; k++) {
+      const explicit = entries.find((c) => (c.controlsMayGo ?? []).includes(key));
+      if (explicit) { allowedControls.push({ rows: [explicit.row], text: `${key} is gone` }); continue; }
+      let renamed = null;
+      for (const c of entries.filter((e) => e.controlsMayGainWords)) {
+        const at = newKeys.findIndex((n) => tagOf(n) === tagOf(key) && gainedWords(key, n)?.every((w) => c.controlsMayGainWords.includes(w)));
+        if (at !== -1) { renamed = { row: c.row, next: newKeys[at] }; newKeys.splice(at, 1); break; }
+      }
+      if (renamed) allowedControls.push({ rows: [renamed.row], text: `${key} is now ${renamed.next}` });
+      else fails.push(`a control is gone: ${key} (${list.length} -> ${current.length})`);
+    }
     current.slice(0, list.length).forEach((c, i) => {
       if (c.width < list[i].width - 0.5 || c.height < list[i].height - 0.5) {
         const line = `a control is smaller: ${key}: ${list[i].width} by ${list[i].height} px in the baseline, ${c.width} by ${c.height} px now`;
@@ -333,6 +461,10 @@ function compareFacts(before, now, page) {
       }
     });
   }
+  for (const [rows, texts] of byRow(allowedControls)) {
+    warnings.push(`row ${rows}: ${texts.length} ${texts.length === 1 ? 'control is gone or has' : 'controls are gone or have'} a new name, as the row allows: ${texts.slice(0, 3).join(' | ')}${texts.length > 3 ? ` | and ${texts.length - 3} more` : ''}`);
+  }
+  if (page.mirror) fails.push(...mirrorFails(page.mirror, now));
   return { fails, warnings };
 }
 

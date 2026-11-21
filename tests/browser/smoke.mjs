@@ -12,11 +12,16 @@
 //                     It needs --commit <commit>: the commit of the build that is served.
 //
 // Each gate case has a new browser context. The service worker is blocked, except in the
-// offline case. A case that needs the same questions on each run sets a seed before the page
-// loads: a fixed generator in place of `Math.random`. Each gate case fails on a page error, on
-// a console error, or on sideways scroll at 390 or 1440: the page scrolls sideways, or the
-// content of `main` is wider than `main`. The script prints PASS or FAIL and the time for each
-// gate case, and exits non-zero when one gate case fails.
+// offline case and the update case. A case that needs the same questions on each run sets a seed
+// before the page loads: a fixed generator in place of `Math.random`. Each gate case fails on a
+// page error, on a console error that the case does not expect, or on sideways scroll at 390 or
+// 1440: the page scrolls sideways, or the content of `main` is wider than `main`. The script
+// prints PASS or FAIL and the time for each gate case, and exits non-zero when one gate case
+// fails.
+//
+// The learn card of the Drill (2c-plan C11, ruling LEARN-GAP): a case that waits for the first
+// question presses the control of each learn card that shows first. The one helper of
+// tools/lib/learn-card.mjs does it. It presses nothing when the build shows no learn card.
 //
 // A report-only case prints PENDING with a count and the job that owns the fix. It does not
 // change the exit code. A count of 0 means that the case passes on this build. The closing
@@ -27,10 +32,13 @@
 // job can replace an old class and put the hook on the same element, with no edit of this file.
 // No case states a rule. The tape holds a hash and a word count of the page text, not the text.
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
+import { tmpdir } from 'node:os';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import vm from 'node:vm';
+import { LEARN_CARD, passLearnCards } from '../../tools/lib/learn-card.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
@@ -58,6 +66,9 @@ try {
 }
 
 // ---- The server of the build.
+// The server serves `served.dir`. It is the build of --dist, or `dist/`. The update case serves a
+// second build for a time, and then the first build again.
+const served = { dir: distDir };
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json', '.svg': 'image/svg+xml',
@@ -65,8 +76,9 @@ const MIME = {
 };
 const server = createServer((request, response) => {
   const path = decodeURIComponent(new URL(request.url, 'http://127.0.0.1').pathname);
-  let file = normalize(join(distDir, path));
-  if (file !== distDir && !file.startsWith(distDir + sep)) { response.writeHead(403).end(); return; }
+  const dir = served.dir;
+  let file = normalize(join(dir, path));
+  if (file !== dir && !file.startsWith(dir + sep)) { response.writeHead(403).end(); return; }
   if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');
   if (!existsSync(file)) { response.writeHead(404, { 'content-type': 'text/plain' }).end('not found'); return; }
   response.writeHead(200, { 'content-type': MIME[extname(file)] ?? 'application/octet-stream', 'cache-control': 'no-store' });
@@ -117,6 +129,18 @@ function seedScript(start) {
   };
 }
 
+// The browser refuses the storage of the site, as a browser that blocks the data of sites does:
+// each read of `localStorage` or `sessionStorage` throws a SecurityError. It runs before each page
+// script.
+function refuseStorage() {
+  for (const name of ['localStorage', 'sessionStorage']) {
+    Object.defineProperty(window, name, {
+      configurable: true,
+      get() { throw new DOMException(`Failed to read the '${name}' property from 'Window': Access is denied for this document.`, 'SecurityError'); },
+    });
+  }
+}
+
 class CaseFailure extends Error {}
 function ok(condition, message) {
   if (!condition) throw new CaseFailure(message);
@@ -133,7 +157,9 @@ const overflowOf = (page) => page.evaluate(() => {
 
 // Open one page in a new context, run `body`, then make the common checks.
 // Options: width (390 or 1440, or another width), seed, serviceWorker, settings (stored before
-// the page loads), reduce (the device flag for reduced motion).
+// the page loads), reduce (the device flag for reduced motion), storage (false: the browser refuses
+// the storage of the site), expectedError (a function of the text and the address of a console
+// error: true for an error that the case causes on purpose), common (false: no common checks).
 async function withPage(options, body) {
   const size = SIZES[options.width ?? 1440] ?? { width: options.width, height: 800 };
   const context = await browser.newContext({
@@ -150,11 +176,18 @@ async function withPage(options, body) {
     if (options.settings) {
       await context.addInitScript(([key, value]) => { if (!localStorage.getItem(key)) localStorage.setItem(key, value); }, [SETTINGS_KEY, JSON.stringify(options.settings)]);
     }
+    if (options.storage === false) await context.addInitScript(refuseStorage);
     const page = await context.newPage();
     page.setDefaultTimeout(10000);
     page.on('pageerror', (err) => errors.push(`page error: ${err.message}`));
-    page.on('console', (message) => { if (message.type() === 'error' && !options.offlineNoise?.(message.text())) errors.push(`console error: ${message.text()}`); });
-    const result = await body(page, context);
+    page.on('console', (message) => {
+      if (message.type() === 'error' && !options.expectedError?.(message.text(), message.location().url ?? '')) errors.push(`console error: ${message.text()}`);
+    });
+    // A case that stops also names the page errors and console errors that came before it stopped.
+    const result = await body(page, context).catch((err) => {
+      if (!errors.length) throw err;
+      throw new CaseFailure(`${err instanceof CaseFailure ? err.message : String(err.message).split('\n')[0]}; ${errors.join('; ')}`);
+    });
     if (options.common !== false) {
       ok(errors.length === 0, errors.join('; '));
       if (size.width === 390 || size.width === 1440) {
@@ -173,16 +206,26 @@ const open = (page, route) => page.goto(`${base}/#${route}`);
 const visibleText = (page, selector) => page.locator(selector).first().innerText();
 const count = (page, selector) => page.locator(selector).count();
 
-// The six routes and the key element of each one.
+// The first question of the Drill or of Signals: the helper of C11 presses the control of each learn
+// card that shows first, and then an answer option shows.
+async function toFirstQuestion(page) {
+  await passLearnCards(page, hook('opt'));
+  await page.locator(hook('opt')).first().waitFor();
+}
+// The first screen of the Drill or of Signals, with no press: a learn card or an answer option.
+const firstScreen = (page) => page.locator(`${LEARN_CARD}, ${hook('opt')}`).first().waitFor();
+
+// The six routes and the key element of each one. `ready` waits for the first screen of a route
+// with no press; with no `ready` the check is the first screen.
 const ROUTES = [
   { route: '/', name: 'home', async check(page) {
     await page.locator(hook('domain-card')).first().waitFor();
     ok(await count(page, hook('station')) > 0, 'Home has no station button');
   } },
   { route: '/reference', name: 'reference', async check(page) { await page.locator(hook('ref-row')).first().waitFor(); } },
-  { route: '/drill', name: 'drill', async check(page) { await page.locator(hook('opt')).first().waitFor(); } },
-  { route: '/signals', name: 'signals', async check(page) {
-    await page.locator(hook('opt')).first().waitFor();
+  { route: '/drill', name: 'drill', ready: firstScreen, async check(page) { await toFirstQuestion(page); } },
+  { route: '/signals', name: 'signals', ready: firstScreen, async check(page) {
+    await toFirstQuestion(page);
     // With the seed the route opens on a drawn aspect. With no seed it can open on a text question.
     await page.locator(hook('prompt-signal', ' svg')).first().waitFor();
   } },
@@ -198,6 +241,16 @@ const ROUTES = [
     ok(await page.locator('.radio-host').evaluate((el) => el.childElementCount > 0), '.radio-host is empty');
   } },
 ];
+
+// The service worker of the page is active. The wait is on the state of the worker; the bound of
+// 15 s only ends a wait for a worker that never comes (an app that registers no worker).
+async function workerReady(page) {
+  const ready = await page.evaluate(() => Promise.race([
+    navigator.serviceWorker.ready.then(() => true),
+    new Promise((done) => { setTimeout(() => done(false), 15000); }),
+  ]));
+  ok(ready, 'the app registered no service worker: no worker was active after 15 s');
+}
 
 const storedJson = (page, key) => page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), key);
 
@@ -250,6 +303,7 @@ const GATE_CASES = [
   { name: '2 drill', async run() {
     await withPage({}, async (page) => {
       await open(page, '/drill');
+      await toFirstQuestion(page);
       await page.locator(hook('opt')).first().click();
       await page.locator(hook('feedback')).first().waitFor();
       const profile = await storedJson(page, PROFILE_KEY);
@@ -387,12 +441,12 @@ const GATE_CASES = [
   } },
 
   { name: '9 offline', async run() {
-    const offlineNoise = (text) => /net::ERR_INTERNET_DISCONNECTED/.test(text);
-    await withPage({ serviceWorker: true, offlineNoise }, async (page, context) => {
+    const expectedError = (text) => /net::ERR_INTERNET_DISCONNECTED/.test(text);
+    await withPage({ serviceWorker: true, expectedError }, async (page, context) => {
       await open(page, '/');
       await page.locator(hook('domain-card')).first().waitFor();
       // Wait for the worker and for its cache to stop growing.
-      await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+      await workerReady(page);
       const cached = () => page.evaluate(async () => {
         let n = 0;
         for (const name of await caches.keys()) n += (await (await caches.open(name)).keys()).length;
@@ -434,7 +488,7 @@ const GATE_CASES = [
     for (const width of [390, 1440]) {
       await withPage({ width }, async (page) => {
         await open(page, '/drill');
-        await page.locator(hook('opt')).first().waitFor();
+        await toFirstQuestion(page);
         const heights = await page.locator(hook('opt')).evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
         ok(heights.length > 0 && heights.every((h) => h >= 44), `an answer option is under 44 px high at ${width}: ${heights.map((h) => Math.round(h)).join(', ')}`);
         await page.locator(hook('opt')).first().click();
@@ -450,7 +504,7 @@ const GATE_CASES = [
     // With the dyslexia setting on, an answer option has the letter spacing of the prompt.
     await withPage({ settings: { ...allOff, dys: true } }, async (page) => {
       await open(page, '/drill');
-      await page.locator(hook('opt')).first().waitFor();
+      await toFirstQuestion(page);
       ok(await page.evaluate(() => document.documentElement.dataset.dys) === '1', 'the dyslexia setting is not on');
       const spacing = (selector) => page.locator(selector).first().evaluate((el) => getComputedStyle(el).letterSpacing);
       const option = await spacing(hook('opt'));
@@ -606,12 +660,209 @@ const GATE_CASES = [
     ok(notLarger.length === 0, `with "Bigger text" on, ${notLarger.length} keys of text elements are not larger: ${notLarger.slice(0, 6).join('; ')}${notLarger.length > 6 ? '; ...' : ''}`);
     return `${compared} text elements compared, each one larger with "Bigger text" on. ${alone.length} text elements of the Yard drawing have no partner under the other setting and are not compared${alone.length ? `: ${alone.join('; ')}` : ''}.`;
   } },
+
+  // Cases 16, 17 and 18 are the trials of R6 ENG-01 and ENG-02 as browser tests (P-22). They enter
+  // the gate with rows U-10 and U-07, which Wave 2c-1 merged.
+  { name: '16 update', async run() {
+    // Row U-10 (R6 ENG-01): an open app that gets a new build shows "A new version is ready." with
+    // one control, keeps the first build until the control is pressed, and then reloads on the new
+    // build. The server serves a first build, then a second build with one changed file.
+    const second = secondBuild(distDir);
+    try {
+      await withPage({ serviceWorker: true }, async (page) => {
+        await open(page, '/');
+        await page.locator(hook('domain-card')).first().waitFor();
+        await workerReady(page);
+        // The learner opens the app again: the worker of the first build now controls the page.
+        await page.reload();
+        await page.locator(hook('domain-card')).first().waitFor();
+        await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
+        await page.evaluate(() => { window.__cbSmokeOpen = 'first build'; });
+        const stillOpen = async (when) => ok(await page.evaluate(() => window.__cbSmokeOpen) === 'first build', `the page reloaded ${when}, before the control of the notice was pressed`);
+        const notice = page.getByText(UPDATE_NOTICE, { exact: true });
+        // The server now holds the second build. The learner comes back to the open app: the app
+        // asks for a new version on that event of the page (App.tsx). The app adds its listener when
+        // the worker is registered, so the event is sent again until the notice shows.
+        served.dir = second;
+        let shown = false;
+        for (let tries = 0; tries < 10 && !shown; tries++) {
+          await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+          shown = await notice.waitFor({ timeout: 1500 }).then(() => true, () => false);
+        }
+        if (!shown) await stillOpen('by itself, and the notice did not stay');
+        ok(shown, `the notice "${UPDATE_NOTICE}" did not show after the server held a second build`);
+        const reload = page.locator('p', { has: notice }).getByRole('button', { name: 'Reload', exact: true });
+        ok(await reload.count() === 1, `the notice "${UPDATE_NOTICE}" has no control "Reload"`);
+        await stillOpen('when the notice showed');
+        ok(await page.evaluate(() => document.querySelector('meta[name="cb-smoke-build"]') === null), 'the page shows the second build before the control was pressed');
+        // The open app keeps the first build: a station draws from its cache, and the page does not
+        // reload on a change of route.
+        await page.evaluate(() => { location.hash = '#/yard'; });
+        await ROUTES.find((r) => r.route === '/yard').check(page);
+        await stillOpen('on a change of route');
+        ok(await notice.isVisible(), 'the notice went away on a change of route');
+        // The learner presses the control: the page reloads on the second build.
+        const loaded = page.waitForEvent('load', { timeout: 15000 });
+        await reload.click();
+        await loaded;
+        await ROUTES.find((r) => r.route === '/yard').check(page);
+        ok(await page.evaluate(() => window.__cbSmokeOpen) === undefined, 'the page did not reload after the control was pressed');
+        ok(await page.evaluate(() => document.querySelector('meta[name="cb-smoke-build"]')?.getAttribute('content')) === '2', 'after the reload the page does not show the second build');
+        ok(await page.getByText(UPDATE_NOTICE, { exact: true }).count() === 0, `the notice "${UPDATE_NOTICE}" still shows after the reload on the new build`);
+      });
+    } finally {
+      served.dir = distDir;
+      rmSync(second, { recursive: true, force: true });
+    }
+  } },
+
+  { name: '17 failed load', async run() {
+    // Row U-07 (2c-plan C9; R6 ENG-02): one content file does not load. The notice of the shell
+    // shows with its control, Home shows no "Coming soon", and the control loads the file. The file
+    // is blocked one time and answered with a 404 one time, as in the trial of ENG-02.
+    const BLOCKED = '**/data/rules.json';
+    const liveTiles = (page) => page.locator(hook('domain-card')).evaluateAll((els) => els.filter((el) => el.tagName === 'BUTTON').length);
+    const all = await withPage({}, async (page) => {
+      await open(page, '/');
+      await page.locator(hook('domain-card')).first().waitFor();
+      ok(await page.getByText(FAILED_NOTICE).count() === 0, `the notice "${FAILED_NOTICE}" shows when each file loaded`);
+      return liveTiles(page);
+    });
+    for (const how of ['blocked', 'answered 404']) {
+      await withPage({ expectedError: (text, url) => /\/data\/rules\.json$/.test(url) }, async (page, context) => {
+        await context.route(BLOCKED, (route) => (how === 'blocked' ? route.abort() : route.fulfill({ status: 404, body: 'not found' })));
+        await open(page, '/');
+        await page.locator(hook('domain-card')).first().waitFor();
+        const notice = page.getByText(FAILED_NOTICE, { exact: true });
+        await notice.waitFor().catch(() => { throw new CaseFailure(`rules.json ${how}: the notice "${FAILED_NOTICE}" did not show`); });
+        const retry = page.locator('p', { has: notice }).getByRole('button', { name: 'Try again', exact: true });
+        ok(await retry.count() === 1, `rules.json ${how}: the notice has no control "Try again"`);
+        ok(await page.getByText('Coming soon').count() === 0, `rules.json ${how}: Home shows "Coming soon"`);
+        const before = await liveTiles(page);
+        ok(before < all, `rules.json ${how}: Home shows ${before} domain tiles to drill, as many as when each file loaded`);
+        // The file loads again: the control loads it, the notice goes, and each tile is back.
+        await context.unroute(BLOCKED);
+        await retry.click();
+        await notice.waitFor({ state: 'detached' }).catch(() => { throw new CaseFailure(`rules.json ${how}: the notice stays after "Try again"`); });
+        await page.waitForFunction(([selector, n]) => [...document.querySelectorAll(selector)].filter((el) => el.tagName === 'BUTTON').length === n, [hook('domain-card'), all])
+          .catch(async () => { throw new CaseFailure(`rules.json ${how}: after "Try again" Home shows ${await liveTiles(page)} domain tiles to drill, and ${all} are expected`); });
+      });
+    }
+  } },
+
+  { name: '18 storage refused', async run() {
+    // Row U-07 (R6 ENG-02): the browser refuses the storage of the site. Each of the six routes
+    // draws its key element, with 0 page errors and 0 console errors. The Yard draws.
+    for (const r of ROUTES) {
+      await withPage({ storage: false }, async (page) => {
+        await open(page, r.route);
+        ok(await page.evaluate(() => { try { void localStorage.length; return false; } catch { return true; } }), 'the storage of the site is not refused');
+        await r.check(page).catch(async (err) => {
+          const shows = (await page.locator('main').innerText().catch(() => '')).replace(/\s+/g, ' ').trim().slice(0, 160);
+          throw new CaseFailure(`storage refused, ${r.name}: ${err.message.split('\n')[0]} The view shows: "${shows}"`);
+        });
+      });
+    }
+  } },
+
+  { name: '19 cache budget', async run() {
+    // Row U-43 (R6 ENG-22): the offline cache of the build (the precache list of the service worker)
+    // is 5 MB or less. A file of the list that the build does not hold fails the case: the sum would
+    // then be false.
+    const list = precacheList(distDir);
+    const missing = list.filter((url) => !existsSync(join(distDir, url)));
+    ok(missing.length === 0, `the precache list of sw.js names ${missing.length} files that the build does not hold: ${missing.join(', ')}`);
+    const sizes = list.map((url) => ({ url, bytes: statSync(join(distDir, url)).size })).sort((a, b) => b.bytes - a.bytes);
+    const total = sizes.reduce((sum, f) => sum + f.bytes, 0);
+    const largest = sizes.slice(0, 3).map((f) => `${f.url} ${f.bytes}`).join(', ');
+    ok(total <= CACHE_BUDGET, `the offline cache is ${total} bytes in ${list.length} files, over the budget of ${CACHE_BUDGET} bytes (5 MB). The largest files: ${largest}`);
+    return `the offline cache is ${total} bytes (${(total / 1024).toFixed(2)} KiB) in ${list.length} files: ${(100 * total / CACHE_BUDGET).toFixed(1)} % of the budget of ${CACHE_BUDGET} bytes (5 MB). The largest files: ${largest}.`;
+  } },
 ];
 
 // ---- The report-only cases. Each one prints PENDING with its count. It is a gate only after
 // the closing commit of the G1 line makes it one. Each report-only case of Wave 2a is a gate now
-// (cases 11 to 15). A later wave can add a report-only case to this list.
-const REPORT_CASES = [];
+// (cases 11 to 15). A report-only case returns its count, or an object with the count and the list
+// of what it found.
+const REPORT_CASES = [
+  { name: 'c7 focus after a change of route', owner: 'U1-D (ruling C7-DRILL)', what: 'the count of routes and widths where focus is not on the first h2 of #view after a change of route', async run() {
+    // 2c-plan C7: after a change of route, focus is on the first h2 of #view. The case opens another
+    // route first, changes the route in the page, and waits for the first screen of the route with
+    // no press, and for the end of the wait of the shell (it holds focus on #view while the heading
+    // of an island is not there).
+    const misses = [];
+    for (const width of [390, 1440]) {
+      for (const r of ROUTES) {
+        const from = ROUTES.find((x) => x.route === (r.route === '/' ? '/reference' : '/'));
+        const found = await withPage({ width, common: false }, async (page) => {
+          await open(page, from.route);
+          await from.check(page);
+          await page.evaluate((route) => { location.hash = `#${route}`; }, r.route);
+          await (r.ready ?? r.check)(page);
+          const settled = await page.waitForFunction(() => document.activeElement !== document.querySelector('main#view'), null, { timeout: 5000 }).then(() => true, () => false);
+          if (!settled) return 'main#view (the heading did not come)';
+          return page.evaluate(() => {
+            const heading = document.querySelector('#view h2');
+            const el = document.activeElement;
+            if (heading && el === heading) return null;
+            return el ? `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ''}${[...el.classList].map((c) => `.${c}`).join('')}` : 'nothing';
+          });
+        });
+        if (found) misses.push(`${r.name} at ${width}: focus is on ${found}`);
+      }
+    }
+    return { count: misses.length, found: misses };
+  } },
+];
+
+// ---- The words of the shell notices (rows U-10 and U-07, job U1-B).
+const UPDATE_NOTICE = 'A new version is ready.';
+const FAILED_NOTICE = 'Part of the library did not load.';
+
+// ---- The second build of the update case. It is a copy of the build with one changed file: the
+// page of the app holds one more meta element. The precache list of sw.js names the new revision of
+// that page (the MD5 of the file, as Workbox writes it), so sw.js changes too, and the browser finds
+// a new worker. The copy is in the folder of temporary files and is removed after the case.
+function secondBuild(dir) {
+  const copy = mkdtempSync(join(tmpdir(), 'cb-smoke-second-build-'));
+  cpSync(dir, copy, { recursive: true });
+  const page = readFileSync(join(copy, 'index.html'), 'utf8');
+  if (!page.includes('</head>')) throw new CaseFailure('the second build cannot be made: index.html has no </head>');
+  const changed = page.replace('</head>', '<meta name="cb-smoke-build" content="2"></head>');
+  writeFileSync(join(copy, 'index.html'), changed);
+  const sw = readFileSync(join(copy, 'sw.js'), 'utf8');
+  const entry = /\{url:"index\.html",revision:"[0-9a-f]+"\}/;
+  if (!entry.test(sw)) throw new CaseFailure('the second build cannot be made: the precache list of sw.js has no entry of index.html with a revision');
+  writeFileSync(join(copy, 'sw.js'), sw.replace(entry, `{url:"index.html",revision:"${createHash('md5').update(changed).digest('hex')}"}`));
+  return copy;
+}
+
+// ---- The precache list of the service worker of a build: the address of each file, from the
+// list that sw.js gives to precacheAndRoute. The list is found by its call and its brackets, and
+// evaluated in an empty node:vm context.
+const CACHE_BUDGET = 5 * 1024 * 1024;   // 5 MB, as SPEC.md sets the budget (R6 ENG-22: 5,242,880 bytes)
+function precacheList(dir) {
+  const file = join(dir, 'sw.js');
+  if (!existsSync(file)) throw new CaseFailure(`${file} does not exist: the build has no service worker`);
+  const text = readFileSync(file, 'utf8');
+  const call = text.indexOf('precacheAndRoute(');
+  if (call === -1 || text.indexOf('precacheAndRoute(', call + 1) !== -1) throw new CaseFailure('sw.js does not hold exactly one call of precacheAndRoute');
+  const start = text.indexOf('[', call);
+  let depth = 0;
+  let quote = null;
+  let end = -1;
+  for (let i = start; i < text.length && end === -1; i++) {
+    const c = text[i];
+    if (quote) { if (c === '\\') i++; else if (c === quote) quote = null; continue; }
+    if (c === '"' || c === "'" || c === '`') quote = c;
+    else if (c === '[') depth++;
+    else if (c === ']' && --depth === 0) end = i;
+  }
+  if (start === -1 || end === -1) throw new CaseFailure('the precache list of sw.js has no end');
+  const entries = vm.runInNewContext(`(${text.slice(start, end + 1)})`, Object.create(null), { timeout: 2000 });
+  ok(Array.isArray(entries) && entries.length > 0 && entries.every((e) => typeof e?.url === 'string'), 'the precache list of sw.js is not a list of entries with a url');
+  return entries.map((e) => decodeURIComponent(e.url.split(/[?#]/)[0]));
+}
 
 // ---- Record the tape, or run the cases.
 const seconds = (ms) => `${(ms / 1000).toFixed(2)} s`;
@@ -651,8 +902,10 @@ try {
     for (const c of REPORT_CASES.filter(wanted)) {
       const t0 = Date.now();
       try {
-        const n = await c.run();
+        const result = await c.run();
+        const n = typeof result === 'number' ? result : result.count;
         console.log(`PENDING  ${c.name}  count ${n}  ${seconds(Date.now() - t0)}  (report only; owner ${c.owner}; ${c.what}${n > 0 ? '' : '; the count is 0 on this build, so the case can be a gate when its owner is merged'})`);
+        for (const line of (typeof result === 'object' ? result.found : []) ?? []) console.log(`      ${line}`);
       } catch (err) {
         console.log(`PENDING  ${c.name}  count not known  ${seconds(Date.now() - t0)}  (report only; owner ${c.owner}; the case did not run: ${String(err.message).split('\n')[0]})`);
       }
