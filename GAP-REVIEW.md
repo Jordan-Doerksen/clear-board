@@ -2,6 +2,9 @@
 
 *Adversarial review of SPEC.md + DECISIONS.md, 2026-06-23, per `AI-Brain/workflows/design-gate.md`.*
 *No repo is created until these come back with nothing that would change behavior.*
+*This file is the record of the design gate of 2026-06-23. Each statement describes that day. Today
+the repository exists, the app has a build step (D-0016) and a check workflow
+(`.github/workflows/check.yml`). What is true now is in `SPEC.md` and `ARCHITECTURE.md`.*
 
 ---
 
