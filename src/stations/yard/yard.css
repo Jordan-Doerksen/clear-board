@@ -85,18 +85,25 @@
   margin-left: 10px; padding-inline: 9px; border: 1px solid transparent;
   font-size: var(--fs-s); font-weight: var(--fw-medium);
 }
-.yard-wrap .yd-rules-legend { color: var(--ink-2); font-size: .78125rem; margin: 6px 0 2px; }
-.yard-wrap .yd-rules-legend .yd-k { color: var(--blue-ink); font-weight: 700; }
-.yard-wrap .yd-rules-legend .yd-s { color: var(--amber-ink); font-weight: 700; }
-.yard-wrap .yd-rules { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-.yard-wrap .yd-chip {
-  display: flex; flex-direction: column; gap: 2px; padding: 8px 12px;
-  border-radius: 8px; border: 1px solid var(--lit-rule); background: var(--panel-hi); min-width: 150px;
-}
-.yard-wrap .yd-chip b { font: 700 var(--fs-s) var(--font-mono); }
-.yard-wrap .yd-chip span { font-size: .78125rem; color: var(--ink-2); }
-.yard-wrap .yd-chip.yd-cror { border-left: 3px solid var(--blue-ink); } .yard-wrap .yd-chip.yd-cror b { color: var(--blue-ink); }
-.yard-wrap .yd-chip.yd-si { border-left: 3px solid var(--amber-ink); background: var(--rowwash-amber); } .yard-wrap .yd-chip.yd-si b { color: var(--amber-ink); }
+/* The rules in play: the legend and the rule tiles share one Dusk panel. */
+.yard-wrap .yd-rules-panel { margin: 12px 0; }
+/* The legend is a Dusk named rule: the name, then the line of text beside it, then the lit line of
+   the part under both. The line and the name keep 12.5 px and the letter case of today, and the
+   line stops at the Dusk measure. */
+.yard-wrap .yd-rules-legend { max-width: var(--measure); margin-bottom: var(--sp-4); align-items: baseline; font-size: .78125rem; }
+.yard-wrap .yd-rules-legend b { font-size: .78125rem; text-transform: none; }
+.yard-wrap .yd-rules-legend > span { flex: 1 1 18em; }
+.yard-wrap .yd-rules-legend::after { flex-basis: 100%; }
+.yard-wrap .yd-rules-legend .yd-k { color: var(--blue-ink); font-weight: var(--fw-bold); }
+.yard-wrap .yd-rules-legend .yd-s { color: var(--amber-ink); font-weight: var(--fw-bold); }
+/* The rule tiles: a Dusk grid of tiles in the tone of their kind. A tile here is not a control: it
+   has no least height, and no lift and no brighter edge on hover or on focus inside it. The
+   citation wraps and is never cut. The citation keeps 12 px and the label 12.5 px. */
+.yard-wrap .yd-chip { min-height: 0; }
+.yard-wrap .yd-chip:hover, .yard-wrap .yd-chip:focus-within { transform: none; box-shadow: var(--tile-neon); }
+.yard-wrap .yd-chip .dusk-tile-lab { white-space: normal; overflow-wrap: anywhere; text-overflow: clip; }
+.yard-wrap .yd-chip .dusk-tile-body { padding-bottom: var(--sp-3); }
+.yard-wrap .yd-chip .dusk-tile-sub { min-height: 0; font-size: .78125rem; }
 .yard-wrap .yd-help { margin-top: 18px; color: var(--ink-2); font-size: var(--fs-data); }
 .yard-wrap .yd-help summary { cursor: pointer; color: var(--ink); font-weight: 600; }
 .yard-wrap .yd-help code { background: var(--head); padding: 1px 5px; border-radius: 4px; font-size: .78125rem; font-family: var(--font-mono); }

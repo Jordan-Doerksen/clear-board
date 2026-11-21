@@ -116,12 +116,14 @@ const YARD_HTML = `
 
     <div class="yd-banner cb-banner" id="msg"></div>
 
-    <div class="yd-rules-legend">
-      Rules in play —
-      <span class="yd-k">CROR</span> = the national rulebook (applies everywhere) ·
-      <span class="yd-s">S.I.</span> = a <em>special instruction</em>, specific to <em>this</em> yard — <strong>you must know your yard's.</strong>
+    <div class="yd-rules-panel dusk-panel">
+      <div class="yd-rules-legend dusk-rule">
+        <b>Rules in play</b>
+        <span>— <span class="yd-k">CROR</span> = the national rulebook (applies everywhere) ·
+        <span class="yd-s">S.I.</span> = a <em>special instruction</em>, specific to <em>this</em> yard — <strong>you must know your yard's.</strong></span>
+      </div>
+      <div class="yd-rules dusk-grid" id="rules"></div>
     </div>
-    <div class="yd-rules" id="rules"></div>
 
     <div class="yd-note">
       <strong class="yd-note-head">What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span class="yd-note-more">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span>
@@ -194,9 +196,13 @@ export function createView(root: HTMLElement): YardView {
     renderRules(list) {
       const box = at('rules'); box.innerHTML = '';
       for (const r of list) {
+        // A rule tile takes the tone of its kind: blue for CROR, amber for a special instruction.
+        // A kind with no tone gets no tone class.
+        const tone = r.kind === 'cror' ? ' dusk-tile--blue' : r.kind === 'si' ? ' dusk-tile--amber' : '';
         const chip = document.createElement('div');
-        chip.className = `yd-chip yd-${r.kind}`;
-        chip.innerHTML = `<b>${r.cite}</b><span>${r.label}</span>`;
+        chip.className = `yd-chip yd-${r.kind} dusk-tile${tone}`;
+        chip.innerHTML = `<div class="dusk-tile-cap"><b class="dusk-tile-lab dusk-num">${r.cite}</b></div>`
+          + `<div class="dusk-tile-body"><span class="dusk-tile-sub">${r.label}</span></div>`;
         box.appendChild(chip);
       }
     },
