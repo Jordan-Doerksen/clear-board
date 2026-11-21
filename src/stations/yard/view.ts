@@ -208,6 +208,19 @@ export function createView(root: HTMLElement): YardView {
   at('yard-ask-no').addEventListener('click', () => settle(false));
   dialog.addEventListener('close', () => { if (pending) settle(false); });   // Escape
 
+  // A track id in a job line is a mark: bold, in the mono face (TRACK-MONO).
+  const mark = (track: string): string => `<b class="dusk-num">${track}</b>`;
+  // Writes the work order. When focus was inside it, focus stays inside it (CERTIFY-FOCUS): the job
+  // line takes the focus, so that focus does not fall to the page body when its control goes.
+  function order(html: string): void {
+    const box = at('workorder');
+    const had = box.contains(document.activeElement);
+    box.innerHTML = html;
+    if (!had) return;
+    const line = box.querySelector<HTMLElement>('.yd-wo-job');
+    if (line) { line.tabIndex = -1; line.focus(); }
+  }
+
   return {
     el,
     drawHost,
@@ -258,14 +271,14 @@ export function createView(root: HTMLElement): YardView {
         + `<span class="yd-ord-flag dusk-ico" aria-hidden="true">${e.flagged ? '⚑' : '▢'}</span>`
         + `<span class="yd-ord-line"><span class="yd-ord-mark">${e.mark}</span><span class="yd-ord-arrow">→</span><span class="yd-ord-trk">${e.track}</span></span>`
         + `</button>`).join('');
-      at('workorder').innerHTML =
+      order(
         `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag yd-si dusk-panel-name">SWITCH LIST</span> <span class="yd-wo-id dusk-count">${data.id.toUpperCase()}</span> <span class="yd-wo-sub dusk-panel-sub">· the list can be wrong</span></div>`
         + `<div class="yd-wo-body dusk-panel-body">`
-        + `<div class="yd-wo-job cb-prose">Build <b>${data.goalTrack}</b> from these cars. Check each line against the yard — tap any that <b>don't match</b>, then certify.</div>`
+        + `<div class="yd-wo-job cb-prose">Build ${mark(data.goalTrack)} from these cars. Check each line against the yard — tap any that <b>don't match</b>, then certify.</div>`
         + `<div class="yd-ord-list">${rows}</div>`
         + `<button class="yd-go dusk-btn" id="certify">Certify order ▸</button>`
         + `<div class="yd-wo-meta cb-sub"><span class="yd-wo-tip">${data.hint}</span></div>`
-        + `</div>`;
+        + `</div>`);
       at('workorder').querySelectorAll<HTMLElement>('.yd-ord-row').forEach((row) => row.addEventListener('click', () => {
         onFlag(+(row.dataset.i as string));
       }));
@@ -280,28 +293,29 @@ export function createView(root: HTMLElement): YardView {
       (row.querySelector('.yd-ord-flag') as HTMLElement).textContent = flagged ? '⚑' : '▢';
     },
 
-    // The job line (Y-FIX): only a car mark or a car number takes the mono face (dusk-num). A track
-    // id and a word stay in the face of the line, in bold.
+    // The job line (Y-FIX, TRACK-MONO): a car mark, a car number and a track id are marks, and only a
+    // mark takes the mono face (dusk-num). A word stays in the face of the line.
     renderVerifiedOrder(data) {
       const lines = data.lines
-        .map((e) => `<b class="dusk-num">${e.mark}</b> → ${e.track}${e.corrected ? ' <span class="yd-ord-fix">(list was wrong)</span>' : ''}`)
+        .map((e) => `<b class="dusk-num">${e.mark}</b> → <span class="dusk-num">${e.track}</span>${e.corrected ? ' <span class="yd-ord-fix">(list was wrong)</span>' : ''}`)
         .join(' · ');
-      at('workorder').innerHTML =
+      order(
         `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag dusk-panel-name">WORK ORDER ✓</span> <span class="yd-wo-id dusk-count">${data.goalTrack}</span> <span class="yd-wo-sub dusk-panel-sub">· verified</span></div>`
         + `<div class="yd-wo-body dusk-panel-body">`
-        + `<div class="yd-wo-job cb-prose">Build <b>${data.goalTrack}</b>: ${lines}.</div>`
+        + `<div class="yd-wo-job cb-prose">Build ${mark(data.goalTrack)}: ${lines}.</div>`
         + `<div class="yd-wo-meta cb-sub">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.</div>`
-        + `</div>`;
+        + `</div>`);
     },
 
     renderWorkOrder(data) {
       const nums = data.cars.map((c) => c.split(' ').pop());
       const head = `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag dusk-panel-name">WORK ORDER</span> <span class="yd-wo-id dusk-count">${data.id.toUpperCase()}</span> <span class="yd-wo-sub dusk-panel-sub">· ${data.title}</span></div>`;
       const meta = `<div class="yd-wo-meta cb-sub">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.<span class="yd-wo-tip">${data.hint}</span></div>`;
+      const from = data.from.map((t) => `<span class="dusk-num">${t}</span>`).join(', ');
       const job = data.depart
-        ? `<div class="yd-wo-job cb-prose">Build the outbound${data.ordered ? ' in order' : ''} — gather <b class="dusk-num">${nums.join(' · ')}</b> onto your train${data.from.length ? ` <span class="yd-wo-from">(set out on ${data.from.join(', ')})</span>` : ''}, then <b>Depart ▸</b>.</div>`
-        : `<div class="yd-wo-job cb-prose">Build <b>${data.goalTrack}</b> — gather <b class="dusk-num">${nums.join(' · ')}</b> onto it${data.from.length ? ` <span class="yd-wo-from">(now on ${data.from.join(', ')})</span>` : ''}.</div>`;
-      at('workorder').innerHTML = head + `<div class="yd-wo-body dusk-panel-body">` + job + meta + `</div>`;
+        ? `<div class="yd-wo-job cb-prose">Build the outbound${data.ordered ? ' in order' : ''} — gather <b class="dusk-num">${nums.join(' · ')}</b> onto your train${data.from.length ? ` <span class="yd-wo-from">(set out on ${from})</span>` : ''}, then <b>Depart ▸</b>.</div>`
+        : `<div class="yd-wo-job cb-prose">Build ${mark(data.goalTrack as string)} — gather <b class="dusk-num">${nums.join(' · ')}</b> onto it${data.from.length ? ` <span class="yd-wo-from">(now on ${from})</span>` : ''}.</div>`;
+      order(head + `<div class="yd-wo-body dusk-panel-body">` + job + meta + `</div>`);
     },
 
     setCount({ max, value, disabled }) {
