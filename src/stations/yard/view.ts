@@ -145,7 +145,7 @@ export interface YardView {
 const YARD_HTML = `
   <div class="yard-wrap">
     <div class="yd-bar yd-strip dusk-strip">
-      <div class="yd-field yd-field--job"><label class="yd-label" for="picker">Pick a job</label><select class="cb-select" id="picker"></select></div>
+      <div class="yd-field yd-field--job"><label class="yd-label" for="picker">Pick a job</label><select class="cb-select" id="picker" aria-describedby="yard-pickkey"></select><span class="yd-pickkey cb-sub" id="yard-pickkey">✓ job done · → your next job</span></div>
       <span class="dusk-spacer"></span>
       <div class="dusk-cell"><b class="yd-readout" id="readout">Moves 0 / par 0 · Couplings 0</b></div>
     </div>

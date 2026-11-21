@@ -163,17 +163,25 @@ export function mount(root, ctx) {
   // job, so the arrival is a picture only, and a new input ends it at the yard that it sets out
   // (R7-P11). With reduced motion the request shows that end state at once. The picture of the set-out
   // stays as it was (SME note S5).
+  // While it plays, the banner and the region say "Wait for the train." (U-39); at its end they say
+  // that the road train has left.
   function showArrival() {
     if (!canArrive()) return;
     settle();
     lastFrom = null;
+    const quiet = still();
+    if (!quiet) { const text = 'Wait for the train.'; banner(text, 'ok'); live.say(text); }
     const lenR = routeLength(THROUGH_ROUTE), stopS = lenR - 110;
     cine = { introS: -220, setoutCars: puzzle.inbound.cars, to: puzzle.inbound.to, phase: 'arrive', spotProg: 0 };
     run([
       { dur: 2200, fn: (t) => { cine.phase = 'arrive'; cine.introS = -220 + (stopS + 220) * t; } },                    // arrive & stop
       { dur: 1100, fn: (t) => { cine.phase = 'setout'; cine.spotProg = t; } },                                         // spot the cars in
       { dur: 1700, fn: (t) => { cine.phase = 'depart'; cine.introS = stopS + (lenR + 420 - stopS) * t; } },            // depart out the lead
-    ], still(), () => { cine = null; paint(); });
+    ], quiet, () => {
+      cine = null; paint();
+      const text = 'The road train has left out the lead.';
+      banner(text, 'ok'); live.say(text);
+    });
   }
   // The arrival is offered while the yard is as the job starts: no move, and each switch lined normal
   // as the train passes the ladder. In another state the picture of the arrival would be false.
@@ -749,6 +757,7 @@ export function mount(root, ctx) {
     const missed = [...errs].find((i) => !flagged.has(i));
     const over = [...flagged].find((i) => !errs.has(i));
     let why;
+    // Calm words for the refusal of the list (U-39): "Not quite", the word of the Drill for a miss.
     if (missed != null) {
       const e = puzzle.listed[missed];
       why = e.error === 'location'
@@ -756,9 +765,9 @@ export function mount(root, ctx) {
         : `read ${e.listedTrack} again — the number on the ground isn't ${e.listedMark}.`;
     } else {
       const e = puzzle.listed[over];
-      why = `${e.listedMark} on ${e.listedTrack} checks out — don't flag a good line.`;
+      why = `${e.listedMark} on ${e.listedTrack} checks out — leave a good line unflagged.`;
     }
-    banner(`Not so fast — ${why}`, 'bad'); live.say(`Not so fast — ${why}`);
+    banner(`Not quite — ${why}`, 'bad'); live.say(`Not quite — ${why}`);
   }
 
   function renderVerifiedOrder() {

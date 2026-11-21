@@ -218,3 +218,7 @@
   margin: var(--sp-3) 0 var(--sp-2); padding-left: var(--sp-4); max-width: var(--measure);
   border-left: 2px solid var(--lit-line); color: var(--ink);
 }
+/* The key of the marks of the picker (U-39), under the select: 12 px in the second ink. */
+.yard-wrap .yd-pickkey { color: var(--ink-2); font-size: var(--fs-s); }
+/* The message shows no empty box (U-39): with no text it takes no room. */
+.yard-wrap .yd-banner:empty { display: none; }
