@@ -20,23 +20,23 @@ export function Home() {
   const pct = Math.round(live.reduce((s, d) => s + (profile.domains[d.id]?.mastery || 0), 0) / Math.max(1, live.length) * 100);
 
   return (
-    <>
-      <section className="lede">
-        <span className="free">Free · tip jar only</span>
-        <p>Start on your first day knowing nothing. Get <b>job-ready, one piece at a time</b>. Every rule
+    <div className="cb-home-view">
+      <section className="dusk-panel">
+        <span className="dusk-badge">Free · tip jar only</span>
+        <p className="cb-prose">Start on your first day knowing nothing. Get <b>job-ready, one piece at a time</b>. Every rule
           explained in plain words first, the real CROR text one tap deeper — and a safe place to make every
           mistake until the right move is automatic.</p>
       </section>
 
-      <h2 className="section">Your path</h2>
-      <div className="path">
-        <div className="stage"><b>{stageFor(profile)}</b><span>{pct}% mastered</span></div>
-        <div className="bar" role="progressbar" aria-label="Overall mastery" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
-          <i style={{ width: `${pct}%` }} />
+      <h2 className="dusk-rule"><b>Your path</b></h2>
+      <div className="dusk-panel">
+        <div className="cb-home-stage"><b>{stageFor(profile)}</b><span className="dusk-num">{pct}% mastered</span></div>
+        <div className="dusk-bar" role="progressbar" aria-label="Overall mastery" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
+          <i className="dusk-fill dusk-fill--teal" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
-      <h2 className="section">The job, one piece at a time</h2>
+      <h2 className="dusk-rule"><b>The job, one piece at a time</b></h2>
       <div className="grid">
         {DOMAINS.map(d => {
           const m = Math.round((profile.domains[d.id]?.mastery || 0) * 100);
@@ -56,7 +56,7 @@ export function Home() {
         })}
       </div>
 
-      <h2 className="section">Ways to learn</h2>
+      <h2 className="dusk-rule"><b>Ways to learn</b></h2>
       <div className="stations">
         {STATIONS.map(s => (
           <button key={s.go} className="station" onClick={() => navigate(s.go)}><b>{s.icon} {s.name}</b><small>{s.sub}</small></button>
@@ -70,6 +70,6 @@ export function Home() {
           and flags CN operating practice (GOI) as not-a-rule. Not affiliated with CN, Transport Canada,
           or the RAC. Built for the people the book failed.</p>
       </footer>
-    </>
+    </div>
   );
 }

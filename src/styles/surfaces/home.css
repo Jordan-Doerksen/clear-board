@@ -1,1 +1,40 @@
 /* surfaces/home.css - the rules that only Home needs. Owner in Wave 2b: job B1. Class prefix: cb-home-. Job S1 made this file with no rule. */
+
+/* ---- the view --------------------------------------------------------------------------------
+   One element holds the view. Its parts stack in one column with the gap of the Dusk content
+   area. A heading has more space above it than below it, as today. */
+.cb-home-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+/* ---- the lede --------------------------------------------------------------------------------
+   The chip keeps the upper case of today. Its size is the Dusk size of a label (D-0038, TEXT-SIZE),
+   which is larger than the size of today. */
+.cb-app .cb-home-view .dusk-badge {
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+}
+.cb-app .cb-home-view .dusk-badge + .cb-prose { margin-top: var(--sp-4); }
+
+/* ---- the headings ----------------------------------------------------------------------------
+   A Dusk named rule. The words keep their size of today. */
+.cb-app .cb-home-view .dusk-rule { margin-top: var(--sp-6); }
+.cb-app .cb-home-view .dusk-rule b { font-size: .78rem; }
+
+/* ---- the path --------------------------------------------------------------------------------
+   The stage name and the figure share one row. Each text keeps its size of today. */
+.cb-home-stage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+.cb-home-stage b { font-size: 1.05rem; }
+.cb-home-stage span {
+  color: var(--ink-2);
+  font-size: .85rem;
+}
+.cb-app .cb-home-view .cb-home-stage + .dusk-bar { margin-top: var(--sp-5); }
