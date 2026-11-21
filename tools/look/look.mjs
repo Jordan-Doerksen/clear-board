@@ -55,6 +55,10 @@
 // name, and each other word of the new name is in this list). An allowed change gives a warning
 // that names its row. Each other change of these facts fails.
 //
+// A shot that does not reach its state (a page that does not load, an element that the page waits
+// for and that does not show, a step that does not end) fails with a sentence, and the run goes on
+// with the next shot (ruling LOOK-CRASH).
+//
 // A baseline is compared only with pictures from the same machine.
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -253,7 +257,21 @@ async function runStep(page, step) {
   else throw new Error(`a step of the config has no known kind: ${JSON.stringify(step)}`);
 }
 
-// Take one picture and its facts, in a new browser process, a new context and a new page.
+// A shot that does not reach its state (ruling LOOK-CRASH). The message is a sentence.
+class ShotFailure extends Error {}
+// Run one part of a shot. When it does not end, the shot fails with the sentence `what`. A time-out
+// gives the sentence only; another error gives the sentence and the first line of the error.
+async function reach(what, part) {
+  try {
+    return await part();
+  } catch (err) {
+    if (err instanceof ShotFailure) throw err;
+    throw new ShotFailure(err?.name === 'TimeoutError' ? what : `${what}: ${String(err?.message ?? err).split('\n')[0]}`);
+  }
+}
+
+// Take one picture and its facts, in a new browser process, a new context and a new page. When the
+// shot does not reach its state, the result holds `failure`, a sentence, and no picture.
 async function take(shot) {
   const size = config.sizes[shot.size];
   const browser = await launch();
@@ -274,9 +292,9 @@ async function take(shot) {
     await page.clock.setFixedTime(new Date(config.clock));
     page.on('pageerror', (err) => errors.push(`page error: ${err.message}`));
     page.on('console', (message) => { if (message.type() === 'error') errors.push(`console error: ${message.text()}`); });
-    await page.goto(`${base}/#${shot.page.route}`, { waitUntil: 'networkidle' });
-    if (shot.page.waitFor) await page.locator(shot.page.waitFor).first().waitFor();
-    for (const step of shot.page.steps ?? []) await runStep(page, step);
+    await reach(`the page #${shot.page.route} did not load in 15 s`, () => page.goto(`${base}/#${shot.page.route}`, { waitUntil: 'networkidle' }));
+    if (shot.page.waitFor) await reach(`the element ${shot.page.waitFor} that the page waits for did not show in 15 s`, () => page.locator(shot.page.waitFor).first().waitFor());
+    for (const [k, step] of (shot.page.steps ?? []).entries()) await reach(`step ${k + 1} of the page (${JSON.stringify(step)}) did not end in 15 s`, () => runStep(page, step));
     // Move the pointer off the page content, so that no picture shows a hover state of a step.
     await page.mouse.move(0, 0);
     await page.evaluate(async () => {
@@ -306,6 +324,9 @@ async function take(shot) {
       if (!settled) await page.waitForTimeout(100);
     }
     return { png, sha256: createHash('sha256').update(png).digest('hex'), facts: { ...facts, errors }, settled };
+  } catch (err) {
+    const sentence = err instanceof ShotFailure ? err.message : `the shot stopped: ${String(err?.message ?? err).split('\n')[0]}`;
+    return { failure: `${sentence}${errors.length ? `. Before that: ${errors.join('; ')}` : ''}` };
   } finally {
     await browser.close();
   }
@@ -513,16 +534,26 @@ try {
     mkdirSync(join(outDir, 'baseline'), { recursive: true });
     const rows = [];
     const manifest = { made: new Date().toISOString(), commit: source.commit, source: source.commit ? `the build of the commit ${source.commit}` : 'dist/ of the working tree', shots: {} };
+    let failedShots = 0;
     for (const shot of shots) {
-      // Two takes must be equal. If they are not, the harness takes the picture again.
+      // Two takes must be equal. If they are not, the harness takes the picture again. A shot that
+      // does not reach its state fails with its sentence, and the run goes on (LOOK-CRASH).
       let first = await take(shot);
       let takes = 1;
       let stable = false;
-      while (takes < 4 && !stable) {
+      while (!first.failure && takes < 4 && !stable) {
         const next = await take(shot);
         takes++;
+        if (next.failure) { first = next; break; }
         stable = next.sha256 === first.sha256;
         if (!stable) first = next;
+      }
+      if (first.failure) {
+        failedShots++;
+        manifest.shots[shot.name] = { failure: first.failure, takes };
+        console.log(`FAIL      ${shot.name}  ${first.failure}`);
+        rows.push({ name: shot.name, status: 'not taken', lines: [`FAIL: ${first.failure}`], images: [] });
+        continue;
       }
       writeFileSync(join(outDir, 'baseline', `${shot.name}.png`), first.png);
       writeFileSync(join(outDir, 'baseline', `${shot.name}.json`), `${JSON.stringify(first.facts, null, 1)}\n`);
@@ -533,10 +564,10 @@ try {
       rows.push({ name: shot.name, status: stable ? 'taken' : 'not stable', lines, images: [['baseline', `baseline/${shot.name}.png`]] });
     }
     writeFileSync(join(outDir, 'baseline', 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
-    writeReport('Look harness: the baseline', [`The baseline: ${manifest.source}. ${shots.length} pictures.`], rows);
-    const unstable = Object.values(manifest.shots).filter((s) => !s.stable).length;
-    console.log(`\nlook: baseline of ${shots.length} pictures from ${manifest.source} in ${((Date.now() - started) / 1000).toFixed(1)} s -> ${outDir}${unstable ? `; ${unstable} not stable` : ''}`);
-    if (unstable) exitCode = 1;
+    writeReport('Look harness: the baseline', [`The baseline: ${manifest.source}. ${shots.length - failedShots} pictures.${failedShots ? ` ${failedShots} shots fail: they did not reach their state.` : ''}`], rows);
+    const unstable = Object.values(manifest.shots).filter((s) => !s.failure && !s.stable).length;
+    console.log(`\nlook: baseline of ${shots.length - failedShots} pictures from ${manifest.source} in ${((Date.now() - started) / 1000).toFixed(1)} s -> ${outDir}${unstable ? `; ${unstable} not stable` : ''}${failedShots ? `; ${failedShots} shots fail` : ''}`);
+    if (unstable || failedShots) exitCode = 1;
   } else {
     const manifestPath = join(outDir, 'baseline', 'manifest.json');
     if (!existsSync(manifestPath)) stop(`${outDir} holds no baseline. Take the baseline first.`);
@@ -559,7 +590,14 @@ try {
       const equal = () => createHash('sha256').update(before.png).digest('hex') === now.sha256;
       // A picture that is not equal is taken again, two times at most. A shot that is equal
       // only on a later take passes, and the report names it.
-      while (!equal() && takes < 3) { now = await take(shot); takes++; }
+      while (!now.failure && !equal() && takes < 3) { now = await take(shot); takes++; }
+      // A shot that does not reach its state fails with its sentence, and the run goes on (LOOK-CRASH).
+      if (now.failure) {
+        console.log(`FAIL  ${shot.name}  ${now.failure}`);
+        rows.push({ name: shot.name, status: 'FAIL, not taken', lines: [`FAIL: ${now.failure}`], images: [['baseline', `baseline/${shot.name}.png`]] });
+        failed++;
+        continue;
+      }
       writeFileSync(join(outDir, 'current', `${shot.name}.png`), now.png);
       writeFileSync(join(outDir, 'current', `${shot.name}.json`), `${JSON.stringify(now.facts, null, 1)}\n`);
       const { fails, warnings } = compareFacts(before.facts, now.facts, shot.page);
