@@ -158,7 +158,7 @@ before you repeat it: a sub-agent's report is not proof.
 
 ## 7. What you cannot do from the cloud — leave it, and list it in the final report
 
-- The owner's look at each surface in his own browser, before and after, at 1440 and 390.
+- The owner's look at each surface in the owner's own browser, before and after, at 1440 and 390.
 - A played Yard win by the owner (the open check from D-0027).
 - The Windows desktop build.
 - The push to `main`, and the update of the copy the owner's site serves.

@@ -1,63 +1,88 @@
 # Clear Board
 
-A free CROR conductor-qualification trainer — first day to job-ready, built for the people a rulebook failed.
-Built on **React + TypeScript + Tauri** (the rebuild that replaced the original vanilla build — see `DECISIONS.md` → **D-0016**).
-Design-gate docs live alongside: `SPEC.md`, `DECISIONS.md`, `GAP-REVIEW.md`.
+A free CROR conductor-qualification trainer, from your first day. Practice, not the official test.
+Built for the people a rulebook failed.
 
-## Stack
-- **Vite + React 19 + TypeScript** — the UI.
-- **react-router-dom** (HashRouter) — routing that works on a GitHub Pages subpath and offline.
-- **Tauri v2** — the self-contained desktop exe (uses the OS WebView2). See *Desktop* below.
+Version 2.0.0 (`package.json`). Clear Board is a single-page app: Vite, React 19, TypeScript and a
+hash router (`react-router-dom`). One build ships two ways: an offline PWA and a Tauri v2 desktop
+shell. It has no server, no account and no analytics. The progress stays on the device.
 
-## What's ported (the spine — verified live)
-- `src/core/` — `sr.ts` (SM-2-lite spacing) and `store.ts` (profile, mastery, the `drillable` safety filter), ported 1:1 from the vanilla core and now typed.
-- `src/core/signal.ts` — the verified SVG signal renderer, **byte-for-byte** (only TS annotations added). Wrapped by `src/stations/Signal.tsx`.
-- `src/state/AppContext.tsx` — one provider: content library + the single profile + accessibility settings (the old `ctx` object).
-- Stations: **Home** (the qualification path), **Reference** (cited lookup), **Drill** (rules + signals + definitions).
-- **The Yard** (switch-list canvas sim) and **Radio** ("Back to a Joint" walkthrough) — both are **imperative islands**. Their engines/stations (`src/stations/yard/*.js`, `yardSim.js`, `radioSim.js`) are kept **byte-for-byte**; the shared `useImperativeStation` hook ([imperativeStation.ts](src/stations/imperativeStation.ts)) lazy-loads each (own code-split chunk), hands it a host `<div>` + a `ctx` bridged to React (navigate / settings / read-aloud / live profile / persist-on-win), and tears it down on unmount.
-- `public/data/*.json` — the four SME-verified content files, **copied untouched**. Never re-derived.
+## The stations
+- **Home** — the path: the stage, the overall mastery, one main control ("Start here", or
+  "Continue" with the count of items due now), a tile for each of the seven domains, the stations
+  and the tip jar link.
+- **Reference** — look up each definition, signal, rule and radio call. Plain words first, then
+  the source and a trust mark in words.
+- **Drill** — questions on a spaced schedule (SM-2-lite). A learn card shows a new item before its
+  first question. "Look it up" opens the entry in a dialog on top of the session.
+- **Signals** — the Drill on one domain, signals: the signal aspects and the rule items of that
+  domain.
+- **The Yard** — 19 switching jobs on a drawn yard (look C2), with a native button for each switch,
+  a text list of the yard for a screen reader, a move log and a stepper for the optimal line.
+- **Radio walkthrough** — "Guided" (nothing is scored) and "Call it yourself" (scored).
+- **Settings** (a dialog) — dyslexia-friendly text, higher contrast, reduce motion, read aloud,
+  bigger text; save the progress to a file and load it again; reset the progress.
 
-**This is now at feature parity with the vanilla build** — all five stations run on React, verified live.
-
-## Next — needs the owner, not more code
-- **The app icon.** `public/favicon.svg` is a purple lightning bolt with nothing to do with railroading,
-  and it's currently the whole visual identity (favicon + PWA manifest); the Tauri build still wears the
-  default Tauri logo. Two questions: where that SVG came from (it resembles a third-party tool's default
-  mark — a provenance issue, not a style one), and what the icon should be. With a source mark,
-  `npm run tauri icon <src>` generates the desktop set and PNG manifest icons in one step. (D-0028)
-- **Point protection on shove** — the deferred half of D-0029. It would put a confirmation on the primary
-  verb several times a minute; that's a game-feel call to make with hands on the controls.
-- **A scaffold rung before `p1-sort`** — optional. The par-19 job now sits in tier 3 where it belongs
-  (D-0026); judge whether it still needs a gentler `order` puzzle in front of it.
-- Consolidate — this folder replaces the vanilla `../clear-board`, which retires; update the map + Observatory.
-
-## Done since the revamp design pass
-Radio "Call it yourself" (D-0025) · visible Yard tiers (D-0026) · solver-owned "clean" badge + best
-records (D-0027) · **PWA offline** (D-0028) · **securement as a player action** (D-0029).
-
-## Run / build
+## Install and run (for a developer)
+Node 22: `.nvmrc` holds `22.23.5`.
 ```sh
-npm install
-npm run dev          # dev server (Vite), http://localhost:4548 via .claude/launch.json
-npm run build        # tsc -b && vite build  →  dist/  (static, deploy to GitHub Pages)
-npm run tauri build  # → standalone Clear Board.exe + NSIS installer (see Desktop below)
+npm ci               # install the locked packages (never a fresh resolve)
+npm run dev          # the development server (Vite)
+npm run build        # tsc -b, then vite build → dist/ (relative addresses: base './')
+npm run preview      # serve dist/
 ```
 
-## Desktop (Tauri) — done
-`npm run tauri build` produces a self-contained **`Clear Board.exe`** (~18 MB, frontend baked in,
-uses the OS WebView2) and a **`Clear Board_0.1.0_x64-setup.exe`** NSIS installer (~4 MB), in
-`src-tauri/target/release/` and `.../release/bundle/nsis/`. Config: `src-tauri/tauri.conf.json`
-(dark window, `productName`/`mainBinaryName` "Clear Board", NSIS-only bundling).
-
-**Build env (Windows):** needs the GNU Rust toolchain **plus a complete MinGW-w64** on PATH —
-rustup's bundled MinGW lacks `as.exe`. Build with:
+## The gates
 ```sh
-# PowerShell — WinLibs MinGW first, then cargo
-$env:PATH = "C:\projects\.toolchains\mingw64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
-npm run tauri build
+npm run check         # 12 offline steps: no network, no dist/, no browser
+npm run build         # the type check of the build, then the build
+npm run test:browser  # the browser smoke test of dist/: run the build first; it needs Chromium
 ```
+- `npm run check` runs `tools/check.mjs`: the frozen-file hash gate, the Dusk lock check, the
+  raw-colour lint, the name check, lint, the type check, the unit tests (`tests/unit/`), the
+  vectors of the schedule, the solver of the Yard jobs, the content and trust check, the
+  securement check, and a report of the signal drawings that two items share. Each step prints
+  PASS or FAIL.
+- `npm run test:browser` runs `tests/browser/smoke.mjs`: 19 gate cases and one report case in
+  Chromium. `npx playwright install chromium` gets Chromium.
+- `npm run look:baseline` and `npm run look:compare` run the look harness (`tools/look/look.mjs`):
+  pictures and page facts at 1440 and 390 px, and the Yard at 1280 px, against the build of a
+  baseline commit.
+- `.github/workflows/check.yml` runs the check, the build and the browser test on each pull
+  request and on each push to a branch other than `main`.
 
-## Safety rules carried over (unchanged)
-- Only `trust: "verified"` content is ever drilled/graded; `needs-review` is reference-only (F1).
-- Verbatim CROR text ships (public document); the PDF is never committed.
-- Accessibility is core: dyslexia font, read-aloud, high contrast, bigger text, reduced-motion — all driven by `<html>` data-attributes + persisted.
+## Hosting
+GitHub Pages is off for this repository (plan fact T13). `.github/workflows/deploy.yml` runs on a
+push to `main`: `npm ci`, the check and the build, then its GitHub Pages steps.
+
+## Desktop (Tauri v2)
+`src-tauri/` holds the desktop shell: one window, an NSIS installer and the icons.
+`npm run tauri build` makes the Windows build. It needs the GNU Rust toolchain and a complete
+MinGW-w64 on the PATH, because the MinGW of rustup has no `as.exe` (D-0016). No session of
+Wave 2 made or ran the Windows build: not verified. `src-tauri/` waits for a session that can
+make that build (ruling `TAURI`): `tauri.conf.json` holds the version `0.1.0` and the development
+port 4548 (`vite.config.ts` sets no port), and the icons are the default icons of the framework.
+
+## The documents
+- `SPEC.md` — the product spec.
+- `ARCHITECTURE.md` — the map of the code: the files, the data flow, the frozen set, the style
+  layers, the Yard and the gates.
+- `DECISIONS.md` — each decision, from D-0001.
+- `CHANGELOG.md` — the changes, by version.
+- `GAP-REVIEW.md`, `REVAMP-DESIGN.md`, `REVAMP-APPENDIX.md` — the records of the first design gate
+  and of a design pass, June 2026.
+- `specs/` — the plan of Clear Board 2 (`specs/clear-board-2-plan.md`), the research reports, the
+  briefs and rulings of each wave, and the pictures and the words of each job.
+
+## Safety rules
+- Only `trust: "verified"` content is drilled or graded; `needs-review` is reference-only (F1).
+- The frozen files do not change: `public/data/*.json`, `src/core/signal.ts`, the four Yard engine
+  modules (`model.js`, `solver.js`, `puzzles.js`, `geometry.js`) and the `STEPS` wording of
+  `src/stations/radioSim.js`. Step 1 of `npm run check` compares them with commit `94a41c5`.
+- `public/data/` holds five JSON files: four files of content items, each item with a trust mark,
+  and one file of questions.
+- The rule text ships where the data holds it (a public document). The CROR PDF is never committed.
+- No agent writes, corrects or cites a rule. A finding about rule content is a note for the SME.
+- Accessibility is core: the dyslexia face, read aloud, high contrast, bigger text and reduced
+  motion. The settings set `data-` attributes and a text size on `<html>`, and the choices are
+  stored on the device.

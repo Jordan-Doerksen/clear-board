@@ -3,6 +3,9 @@
 Status: **approved by the owner 2026-07-28** (design chosen in interview: "make the existing
 tiers real, re-place p1-sort"). Source: `REVAMP-DESIGN.md` §4 recs #15/#16.
 
+*This file records the design of 2026-07-28 (D-0026). Its line numbers and its code describe that
+day. What is true now is in `ARCHITECTURE.md`, section 6.*
+
 ---
 
 ## 1. Problem — and where the revamp doc is wrong
@@ -59,7 +62,7 @@ Option `value` stays the index into `PUZZLES`, so `load(PUZZLES[+picker.value])`
 
 ### 2.3 Tier labels live beside the data they label
 A `TIERS` table is exported from `puzzles.js` next to `PUZZLES` and `RULES`. Tunables belong in
-config, but the Yard island is byte-for-byte vanilla with its content inline; fetching JSON from
+config, but the Yard engine is plain JavaScript with its content inline; fetching JSON from
 inside the engine would be a real architecture change for a label table. Kept with `PUZZLES`,
 which is where every other tier number already lives.
 

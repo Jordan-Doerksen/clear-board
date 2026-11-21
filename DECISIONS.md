@@ -16,13 +16,13 @@ overwhelm. One product, one source of truth, one progress.
 ### D-0002 — Spine = the qualification path
 **Chosen:** a trainee → test-ready progression with one mastery profile and a progress-map home.
 **Weighed:** one-living-yard sim; study→drill→certify course; pure adaptive-brain.
-**Why:** matches the emotional goal (confidence, *"not scared"*), motivates return, and
+**Why:** matches the goal of confidence, motivates return, and
 naturally orders disparate content into a journey rather than a launcher.
 
 ### D-0003 — Free, always — tip jar only
 **Chosen:** every station free; no paid tier; a Ko-fi / Buy-Me-a-Coffee tip jar.
 **Weighed:** free core + paid Pro; a commercial store product.
-**Why:** Jordan's call — the mission is helping people the rulebook failed *become railroaders*,
+**Why:** the owner's call — the mission is helping people the rulebook failed *become railroaders*,
 not profit. Also removes the ethics of paywalling safety knowledge, and deletes the entire
 free/paid architecture.
 **Consequence:** cror-signals stops being a separate paid product (its content folds in free);
@@ -55,22 +55,22 @@ with their citations intact.
 SME/CROR-verified. The rebuild is the *shell + unified core + migration*, not a re-write of
 the rules. (mitigates F1)
 
-### D-0008 — Jordan (SME) is the verifier; what "verified" means
+### D-0008 — The SME is the verifier; what "verified" means
 **Chosen:** `trust:"verified"` = the item is cited to a specific CROR rule (or explicitly flagged GOI)
-and has been cross-checked by Jordan against the **Jan 2025 CROR** by him. Jordan holds the flag;
-he re-checks affected items when the CROR is reissued.
+and has been cross-checked by the SME against the **Jan 2025 CROR**. The SME holds the flag and
+re-checks the affected items when the CROR is reissued.
 **Why:** safety-critical content needs a named, accountable verifier and a concrete bar, not a vibe. (B2)
 
 ### D-0009 — Migration carries honest trust state; `needs-review` is reference-only
 **Chosen:** content migrates with its *real* current status. Anything not fully verified — the 4
 unencoded signal indications (410, 418, 433A, 440), the `ASPECTS_DRAFT` set, the 407 conflict —
 migrates as `needs-review`: it may appear in **Reference** (clearly flagged) but **never** in a
-graded Drill/Exam until Jordan verifies it.
+graded Drill/Exam until the SME verifies it.
 **Weighed:** copy everything in as verified (fast, wrong).
 **Why:** F1. A wrong rule taught as correct is the cardinal sin; honesty over coverage. (B1)
 
 ### D-0010 — CROR verbatim text may ship (it is a public document)
-**Chosen:** the CROR is a **public regulatory document** (Jordan, SME), so `citation.verbatim`
+**Chosen:** the CROR is a **public regulatory document** (the SME), so `citation.verbatim`
 text may be bundled in the public offline app. The official **PDF** is still never committed
 (D-0007 / existing rule). Plain-language stays the front door by *pedagogy* (Principle 1), with
 verbatim one tap deeper.
@@ -90,7 +90,7 @@ familiarity — full numbers in SPEC §Retention.
 
 ### D-0013 — Exam + "test-ready" are deferred past V1
 **Chosen:** V1 ships **no Exam station and makes no "test-ready" claim.** The per-domain mastery
-threshold + retention bar for `testReady` are set *with Jordan (SME)* when the Exam station is built.
+threshold + retention bar for `testReady` are set *with the SME* when the Exam station is built.
 **Why:** B5/F3 — a safety claim ("you're ready") won't ship on a guessed number.
 
 ### D-0014 — Solvability verification is a committed harness + pre-ship checklist
@@ -111,9 +111,9 @@ offline PWA for GitHub Pages and (later) a Tauri desktop exe. The React pilot li
 `../clear-board-react` until it reaches parity, then it replaces this folder (the vanilla build
 becomes reference, then retires).
 **Weighed:** stay vanilla ES modules (D-0005); Electron instead of Tauri.
-**Why:** Jordan is standardizing on React for tools with real UI state, and on a clean-exe stack.
-Vite still ships a static, offline-first PWA (the *spirit* of D-0005 — train-side offline, zero
-hosting cost), and Tauri adds the ~5 MB clean exe Electron can't. React's default escaping also
+**Why:** Vite still ships a static, offline-first PWA (the *spirit* of D-0005 — train-side offline, zero
+hosting cost), and Tauri adds the ~5 MB clean exe Electron cannot (an estimate: the Status below gives
+~18 MB for the built exe; no session of Wave 2 checked either size, D-0045). React's default escaping also
 removes the hand-rolled `esc()` from every station — a safety win for rendering verbatim CROR text.
 **Consequence:** the SPEC §Hard-constraints "No build step" line is superseded for this project;
 the offline-PWA + local-first + never-commit-the-PDF constraints still hold. The four verified data
@@ -130,11 +130,12 @@ Drill · The Yard · Radio) + settings + profile run on React, 0 console errors.
 VERIFIED RUNNING (2026-06-24)** — `npm run tauri build` produces a self-contained `Clear Board.exe`
 (~18 MB, OS WebView2) + a `Clear Board_0.1.0_x64-setup.exe` NSIS installer (~4 MB); launched the exe,
 native window "Clear Board" opened, 35 MB resident, no crash. Build needed a complete MinGW-w64 on
-PATH (`C:\projects\.toolchains\mingw64\bin`) — rustup's bundled GNU MinGW lacks `as.exe`.
+PATH — rustup's bundled GNU MinGW lacks `as.exe`.
 **CONSOLIDATED (2026-06-24)** — the React build IS now `clear-board` (the vanilla folder was deleted;
 its tree is preserved in git history before this rebuild commit). Pushed to `main` and the repo's
 GitHub Pages switched from legacy root-serve to a GitHub Actions build (`.github/workflows/deploy.yml`);
-verified live at https://jordan-doerksen.github.io/clear-board/ serving the React bundle. `map.md` updated.
+verified live on GitHub Pages, serving the React bundle. `map.md` updated. **Later (D-0045):** GitHub
+Pages is off for this repository.
 Remaining: PWA service worker (vite-plugin-pwa already a dep), custom app icon (currently default Tauri
 logo), and the Observatory card-collapse (four rail cards → one Clear Board card, tied to retiring the
 old rail apps per D-0011).
@@ -172,7 +173,7 @@ worked. This is the single biggest "one brain, not panels" fix (REVAMP-DESIGN §
 `p2-kick` win moves Switching 0 → 0.017 and Securement 0 → 0.011. The nudge is deliberately modest
 (one rep → `fam` ≈ 0.03, averaged over the domain) and still decays, so sim completion alone can never
 certify a rule.
-**Open (Jordan / SME):** should an over-par or refusal-heavy win grade *softer* than a clean one, and
+**Open (the SME):** should an over-par or refusal-heavy win grade *softer* than a clean one, and
 what exact `fam` weight? SM-2-lite is boolean today; this needs a quality signal. Tracked as tuning,
 not a blocker.
 
@@ -183,6 +184,10 @@ D-0017) between `npm ci` and `npm run build`; a red gate fails the `build` job, 
 **Weighed:** trust the pre-ship checklist by hand; a separate scheduled check.
 **Why:** a gate only protects the user if it actually blocks a bad ship. A broken par or a leaked
 `needs-review` item now stops the deploy instead of reaching the public site.
+**Later (D-0045):** GitHub Pages is off for this repository. The workflow still runs the check before
+the build. Plan fact T13 records that the run then fails at the Pages step. Since Wave 2a,
+`.github/workflows/check.yml` runs the check on each pull request and on each push to a branch
+other than `main`.
 
 ### D-0020 — The practice loop teaches from errors and ramps gently
 **Chosen:** two REVAMP §4/§6 learning-loop wins. (1) **Errors teach:** every Drill miss and every Yard
@@ -222,7 +227,7 @@ severity-ladder/remediation-queue (REVAMP §6) stays deferred.
 But the data item titled "Rule 12" / cited "CROR 12" (which *is* hand signals in the CROR) carries the
 plain text *"Doubt = STOP… on the radio (123.2(v))"* — the 123.2 doubt principle, **not** hand signals.
 So it is mislabeled or mis-authored, not merely mis-filed; the correct fix (retitle/recite, or rewrite
-the plain text) is a CROR-accuracy call left to Jordan/SME — never guessed.
+the plain text) is a CROR-accuracy call left to the SME — never guessed.
 **Verified live:** signals capped at 0.33 with no aspect recalled, lifts to full on first recall; the
 securement drill now builds a 5-question session (was dead); cross-domain + signals drills unaffected;
 0 console errors; `npm run check` green.
@@ -244,7 +249,7 @@ values (`+0.05` correct / `−0.2` miss — no easy/hard buttons yet).
 wrong text). The verified source made a proper, non-guessed fix possible.
 **Why:** safety-critical content must be right *and* sourced; cramming must not read as retention; the
 retention engine must provably match its docs.
-**rule.12 domain — flagged for Jordan:** placed in `operating` to mirror the verified source's own
+**rule.12 domain — flagged for the SME:** placed in `operating` to mirror the verified source's own
 classification (its tags were signals / hand-signals / switching). If you'd rather it sit under `signals`
 or `switching`, that's a one-line change — flagging the bucket, not the content.
 **Verified live:** rule.12 reference shows the hand-signals text in `operating`; the marathon gate holds (a
@@ -265,7 +270,7 @@ order; hand-tagging all 226 questions with a severity.
 The end-of-session review is contained, calm (the audience is anxious learners — a miss is a UX gap to
 scaffold, never a scolding), and rides the existing SM-2 + due-gate: a missed item is now due, so the review
 correctly re-advances it on a clean recall.
-**Deferred — flagged for SME/Jordan:** the full S1/S2/S3 ladder requires deciding which rules are
+**Deferred — flagged for the SME:** the full S1/S2/S3 ladder requires deciding which rules are
 safety-critical (the same kind of CROR-judgment call as rule.12 — won't guess); and Yard mistake-attempt
 tracking (repeated illegal-move attempts feeding remediation). `severity.ts`'s core/standard split is a
 reviewable starting point, not the final ladder.
@@ -286,13 +291,13 @@ genuinely safety-relevant; to make S3 more selective, tune `DOMAIN_SEV` / `SEV_O
 default S2 with S3 only for the STOP/Restricting family).
 **Weighed:** hand-classifying all 100 rules (false precision); a live mid-session re-queue that jumps the
 SM-2 due order (deferred — the end-of-session review + S3-first order already weights safety).
-**Why:** Jordan asked for the real S1/S2/S3. Domain-default + overrides is the honest, reviewable shape — he
-owns the classification and can retune any rule in one line. The Yard already gives the strongest possible
+**Why:** the owner asked for the real S1/S2/S3. Domain-default + overrides is the honest, reviewable shape — the
+SME owns the classification and can retune any rule in one line. The Yard already gives the strongest possible
 S3 response (it *blocks* unsafe moves) and an over-par win already reads as gentle S1, so the ladder's main
 learner-facing home is the Drill.
 **Deferred:** Yard refusal severity-tagging (emphasis only — moves are already blocked + cited); the live
 mid-session S3 re-queue.
-**rule.12 = `operating`: CONFIRMED by Jordan** (was flagged in D-0022). Resolved.
+**rule.12 = `operating`: CONFIRMED by the SME** (was flagged in D-0022). Resolved.
 **Verified live:** `severityOf` spot-checks all correct (rule.112 / 114 / 439 / 12 / 123.2 → S3; rule.405 /
 104.1 → S2; definitions → S1); a securement miss shows the S3 cue; `tsc -b` + lint + `npm run check` green;
 0 console errors.
@@ -357,8 +362,8 @@ in tier order), rebuilt on each win so the marks never go stale.
 learning content). Verified: 0 disabled options.
 **Kept a native `<select>`** rather than a bespoke menu — keyboard-complete and screen-reader-correct
 for free, and `optgroup` is exactly the grouping primitive this needed.
-**`TIERS` lives in `puzzles.js`,** not a `.json`. Tunables belong in config, but the Yard island is
-byte-for-byte vanilla with its content inline; making the engine fetch JSON for a label table would be
+**`TIERS` lives in `puzzles.js`,** not a `.json`. Tunables belong in config, but the Yard engine is
+plain JavaScript with its content inline; making the engine fetch JSON for a label table would be
 a real architecture change for no gain. It sits with `PUZZLES`/`RULES`, where every tier number already lived.
 **Deferred:** authoring a scaffold rung before `p1-sort` — the owner's call after seeing the ramp with
 tiers visible; per-puzzle best records (#14); solver-emitted `optJoints` (#17).
@@ -400,7 +405,7 @@ local-first). `vite-plugin-pwa` was a devDep for months without being wired; it 
 `vite.config.ts` with `registerType: 'autoUpdate'`.
 **The trap that would have shipped a lying app:** Workbox's default `globPatterns` does **not** include
 `.json`. Left at the default, Clear Board would have advertised offline support and then 404'd its
-entire rulebook the moment the signal dropped — the four content files *are* the app. The glob is
+entire rulebook the moment the signal dropped — the five content files *are* the app. The glob is
 explicit: `**/*.{js,css,html,svg,json,woff2}`.
 **Also fixed:** `index.html` referenced `/favicon.svg` absolutely while `base` is `'./'`, so the icon
 404'd on the Pages subpath and inside Tauri. Now relative. Added `theme-color`.
@@ -418,6 +423,9 @@ is a taste call that belongs to the owner, and an identity mark is not something
 tool's default mark, which would be a provenance problem, not a style preference; (2) what should the
 icon actually be. Once there is a source mark, `npm run tauri icon <src>` generates the full desktop
 set and PNG manifest icons in one step.
+**Later:** D-0034 settled the origin of `favicon.svg` (the logo of the Vite template) and picked the
+monogram, so the two questions of this entry are closed. Row U-10 (D-0035) changed `registerType`
+to `'prompt'`: a new version waits until the learner presses "Reload".
 
 ### D-0029 — Securement becomes a player ACTION (#18); point protection deferred
 **The problem:** Rule 112 is the most safety-critical thing the Yard teaches, and the engine was
@@ -443,7 +451,7 @@ the chips say so and `masteryItemsFor` grades it on every win.
 **Visible at its source:** the canvas tags a standing 2+ cut **TIED** or **LOOSE** on the track itself,
 words not colour alone — not just a banner after you try to walk away. The refusal names the specific
 track and cites 112.
-**New gate — `tools/securement-check.mjs` (GATE 3, in `npm run check`).** 13 assertions pin the
+**New gate — `tools/securement-check.mjs` (GATE 3, in `npm run check`).** 15 assertions pin the
 behaviour so it cannot quietly revert to a passive flag. Writing it caught a **false pass in my own
 first test**: "kick refused onto an untied backstop" was passing because the engine was empty
 ("You're only holding 0 cars"), not because of securement. The committed version replays up to the
@@ -530,6 +538,8 @@ and the notes name the token for each. This is an allowed place for a raw colour
 make the Windows build. The green light carries the mark "SME to confirm".
 **Not verified:** only Chromium rendered the icon. No phone launcher and no desktop taskbar was
 tested. No search for similar marks was made.
+**Later:** job B1 made the PNG set in Wave 2b: `icon-192.png` and `icon-512.png` in the manifest, and
+a 180 px `apple-touch-icon.png` that `index.html` links. The desktop icon set still waits (`TAURI`).
 
 ### D-0035 — The upgrade list: 46 rows have a yes, 5 rows have a no
 **Chosen (the owner, Gate A, question 4):** yes to each recommended row of
@@ -552,7 +562,8 @@ content, signal aspects, puzzle layouts, pars or the solver.
 **Reduced motion in the Yard is slower today, not faster.** The plan said "6 times faster" (fact
 T4). `yard/anim.js` line 17 multiplies each duration by the factor that `yardSim.js` line 228 sets
 to 6. Measured: about 9.0 s against 1.6 s for one move. Three reports agree. Motion does not stop.
-Job Y4 makes it stop.
+Job Y4 makes it stop. **Later:** job Y4a made it stop in Wave 2c. With reduced motion on, each move,
+kick, arrival, departure and watched step ends at once with its end state (P-01).
 **The Signals drill can mark a correct name as wrong.** In `public/data/signals.json` one drawing
 (one red lamp on a mast) belongs to `sig.437` and to `sig.439`, and one drawing (one green lamp on a
 dwarf) belongs to `sig.405` and to `sig.431`. Each of the four items is `verified`. The audit saw the
@@ -563,6 +574,10 @@ for the two items is a note for the SME (S-01).
 attention colour of the skin. No file changes.
 **Exception to fence rule 4:** the icon files and the desktop window colour can keep a raw colour
 (row U-45). Each value is a copied Dusk token value.
+**Later (D-0045):** the values of the two SVG icon files are copied Dusk token values (D-0034). The
+desktop window colour in `src-tauri/tauri.conf.json` is still `#0e1116`, the page ground from before
+Wave 2a, and not a Dusk token value: `src-tauri/**` waits for a session that can make the Windows
+build (`TAURI`).
 
 ### D-0037 — The lead's rulings for Wave 2
 **Chosen:** the file `specs/briefs/lead-rulings.md` holds each ruling of the lead and each question
@@ -615,6 +630,134 @@ independent review of G1 found the close match. The lead checked the files: they
 name, path or project reference.
 **Correction:** the message of one unpushed commit said that no code of the reskin tools is in the
 repository. The lead corrected that message before the first push. The trees did not change.
+
+### D-0040 — Wave 2c: the plan, the jobs and the contracts C1 to C11
+**Chosen (the lead, 2026-11-21):** Wave 2c builds, in three steps, the access layer and the controls
+of the Yard (Y4a, Y4b), the upgrade rows that the owner approved (U1-A to U1-D), the tests and the
+cache budget (G1-2, then the G1 close) and the documents (D1). The plan is `specs/briefs/2c-plan.md`.
+In each step each file has one job (`2C-SPLIT`). The plan gives each job an independent review.
+The notes of the lead after each step are in `specs/briefs/`.
+**The contracts between the jobs:**
+- **C1 `lookUp(itemId)`.** The app context and the bridge object of the islands open the Reference
+  entry of an item in a dialog on top of the route. The station stays mounted. Closing the dialog
+  returns focus to the control that opened it.
+- **C2 `unmount()`.** The bridge hook calls `unmount()` of an island before it empties the host. The
+  Yard exports it.
+- **C3 The words.** Each job writes its new learner-facing words in `specs/words/<job>.md`. The
+  owner approves the words of the rows marked "(words)" in one question at the end of the wave.
+- **C4 Reduce motion.** The setting follows the device flag live. The Yard reads it at each move.
+- **C5 Pictures.** `specs/pictures/2c-<job>/`, at scale 1, at most 6000 px high.
+- **C6 One name for one thing.** "← Home" for the way back to Home, "session" for a scored set of
+  questions or calls, "coupling" for a join of two cars. The owner approves the words.
+- **C7 Titles and headings.** Each route sets a page title. After a change of route, focus goes to
+  the first `h2` of the view; at the first load focus does not move. Each station shows one heading.
+- **C8 The Yard sound key.** The stored sound choice keeps the key `sl_muted`. "Reset my progress"
+  removes it.
+- **C9 A failed load.** The app context gives `contentFailed` and `retryContent()`. The shell shows
+  one notice with a retry control, and Home shows no "Coming soon" for a domain whose file failed.
+- **C10 Read aloud.** A spoken confirmation, "No voice on this device" and a stop on a change of
+  route. The Drill and the Radio test also give the options and the feedback to Read aloud.
+- **C11 The learn card.** The hooks `data-cb="learn"` and `data-cb="learn-next"`.
+**Why:** the jobs of one step run in parallel. A contract gives them one name for each shared
+thing, and each file one owner.
+**State on 2026-11-21:** steps 2c-1 and 2c-2 are merged on `claude/cb2-wave-2c`. Step 2c-3 is the
+G1 close and D1.
+
+### D-0041 — A learn card before the first question about a new item (`LEARN-GAP`, row U-28)
+**Chosen (the lead):** the Drill shows a new item (an item that the learner never answered) one
+time, on a learn card, before the first question about it. The card shows the text that the data
+holds: the title, the plain words and each different drawing of a signal. One other screen or more
+comes between the card and that question. The card grades nothing, and the mastery model does not
+change. A first session can hold up to 10 cards and 10 questions (`SESSION-LENGTH`).
+**Weighed:** the first question right after its card.
+**Why:** row U-28 asks that the Drill shows an item before it tests it, and UX-11 says "no change
+to the mastery model". The signals cap is a safety gate: a right answer right after the card is
+short-term memory, not a read on sight.
+**Open for the SME:** is one other screen between the card and the question enough?
+**Built:** job U1-D (`withLearnCards` in `src/core/drill.ts`, and the hooks of C11).
+
+### D-0042 — A miss in the Radio test is announced by the severity of its own item (`RADIO-SEVERITY`)
+**Chosen (the lead):** after a miss in "Call it yourself", the verdict goes into the alert or into
+the status region by the severity of the radio item itself (`verdictRegion` in `src/core/radio.ts`).
+Each radio item is S2 today, the default of its domain in `src/core/severity.ts`, so a miss goes
+into the status region.
+**Weighed:** the severity of the rule that the call cites.
+**Why:** a link to the severity of the cited rule changes the classification, and the
+classification belongs to the SME.
+**Open for the SME:** which severity a radio call has.
+
+### D-0043 — The stored progress: the sound key, the mastery now, a load and a reset
+**Chosen (the lead):**
+- **`SOUND-KEY`.** The stored sound choice of the Yard keeps the key `sl_muted`: no value or "1" is
+  off, "0" is on. **Why:** a new key needs a move of the stored value, and row U-36 asks only that
+  the choice holds and that a reset clears it.
+- **`MASTERY-NOW`.** The app context computes the mastery again at the first report of a new route,
+  so that Home shows the same current value as the end of a Drill session. This recompute does not
+  write the stored profile. **Why:** the mastery decays with time, and one value must be true at
+  each place.
+- **`LOAD-NEW-PROFILE`.** A load of a progress file gives the profile a new `createdAt`. Another
+  open copy of the app then replaces its profile with the loaded one and does not merge its older
+  answers back. **Why:** the question before a load says that the load replaces the progress.
+- **`RESET-COPY`.** "Reset my progress" also removes the copy of an older profile
+  (`cb.profile.v1.copy`), as it removes the sound choice (C8). **Why:** a reset removes the
+  progress, and the copy holds old progress.
+**Built:** jobs U1-B, U1-D, Y4a and Y4b.
+
+### D-0044 — The Yard: the switch buttons, a done job and the work order (`SW-NAME`, `WIN-HOLD`, `FROM-NOW`)
+**Chosen (the lead):**
+- **`SW-NAME`.** Each switch button keeps `data-sw` and the name that says its lining, and has no
+  `aria-pressed`. **Why:** the name and the pressed state gave the lining two times (the review of
+  Y4a).
+- **`WIN-HOLD`.** A refused call to a job that is done is said in the status region, and "Job done."
+  stays on the screen. **Why:** nothing locks during motion (R7-P11), so a second press of the
+  winning call replaced the win words with a refusal (the review of Y4b).
+- **`FROM-NOW`.** The work order says where the cars of the job stand now, and the list follows the
+  cars. When each car is on the goal track, the words go. A job with Depart keeps "(set out on
+  ...)". **Why:** fence rule 15: the words "(now on ...)" were true only at the start of a job.
+**Built:** job Y4b (`SW-NAME`) and the lead (commit `c3bc4db`).
+
+### D-0045 — Facts that the documents had wrong, and three changes with no entry (R6 section 11)
+**Recorded (job D1, 2026-11-21):** R6 section 11 lists 46 places where a document and the code
+disagree. Job D1 made its documents say what is true. In this file:
+- **GitHub Pages is off** for this repository (plan fact T13; R6 read `has_pages: false`). D-0016 and
+  D-0019 now say so. The deploy workflow runs `npm ci`, the check and the build on a push to
+  `main`, then its Pages steps. Plan fact T13 says that the run fails at the Pages step and that the
+  owner's site repository serves the live copy. This job did not verify either. Fence rule 12: no
+  job turns Pages on, and no job edits the last step of the deploy workflow.
+- **The line endings** (commit `94a41c5`, 2026-09-22): `.gitattributes` gives each text file LF line
+  endings in the repository. Clear Board 2 took this commit as the baseline of the frozen files
+  (D-0030).
+- **The Dusk copy** (commit `86cfef2`, 2026-11-20): the six layer files of Dusk 0.2.0 in
+  `src/styles/dusk/`, with `src/styles/dusk.lock.json`, which holds the source commit and a
+  SHA-256 for each file. Step 2 of `npm run check` proves the copy.
+- **Corrected in place.** A note says what changed in D-0016 (GitHub Pages; the two sizes of the
+  desktop file, ~5 MB and ~18 MB, which no session of Wave 2 checked), in D-0019 (GitHub Pages), in
+  D-0028 (D-0034 settled the origin of the favicon; row U-10 made the update a prompt) and in D-0036
+  (the desktop window colour is not yet a Dusk token value; job D1 found it). The
+  wrong words are replaced in D-0026 ("byte-for-byte vanilla": the Yard engine is plain JavaScript,
+  and its files changed after their copy, for example `model.js` in D-0029), in D-0028 ("the four
+  content files": five JSON files, four of content items and one of questions) and in D-0029
+  ("13 assertions": the securement check has 15 from its first commit; P-27 item 7).
+**Why:** a document that says a false thing misleads the next reader (fence rule 15). An entry
+records its own day; a later note says what changed, and the old words stay readable.
+
+### D-0046 — The documents name a role, not a person (fence rule 14, P-25)
+**Chosen (job D1, 2026-11-21):** in the documents, a person's name becomes the role that its
+sentence gives. A call on the product, the mission, a feature or a gate names "the owner". A call on
+content names "the SME": a verification, a severity classification, the domain of a rule, a bar of
+the learning model. A sentence of personal history goes: a state of mind, a quoted personal phrase,
+a working habit. A sentence that gave the voice of a person as the voice of the app now gives the
+voice of the app with no person. A folder path of a personal machine goes. A web address with an
+account name goes, or becomes words ("the tip jar link").
+**Kept:** the licence keeps its holder (`LICENSE`). An address of the repository stays.
+**Why:** fence rule 14. R6 section 12 found that the documents treat the SME and one named person
+as one, and left the form to this job. One rule keeps each document in the same form.
+**Not in this job:** `src-tauri/Cargo.toml` (an author name and the address of the repository);
+`src/stations/Home.tsx` (the tip jar address, a working link that row U-42 keeps); the comments of
+the frozen `geometry.js`, `model.js` and `solver.js`, and a folder path in the frozen
+`src/core/signal.ts` (no job edits a frozen file); and two addresses of private repositories in
+`specs/clear-board-2-plan.md` (the owner's text: this job changed one pronoun in it). These places
+are for the lead.
 
 ---
 *V1. Edit as decisions are made or reversed.*
