@@ -283,10 +283,12 @@ browser. It runs each step after a failure, and exits non-zero when one step fai
 - **Screen-reader:** labelled controls, live regions for drill feedback. The Drill and the Radio
   test put the verdict into a status region, or into an alert for a miss on a safety-critical
   item (row U-19). The Yard has a text mirror (`#yard-mirror`) and a status region (`#yard-live`)
-  (P-03). The emoji of a control is hidden from a screen reader (row U-41). Two signs stay in the
-  name of a control: ▶ in "▶ Watch optimal" (the Yard) and in "Key the radio ▶" (the guided Radio),
-  and ⚠ in the trust mark of the four Reference rows of the `needs-review` items. No screen reader
-  was run: what a screen reader says is not verified.
+  (P-03). The emoji of a control is hidden from a screen reader (row U-41), and so is the icon of
+  each station heading: the spoken name of a station heading is the station name (`HEAD-ONE`). The
+  sign ▶ of "▶ Watch optimal" (the Yard) and of "Key the radio ▶" (the guided Radio), and the signs
+  ✓ ⚠ ● of the trust mark of an entry and of a Reference row, are hidden too: the words carry the
+  state (`SIGN-NAME`). Arrows and other signs stay in the names of some controls, for example
+  "← Home" and "Next →". No screen reader was run: what a screen reader says is not verified.
 - **Dyslexia option:** toggle to a dyslexia-friendly face + wider spacing. The face is Atkinson
   Hyperlegible, two font files that ship with the app with their licence text (row U-30).
 - **Read-aloud:** Web Speech API; **degrades gracefully with no offline voice** (N13) — never blocks

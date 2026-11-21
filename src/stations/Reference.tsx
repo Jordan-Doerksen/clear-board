@@ -73,7 +73,10 @@ export function Reference() {
       <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
       <div className="dusk-top cb-reference-head">
         <div>
-          <h2 className="dusk-title cb-reference-title"><span className="dusk-ico">📖</span> Reference</h2>
+          {/* The station heading (U-29, 2c-plan C7). The icon is decoration. aria-hidden keeps it out
+              of the spoken name, so a screen reader says "Reference", as on the other stations. The
+              screen shows the icon as before (ruling HEAD-ONE, finding F-14). */}
+          <h2 className="dusk-title cb-reference-title"><span className="dusk-ico" aria-hidden="true">📖</span> Reference</h2>
           <p className="dusk-lede">Look anything up. Plain words first, then the source. Where the app holds the rule text, it is one tap deeper.</p>
         </div>
       </div>

@@ -167,11 +167,14 @@ export function mount(root, ctx) {
     }
     logEl.scrollTop = logEl.scrollHeight;
   }
+  // The sign ▶ of "Key the radio" is decoration: aria-hidden keeps it out of the spoken name, so a
+  // screen reader says "Key the radio" (row U-41, ruling SIGN-NAME). The screen shows the sign as
+  // before. This is the one place that writes the control.
   function renderNext() {
     if (idx < STEPS.length) {
       const s = STEPS[idx];
       const pre = s.pre ? '<div class="tx eng" style="margin-bottom:8px"><span class="who">Engineer &middot; CN 2204 (incoming)</span><br>' + s.pre + '</div>' : '';
-      nextEl.innerHTML = pre + '<span class="lbl">Your ' + (s.pre ? 'reply' : 'next call') + '</span><div class="call">' + s.call + '</div><button class="rbtn key" id="keyBtn">Key the radio &#9654;</button>';
+      nextEl.innerHTML = pre + '<span class="lbl">Your ' + (s.pre ? 'reply' : 'next call') + '</span><div class="call">' + s.call + '</div><button class="rbtn key" id="keyBtn">Key the radio <span aria-hidden="true">&#9654;</span></button>';
       $('keyBtn').addEventListener('click', transmit);
     } else {
       nextEl.innerHTML = '<button class="rbtn again" id="againBtn">Run it again</button>';
