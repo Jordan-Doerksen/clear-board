@@ -12,11 +12,13 @@ export function Home() {
 
   return (
     <div className="cb-home-view">
+      {/* U-11 and U-25: the lede promises only what the app holds, and says that this is practice. */}
       <section className="dusk-panel">
         <span className="dusk-badge">Free · tip jar only</span>
-        <p className="cb-prose">Start on your first day knowing nothing. Get <b>job-ready, one piece at a time</b>. Every rule
-          explained in plain words first, the real CROR text one tap deeper — and a safe place to make every
-          mistake until the right move is automatic.</p>
+        <p className="cb-prose">Start on your first day knowing nothing. Learn the job, <b>one piece at a time</b>. Rules
+          explained in plain words, each with its source — and a safe place to make every mistake until the right move
+          is automatic.</p>
+        <p className="cb-sub cb-home-practice">Practice, not the official test.</p>
       </section>
 
       <h2 className="dusk-rule"><b>Your path</b></h2>

@@ -62,7 +62,7 @@ export default defineConfig({
         name: 'Clear Board — become a conductor, free',
         short_name: 'Clear Board',
         description:
-          'A free CROR conductor-qualification trainer — first day to job-ready, built for the people a rulebook failed.',
+          'A free CROR conductor-qualification trainer — practice from your first day, not the official test. Built for the people a rulebook failed.',
         start_url: './',
         scope: './',
         display: 'standalone',
