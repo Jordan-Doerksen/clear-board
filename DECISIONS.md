@@ -112,7 +112,8 @@ offline PWA for GitHub Pages and (later) a Tauri desktop exe. The React pilot li
 becomes reference, then retires).
 **Weighed:** stay vanilla ES modules (D-0005); Electron instead of Tauri.
 **Why:** Vite still ships a static, offline-first PWA (the *spirit* of D-0005 — train-side offline, zero
-hosting cost), and Tauri adds the ~5 MB clean exe Electron can't. React's default escaping also
+hosting cost), and Tauri adds the ~5 MB clean exe Electron can't (an estimate: the Status below gives
+~18 MB for the built exe; no session of Wave 2 checked either size, D-0045). React's default escaping also
 removes the hand-rolled `esc()` from every station — a safety win for rendering verbatim CROR text.
 **Consequence:** the SPEC §Hard-constraints "No build step" line is superseded for this project;
 the offline-PWA + local-first + never-commit-the-PDF constraints still hold. The four verified data
@@ -133,7 +134,8 @@ PATH — rustup's bundled GNU MinGW lacks `as.exe`.
 **CONSOLIDATED (2026-06-24)** — the React build IS now `clear-board` (the vanilla folder was deleted;
 its tree is preserved in git history before this rebuild commit). Pushed to `main` and the repo's
 GitHub Pages switched from legacy root-serve to a GitHub Actions build (`.github/workflows/deploy.yml`);
-verified live on GitHub Pages, serving the React bundle. `map.md` updated.
+verified live on GitHub Pages, serving the React bundle. `map.md` updated. **Later (D-0045):** GitHub
+Pages is off for this repository.
 Remaining: PWA service worker (vite-plugin-pwa already a dep), custom app icon (currently default Tauri
 logo), and the Observatory card-collapse (four rail cards → one Clear Board card, tied to retiring the
 old rail apps per D-0011).
@@ -182,6 +184,10 @@ D-0017) between `npm ci` and `npm run build`; a red gate fails the `build` job, 
 **Weighed:** trust the pre-ship checklist by hand; a separate scheduled check.
 **Why:** a gate only protects the user if it actually blocks a bad ship. A broken par or a leaked
 `needs-review` item now stops the deploy instead of reaching the public site.
+**Later (D-0045):** GitHub Pages is off for this repository. The workflow still runs the check before
+the build. Plan fact T13 records that the run then fails at the Pages step. Since Wave 2a,
+`.github/workflows/check.yml` runs the check on each pull request and on each push to a branch
+other than `main`.
 
 ### D-0020 — The practice loop teaches from errors and ramps gently
 **Chosen:** two REVAMP §4/§6 learning-loop wins. (1) **Errors teach:** every Drill miss and every Yard
@@ -356,8 +362,8 @@ in tier order), rebuilt on each win so the marks never go stale.
 learning content). Verified: 0 disabled options.
 **Kept a native `<select>`** rather than a bespoke menu — keyboard-complete and screen-reader-correct
 for free, and `optgroup` is exactly the grouping primitive this needed.
-**`TIERS` lives in `puzzles.js`,** not a `.json`. Tunables belong in config, but the Yard island is
-byte-for-byte vanilla with its content inline; making the engine fetch JSON for a label table would be
+**`TIERS` lives in `puzzles.js`,** not a `.json`. Tunables belong in config, but the Yard engine is
+plain JavaScript with its content inline; making the engine fetch JSON for a label table would be
 a real architecture change for no gain. It sits with `PUZZLES`/`RULES`, where every tier number already lived.
 **Deferred:** authoring a scaffold rung before `p1-sort` — the owner's call after seeing the ramp with
 tiers visible; per-puzzle best records (#14); solver-emitted `optJoints` (#17).
@@ -399,7 +405,7 @@ local-first). `vite-plugin-pwa` was a devDep for months without being wired; it 
 `vite.config.ts` with `registerType: 'autoUpdate'`.
 **The trap that would have shipped a lying app:** Workbox's default `globPatterns` does **not** include
 `.json`. Left at the default, Clear Board would have advertised offline support and then 404'd its
-entire rulebook the moment the signal dropped — the four content files *are* the app. The glob is
+entire rulebook the moment the signal dropped — the five content files *are* the app. The glob is
 explicit: `**/*.{js,css,html,svg,json,woff2}`.
 **Also fixed:** `index.html` referenced `/favicon.svg` absolutely while `base` is `'./'`, so the icon
 404'd on the Pages subpath and inside Tauri. Now relative. Added `theme-color`.
@@ -417,6 +423,9 @@ is a taste call that belongs to the owner, and an identity mark is not something
 tool's default mark, which would be a provenance problem, not a style preference; (2) what should the
 icon actually be. Once there is a source mark, `npm run tauri icon <src>` generates the full desktop
 set and PNG manifest icons in one step.
+**Later:** D-0034 settled the origin of `favicon.svg` (the logo of the Vite template) and picked the
+monogram, so the two questions of this entry are closed. Row U-10 (D-0035) changed `registerType`
+to `'prompt'`: a new version waits until the learner presses "Reload".
 
 ### D-0029 — Securement becomes a player ACTION (#18); point protection deferred
 **The problem:** Rule 112 is the most safety-critical thing the Yard teaches, and the engine was
@@ -442,7 +451,7 @@ the chips say so and `masteryItemsFor` grades it on every win.
 **Visible at its source:** the canvas tags a standing 2+ cut **TIED** or **LOOSE** on the track itself,
 words not colour alone — not just a banner after you try to walk away. The refusal names the specific
 track and cites 112.
-**New gate — `tools/securement-check.mjs` (GATE 3, in `npm run check`).** 13 assertions pin the
+**New gate — `tools/securement-check.mjs` (GATE 3, in `npm run check`).** 15 assertions pin the
 behaviour so it cannot quietly revert to a passive flag. Writing it caught a **false pass in my own
 first test**: "kick refused onto an untied backstop" was passing because the engine was empty
 ("You're only holding 0 cars"), not because of securement. The committed version replays up to the
@@ -614,6 +623,30 @@ independent review of G1 found the close match. The lead checked the files: they
 name, path or project reference.
 **Correction:** the message of one unpushed commit said that no code of the reskin tools is in the
 repository. The lead corrected that message before the first push. The trees did not change.
+
+### D-0045 — Facts that the documents had wrong, and three changes with no entry (R6 section 11)
+**Recorded (job D1, 2026-11-21):** R6 section 11 lists 46 places where a document and the code
+disagree. Job D1 made its documents say what is true. In this file:
+- **GitHub Pages is off** for this repository (plan fact T13; R6 read `has_pages: false`). D-0016 and
+  D-0019 now say so. The deploy workflow runs `npm ci`, the check and the build on a push to
+  `main`, then its Pages steps. Plan fact T13 says that the run fails at the Pages step and that the
+  owner's site repository serves the live copy. This job did not verify either. Fence rule 12: no
+  job turns Pages on, and no job edits the last step of the deploy workflow.
+- **The line endings** (commit `94a41c5`, 2026-09-22): `.gitattributes` gives each text file LF line
+  endings in the repository. Clear Board 2 took this commit as the baseline of the frozen files
+  (D-0030).
+- **The Dusk copy** (commit `86cfef2`, 2026-11-20): the six layer files of Dusk 0.2.0 in
+  `src/styles/dusk/`, with `src/styles/dusk.lock.json`, which holds the source commit and a
+  SHA-256 for each file. Step 2 of `npm run check` proves the copy.
+- **Corrected in place.** A note says what changed in D-0016 (GitHub Pages; the two sizes of the
+  desktop file, ~5 MB and ~18 MB, which no session of Wave 2 checked), in D-0019 (GitHub Pages) and
+  in D-0028 (D-0034 settled the origin of the favicon; row U-10 made the update a prompt). The
+  wrong words are replaced in D-0026 ("byte-for-byte vanilla": the Yard engine is plain JavaScript,
+  and its files changed after their copy, for example `model.js` in D-0029), in D-0028 ("the four
+  content files": five JSON files, four of content items and one of questions) and in D-0029
+  ("13 assertions": the securement check has 15 from its first commit; P-27 item 7).
+**Why:** a document that says a false thing misleads the next reader (fence rule 15). An entry
+records its own day; a later note says what changed, and the old words stay readable.
 
 ---
 *V1. Edit as decisions are made or reversed.*
