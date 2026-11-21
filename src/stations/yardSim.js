@@ -1,7 +1,7 @@
 // yardSim.js — the controller of the Yard station.
 //
 // It holds the game state, the move logic, the records, the sound calls and the event wiring.
-// It exports mount(root, ctx) and nothing else. It works with these files in ./yard/:
+// It exports mount(root, ctx) and unmount(), and nothing else. It works with these files in ./yard/:
 //   view.ts            each markup string, each class name and each DOM write of the chrome
 //   yard.css           the style of the chrome
 //   draw.ts            the drawing: the canvas, the hit test of a click and the one draw call
@@ -46,7 +46,21 @@ function masteryItemsFor(puzzle) {
   return [...ids];
 }
 
+// The teardown of the Yard that is mounted now, or null (UNMOUNT, 2c-plan C2).
+let teardown = null;
+
+// Stops each timer, each animation frame, each loop and each listener of the mounted Yard, so that
+// nothing of the Yard runs after the learner leaves. The bridge calls it before it empties the host.
+// A second call does nothing. A sound that sound.js started before the call plays to its end.
+export function unmount() {
+  if (!teardown) return;
+  const stop = teardown;
+  teardown = null;
+  stop();
+}
+
 export function mount(root, ctx) {
+  unmount();                          // one Yard at a time
   // The view puts the scoped markup into the container Clear Board gave us.
   const view = createView(root);
 
@@ -218,7 +232,12 @@ export function mount(root, ctx) {
 
   // Auto-line the ladder for the route to `id`: its switch reverse, all others normal.
   function autoLine(id) { for (const t of TRACK_IDS) state.lined[t] = (t === id) ? 'reverse' : 'normal'; }
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  // A pause of the watched line. The teardown clears each pause that has not ended.
+  const pauses = new Set();
+  const sleep = (ms) => new Promise((r) => {
+    const t = setTimeout(() => { pauses.delete(t); r(); }, ms);
+    pauses.add(t);
+  });
 
   // ▶ Watch optimal — reset, then auto-line + play the fewest-moves line in slow-mo.
   async function watchOptimal() {
@@ -503,4 +522,19 @@ export function mount(root, ctx) {
   if (ctx.settings && !ctx.settings.audio && !isMuted()) toggleMute();
   view.setMuted(isMuted());
   load(PUZZLES[0]);
+
+  // The teardown (UNMOUNT). A move, the watched line and the arrival stop at once: the new gen ends
+  // each loop at its next check, the frame of a tween and of the arrival is cancelled, and each pause
+  // is cleared. The drawing removes its observers and its listeners of the window. The listeners of
+  // the elements of the Yard go with the elements when the host is emptied.
+  teardown = () => {
+    gen++;
+    if (stopAnim) stopAnim();
+    stopAnim = null;
+    cancelCine();
+    for (const t of pauses) clearTimeout(t);
+    pauses.clear();
+    busy = true;                      // no input handler starts a new effect between this call and the end of the host
+    drawing.destroy();
+  };
 }
