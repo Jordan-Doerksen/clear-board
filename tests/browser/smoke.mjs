@@ -32,7 +32,7 @@
 // job can replace an old class and put the hook on the same element, with no edit of this file.
 // No case states a rule. The tape holds a hash and a word count of the page text, not the text.
 import { createHash } from 'node:crypto';
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
@@ -872,12 +872,32 @@ const GATE_CASES = [
   // Cases 16, 17 and 18 are the trials of R6 ENG-01 and ENG-02 as browser tests (P-22). They enter
   // the gate with rows U-10 and U-07, which Wave 2c-1 merged.
   { name: '16 update', async run() {
-    // Row U-10 (R6 ENG-01): an open app that gets a new build shows "A new version is ready." with
-    // one control, keeps the first build until the control is pressed, and then reloads on the new
-    // build. The server serves a first build, then a second build with one changed file.
+    // Row U-10 and the trial of R6 ENG-01 in full. The server serves a first build, then a second build
+    // in which the station chunk of the Yard has a new name and the old chunk is gone (secondBuild).
+    // Two copies of the app are open on the first build: A and B. B is on Home and has not opened the
+    // Yard. Then:
+    //   1. A gets the new build: A shows "A new version is ready." with one control "Reload", and keeps
+    //      the first build. A opens the Yard: the Yard draws from the old chunk, which the cache of the
+    //      first build holds, although the server no longer holds it.
+    //   2. The learner presses "Reload" in A: A reloads on the second build, and the Yard draws from the
+    //      new chunk. The new worker now controls each copy, and the old chunk is in no cache.
+    //   3. B opens the Yard: the old chunk does not load. B says "This station did not load." with a
+    //      control "Reload", and does not go blank. Its "Reload" loads the second build, and the Yard
+    //      draws.
+    // A control "Reload" that does nothing fails the case with a sentence.
     const second = secondBuild(distDir);
+    const yardRoute = ROUTES.find((r) => r.route === '/yard');
+    const isOld = (url) => url.endsWith(`/assets/${second.oldYard}`);
+    const isNew = (url) => url.endsWith(`/assets/${second.newYard}`);
+    const loadedChunks = (page) => page.evaluate(() => performance.getEntriesByType('resource').map((e) => e.name));
+    // A press of a control "Reload" that must reload the page; with no reload in 15 s the case fails.
+    const reloads = async (page, control, what) => {
+      const loaded = page.waitForEvent('load', { timeout: 15000 }).then(() => true, () => false);
+      await control.click();
+      ok(await loaded, `${what}: the control "Reload" did not reload the page in 15 s`);
+    };
     try {
-      await withPage({ serviceWorker: true }, async (page) => {
+      return await withPage({ serviceWorker: true }, async (page, context) => {
         await open(page, '/');
         await page.locator(hook('domain-card')).first().waitFor();
         await workerReady(page);
@@ -886,12 +906,28 @@ const GATE_CASES = [
         await page.locator(hook('domain-card')).first().waitFor();
         await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
         await page.evaluate(() => { window.__cbSmokeOpen = 'first build'; });
+        // Copy B, on Home with the first build. Its page errors and console errors fail the case,
+        // except the failed request of the old Yard chunk in step 3.
+        const other = await context.newPage();
+        other.setDefaultTimeout(10000);
+        const otherErrors = [];
+        let oldMissing = 0;
+        other.on('pageerror', (err) => otherErrors.push(`page error: ${err.message}`));
+        other.on('console', (message) => {
+          if (message.type() !== 'error') return;
+          if (isOld(message.location().url ?? '')) oldMissing++;
+          else otherErrors.push(`console error: ${message.text()}`);
+        });
+        await open(other, '/');
+        await other.locator(hook('domain-card')).first().waitFor();
+        await other.waitForFunction(() => navigator.serviceWorker.controller !== null);
+        await other.evaluate(() => { window.__cbSmokeOpen = 'first build'; window.__cbFirstWorker = navigator.serviceWorker.controller; });
         const stillOpen = async (when) => ok(await page.evaluate(() => window.__cbSmokeOpen) === 'first build', `the page reloaded ${when}, before the control of the notice was pressed`);
         const notice = page.getByText(UPDATE_NOTICE, { exact: true });
-        // The server now holds the second build. The learner comes back to the open app: the app
+        // 1. The server now holds the second build. The learner comes back to the open app: the app
         // asks for a new version on that event of the page (App.tsx). The app adds its listener when
         // the worker is registered, so the event is sent again until the notice shows.
-        served.dir = second;
+        served.dir = second.dir;
         let shown = false;
         for (let tries = 0; tries < 10 && !shown; tries++) {
           await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
@@ -903,24 +939,52 @@ const GATE_CASES = [
         ok(await reload.count() === 1, `the notice "${UPDATE_NOTICE}" has no control "Reload"`);
         await stillOpen('when the notice showed');
         ok(await page.evaluate(() => document.querySelector('meta[name="cb-smoke-build"]') === null), 'the page shows the second build before the control was pressed');
-        // The open app keeps the first build: a station draws from its cache, and the page does not
+        // The open app keeps the first build: the Yard draws from the old chunk, and the page does not
         // reload on a change of route.
+        ok(!existsSync(join(second.dir, 'assets', second.oldYard)), `the second build still holds the old Yard chunk ${second.oldYard}`);
         await page.evaluate(() => { location.hash = '#/yard'; });
-        await ROUTES.find((r) => r.route === '/yard').check(page);
+        await yardRoute.check(page).catch((err) => { throw new CaseFailure(`the open app with the first build, after the server held the second build: the Yard did not draw: ${err.message.split('\n')[0]}`); });
+        ok((await loadedChunks(page)).some(isOld), `the open app did not load the old Yard chunk ${second.oldYard}`);
         await stillOpen('on a change of route');
         ok(await notice.isVisible(), 'the notice went away on a change of route');
-        // The learner presses the control: the page reloads on the second build.
-        const loaded = page.waitForEvent('load', { timeout: 15000 });
-        await reload.click();
-        await loaded;
-        await ROUTES.find((r) => r.route === '/yard').check(page);
+        // 2. The learner presses the control: the page reloads on the second build.
+        await reloads(page, reload, `copy A, the notice "${UPDATE_NOTICE}"`);
+        await yardRoute.check(page);
         ok(await page.evaluate(() => window.__cbSmokeOpen) === undefined, 'the page did not reload after the control was pressed');
         ok(await page.evaluate(() => document.querySelector('meta[name="cb-smoke-build"]')?.getAttribute('content')) === '2', 'after the reload the page does not show the second build');
+        ok((await loadedChunks(page)).some(isNew), `after the reload the Yard did not load the new chunk ${second.newYard}`);
         ok(await page.getByText(UPDATE_NOTICE, { exact: true }).count() === 0, `the notice "${UPDATE_NOTICE}" still shows after the reload on the new build`);
+        // 3. Copy B still runs the first build. Wait until the new worker controls B and is activated:
+        // its activation takes the files of the first build out of the cache. Then open the Yard in B.
+        const taken = await other.waitForFunction(() => {
+          const worker = navigator.serviceWorker.controller;
+          return worker !== null && worker !== window.__cbFirstWorker && worker.state === 'activated';
+        }, null, { timeout: 15000 }).then(() => true, () => false);
+        ok(taken, 'copy B: 15 s after the reload of copy A, the worker of the second build does not control copy B');
+        const oldUrl = new URL(`assets/${second.oldYard}`, `${base}/`).href;
+        ok(await other.evaluate(async (url) => (await caches.match(url)) === undefined, oldUrl), `after the worker of the second build took control, a cache still holds the old Yard chunk ${second.oldYard}`);
+        ok(await other.evaluate(() => window.__cbSmokeOpen) === 'first build', 'copy B reloaded before its learner pressed a control');
+        await other.evaluate(() => { location.hash = '#/yard'; });
+        const failed = other.locator('.yard-host [role="alert"]');
+        await failed.waitFor().catch(async () => {
+          const shows = (await other.locator('main').innerText().catch(() => '')).replace(/\s+/g, ' ').trim().slice(0, 160);
+          throw new CaseFailure(`copy B with the first build opened the Yard after the old chunk was gone: the Yard shows no alert that it did not load. The view shows: "${shows}"`);
+        });
+        const said = (await failed.innerText()).replace(/\s+/g, ' ').trim();
+        ok(said.startsWith('This station did not load.'), `copy B: the alert of the Yard says "${said}", and "This station did not load." is expected`);
+        ok((await other.locator('main h2').first().innerText()).includes('The Yard'), 'copy B: the view of the Yard has no heading');
+        const otherReload = failed.getByRole('button', { name: 'Reload', exact: true });
+        ok(await otherReload.count() === 1, 'copy B: the alert of the Yard has no control "Reload"');
+        // B's "Reload" loads the second build, and the Yard draws.
+        await reloads(other, otherReload, 'copy B, the alert of the Yard');
+        await yardRoute.check(other).catch((err) => { throw new CaseFailure(`copy B after its "Reload": the Yard did not draw: ${err.message.split('\n')[0]}`); });
+        ok(await other.evaluate(() => document.querySelector('meta[name="cb-smoke-build"]')?.getAttribute('content')) === '2', 'copy B after its "Reload" does not show the second build');
+        ok(otherErrors.length === 0, `copy B: ${otherErrors.join('; ')}`);
+        return `the Yard chunk ${second.oldYard} became ${second.newYard} (${second.renamed.length} files renamed); copy A drew the Yard from the old chunk, then from the new one; copy B said "${said}" (${oldMissing} failed requests of the old chunk), then drew the Yard after its "Reload"`;
       });
     } finally {
       served.dir = distDir;
-      rmSync(second, { recursive: true, force: true });
+      rmSync(second.dir, { recursive: true, force: true });
     }
   } },
 
@@ -1041,22 +1105,48 @@ const REPORT_CASES = [];
 const UPDATE_NOTICE = 'A new version is ready.';
 const FAILED_NOTICE = 'Part of the library did not load.';
 
-// ---- The second build of the update case. It is a copy of the build with one changed file: the
-// page of the app holds one more meta element. The precache list of sw.js names the new revision of
-// that page (the MD5 of the file, as Workbox writes it), so sw.js changes too, and the browser finds
-// a new worker. The copy is in the folder of temporary files and is removed after the case.
+// ---- The second build of the update case, as a release that changes the sources of the Yard gives
+// it (the trial of R6 ENG-01). It is a copy of the build with these changes:
+//   - The station chunk of the Yard (assets/yardSim-*.js) gets a new name. The old file is not in the
+//     copy, so the server no longer holds it.
+//   - A file of assets/ whose text names a renamed file changes, and a build gives a changed file of
+//     assets/ a new name. So each such file gets a new name too, until no more file changes: today the
+//     main chunk, which imports the Yard chunk. Each name in index.html, in sw.js and in assets/ is
+//     changed to the new name.
+//   - The page of the app holds one more meta element, so that a case can see which build shows.
+//   - The precache list of sw.js names the new files, and the new revision of the page (the MD5 of the
+//     file, as Workbox writes it). So sw.js changes, and the browser finds a new worker.
+// The copy is in the folder of temporary files and is removed after the case. Returns the folder and
+// the old and new name of the Yard chunk.
 function secondBuild(dir) {
   const copy = mkdtempSync(join(tmpdir(), 'cb-smoke-second-build-'));
   cpSync(dir, copy, { recursive: true });
-  const page = readFileSync(join(copy, 'index.html'), 'utf8');
+  const assets = join(copy, 'assets');
+  const files = readdirSync(assets).filter((f) => /\.(js|css)$/.test(f));
+  const yard = files.filter((f) => /^yardSim-[\w-]+\.js$/.test(f));
+  if (yard.length !== 1) throw new CaseFailure(`the second build cannot be made: the build holds ${yard.length} station chunks of the Yard (assets/yardSim-*.js), and 1 is expected`);
+  const newName = (name) => name.replace(/-[\w-]+\.(js|css)$/, (m, ext) => `-${createHash('sha256').update(`second build ${name}`).digest('base64url').slice(0, 8)}.${ext}`);
+  const renamed = new Map();
+  const queue = [yard[0]];
+  while (queue.length) {
+    const name = queue.shift();
+    if (renamed.has(name)) continue;
+    renamed.set(name, newName(name));
+    for (const f of files) if (!renamed.has(f) && readFileSync(join(assets, f), 'utf8').includes(name)) queue.push(f);
+  }
+  const rename = (text) => [...renamed].reduce((t, [from, to]) => t.split(from).join(to), text);
+  for (const f of files) writeFileSync(join(assets, f), rename(readFileSync(join(assets, f), 'utf8')));
+  for (const [from, to] of renamed) renameSync(join(assets, from), join(assets, to));
+  const page = rename(readFileSync(join(copy, 'index.html'), 'utf8'));
   if (!page.includes('</head>')) throw new CaseFailure('the second build cannot be made: index.html has no </head>');
   const changed = page.replace('</head>', '<meta name="cb-smoke-build" content="2"></head>');
   writeFileSync(join(copy, 'index.html'), changed);
-  const sw = readFileSync(join(copy, 'sw.js'), 'utf8');
+  const sw = rename(readFileSync(join(copy, 'sw.js'), 'utf8'));
   const entry = /\{url:"index\.html",revision:"[0-9a-f]+"\}/;
   if (!entry.test(sw)) throw new CaseFailure('the second build cannot be made: the precache list of sw.js has no entry of index.html with a revision');
+  for (const to of renamed.values()) if (!sw.includes(`assets/${to}`)) throw new CaseFailure(`the second build cannot be made: the precache list of sw.js does not name assets/${to}`);
   writeFileSync(join(copy, 'sw.js'), sw.replace(entry, `{url:"index.html",revision:"${createHash('md5').update(changed).digest('hex')}"}`));
-  return copy;
+  return { dir: copy, oldYard: yard[0], newYard: renamed.get(yard[0]), renamed: [...renamed.keys()] };
 }
 
 // ---- The precache list of the service worker of a build: the address of each file, from the
