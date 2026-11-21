@@ -6,6 +6,11 @@
 // last step of LEG ms (the run in and the run out of a move, ../yardSim.js animateMove), the first
 // step takes --yard-run-in and the last step takes --yard-run-out (ruling LEG-ROLE). Each other
 // step keeps its time. Each time is multiplied by the speed factor, as before.
+//
+// Reduced motion (MOTION-STOP-OWNER): with the option `still`, play() runs each step one time with
+// its end value (t = 1), in order, in the same call. Then it calls onFrame one time and onDone. It
+// asks for no frame and lets no time pass. Each step runs, because a step can commit a part of a
+// move to the model (yardSim.js, commitOnce).
 
 export const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 
@@ -25,8 +30,16 @@ function readTime(name) {
 }
 
 // steps: [{ dur, fn(t) }]. onFrame() is called after each fn (to redraw).
+// With still: true the steps end at once (see the head of this file); onDone is called before
+// play() returns.
 // Returns a cancel() handle.
-export function play(steps, { onFrame, onDone } = {}) {
+export function play(steps, { onFrame, onDone, still = false } = {}) {
+  if (still) {
+    for (const step of steps) step.fn(1);
+    if (onFrame) onFrame();
+    if (onDone) onDone();
+    return () => {};
+  }
   const runIn = readTime('--yard-run-in');
   const runOut = readTime('--yard-run-out');
   const durs = steps.map((step) => step.dur);

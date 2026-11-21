@@ -67,11 +67,12 @@ export function mount(root, ctx) {
   // Back button → Clear Board home.
   view.onGo((route) => ctx.go(route));
 
-  // The reduce setting is read one time, here. With the setting on, the speed factor is 6.
-  // anim.js multiplies each duration by the factor, so a move takes about 6 times longer and
-  // motion does not stop. This is a known defect. It stays as it is in this file for now.
-  const reduce = !!(ctx.settings && ctx.settings.reduce);
-  const fast = () => reduce ? 6 : 1;          // setSpeed(6) = 6 times slower; setSpeed(1) = normal
+  // Reduced motion (P-01, MOTION-STOP-OWNER). The setting is read at the time of each effect, not at
+  // mount, so that a change in Settings acts on the next effect (2c-plan C4: the app sets the value).
+  // With it on, each move, kick, arrival, departure and watched step ends at once: play() runs each
+  // step one time with its end value, and the end state is painted with its words and the trace of
+  // the last move. No effect is slower. With it off, each effect keeps its times.
+  const still = () => !!(ctx.settings && ctx.settings.reduce);
 
   // The drawing adapter makes the canvas inside the frame that the view gives.
   const drawing = createDrawing(view.drawHost, { onPick });
@@ -95,7 +96,7 @@ export function mount(root, ctx) {
     if (stopAnim) stopAnim();          // abort the live tween (mid-move, depart, etc.)
     stopAnim = null;
     cancelCine();
-    puzzle = p; state = freshState(p); anim = null; busy = false; setSpeed(fast());
+    puzzle = p; state = freshState(p); anim = null; busy = false; setSpeed(1);
     ordered = !p.listed; flagged.clear();
     view.setDepart({ shown: !!p.goal.depart, enabled: false });
     renderRules(); renderOrder(); syncBuilder(); paint(); banner('', '');
@@ -114,13 +115,15 @@ export function mount(root, ctx) {
     if (!puzzle.inbound) { paint(); return; }
     const lenR = routeLength(THROUGH_ROUTE), stopS = lenR - 110;
     cine = { introS: -220, setoutCars: puzzle.inbound.cars, to: puzzle.inbound.to, phase: 'arrive', spotProg: 0 };
-    const finish = () => { cancelCine(); paint(); };
-    cineCancel = play([
+    let ended = false;
+    const finish = () => { ended = true; cancelCine(); paint(); };
+    const cancel = play([
       { dur: 2200, fn: (t) => { if (cine) { cine.phase = 'arrive'; cine.introS = -220 + (stopS + 220) * t; } } },   // arrive & stop
       { dur: 1100, fn: (t) => { if (cine) { cine.phase = 'setout'; cine.spotProg = t; } } },                        // spot the cars in
       { dur: 1700, fn: (t) => { if (cine) { cine.phase = 'depart'; cine.introS = stopS + (lenR + 420 - stopS) * t; } } }, // depart out the lead
-    ], { onFrame: paint, onDone: finish });
-    cineTimer = setTimeout(finish, 5800);
+    ], { onFrame: paint, onDone: finish, still: still() });
+    // With reduced motion the arrival has ended in the call above: no frame and no timer stay.
+    if (!ended) { cineCancel = cancel; cineTimer = setTimeout(finish, 5800); }
   }
 
   // --- input: line a switch by clicking its target -------------------------
@@ -150,7 +153,10 @@ export function mount(root, ctx) {
     return kind === 'pull' ? canPull(state, id, n) : kind === 'kick' ? canKick(state, id, n) : canSpot(state, id, n);
   }
 
-  function animateMove(kind, id, n) {
+  // `quiet` is the reduced-motion value that the caller read for this move: each step of the move
+  // then runs one time at its end value, in this call. Each step still runs, because the step after
+  // the run in commits the move to the model (commitOnce).
+  function animateMove(kind, id, n, quiet) {
     return new Promise((resolve) => {
       const i = TRACK_IDS.indexOf(id);
       const route = engineRoute(i);
@@ -213,8 +219,9 @@ export function mount(root, ctx) {
           anim = { route, engS: lerp(engIn, restEnd, t), cut, shove: null };
         },
       });
-      const cancel = play(phases, { onFrame: paint, onDone: () => { stopAnim = null; anim = null; resolve(); } });
-      stopAnim = () => { cancel(); resolve(); };          // load() can abort this move mid-flight
+      let ended = false;
+      const cancel = play(phases, { onFrame: paint, still: quiet, onDone: () => { ended = true; stopAnim = null; anim = null; resolve(); } });
+      if (!ended) stopAnim = () => { cancel(); resolve(); };   // load() can abort this move mid-flight
     });
   }
 
@@ -227,7 +234,7 @@ export function mount(root, ctx) {
     if (kind === 'secure') { secure(state, id); sfx.points(); afterMove(); return; }
     busy = true;
     const g = gen;
-    animateMove(kind, id, n).then(() => { if (gen !== g) return; busy = false; afterMove(); });
+    animateMove(kind, id, n, still()).then(() => { if (gen !== g) return; busy = false; afterMove(); });
   }
 
   // Auto-line the ladder for the route to `id`: its switch reverse, all others normal.
@@ -249,7 +256,7 @@ export function mount(root, ctx) {
       puzzle.listed.forEach((e, i) => { if (e.error) flagged.add(i); });
       ordered = true; renderOrder();
     }
-    busy = true; setSpeed(reduce ? 6 : 1.7);
+    busy = true; setSpeed(1.7);
     banner(`▶ Watching the optimal line — par ${puzzle.par} move${puzzle.par === 1 ? '' : 's'}`, 'ok');
     for (const [act, trk, n] of puzzle.opt) {
       if (gen !== myGen) return;
@@ -257,13 +264,20 @@ export function mount(root, ctx) {
       if (gen !== myGen) return;
       // SECURE has no engine movement to animate — show it as the beat it is.
       if (act === 'secure') { secure(state, trk); banner(state.msg, 'ok'); paint(); await sleep(420); }
-      else await animateMove(act, trk, n);
+      else {
+        // With reduced motion the step ends at once. Its end state is painted with no frame, so
+        // the trace of the step shows during the pause after it.
+        const quiet = still();
+        await animateMove(act, trk, n, quiet);
+        if (gen !== myGen) return;
+        if (quiet) paint();
+      }
       if (gen !== myGen) return;
       view.setReadout({ moves: state.moves, par: puzzle.par, joints: state.joints });
       await sleep(320);
     }
     if (gen !== myGen) return;
-    setSpeed(fast()); busy = false;
+    setSpeed(1); busy = false;
     fromDemo = true;                                                  // a watched line is not the player's win — don't grade mastery
     afterMove();
     if (puzzle.goal.depart && checkWin(state, puzzle)) departOut();   // finish the demo by departing
@@ -361,8 +375,10 @@ export function mount(root, ctx) {
     const cutLen = state.engine.reduce((a, c) => a + carLen(state.type[c]), 0);
     const startS = restS(cutLen), endS = -(cutLen + ENGLEN + 220);
     const cut = state.engine.slice();
-    stopAnim = play([{ dur: 1300, fn: (t) => { anim = { route: LEAD_ROUTE, engS: startS + (endS - startS) * t, cut }; } }],
-      { onFrame: paint, onDone: () => { stopAnim = null; anim = null; busy = false; paint(); } });
+    let ended = false;
+    const cancel = play([{ dur: 1300, fn: (t) => { anim = { route: LEAD_ROUTE, engS: startS + (endS - startS) * t, cut }; } }],
+      { onFrame: paint, still: still(), onDone: () => { ended = true; stopAnim = null; anim = null; busy = false; paint(); } });
+    if (!ended) stopAnim = cancel;
   }
 
   // The joint count of the solver-proven optimal line, baked into each puzzle by tools/solve.mjs
