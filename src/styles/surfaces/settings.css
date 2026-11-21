@@ -8,6 +8,12 @@
 .cb-app .cb-settings-view .dusk-btn,
 .cb-app .cb-settings-view .cb-btn--attn { font-size: .9rem; }
 
+/* A defect of shared parts, for job U1 to fold into the parts file: an open dialog cuts each pixel
+   outside its box, and the Dusk panel head puts "Done" 4 px below the top edge, but the focus ring
+   reaches 5 px out. With 8 px above and below "Done", the whole ring shows, on the ground of the
+   head and clear of the lit edge of the dialog. */
+.cb-app .cb-settings-view .dusk-panel-head { padding-block: var(--sp-3); }
+
 /* ---- the sample ------------------------------------------------------------------------------
    A well that shows the reading modes at work. "Aa" is in the gold of the lit line. */
 .cb-settings-sample {

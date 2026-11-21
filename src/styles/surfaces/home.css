@@ -44,6 +44,12 @@
    and not a control (D-0038, TILE-TONE). Each tile has the corner of a control. */
 .cb-app .cb-home-view .dusk-tile { border-radius: var(--r-control); }
 
+/* The focus ring of a tile lies in the gap between two tiles. With the Dusk gap of 10 px the edge
+   and the glow of the next tile are 3 px from the ring, and the ring has less than 3:1 against
+   them. The grid keeps the gap of the cards of today, 14 px: the ring then has 3:1 or more against
+   the ground beside it on each side, and the grid keeps two columns at 390 px. */
+.cb-app .cb-home-view .dusk-grid { gap: 14px; }
+
 /* A tile that is not a control does not lift. Its edge still brightens, as on each Dusk tile. */
 .cb-app .cb-home-view div.dusk-tile:hover,
 .cb-app .cb-home-view div.dusk-tile:focus-within { transform: none; }
