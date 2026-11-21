@@ -1,36 +1,36 @@
 // Clear Board — Radio station. Ported VERBATIM from the CN Conductor Trainer "Back to a Joint"
 // walkthrough. The call wording is real-world-accurate and tuned by the SME — do NOT reword it.
-// One walkthrough for now (Jordan: weakest section, port as-is, grow later).
+// One walkthrough for now (the SME: weakest section, port as-is, grow later).
 
 const RADIO_CSS = `
-.radio-wrap{ --rbg:#14181d; --rcard:#1d222b; --rcard2:#232a34; --rline:#2c3340; --rink:#eef2f6;
-  --rmuted:#9aa3b0; --ryellow:#36d07f; --rblue:#4aa3ff; --rgreen:#33c27f; --rorange:#ff8a3d;
-  color:var(--rink); }
+.radio-wrap{ color:var(--ink) }
+.radio-wrap .scenario, .radio-wrap .tx, .radio-wrap .call, .radio-wrap #notebody, .radio-wrap .done, .radio-wrap .tip{ max-width:var(--measure) }
+html[data-reduce="1"] .radio-wrap button.rbtn{ transition:none } @media (prefers-reduced-motion: reduce){ html .radio-wrap button.rbtn{ transition:none } }
 .radio-wrap *{ box-sizing:border-box }
-.radio-wrap .scenario{ background:var(--rcard); border:1px solid var(--rline); border-left:3px solid var(--ryellow); border-radius:8px; padding:10px 14px; font-size:13.5px; margin-bottom:14px }
+.radio-wrap .scenario{ background:var(--well); border-left:3px solid var(--green-ink); border-radius:0 var(--r-control) var(--r-control) 0; padding:var(--sp-3) var(--sp-5); font-size:.84375rem; margin-bottom:14px }
 .radio-wrap .rhead{ display:flex; align-items:center; gap:12px; margin:6px 0 14px }
-.radio-wrap .sigmark{ width:34px; height:48px; border-radius:9px; flex:none; background:var(--rcard2); border:1px solid var(--rline); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px }
-.radio-wrap .sigmark span{ width:8px; height:8px; border-radius:50%; background:#262b34 }
-.radio-wrap .rtitle{ font-size:17px; font-weight:700 } .radio-wrap .rsub{ font-size:12.5px; color:var(--rmuted) }
-.radio-wrap .stage{ display:block; background:#10131a; border:1px solid var(--rline); border-radius:12px; padding:8px; margin-bottom:14px }
+.radio-wrap .sigmark{ width:34px; height:48px; border-radius:var(--r-icon); flex:none; background:var(--head); box-shadow:var(--ring-well); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px }
+.radio-wrap .sigmark span{ width:8px; height:8px; border-radius:var(--r-circle); background:var(--hair-2) }
+.radio-wrap .rtitle{ font-size:1.0625rem; font-weight:var(--fw-bold) } .radio-wrap .rsub{ font-size:.78125rem; color:var(--ink-2) }
+.radio-wrap .stage{ display:block; background:var(--well); box-shadow:var(--ring-well); border-radius:var(--r-tile); padding:8px; margin-bottom:14px }
 .radio-wrap .stage svg{ display:block; width:100%; height:auto }
 .radio-wrap .cols{ display:flex; gap:14px; flex-wrap:wrap }
-.radio-wrap .radio{ flex:1 1 420px; background:var(--rcard); border:1px solid var(--rline); border-radius:12px; padding:14px }
-.radio-wrap .radio h3, .radio-wrap .note h3{ margin:0 0 8px; font-size:13px; color:var(--rmuted) }
+.radio-wrap .radio{ flex:1 1 420px; background:var(--panel-fill); box-shadow:var(--neon); border-radius:var(--r-tile); padding:14px }
+.radio-wrap .radio h3, .radio-wrap .note h3{ margin:0 0 8px; font-size:.8125rem; color:var(--ink-2) }
 .radio-wrap .log{ min-height:90px; max-height:240px; overflow:auto; margin-bottom:10px }
-.radio-wrap .tx{ background:#1d222b; border:1px solid var(--rline); border-left:3px solid var(--rblue); border-radius:7px; padding:7px 10px; margin-bottom:6px; font-size:13.5px }
-.radio-wrap .tx.eng{ border-left-color:var(--rgreen) }
-.radio-wrap .tx .who{ font-size:10.5px; color:var(--rmuted); text-transform:uppercase; letter-spacing:.4px }
-.radio-wrap .next{ font-size:14px; margin:8px 0 } .radio-wrap .next .lbl{ font-size:11px; color:var(--rmuted); text-transform:uppercase; letter-spacing:.4px; display:block; margin-bottom:4px }
-.radio-wrap .call{ background:#0e1a28; border:1px dashed var(--rblue); border-radius:8px; padding:9px 12px; font-size:14.5px }
-.radio-wrap button.rbtn{ font:inherit; border:none; border-radius:8px; padding:10px 14px; font-weight:700; cursor:pointer; font-size:14px; margin-top:10px }
-.radio-wrap button.key{ background:var(--ryellow); color:#06301c } .radio-wrap button.again{ background:transparent; color:var(--rmuted); border:1px solid var(--rline) }
-.radio-wrap .note{ flex:1 1 320px; background:var(--rcard); border:1px solid var(--rline); border-radius:12px; padding:14px; font-size:13.5px }
-.radio-wrap .note .rule{ color:var(--ryellow); font-weight:700; font-size:12px; margin-bottom:4px }
-.radio-wrap .note .goi{ color:var(--rorange); font-weight:700; font-size:12px; margin-bottom:4px }
-.radio-wrap .done{ background:#123326; border:1px solid var(--rgreen); border-radius:9px; padding:12px; margin-top:10px; font-size:13.5px; display:none }
+.radio-wrap .tx{ background:var(--well); border-left:3px solid var(--blue); border-radius:0 var(--r-control) var(--r-control) 0; padding:var(--sp-3) var(--sp-5); margin-bottom:6px; font-size:.84375rem }
+.radio-wrap .tx.eng{ border-left-color:var(--green) }
+.radio-wrap .tx .who{ display:block; margin-bottom:3px; font-size:var(--fs-xs); font-weight:var(--fw-medium); color:var(--ink-3); text-transform:uppercase; letter-spacing:var(--track-label) }
+.radio-wrap .next{ font-size:.875rem; margin:8px 0 } .radio-wrap .next .lbl{ font-size:var(--fs-xs); font-weight:var(--fw-medium); color:var(--ink-3); text-transform:uppercase; letter-spacing:var(--track-label); display:block; margin-bottom:4px }
+.radio-wrap .call{ background:var(--well); border:1px dashed var(--blue-ink); border-radius:var(--r-control); padding:var(--sp-4) var(--sp-5); font-size:.90625rem }
+.radio-wrap button.rbtn{ font:inherit; border:none; border-radius:var(--r-control); padding:10px 14px; min-width:var(--cb-target); min-height:var(--cb-target); font-weight:var(--fw-bold); cursor:pointer; font-size:.875rem; margin-top:10px; transition:background-color var(--m-confirm) var(--ease), box-shadow var(--m-confirm) var(--ease) }
+.radio-wrap button.key{ background:var(--btn-bg); color:var(--btn-ink); box-shadow:var(--neon-ctl) } .radio-wrap button.key:hover{ background:var(--btn-bg-hover); box-shadow:var(--neon-ctl-on) } .radio-wrap button.key:active{ background:var(--btn-bg-press) } .radio-wrap button.again{ background:none; color:var(--cb-link); padding-inline:15px } .radio-wrap button.again:hover{ background:var(--wash-1); text-decoration:underline } .radio-wrap button.again:active{ background:var(--wash-2) }
+.radio-wrap .note{ flex:1 1 320px; background:var(--panel-fill); box-shadow:var(--neon); border-radius:var(--r-tile); padding:14px; font-size:.84375rem }
+.radio-wrap .note .rule{ color:var(--green-ink); font-weight:var(--fw-bold); font-size:.75rem; margin-bottom:4px }
+.radio-wrap .note .goi{ color:var(--amber-ink); font-weight:var(--fw-bold); font-size:.75rem; margin-bottom:4px }
+.radio-wrap .done{ background:var(--rowwash-green); box-shadow:var(--rowneon-green); border-radius:var(--r-control); padding:12px; margin-top:10px; font-size:.84375rem; display:none }
 .radio-wrap .done.show{ display:block }
-.radio-wrap .tip{ font-size:12px; color:var(--rmuted); margin-top:10px; border-top:1px solid var(--rline); padding-top:9px }`;
+.radio-wrap .tip{ font-size:.75rem; color:var(--ink-2); margin-top:10px; border-top:1px solid var(--lit-rule); padding-top:9px }`;
 
 const RADIO_HTML = `
 <div class="radio-wrap">
@@ -42,28 +42,28 @@ const RADIO_HTML = `
   <div class="scenario">Engine <b>CN 2204</b> backs its cut up to couple onto a car on AS73. You're on the ground, in the clear, watching the tail car and the joint. Count it down — cars, then feet — verify the coupling, protect, couple the air, release.</div>
   <div class="stage">
     <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg">
-      <line x1="0" y1="168" x2="760" y2="168" stroke="#2c3340" stroke-width="2"/>
-      <line x1="0" y1="176" x2="760" y2="176" stroke="#2c3340" stroke-width="2"/>
-      <rect x="566" y="120" width="92" height="46" rx="3" fill="#2c3a4c" stroke="#5878a0"/>
-      <text x="612" y="113" fill="#93a6bd" font-size="11" text-anchor="middle" font-family="monospace">standing car · AS73</text>
-      <text id="gaptxt" x="360" y="84" fill="#e8eef6" font-size="14" text-anchor="middle" font-weight="700">10 cars to the joint</text>
-      <text id="status" x="360" y="84" fill="#33c27f" font-size="13.5" text-anchor="middle" font-weight="700" opacity="0"></text>
-      <circle cx="560" cy="190" r="6" fill="#36d07f"/>
-      <line x1="560" y1="196" x2="560" y2="210" stroke="#36d07f" stroke-width="2.5"/>
-      <line x1="560" y1="200" x2="552" y2="206" stroke="#36d07f" stroke-width="2.5"/>
-      <line x1="560" y1="200" x2="568" y2="206" stroke="#36d07f" stroke-width="2.5"/>
-      <line x1="560" y1="210" x2="554" y2="222" stroke="#36d07f" stroke-width="2.5"/>
-      <line x1="560" y1="210" x2="566" y2="222" stroke="#36d07f" stroke-width="2.5"/>
-      <text x="560" y="233" fill="#36d07f" font-size="10.5" text-anchor="middle">you — in the clear, watching the tail car</text>
+      <line x1="0" y1="168" x2="760" y2="168" style="stroke:var(--grey)" stroke-width="2"/>
+      <line x1="0" y1="176" x2="760" y2="176" style="stroke:var(--grey)" stroke-width="2"/>
+      <rect x="566" y="120" width="92" height="46" rx="3" style="fill:var(--tile-grey-lo);stroke:var(--grey-ink)"/>
+      <text x="612" y="113" style="fill:var(--ink-2);font-size:.6875rem;font-family:var(--font-mono)" text-anchor="middle">standing car · AS73</text>
+      <text id="gaptxt" x="360" y="84" style="fill:var(--ink);font-size:.875rem" text-anchor="middle" font-weight="700">10 cars to the joint</text>
+      <text id="status" x="360" y="84" style="fill:var(--green-ink);font-size:.84375rem" text-anchor="middle" font-weight="700" opacity="0"></text>
+      <circle cx="560" cy="190" r="6" style="fill:var(--green)"/>
+      <line x1="560" y1="196" x2="560" y2="210" style="stroke:var(--green)" stroke-width="2.5"/>
+      <line x1="560" y1="200" x2="552" y2="206" style="stroke:var(--green)" stroke-width="2.5"/>
+      <line x1="560" y1="200" x2="568" y2="206" style="stroke:var(--green)" stroke-width="2.5"/>
+      <line x1="560" y1="210" x2="554" y2="222" style="stroke:var(--green)" stroke-width="2.5"/>
+      <line x1="560" y1="210" x2="566" y2="222" style="stroke:var(--green)" stroke-width="2.5"/>
+      <text x="560" y="233" style="fill:var(--green-ink);font-size:.65625rem" text-anchor="middle">you — in the clear, watching the tail car</text>
       <g id="consist">
-        <rect x="20" y="108" width="110" height="58" rx="4" fill="#232a34" stroke="#5878a0"/>
-        <rect x="20" y="92" width="40" height="20" rx="3" fill="#2a323d" stroke="#5878a0"/>
-        <text x="40" y="104" fill="#93a6bd" font-size="9" text-anchor="middle">front</text>
-        <text x="88" y="142" fill="#cfe0f2" font-size="11" text-anchor="middle" font-family="monospace">CN 2204</text>
-        <rect x="134" y="120" width="58" height="46" rx="3" fill="#3a4a5e" stroke="#5878a0"/>
-        <rect x="196" y="120" width="58" height="46" rx="3" fill="#3a4a5e" stroke="#5878a0"/>
-        <rect x="258" y="120" width="58" height="46" rx="3" fill="#46586e" stroke="#7fd0a0"/>
-        <text x="287" y="148" fill="#bfe8cf" font-size="10" text-anchor="middle">tail car</text>
+        <rect x="20" y="108" width="110" height="58" rx="4" style="fill:var(--head);stroke:var(--grey-ink)"/>
+        <rect x="20" y="92" width="40" height="20" rx="3" style="fill:var(--head);stroke:var(--grey-ink)"/>
+        <text x="40" y="104" style="fill:var(--ink-2);font-size:.5625rem" text-anchor="middle">front</text>
+        <text x="88" y="142" style="fill:var(--ink);font-size:.6875rem;font-family:var(--font-mono)" text-anchor="middle">CN 2204</text>
+        <rect x="134" y="120" width="58" height="46" rx="3" style="fill:var(--tile-grey-lo);stroke:var(--grey-ink)"/>
+        <rect x="196" y="120" width="58" height="46" rx="3" style="fill:var(--tile-grey-lo);stroke:var(--grey-ink)"/>
+        <rect x="258" y="120" width="58" height="46" rx="3" style="fill:var(--tile-grey-lo);stroke:var(--green-ink)"/>
+        <text x="287" y="148" style="fill:var(--ink);font-size:.625rem" text-anchor="middle">tail car</text>
       </g>
     </svg>
   </div>
@@ -71,9 +71,9 @@ const RADIO_HTML = `
     <div class="radio"><h3>Radio</h3><div class="log" id="log"></div><div class="next" id="next"></div></div>
     <div class="note" id="notebox">
       <h3>Why this call</h3>
-      <div id="notebody" style="color:var(--rmuted)">Make your first call to begin — identify the engine, railway initials and number digit by digit, and wait for the engineer to answer up.</div>
+      <div id="notebody" style="color:var(--ink-2)">Make your first call to begin — identify the engine, railway initials and number digit by digit, and wait for the engineer to answer up.</div>
       <div class="done" id="done"></div>
-      <div class="tip"><span style="color:var(--rorange)">CN GOI</span> = operational practice, not a CROR rule. Green lines are the engineer; he repeats the car counts and calls the air to the tail.</div>
+      <div class="tip"><span style="color:var(--amber-ink)">CN GOI</span> = operational practice, not a CROR rule. Green lines are the engineer; he repeats the car counts and calls the air to the tail.</div>
     </div>
   </div>
 </div>`;
@@ -132,7 +132,7 @@ function injectStyle() {
 
 export function mount(root, ctx) {
   injectStyle();
-  root.innerHTML = `<button class="back" data-go="">← Home</button>` + RADIO_HTML;
+  root.innerHTML = `<button class="cb-btn--plain" data-go="">← Home</button>` + RADIO_HTML;
   root.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => ctx.go(b.dataset.go)));
 
   const $ = (id) => root.querySelector('#' + id);
@@ -142,7 +142,7 @@ export function mount(root, ctx) {
 
   // static signal badge (Clear) — decorative; no looping interval (avoids a leak on re-mount)
   const m = $('sigmark');
-  if (m) { const dot = m.getElementsByTagName('span')[0]; dot.style.background = '#36d07f'; dot.style.boxShadow = '0 0 7px #36d07f'; }
+  if (m) { const dot = m.getElementsByTagName('span')[0]; dot.style.background = 'var(--green)'; dot.style.boxShadow = 'var(--glow-green)'; }
 
   function applyReadout(s) {
     const feet = (s.feet === undefined ? 500 : s.feet);

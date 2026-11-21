@@ -57,7 +57,7 @@ export function RadioTest() {
   const missedRef = useRef<Set<number>>(new Set());
   const startRef = useRef(0);
 
-  // radioSim is loaded dynamically here as well as in guided mode, so the byte-for-byte island
+  // radioSim is loaded dynamically here as well as in guided mode, so the island module
   // keeps its own code-split chunk instead of being pulled into the main bundle.
   const [allSteps, setAllSteps] = useState<Step[] | null>(null);
   useEffect(() => {
@@ -98,8 +98,8 @@ export function RadioTest() {
     if (step) speak(step.pre ? step.pre : (step.read || step.status || ''));
   }, [step, speak]);
 
-  if (!content || !allSteps) return <p className="muted">Loading…</p>;
-  if (!items.length) return <p className="muted">The radio script hasn't loaded.</p>;
+  if (!content || !allSteps) return <p className="dusk-lede">Loading…</p>;
+  if (!items.length) return <p className="dusk-lede">The radio script hasn't loaded.</p>;
 
   // ── Run finished ──
   if (item === undefined || step === undefined) {
@@ -108,27 +108,33 @@ export function RadioTest() {
     const delta = Math.round((end - startRef.current) * 100);
     return (
       <>
-        <h2 className="view-title">{focus ? 'Review done' : 'Run done'}</h2>
-        <p className="big-score">{score} / {order.length}</p>
-        <p className="muted">
-          {gradedCount} of those {order.length} calls carry a verified CROR citation and moved your
-          Radio mastery: {delta >= 0 ? '+' : ''}{delta}% → {Math.round(end * 100)}%. The rest are real
-          practice with no rule to cite — they're never scored against you.
-        </p>
-        <div className="opts">
+        <div className="dusk-tile dusk-tile--teal cb-radio-done">
+          <div className="dusk-tile-cap">
+            <h2 className="dusk-tile-lab">{focus ? 'Review done' : 'Run done'}</h2>
+          </div>
+          <div className="dusk-tile-body">
+            <p className="dusk-tile-num">{score} / {order.length}</p>
+            <p className="dusk-tile-sub">
+              {gradedCount} of those {order.length} calls carry a verified CROR citation and moved your
+              Radio mastery: {delta >= 0 ? '+' : ''}{delta}% → {Math.round(end * 100)}%. The rest are real
+              practice with no rule to cite — they're never scored against you.
+            </p>
+          </div>
+        </div>
+        <div className="cb-radio-actions">
           {missedRef.current.size > 0 && (
-            <button className="opt" onClick={() => {
+            <button className="dusk-btn" onClick={() => {
               setFocus([...missedRef.current]); missedRef.current = new Set();
               setPos(0); setPicked(null); setScore(0); setRunKey(k => k + 1);
             }}>
               Practice the {missedRef.current.size} you missed →
             </button>
           )}
-          <button className="opt" onClick={() => {
+          <button className="dusk-btn" onClick={() => {
             setFocus(null); missedRef.current = new Set();
             setPos(0); setPicked(null); setScore(0); setRunKey(k => k + 1);
           }}>Run it again</button>
-          <button className="opt" onClick={() => navigate('/')}>Back to the path</button>
+          <button className="dusk-btn" onClick={() => navigate('/')}>Back to the path</button>
         </div>
       </>
     );
@@ -152,48 +158,55 @@ export function RadioTest() {
 
   return (
     <>
-      <div className="drill-top">
-        <span className="muted">Call {pos + 1} of {order.length}</span>
-        <span className="muted">{score} correct</span>
+      <div className="cb-radio-top">
+        <span>Call {pos + 1} of {order.length}</span>
+        <span className="dusk-count">{score} correct</span>
       </div>
 
-      <div className="radio-readout" aria-live="polite">{readout}</div>
+      <div className="dusk-strip cb-radio-readout" aria-live="polite">
+        <div className="dusk-cell dusk-cell--key"><b>{readout}</b></div>
+      </div>
 
       {step.pre && (
-        <p className="radio-incoming"><span className="who">Engineer · CN 2204</span> {step.pre}</p>
+        <p className="cb-tx cb-tx--eng"><span className="cb-who">Engineer · CN 2204</span> {step.pre}</p>
       )}
 
-      <h2 className="view-title">{step.pre ? 'What do you reply?' : 'What do you call?'}</h2>
+      <div className="dusk-panel dusk-panel--framed cb-radio-q">
+        <div className="dusk-panel-head">
+          <h2 className="dusk-panel-name">{step.pre ? 'What do you reply?' : 'What do you call?'}</h2>
+        </div>
+        <div className="dusk-panel-body">
+          {!graded && (
+            <p className="cb-chip cb-chip--caution">
+              {c.source === 'GOI'
+                ? '● CN practice (GOI), not a CROR rule — answered and explained, never scored'
+                : '● No CROR citation in the verified source — answered and explained, never scored'}
+            </p>
+          )}
 
-      {!graded && (
-        <p className="badge caution">
-          {c.source === 'GOI'
-            ? '● CN practice (GOI), not a CROR rule — answered and explained, never scored'
-            : '● No CROR citation in the verified source — answered and explained, never scored'}
-        </p>
-      )}
-
-      <div className="opts">
-        {opts.map((o, i) => {
-          const cls = answered ? (o === step.call ? 'opt right' : (o === picked ? 'opt wrong' : 'opt')) : 'opt';
-          return <button key={i} className={cls} disabled={answered} onClick={() => choose(o)}>{o}</button>;
-        })}
+          <div className="cb-opts">
+            {opts.map((o, i) => {
+              const cls = answered ? (o === step.call ? 'cb-opt cb-opt--right' : (o === picked ? 'cb-opt cb-opt--wrong' : 'cb-opt')) : 'cb-opt';
+              return <button key={i} className={cls} data-cb="opt" disabled={answered} onClick={() => choose(o)}>{o}</button>;
+            })}
+          </div>
+        </div>
       </div>
 
       {answered && (
-        <div className="feedback" aria-live="polite">
-          <b className={ok ? 'fb-ok' : 'fb-no'}>{ok ? 'Right.' : 'Not quite.'}</b>
+        <div className="dusk-panel cb-radio-feedback" data-cb="feedback" aria-live="polite">
+          <b className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{ok ? 'Right.' : 'Not quite.'}</b>
           {/* Only on a correct call: the engineer would not acknowledge a transmission you didn't make. */}
-          {ok && step.ack && <span className="radio-ack"><span className="who">Engineer · CN 2204</span> {step.ack}</span>}
-          {step.goi && <span className="muted">{step.goi}</span>}
+          {ok && step.ack && <span className="cb-tx cb-tx--eng"><span className="cb-who">Engineer · CN 2204</span> {step.ack}</span>}
+          {step.goi && <span className="cb-radio-goi">{step.goi}</span>}
           <span><b>{step.rule}</b> — {step.note}</span>
-          <span className="cite">{c.source}{c.ref ? ` · ${c.ref}` : ''}{c.relatedRef ? ` · related: ${c.relatedRef}` : ''}</span>
+          <span className="cb-sub">{c.source}{c.ref ? ` · ${c.ref}` : ''}{c.relatedRef ? ` · related: ${c.relatedRef}` : ''}</span>
           {item.payload?.ruleId && (
-            <button className="iconbtn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(String(item.payload!.ruleId))}`)}>
+            <button className="dusk-btn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(String(item.payload!.ruleId))}`)}>
               Look it up →
             </button>
           )}
-          <button className="iconbtn next" autoFocus onClick={() => { setPos(p => p + 1); setPicked(null); }}>
+          <button className="dusk-btn cb-radio-next" autoFocus onClick={() => { setPos(p => p + 1); setPicked(null); }}>
             {pos + 1 < order.length ? 'Next call →' : 'Finish'}
           </button>
         </div>

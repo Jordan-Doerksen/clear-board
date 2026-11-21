@@ -1,1 +1,110 @@
-/* surfaces/radio.css - the rules that only the Radio tabs and the Radio test need. Owner in Wave 2b: job B3. Class prefix: cb-radio-. Job S1 made this file with no rule. */
+/* surfaces/radio.css - the rules that only the Radio tabs and the Radio test need. Owner in Wave 2b: job B3. Class prefix: cb-radio-.
+   The root of the Radio view is .cb-radio-view. Each selector item starts with .cb-app .cb-radio-view, after a reading-mode
+   attribute where a rule needs one. The guided island keeps its own rules in radioSim.js (RADIO_CSS). A rule here sets no
+   transition, no animation and no transform other than transform: none. Each size keeps the size of today at a root of 16 px. */
+
+/* ---- the mode tabs (part G10) ---------------------------------------------------------------------
+   The sub-line keeps 12.16 px (the part gives 12 px). The tabs keep the space of today above and below. */
+.cb-app .cb-radio-view .cb-tabs { margin: 10px 0 16px; }
+.cb-app .cb-radio-view .cb-tab small { font-size: .76rem; }
+
+/* ---- "Call it yourself": the count line, the readout, the incoming call ---------------------------
+   The count line keeps its place above the readout. Both texts keep 16 px; "N correct" is a count
+   chip (the part gives 11 px). The readout keeps 18.4 px in bold in the UI face (the part gives
+   15 px) and the line height of reading text. The incoming call keeps 14.72 px (the part sets no
+   size). Each block of reading text is capped at the measure (TEXT-CAP). */
+.cb-app .cb-radio-view .cb-radio-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin: 6px 0;
+  color: var(--ink-2);
+}
+.cb-app .cb-radio-view .cb-radio-top .dusk-count { font-size: 1rem; }
+.cb-app .cb-radio-view .cb-radio-readout { margin: 8px 0 12px; }
+.cb-app .cb-radio-view .cb-radio-readout b {
+  font-size: 1.15rem;
+  line-height: var(--lh-base);
+}
+.cb-app .cb-radio-view .cb-tx {
+  max-width: var(--measure);
+  font-size: .92rem;
+}
+.cb-app .cb-radio-view .cb-radio-readout + .cb-tx { margin: 0 0 12px; }
+
+/* ---- "Call it yourself": the question panel ----------------------------------------------------------
+   The head holds the question only, at 20.8 px (the part gives 13 px). The body holds the unscored
+   chip and the answer options. */
+.cb-app .cb-radio-view .cb-radio-q .dusk-panel-name { font-size: 1.3rem; }
+.cb-app .cb-radio-view .cb-radio-q .cb-chip { margin: 0 0 var(--sp-4); }
+
+/* ---- "Call it yourself": the feedback -----------------------------------------------------------------
+   A Dusk panel laid out as a column, in the order of today. The acknowledgement keeps 14.72 px (the
+   .cb-tx rule above), the GOI line 16 px in --ink-2, the source line 12.8 px (the part gives 14 px).
+   "Look it up →" keeps the width of the panel; "Next call →" keeps its own width at the start of its
+   line. Both button words keep 14.4 px (the floor rule gives 14 px) and the line height of the page.
+   The padding of today keeps each of the two buttons as wide and as high as today in each mode. */
+.cb-app .cb-radio-view .cb-radio-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+.cb-app .cb-radio-view .cb-radio-feedback > span { max-width: var(--measure); }
+.cb-app .cb-radio-view .cb-radio-goi { color: var(--ink-2); }
+.cb-app .cb-radio-view .cb-radio-feedback .cb-sub {
+  margin-top: 10px;
+  font-size: .8rem;
+}
+.cb-app .cb-radio-view .cb-radio-feedback .dusk-btn {
+  padding: 10px 14px;
+  font-size: .9rem;
+  line-height: var(--lh-base);
+}
+.cb-app .cb-radio-view .cb-radio-next {
+  align-self: flex-start;
+  margin-top: 6px;
+}
+
+/* ---- "Call it yourself": the end of a run --------------------------------------------------------------
+   A teal Dusk tile. It is not a control, so it does not lift and its edge does not change on hover.
+   The heading keeps 20.8 px and wraps (the part gives 12 px on one line with an ellipsis), the score
+   keeps 38.4 px (27 px) and the mastery line keeps 16 px (12 px). Each text keeps the line height of
+   the page, so the dyslexia type loosens it as today. The body gets a bottom padding: the tile has no
+   sparkline. The cap has no icon square, so its heading starts at the left edge of the body text. */
+.cb-app .cb-radio-view .cb-radio-done:hover,
+.cb-app .cb-radio-view .cb-radio-done:focus-within {
+  transform: none;
+  box-shadow: var(--tile-neon);
+}
+.cb-app .cb-radio-view .cb-radio-done .dusk-tile-lab {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+  font-size: 1.3rem;
+}
+.cb-app .cb-radio-view .cb-radio-done .dusk-tile-cap { padding-left: var(--sp-4); }
+.cb-app .cb-radio-view .cb-radio-done .dusk-tile-body { padding-bottom: var(--sp-4); }
+.cb-app .cb-radio-view .cb-radio-done .dusk-tile-num {
+  font-size: 2.4rem;
+  line-height: var(--lh-base);
+}
+.cb-app .cb-radio-view .cb-radio-done .dusk-tile-sub {
+  max-width: var(--measure);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
+
+/* The end actions: Dusk buttons in a row that wraps, in the order of today, with words at 16 px. */
+.cb-app .cb-radio-view .cb-radio-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  margin-top: 16px;
+}
+.cb-app .cb-radio-view .cb-radio-actions .dusk-btn {
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}

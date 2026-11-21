@@ -1,6 +1,6 @@
 // Radio — the "Back to a Joint" procedure, in two modes.
-//   Guided      — the SME-tuned walkthrough. Imperative island (./radioSim.js is byte-for-byte
-//                 vanilla), and UNGRADED on purpose: REVAMP §5 — merging the walkthrough with
+//   Guided      — the SME-tuned walkthrough. Imperative island (./radioSim.js: mount(root, ctx);
+//                 its STEPS wording is frozen), and UNGRADED on purpose: REVAMP §5 — merging the walkthrough with
 //                 grading turns a confidence-builder into a test.
 //   Call it yourself — the same procedure with the call hidden; this is where mastery is earned.
 import { useState } from 'react';
@@ -18,23 +18,23 @@ export function Radio() {
   const navigate = useNavigate();
 
   return (
-    <>
+    <div className="cb-radio-view">
       {/* The island renders its own "← Home"; in test mode this station provides it. */}
-      {mode === 'test' && <button className="back" onClick={() => navigate('/')}>← Home</button>}
+      {mode === 'test' && <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>}
 
-      <div className="mode-tabs" role="tablist" aria-label="Radio mode">
-        <button role="tab" aria-selected={mode === 'guided'} className={`mode-tab ${mode === 'guided' ? 'on' : ''}`}
+      <div className="cb-tabs" role="tablist" aria-label="Radio mode">
+        <button role="tab" aria-selected={mode === 'guided'} className="cb-tab"
           onClick={() => setMode('guided')}>
           Guided<small>Walk it through — nothing scored</small>
         </button>
-        <button role="tab" aria-selected={mode === 'test'} className={`mode-tab ${mode === 'test' ? 'on' : ''}`}
+        <button role="tab" aria-selected={mode === 'test'} className="cb-tab"
           onClick={() => setMode('test')}>
           Call it yourself<small>Pick the right call — counts toward Radio</small>
         </button>
       </div>
 
       {mode === 'guided' ? <Guided /> : <RadioTest />}
-    </>
+    </div>
   );
 }
 
