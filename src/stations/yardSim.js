@@ -136,6 +136,8 @@ export function mount(root, ctx) {
   }
 
   // The mirror and the names of the switch buttons state the model at each paint with no motion frame.
+  // The head bar of the picture states the picture at each paint, also during a motion: a step of the
+  // watched line and "Play again" line the switches at their start.
   // After the departure the picture shows the lead empty (the motion of the departure draws the train).
   // The picture shows the yard now, or a past state of the move log (a copy). The job of each paint is
   // `gen`, so a copy keeps the form of the job; `from` gives the trace of the last move.
@@ -147,12 +149,12 @@ export function mount(root, ctx) {
       const builder = atRest && !demo && !departed ? { act: $('act').value, n: +$('count').value, track: $('track').value } : undefined;
       drawing.paint(state, puzzle, { anim, cine, job: gen, from: lastFrom, departed: departed && !anim, builder });
     }
+    // The head bar says the route and the goal of the state that the picture shows.
+    const shown = past ? pastState : state;
+    view.setYardHead({ route: routeWords(shown.lined), goal: goalOf(shown, puzzle) });
     if (!anim && !cine) {
       mirror.update(state, puzzle, { departed }); switches.setLining(state.lined);
       view.setArrival(canArrive());
-      // The head bar says the route and the goal of the state that the picture shows.
-      const shown = past ? pastState : state;
-      view.setYardHead({ route: routeWords(shown.lined), goal: goalOf(shown, puzzle) });
     }
   }
 
