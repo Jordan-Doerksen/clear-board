@@ -45,7 +45,15 @@ interface AppValue {
   recordRadioStep: (itemId: string, correct: boolean) => void;
   persistProfile: () => void;
   speak: (text: string) => void;
+  // 2c-plan C1 (U-17): opens the Reference entry of an item in a dialog on top of the current
+  // route. The station stays mounted. Closing the dialog returns focus to the control that opened it.
+  lookUp: (itemId: string) => void;
+  // The request of the look-up dialog, or null. Each call of lookUp makes a new request, so a late
+  // close event of the dialog clears only the request that it closes.
+  lookUpRequest: LookUpRequest | null;
+  closeLookUp: (request: LookUpRequest) => void;
 }
+export interface LookUpRequest { itemId: string }
 
 const Ctx = createContext<AppValue | null>(null);
 
@@ -154,6 +162,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [settings, content]);
 
+  // C1: the look-up dialog. An id that the full library does not hold opens nothing.
+  const [lookUpRequest, setLookUpRequest] = useState<LookUpRequest | null>(null);
+  const lookUp = useCallback((itemId: string) => {
+    if (content && !content.byId[itemId]) return;
+    setLookUpRequest({ itemId });
+  }, [content]);
+  const closeLookUp = useCallback((request: LookUpRequest) => {
+    setLookUpRequest(current => (current === request ? null : current));
+  }, []);
+
   const replaceProgress = useCallback((next: Profile, nextSettings: Settings | null) => {
     const p = structuredClone(next);
     if (content) recomputeMastery(p, content);
@@ -163,7 +181,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [content]);
 
   return (
-    <Ctx.Provider value={{ content, profile, settings, setSetting, resetProgress, replaceProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak }}>
+    <Ctx.Provider value={{ content, profile, settings, setSetting, resetProgress, replaceProgress, recordAnswer, recordYardWin, recordRadioStep, persistProfile, speak, lookUp, lookUpRequest, closeLookUp }}>
       {children}
     </Ctx.Provider>
   );

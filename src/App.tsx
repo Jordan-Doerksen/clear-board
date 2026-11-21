@@ -10,6 +10,7 @@ import { Drill } from './stations/Drill';
 import { Yard } from './stations/Yard';
 import { Radio } from './stations/Radio';
 import { Settings } from './stations/Settings';
+import { LookUp } from './components/LookUp';
 
 function DrillRoute() {
   const { domain } = useParams();
@@ -103,6 +104,7 @@ function Shell() {
         </section>
       </div>
       <Settings open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <LookUp />
     </>
   );
 }

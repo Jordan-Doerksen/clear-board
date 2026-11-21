@@ -41,3 +41,35 @@
   flex-wrap: wrap;
   gap: var(--sp-4);
 }
+
+/* ---- the look-up dialog (U-17, 2c-plan C1) ---------------------------------------------------
+   A cb-dialog that is wider than Settings, so that the entry keeps the measure of Reference. The
+   entry keeps the sizes of the Reference entry. No rule sets the display of the dialog, so a closed
+   dialog stays closed. A long entry scrolls inside the dialog. */
+.cb-app .cb-shell-lookup { width: min(92%, 680px); }
+.cb-app .cb-shell-lookup .dusk-panel-name { font-size: 1.17rem; }
+.cb-app .cb-shell-lookup > .dusk-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.cb-app .cb-shell-lookup .cb-chip,
+.cb-app .cb-shell-lookup .dusk-panel-body > .dusk-btn { align-self: flex-start; }
+.cb-app .cb-shell-lookup .cb-prose--lead { font-size: 1.05rem; }
+.cb-app .cb-shell-lookup .cb-sub {
+  max-width: var(--measure);
+  font-size: .8rem;
+}
+.cb-app .cb-shell-lookup .dusk-btn { font-size: .9rem; }
+.cb-app .cb-shell-lookup .cb-disclosure { margin: 0; }
+.cb-app .cb-shell-lookup .cb-quote { max-width: none; }
+.cb-app .cb-shell-lookup .cb-shell-lookup-aspects {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-3);
+}
+.cb-app .cb-shell-lookup .cb-shell-lookup-aspects svg {
+  width: auto;
+  height: 120px;
+}

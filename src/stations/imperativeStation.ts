@@ -14,12 +14,14 @@ export type StationCtx = {
   save: () => void;
   recordYardWin: (itemIds: string[], correct: boolean) => void;
   go: (route: string) => void;
+  // 2c-plan C1: opens the Reference entry of an item in a dialog on top of the station.
+  lookUp: (itemId: string) => void;
 };
 
 type StationModule = { mount: (host: HTMLElement, ctx: StationCtx) => void };
 
 export function useImperativeStation(load: () => Promise<StationModule>) {
-  const { profile, settings, persistProfile, speak, recordYardWin } = useApp();
+  const { profile, settings, persistProfile, speak, recordYardWin, lookUp } = useApp();
   const navigate = useNavigate();
   const hostRef = useRef<HTMLDivElement>(null);
 
@@ -31,12 +33,14 @@ export function useImperativeStation(load: () => Promise<StationModule>) {
     save: persistProfile,
     recordYardWin,                     // one-brain: a Yard win grades the puzzle's rule items
     go: (route: string) => navigate(route ? `/${route}` : '/'),
+    lookUp,
   });
   ctxRef.current.profile = profile;
   ctxRef.current.settings = settings;
   ctxRef.current.speak = speak;
   ctxRef.current.save = persistProfile;
   ctxRef.current.recordYardWin = recordYardWin;
+  ctxRef.current.lookUp = lookUp;
 
   useEffect(() => {
     let cancelled = false;
