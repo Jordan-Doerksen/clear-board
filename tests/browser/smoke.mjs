@@ -429,10 +429,22 @@ const KEYBOARD = {
   only: (seen) => seen.keys > 0 && seen.touch + seen.mouse + seen.pen + seen.other === 0,
 };
 
+// A control that the case is about to use must have its role and a name with a letter or a digit, and
+// must be 44 by 44 px or more (fence item 8; the floor of ruling TARGETS-44). So a control that loses
+// its name or its size fails the case, also in a state of the job that case 13 does not reach.
+async function usable(page, selector, role, where) {
+  const named = await page.locator(selector).and(page.getByRole(role, { name: /[A-Za-z0-9]/ })).count();
+  ok(named === 1, `${where}: the control ${selector} is not a ${role} with a name`);
+  const box = await page.locator(selector).boundingBox();
+  const size = box ? `${Math.round(box.width * 100) / 100} by ${Math.round(box.height * 100) / 100} px` : 'not in the layout';
+  ok(box && box.width >= 44 && box.height >= 44, `${where}: the control ${selector} is ${size}, and 44 by 44 px or more is expected`);
+}
+
 // One press of a switch button, and a wait until its name says the lining `want`.
 async function throwSwitch(page, how, id, want, where) {
   const selector = `[data-sw="${id}"]`;
   const name = `${id} switch, lined ${want}`;
+  await usable(page, selector, 'button', where);
   await how.press(page, selector);
   await page.waitForFunction(([s, n]) => document.querySelector(s)?.getAttribute('aria-label') === n, [selector, name])
     .catch(async () => { throw new CaseFailure(`${where}: after a press the switch button ${id} is named "${await page.locator(selector).getAttribute('aria-label')}", and "${name}" is expected`); });
@@ -441,6 +453,7 @@ async function throwSwitch(page, how, id, want, where) {
 // Play the first job to a win along its optimal line, one way. The case first presses each of the six
 // switch buttons two times. For each call it lines the switches, sets the move builder, presses "Work
 // it" and waits for the end paint of the move; the readout must then show the counters of the model.
+// Each control must have its name and its size when the case uses it (usable).
 // At the end it checks the win words, the readout at par, the status region and the done mark, and
 // that the page got the inputs of this way only. Returns a note.
 async function playToWin(how) {
@@ -466,9 +479,11 @@ async function playToWin(how) {
           if (!(await page.locator(`[data-sw="${id}"]`).getAttribute('aria-label')).endsWith(want)) await throwSwitch(page, how, id, want, where);
         }
       }
-      await how.choose(page, '#act', act);
-      await how.choose(page, '#track', track);
-      if (act !== 'secure') await how.choose(page, '#count', String(n));
+      for (const [selector, value] of [['#act', act], ['#track', track], ...(act !== 'secure' ? [['#count', String(n)]] : [])]) {
+        await usable(page, selector, 'combobox', where);
+        await how.choose(page, selector, value);
+      }
+      await usable(page, '#work', 'button', where);
       const before = await mirrorText(page);
       await how.press(page, '#work');
       await mirrorChange(page, before, `${where}: the call ${callWords(call)}`);
