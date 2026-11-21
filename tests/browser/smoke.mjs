@@ -183,7 +183,11 @@ async function withPage(options, body) {
     page.on('console', (message) => {
       if (message.type() === 'error' && !options.expectedError?.(message.text(), message.location().url ?? '')) errors.push(`console error: ${message.text()}`);
     });
-    const result = await body(page, context);
+    // A case that stops also names the page errors and console errors that came before it stopped.
+    const result = await body(page, context).catch((err) => {
+      if (!errors.length) throw err;
+      throw new CaseFailure(`${err instanceof CaseFailure ? err.message : String(err.message).split('\n')[0]}; ${errors.join('; ')}`);
+    });
     if (options.common !== false) {
       ok(errors.length === 0, errors.join('; '));
       if (size.width === 390 || size.width === 1440) {
@@ -237,6 +241,16 @@ const ROUTES = [
     ok(await page.locator('.radio-host').evaluate((el) => el.childElementCount > 0), '.radio-host is empty');
   } },
 ];
+
+// The service worker of the page is active. The wait is on the state of the worker; the bound of
+// 15 s only ends a wait for a worker that never comes (an app that registers no worker).
+async function workerReady(page) {
+  const ready = await page.evaluate(() => Promise.race([
+    navigator.serviceWorker.ready.then(() => true),
+    new Promise((done) => { setTimeout(() => done(false), 15000); }),
+  ]));
+  ok(ready, 'the app registered no service worker: no worker was active after 15 s');
+}
 
 const storedJson = (page, key) => page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), key);
 
@@ -432,7 +446,7 @@ const GATE_CASES = [
       await open(page, '/');
       await page.locator(hook('domain-card')).first().waitFor();
       // Wait for the worker and for its cache to stop growing.
-      await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+      await workerReady(page);
       const cached = () => page.evaluate(async () => {
         let n = 0;
         for (const name of await caches.keys()) n += (await (await caches.open(name)).keys()).length;
@@ -658,7 +672,7 @@ const GATE_CASES = [
       await withPage({ serviceWorker: true }, async (page) => {
         await open(page, '/');
         await page.locator(hook('domain-card')).first().waitFor();
-        await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+        await workerReady(page);
         // The learner opens the app again: the worker of the first build now controls the page.
         await page.reload();
         await page.locator(hook('domain-card')).first().waitFor();
@@ -675,6 +689,7 @@ const GATE_CASES = [
           await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
           shown = await notice.waitFor({ timeout: 1500 }).then(() => true, () => false);
         }
+        if (!shown) await stillOpen('by itself, and the notice did not stay');
         ok(shown, `the notice "${UPDATE_NOTICE}" did not show after the server held a second build`);
         const reload = page.locator('p', { has: notice }).getByRole('button', { name: 'Reload', exact: true });
         ok(await reload.count() === 1, `the notice "${UPDATE_NOTICE}" has no control "Reload"`);
@@ -742,7 +757,10 @@ const GATE_CASES = [
       await withPage({ storage: false }, async (page) => {
         await open(page, r.route);
         ok(await page.evaluate(() => { try { void localStorage.length; return false; } catch { return true; } }), 'the storage of the site is not refused');
-        await r.check(page).catch((err) => { throw new CaseFailure(`storage refused, ${r.name}: ${err.message.split('\n')[0]}`); });
+        await r.check(page).catch(async (err) => {
+          const shows = (await page.locator('main').innerText().catch(() => '')).replace(/\s+/g, ' ').trim().slice(0, 160);
+          throw new CaseFailure(`storage refused, ${r.name}: ${err.message.split('\n')[0]} The view shows: "${shows}"`);
+        });
       });
     }
   } },

@@ -30,7 +30,9 @@ export async function passLearnCards(page, until, { card = LEARN_CARD, next = LE
       const shows = (selector) => [...document.querySelectorAll(selector)].some((el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden');
       if (shows(cardSelector)) return 'card';
       return shows(untilSelector) ? 'until' : false;
-    }, [card, until]);
+    }, [card, until]).catch((err) => {
+      throw new Error(`no learn card (${card}) and no element of ${until} showed${passed ? ` after ${passed} learn cards` : ''}: ${String(err.message).split('\n')[0]}`);
+    });
     if ((await state.jsonValue()) === 'until') return passed;
     if (passed >= max) throw new Error(`more than ${max} learn cards (${card}) showed before ${until}`);
     // Keep the card that shows and its words, press its control, and wait until that card is gone,
@@ -45,6 +47,8 @@ export async function passLearnCards(page, until, { card = LEARN_CARD, next = LE
       const el = [...document.querySelectorAll(cardSelector)].find((e) => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden');
       const before = window.__cbLearnCard;
       return !el || el !== before.el || el.innerText !== before.words;
-    }, card);
+    }, card).catch((err) => {
+      throw new Error(`the control ${next} did not move the page on: learn card ${passed + 1} still shows after the press: ${String(err.message).split('\n')[0]}`);
+    });
   }
 }
