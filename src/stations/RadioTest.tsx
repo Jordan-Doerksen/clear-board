@@ -36,6 +36,21 @@ export function RadioTest({ active = true }: { active?: boolean }) {
   const missedRef = useRef<Set<number>>(new Set());
   const startRef = useRef(0);
 
+  // Row U-14: after "Next call →" the keyboard focus stays in the task. The control that had the
+  // focus goes away, so the focus goes to the heading of the next call, or to the end heading after
+  // "Finish". "Run it again" and "Practice the N you missed →" send it to the heading of the first
+  // call. A heading takes the focus by script only (tabIndex -1); one Tab press then reaches the
+  // first option.
+  const questionHeadRef = useRef<HTMLHeadingElement>(null);
+  const endHeadRef = useRef<HTMLHeadingElement>(null);
+  const moveFocus = useRef<'question' | 'any' | null>(null);
+  useEffect(() => {
+    const want = moveFocus.current;
+    if (!want) return;
+    const el = questionHeadRef.current ?? (want === 'any' ? endHeadRef.current : null);
+    if (el) { moveFocus.current = null; el.focus(); }
+  });
+
   // radioSim is loaded dynamically here as well as in guided mode, so the island module
   // keeps its own code-split chunk instead of being pulled into the main bundle.
   const [allSteps, setAllSteps] = useState<Step[] | null>(null);
@@ -96,7 +111,7 @@ export function RadioTest({ active = true }: { active?: boolean }) {
       <>
         <div className="dusk-tile dusk-tile--teal cb-radio-done">
           <div className="dusk-tile-cap">
-            <h3 className="dusk-tile-lab">{focus ? 'Review done' : 'Session done'}</h3>
+            <h3 className="dusk-tile-lab" ref={endHeadRef} tabIndex={-1}>{focus ? 'Review done' : 'Session done'}</h3>
           </div>
           <div className="dusk-tile-body">
             <p className="dusk-tile-num">{score} / {order.length}</p>
@@ -110,6 +125,7 @@ export function RadioTest({ active = true }: { active?: boolean }) {
         <div className="cb-radio-actions">
           {missedRef.current.size > 0 && (
             <button className="dusk-btn" onClick={() => {
+              moveFocus.current = 'question';
               setFocus([...missedRef.current]); missedRef.current = new Set();
               setPos(0); setPicked(null); setScore(0); setRunKey(k => k + 1);
             }}>
@@ -117,6 +133,7 @@ export function RadioTest({ active = true }: { active?: boolean }) {
             </button>
           )}
           <button className="dusk-btn" onClick={() => {
+            moveFocus.current = 'question';
             setFocus(null); missedRef.current = new Set();
             setPos(0); setPicked(null); setScore(0); setRunKey(k => k + 1);
           }}>Run it again</button>
@@ -169,7 +186,7 @@ export function RadioTest({ active = true }: { active?: boolean }) {
 
       <div className="dusk-panel dusk-panel--framed cb-radio-q">
         <div className="dusk-panel-head">
-          <h3 className="dusk-panel-name">{question}</h3>
+          <h3 className="dusk-panel-name" ref={questionHeadRef} tabIndex={-1}>{question}</h3>
         </div>
         <div className="dusk-panel-body">
           {!graded && (
@@ -205,7 +222,10 @@ export function RadioTest({ active = true }: { active?: boolean }) {
               Look it up →
             </button>
           )}
-          <button className="dusk-btn cb-radio-next" autoFocus aria-describedby="cb-radio-verdict" onClick={() => { setPos(p => p + 1); setPicked(null); }}>
+          <button className="dusk-btn cb-radio-next" autoFocus aria-describedby="cb-radio-verdict" onClick={() => {
+            moveFocus.current = pos + 1 < order.length ? 'question' : 'any';
+            setPos(p => p + 1); setPicked(null);
+          }}>
             {pos + 1 < order.length ? 'Next call →' : 'Finish'}
           </button>
         </div>
