@@ -73,7 +73,7 @@
    The heading keeps 20.8 px and wraps (the part gives 12 px on one line with an ellipsis), the score
    keeps 38.4 px (27 px) and the mastery line keeps 16 px (12 px). Each text keeps the line height of
    the page, so the dyslexia type loosens it as today. The body gets a bottom padding: the tile has no
-   sparkline. */
+   sparkline. The cap has no icon square, so its heading starts at the left edge of the body text. */
 .cb-app .cb-radio-view .cb-radio-done:hover,
 .cb-app .cb-radio-view .cb-radio-done:focus-within {
   transform: none;
@@ -85,6 +85,7 @@
   text-overflow: clip;
   font-size: 1.3rem;
 }
+.cb-app .cb-radio-view .cb-radio-done .dusk-tile-cap { padding-left: var(--sp-4); }
 .cb-app .cb-radio-view .cb-radio-done .dusk-tile-body { padding-bottom: var(--sp-4); }
 .cb-app .cb-radio-view .cb-radio-done .dusk-tile-num {
   font-size: 2.4rem;
