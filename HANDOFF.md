@@ -123,7 +123,7 @@ STEPS region at 94a41c5 and now: dc38610359f800ba... (equal)
 
 ## 5. What is open
 
-After the handoff the lead fixed F-1, F-3, F-4, F-5, F-6, F-8, F-9, F-13 and K-2, and the focus part of F-7, on the same branch (section 5.1 marks each one). The gates stayed green: check 12 of 12 with 81 unit tests, build, smoke 22 of 22, frozen files and the `STEPS` region equal (section 3.1).
+After the handoff the lead fixed F-1, F-3, F-4, F-5, F-6, F-8, F-9, F-13 and K-2, and the focus part of F-7, on the same branch (section 5.1 marks each one). The gates stayed green: check 12 of 12 with 81 unit tests, build, smoke 22 of 22, frozen files and the `STEPS` region equal (section 3.1). A second reader then checked these fixes (section 5.1.1), and the lead repaired what it found in `c276de5`. Fix round 2 (`specs/briefs/2c-F2-plan.md`) builds the rest of section 5.1 and 5.2 that needs no ruling of the owner.
 
 ### 5.1 The last review of the whole wave (finished)
 
@@ -144,14 +144,29 @@ The confirmed findings, with the same defect found twice shown once:
 | F-4 | medium | The look-up dialog stays open after a browser Back, and its close drops focus to the page body. | **Fixed in `62cedd7`.** |
 | F-5 | medium | Reference says "No match" while the library loads. | **Fixed in `62cedd7`.** |
 | F-6 | medium | Settings: the sticky head of the dialog hides the control that has focus when focus moves up (`clear-board.parts.css`, the rule of `.cb-dialog > .dusk-panel-head`). Fix: `scroll-padding-top` on `.cb-dialog`. | **Fixed in `b0c70f3`.** The look-up dialog had the same defect with a long name (its head is up to 162 px high at 390 px); it writes the height of its head for the rule. Probe: each control of both dialogs keeps its whole focus ring below the head. |
-| F-7 | medium | After a "Try again" that works, focus falls to the page body and no result is said (`src/App.tsx`, `src/components/LookUp.tsx`). | **Focus fixed in `b0c70f3`:** it goes to the heading of the view, or of the look-up dialog. Open: one message that says the result of a try (loaded, or still not loaded). It needs new words, so the owner approves them first. |
-| F-8 | medium | "Reload" of the notice "A new version is ready" does nothing on a page that no service worker controls (`src/App.tsx` lines 87 to 90). Fix: reload the page when no worker waits. | **Fixed in `b0c70f3`.** Probe with two builds: on a first visit and on a second visit, "Reload" opens build 2. |
+| F-7 | medium | After a "Try again" that works, focus falls to the page body and no result is said (`src/App.tsx`, `src/components/LookUp.tsx`). | **Focus fixed in `b0c70f3` and `c276de5`:** it goes to the heading of the view, or of the look-up dialog, also after a try that loads only part of the library. Open: one message that says the result of a try (loaded, or still not loaded). It needs new words, so the owner approves them first. |
+| F-8 | medium | "Reload" of the notice "A new version is ready" does nothing on a page that no service worker controls (`src/App.tsx` lines 87 to 90). Fix: reload the page when no worker waits. | **Fixed in `b0c70f3` and `c276de5`.** Probe with two builds: on a first visit, on a second visit and with two open copies, the first press of "Reload" opens build 2. |
 | F-9 | medium | The guided Radio: the end summary is not announced (`src/stations/radioSim.js` line 79, outside `STEPS`). Fix: put the done box in a `role="status"` region. | **Fixed in `b0c70f3`.** The `STEPS` region stays equal; the gaps round the box stay 10 px. |
 | F-10 | low | Forced colours: the selected Radio mode, the stepper controls that cannot act and the Key button lose their marks. | Open. |
 | F-11 | low | The Yard stepper with Reduce motion: "Play all" announces only the last step (`src/stations/yardSim.js` near line 495). | Open. |
 | F-12 | low | LEARN-GAP: the learn card of a twin item (the rule item and the signal item of one CROR rule) can come right before a question about the other, and holds its answer (`src/core/drill.ts` lines 107 to 131). A question for the SME too. | Open. |
 | F-13 | low | Comments and one document line that Wave 2c made untrue: `ARCHITECTURE.md` near line 397 (the report case of C7 is now gate case 21), `src/stations/yard/view.ts` lines 5 to 8, `src/App.tsx` lines 127 and 128. | **Fixed in `b0c70f3`.** |
 | F-14 | low | The headings of the Drill and Reference carry their icon in the accessible name; the Yard and the Radio do not. | Open: one verifier refuted it (brief B2 asked for "📖 Reference" as the heading). |
+
+#### 5.1.1 The second reader of the fixes of the lead (job F2-R, 2026-11-21)
+
+An independent reader checked `3076815`, `62cedd7`, `5a7f3fc` and `b0c70f3` with its own probes at
+1440 and 390. F-1, F-3, F-4, F-5, F-6, F-9 and K-2 hold. It found six more items; the lead repaired
+each one in `c276de5` and ran the reader's probes again on that build:
+
+| # | Item | State |
+|---|---|---|
+| R-1 | A "Try again" that loads only part of the library dropped focus to the page body (Drill, Reference, Radio test). | **Fixed in `c276de5`.** |
+| R-2 | After a "Try again" in the look-up dialog, each later look-up opened on its heading, not on "Close". | **Fixed in `c276de5`.** |
+| R-3 | With two open copies, the first press of "Reload" in the copy that no worker controls did nothing. | **Fixed in `c276de5`.** |
+| R-4 | A Reset in another copy restarts the Drill or the Radio test under an open look-up dialog; closing it dropped focus to the page body. | **Fixed in `c276de5`.** |
+| R-5 | The F-6 offset scrolled a dialog to its top when focus reached "Done" or "Close". | **Fixed in `c276de5`.** |
+| R-6 | Comments and document lines that the fixes left untrue. | **Fixed in `c276de5`**, except line 4 of `src/stations/yardSim.js` (it does not name `profileChanged()`): it waits for job F2-C, which owns that file in fix round 2. |
 
 ### 5.2 Small known items for the same final fix job
 
@@ -230,7 +245,13 @@ and any test with a learner. Each measurement is from headless Chromium on Linux
 3. Read the fence (plan, section 4) and keep it. The frozen files and the `STEPS` region must stay
    equal to `94a41c5`: `specs/handoff/lead-merge-check.sh` checks them with
    `specs/handoff/frozen-files-94a41c5.sha256`.
-4. Do the final fix job: F-10, F-11, F-12 (with its note for the SME), a decision on F-14, K-1, K-3 and K-4. The message part of F-7 needs new words: ask the owner first. F-2 waits for the owner's ruling. Each other item of section 5.1 and 5.2 is fixed. Give the fixes of the lead (`3076815`, `62cedd7`, `5a7f3fc`, `b0c70f3`) an independent review: they had probes and the gates, but no second reader. Check section 5.1 first: the lead may have fixed more before the account ended.
+4. Fix round 2 builds F-10, F-11, F-12, F-14, K-1, K-3 and K-4 (`specs/briefs/2c-F2-plan.md`; the
+   rulings are in `specs/briefs/lead-rulings.md`, section 2.8). Its jobs work on local branches
+   (`cb2/2c-F2A` to `cb2/2c-F2D`). The lead merges each job into `claude/cb2-wave-2c` after its
+   review. When a job of section 3 of the plan is not merged on this branch, do it again from the
+   plan. The message part of F-7 needs new words: ask the owner first. F-2 waits for the owner's
+   ruling. The repairs of the lead in `c276de5` had the probes of the second reader and the gates,
+   but no second reader of their own.
    Work on a new branch from `claude/cb2-wave-2c`, give the job an independent review, merge it into
    `claude/cb2-wave-2c`, run the gates, and push. The draft pull request #4 then shows the change.
 5. After the fix job, run the last review again on the whole wave (the four lenses of section
