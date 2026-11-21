@@ -121,15 +121,15 @@ findings are below. Their independent verification did not finish. The raw outpu
 | F-1 | high | **Fixed in `3076815`** (two unit tests over 350 seeds; both fail on the code before it). In the review of the misses, a signal question can offer a definition term ("FIXED SIGNAL", "ADVANCE SIGNAL", "BLOCK", "INTERLOCKING", "CONTROLLED SIGNAL") as an option, and marks it wrong with "Safety-critical — lock this one in." The entry of FIXED SIGNAL is true of each signal. Seeded model: 171 of 11,808 review signal questions. | `src/core/drill.ts` lines 175 to 181: with fewer than three other signals among the misses, the distractors come from the pool of the misses, which holds other kinds. Fix: a signal question takes its distractors from the signal items of the library. Small. This is ruling `WEAK-REVIEW` with a new fact: it is now a defect to fix. |
 | F-2 | medium | "Continue" beside "N due now" asks mostly new items: on a test profile with 33 items due, a session asked 1.9 due items and 8.1 new items on average. | `src/core/drill.ts` line 239 with `src/core/sr.ts` line 30: an item with no state counts as due, so new items land in the first bucket. The comment of the same function says due items come first. Small, but it changes the selection: the owner rules first. |
 | F-3 | medium | After Reset or Load in Settings, an open Yard keeps its old job marks, and an open Drill or Radio session counts the loaded progress as its own gain. | `yardSim.js` builds the job picker at mount and after a win only; the Drill and the Radio test read their start values once. Small: refresh on a change of the stored profile. |
-| F-4 | medium | The look-up dialog stays open over the next route after a browser Back, and closing it drops focus to the page body. | `src/components/LookUp.tsx` does not watch the route. Small: a change of route closes the dialog. |
-| F-5 | medium | Reference says "No match. Try another word." while the library still loads (7.3 s on a slow network; 0.1 to 0.2 s on each direct load). | `src/stations/Reference.tsx` lines 103 to 105. Small: show "Loading…" as the other stations do. |
+| F-4 | medium | **Fixed in `62cedd7`** (probe of the lead, 1440 and 390 px). The look-up dialog stays open over the next route after a browser Back, and closing it drops focus to the page body. | `src/components/LookUp.tsx` does not watch the route. Small: a change of route closes the dialog. |
+| F-5 | medium | **Fixed in `62cedd7`** (probe of the lead, 1440 and 390 px). Reference says "No match. Try another word." while the library still loads (7.3 s on a slow network; 0.1 to 0.2 s on each direct load). | `src/stations/Reference.tsx` lines 103 to 105. Small: show "Loading…" as the other stations do. |
 
 ### 5.2 Small known items for the same final fix job
 
 | # | Item |
 |---|---|
 | K-1 | Row U-41 (an icon in a control is decoration) is not complete: the sign ▶ of "▶ Watch optimal" (`src/stations/yard/view.ts` lines 177 and 449) and of "Key the radio ▶" (`src/stations/radioSim.js` line 174, outside `STEPS`), and the trust signs ✓ ⚠ ● of the Reference rows (`src/components/Entry.tsx`), are part of the accessible name. Hide each sign with `aria-hidden`, and add the name changes to the look register with row U-41. |
-| K-2 | Comments that are no longer true: `tsconfig.app.json` line 9, `index.html` line 5, `src/stations/Reference.tsx` near line 52. (`deploy.yml` stays as it is: fence rule 12.) |
+| K-2 | **Fixed in `62cedd7`.** Comments that are no longer true: `tsconfig.app.json` line 9, `index.html` line 5, `src/stations/Reference.tsx` near line 52. (`deploy.yml` stays as it is: fence rule 12.) |
 | K-3 | The register entry of the look shot `drill-learn` (`tools/look/cb.config.json`) holds word counts of the plain text of one signal item. Replace it with a form that holds no item text (ruling `TAPE-FORM` keeps content words out of the gates). |
 | K-4 | No gate case measures the controls of the Yard stepper and of the win state (44 px). A probe found no defect; add the case. |
 
@@ -201,7 +201,7 @@ and any test with a learner. Each measurement is from headless Chromium on Linux
 3. Read the fence (plan, section 4) and keep it. The frozen files and the `STEPS` region must stay
    equal to `94a41c5`: `specs/handoff/lead-merge-check.sh` checks them with
    `specs/handoff/frozen-files-94a41c5.sha256`.
-4. Do the final fix job: F-3, F-4, F-5 and K-1 to K-4 (F-1 is fixed; F-2 waits for the owner's ruling). Check the top of section 5.1 first: the lead may have fixed more before the account ended.
+4. Do the final fix job: F-3, K-1, K-3 and K-4 (F-1, F-4, F-5 and K-2 are fixed; F-2 waits for the owner's ruling). Check the top of section 5.1 first: the lead may have fixed more before the account ended.
    Work on a new branch from `claude/cb2-wave-2c`, give the job an independent review, merge it into
    `claude/cb2-wave-2c`, run the gates, and push. The draft pull request #4 then shows the change.
 5. Run the three reviews that did not finish (accessibility, the fence and safety, code
