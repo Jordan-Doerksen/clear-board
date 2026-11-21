@@ -135,9 +135,14 @@ export function mount(root, ctx) {
   // After the departure the picture shows the lead empty (the motion of the departure draws the train).
   // The picture shows the yard now, or a past state of the move log (a copy). The job of each paint is
   // `gen`, so a copy keeps the form of the job; `from` gives the trace of the last move.
+  // With no motion, the yard now shows where the spot or the kick of the move builder lands (LANDING).
   function paint() {
     if (past) drawing.paint(pastState, puzzle, { anim, cine: null, job: gen, from: past.from });
-    else drawing.paint(state, puzzle, { anim, cine, job: gen, from: lastFrom, departed: departed && !anim });
+    else {
+      const atRest = !anim && !cine;
+      const builder = atRest && !demo && !departed ? { act: $('act').value, n: +$('count').value, track: $('track').value } : undefined;
+      drawing.paint(state, puzzle, { anim, cine, job: gen, from: lastFrom, departed: departed && !anim, builder });
+    }
     if (!anim && !cine) {
       mirror.update(state, puzzle, { departed }); switches.setLining(state.lined);
       view.setArrival(canArrive());
@@ -693,7 +698,9 @@ export function mount(root, ctx) {
     // SECURE acts on the whole standing cut — a car count would be meaningless.
     view.setCount({ max: Math.max(1, max), value: Math.min(cur || 1, Math.max(1, max)), disabled: kind === 'secure' });
   }
-  ['act', 'track'].forEach((id) => $(id).addEventListener('change', syncBuilder));
+  // A change of the move builder draws the landing place of the new move again.
+  ['act', 'track'].forEach((id) => $(id).addEventListener('change', () => { syncBuilder(); paint(); }));
+  $('count').addEventListener('change', () => paint());
 
   function renderRules() {
     const list = [];
