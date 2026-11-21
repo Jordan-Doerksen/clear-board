@@ -1,6 +1,8 @@
-// Clear Board — Radio station. Ported VERBATIM from the CN Conductor Trainer "Back to a Joint"
+// Clear Board — Radio station. Ported from the CN Conductor Trainer "Back to a Joint"
 // walkthrough. The call wording is real-world-accurate and tuned by the SME — do NOT reword it.
 // One walkthrough for now (the SME: weakest section, port as-is, grow later).
+// Clear Board 2 changed the style and the markup of the island. It did not change the STEPS
+// wording: tools/frozen-check.mjs compares that region with commit 94a41c5.
 
 const RADIO_CSS = `
 .radio-wrap{ color:var(--ink) }
