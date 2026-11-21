@@ -759,5 +759,19 @@ the frozen `geometry.js`, `model.js` and `solver.js`, and a folder path in the f
 `specs/clear-board-2-plan.md` (the owner's text: this job changed one pronoun in it). These places
 are for the lead.
 
+### D-0047 — The owner approves the new words of Wave 2c (`WORDS-2C`)
+**Chosen (the owner, 2026-11-21):** "Approve all (Recommended)". The question listed the 153 lines
+of new or changed learner-facing words of Wave 2c, screen by screen, from the words files
+`specs/words/U1A.md`, `U1B.md`, `U1C.md`, `U1D.md`, `Y4a.md` and `Y4b.md`. It named the 25 lines of
+the seven rows that the owner asked to see before they ship (U-11, U-24, U-25, U-27, U-33, U-37,
+U-40; D-0035), and it said which checks of the SME stay open.
+**Weighed:** approve with exceptions named by the owner; hold each new word until the SME reads it.
+**Why:** each line comes from a row with the owner's yes (D-0035, D-0038), and no line states,
+corrects or cites a rule.
+**Still open for the SME:** the words of the Yard mirror and of the switch names (`MIRROR-WORDS`),
+the cost of a move (R7-P12), the labels of the four radio calls with the source "SME" (S-13), and
+the other notes of the words files. The record of the answer is `specs/briefs/lead-rulings.md`,
+section 3.1.
+
 ---
 *V1. Edit as decisions are made or reversed.*

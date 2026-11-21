@@ -156,8 +156,9 @@ headless Chromium.
 - The Radio has one heading, "Radio walkthrough", and "← Home" first in both modes. A change of mode
   keeps the place in each mode. The end of a session says "Session done" and offers "← Home". The
   guided Radio no longer promises a "next layer". (U-29, U-17, U-40, U-35)
-- The new words of the rows U-11, U-24, U-25, U-27, U-33, U-37 and U-40, and the other new words of
-  each job (`specs/words/`), wait for the owner's approval.
+- The owner approved the new words of each job (`specs/words/`), the words of the rows U-11, U-24,
+  U-25, U-27, U-33, U-37 and U-40 among them (D-0047). The checks of the SME that those files name
+  stay open.
 
 ### Progress, loading and updates
 - On load, the app repairs a damaged stored profile: each readable item stays, and the stored text
@@ -188,9 +189,10 @@ headless Chromium.
   selection and the Radio options are pure functions (`src/core/drill.ts`, `src/core/radio.ts`),
   moved with no change of behaviour, and the app runs the guard that the tests cover. (U-44,
   `U44-GUARDS`)
-- `npm run test:browser` runs 19 gate cases and one report case in Chromium: among them an update, a
-  failed load, refused storage, the 44 px targets, the reading modes and the offline cache budget
-  of 5 MB (U-43). A word tape (a SHA-256 and a word count) guards the words of the guided Radio. The
+- `npm run test:browser` runs 22 gate cases in Chromium: among them an update with a renamed station
+  chunk, a failed load, refused storage, the 44 px targets, the reading modes, the offline cache
+  budget of 5 MB (U-43), the focus of a route, the learn card, and a Yard job played to a win by
+  touch at 390 px and by keyboard at 1440 px. A word tape (a SHA-256 and a word count) guards the words of the guided Radio. The
   look harness compares pictures and page facts with a baseline build and names the row of each
   allowed change.
 - `.github/workflows/check.yml` runs the check, the build and the browser test on each pull request

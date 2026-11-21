@@ -43,7 +43,7 @@ npm run test:browser  # the browser smoke test of dist/: run the build first; it
   vectors of the schedule, the solver of the Yard jobs, the content and trust check, the
   securement check, and a report of the signal drawings that two items share. Each step prints
   PASS or FAIL.
-- `npm run test:browser` runs `tests/browser/smoke.mjs`: 19 gate cases and one report case in
+- `npm run test:browser` runs `tests/browser/smoke.mjs`: 22 gate cases in
   Chromium. `npx playwright install chromium` gets Chromium.
 - `npm run look:baseline` and `npm run look:compare` run the look harness (`tools/look/look.mjs`):
   pictures and page facts at 1440 and 390 px, and the Yard at 1280 px, against the build of a
