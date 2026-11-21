@@ -96,22 +96,22 @@ const YARD_HTML = `
 
     <div class="yd-yardframe dusk-panel dusk-panel--framed" data-cb="yard-drawing"></div>
 
-    <div class="yd-bar yd-builder">
-      <select id="act" title="Action">
+    <div class="yd-bar yd-builder dusk-panel">
+      <select class="cb-select" id="act" title="Action">
         <option value="pull">PULL</option>
         <option value="spot">SPOT</option>
         <option value="kick">KICK</option>
         <option value="secure">SECURE</option>
       </select>
-      <select id="count" title="How many cars"></select>
-      <span class="yd-unit">cars</span>
-      <select id="track" title="Which track"></select>
-      <button class="yd-go" id="work">Work it ▸</button>
-      <button id="optimal" title="Auto-line and play the fewest-moves line in slow motion">▶ Watch optimal</button>
-      <button id="depart" title="Depart the assembled outbound out the lead" style="display:none">Depart ▸</button>
-      <span class="yd-spacer"></span>
-      <button id="reset">Reset</button>
-      <button id="mute" title="Sound">🔊</button>
+      <select class="cb-select" id="count" title="How many cars"></select>
+      <span class="yd-unit cb-sub">cars</span>
+      <select class="cb-select" id="track" title="Which track"></select>
+      <button class="yd-go dusk-btn" id="work">Work it ▸</button>
+      <button class="yd-go dusk-btn" id="optimal" title="Auto-line and play the fewest-moves line in slow motion">▶ Watch optimal</button>
+      <button class="yd-go dusk-btn" id="depart" title="Depart the assembled outbound out the lead" style="display:none">Depart ▸</button>
+      <span class="dusk-spacer"></span>
+      <button class="cb-btn--plain" id="reset">Reset</button>
+      <button class="cb-btn--plain" id="mute" title="Sound">🔊</button>
     </div>
 
     <div class="yd-banner" id="msg"></div>
