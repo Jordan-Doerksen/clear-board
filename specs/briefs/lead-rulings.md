@@ -179,6 +179,26 @@ option of each. A brief that says "open for the lead" for one of these names fol
 | `LOOK-REGISTER` | The element id `vite-plugin-pwa:register-sw` may go (`idsMayGo`). G1-2. | Row U-10 registers the worker from the app. The plugin no longer injects the element. |
 | `WEAK-REVIEW` | Not built. A review round with few items can build a question with one option, a repeated option or an option of another kind. No right answer is marked wrong. | No approved row covers it. It goes to the final report as a found defect. |
 
+### 2.7 Rulings at the merges of Wave 2c-2 (2026-11-21)
+
+| Name | The ruling | The reason |
+|---|---|---|
+| `LOOK-EXACT` | Each entry of the look register names the baseline commit that it was measured on and applies only to a compare against that baseline. Each word of an entry has its expected count. The G1 close of Wave 2c. | Finding F1 of the G1-2 review: a word that no row moved could go or come in the shadow of an upper bound, and the entries of 2c-1 also applied to the baseline of `6d74633`. |
+| `UPDATE-FULL` | Case 16 (the update) also renames a station chunk in the second build and removes the old chunk, as the ENG-01 trial does; a failure says a sentence. The G1 close. | Findings F2 and F3 of the G1-2 review. |
+| `LEARN-CASE` | A gate case checks the learn card screen: the hooks of C11, the item text from the data, the targets, and no question right after its card. The G1 close. | Finding F5 of the G1-2 review. |
+| `LOCK-FOUR` | The lock file changes in four lines for the name and the version (its top fields and the root entry), as npm writes them. | `npm ci` passes with them; a lock with two lines disagrees with `package.json`. |
+| `CHIP-SIZE` | The chip "New item" of the learn card keeps the size of the chip part (12 px), as each chip of the app does. Reading text keeps its size. | `TEXT-READING` is about reading text; a chip is a label of the chip part. |
+| `NOTE-INK` | The two notes of U-11 in the look-up dialog take the look of the Reference entry. The lead added one rule to `shell.css` (`2be82c4`). | Finding F1 of the U1-D review; the rule of Reference is scoped to its view. |
+| `NOTICE-TWICE` | After a failed load the notice shows in the shell and in the station, as C9 asks. Kept. | The final report lists it for the owner's look. |
+| `RETRY-RESTART` | Not built. "Try again" during a session loads a new content object, and the Drill builds its session again; the Radio test shuffles the options of the open call again. | Older than Wave 2c-2 (U1-B). No approved row covers it. The final report lists it as a found defect. |
+| `LOOK-CRASH` | `look.mjs` marks a shot as failed with a sentence when the element that the page waits for does not show, and goes on. The G1 close. | Finding F3 of the U1-D review. |
+| `TAG-HOME` | The rules of "Correct answer" and "Your answer" stay in `drill.css` under `.cb-app .cb-opt`. | The final report names the option part of the parts file as the better home. |
+| `SESSION-LENGTH` | A first Drill session can hold up to 10 learn cards and 10 questions. Kept. | Row U-28 by design. The owner sees it at the look gate. |
+| `WIN-HOLD` | A refused call to a job that is done is said in the status region, and "Job done." stays on the screen. The lead (`c3bc4db`). | The review of Y4b: with no lock (R7-P11), a second press of the winning call replaced the win words with a refusal. |
+| `FROM-NOW` | The work order says where the cars of the job stand now, and the list follows the cars. With each car on the goal track the words go. A job with Depart keeps "(set out on ...)". The lead (`c3bc4db`). | Fence item 15. The words "(now on ...)" were true only at the start of a job. |
+| `P16-NIT` | A throw that changes the first reason of the model can clear a refusal whose text is still true. Kept. | No false text shows; the banner goes empty. R7-P16 asks that a refusal that is no longer true goes. |
+| `PICKER-CUT` | On a phone the closed job picker cuts a long option (17 of 19 options with a record). Kept until the owner rules on the words of the record. | The record words are in the words of Y4b (U-23, U-40), which the owner approves. The open list shows the whole text. |
+
 ## 3. Closed by the owner after Gate A
 
 The owner answered the sheet of these 19 picks on 2026-11-21 with the words "yes to all
