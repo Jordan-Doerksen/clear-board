@@ -23,6 +23,7 @@ html[data-reduce="1"] .radio-wrap button.rbtn{ transition:none } @media (prefers
 .radio-wrap .tx{ background:var(--well); border-left:3px solid var(--blue); border-radius:0 var(--r-control) var(--r-control) 0; padding:var(--sp-3) var(--sp-5); margin-bottom:6px; font-size:.84375rem }
 .radio-wrap .tx.eng{ border-left-color:var(--green) }
 .radio-wrap .tx .who{ display:block; margin-bottom:3px; font-size:var(--fs-xs); font-weight:var(--fw-medium); color:var(--ink-3); text-transform:uppercase; letter-spacing:var(--track-label) }
+.radio-wrap #gapline{ font-size:1.15rem; font-weight:var(--fw-bold); color:var(--ink); margin:4px 0 10px }
 .radio-wrap .next{ font-size:.875rem; margin:8px 0 } .radio-wrap .next .lbl{ font-size:var(--fs-xs); font-weight:var(--fw-medium); color:var(--ink-3); text-transform:uppercase; letter-spacing:var(--track-label); display:block; margin-bottom:4px }
 .radio-wrap .call{ background:var(--well); border:1px dashed var(--blue-ink); border-radius:var(--r-control); padding:var(--sp-4) var(--sp-5); font-size:.90625rem }
 .radio-wrap button.rbtn{ font:inherit; border:none; border-radius:var(--r-control); padding:10px 14px; min-width:var(--cb-target); min-height:var(--cb-target); font-weight:var(--fw-bold); cursor:pointer; font-size:.875rem; margin-top:10px; transition:background-color var(--m-confirm) var(--ease), box-shadow var(--m-confirm) var(--ease) }
@@ -70,7 +71,7 @@ const RADIO_HTML = `
     </svg>
   </div>
   <div class="cols">
-    <div class="radio"><h3 id="loghead">Radio</h3><div class="log" id="log" role="log" tabindex="0" aria-labelledby="loghead"></div><div class="next" id="next"></div></div>
+    <div class="radio"><h3 id="loghead">Radio</h3><div class="log" id="log" role="log" tabindex="0" aria-labelledby="loghead"></div><div id="gapline"></div><div class="next" id="next"></div></div>
     <div class="note" id="notebox">
       <h3>Why this call</h3>
       <div id="notebody" style="color:var(--ink-2)">Make your first call to begin — identify the engine, railway initials and number digit by digit, and wait for the engineer to answer up.</div>
@@ -139,7 +140,7 @@ export function mount(root, ctx) {
 
   const $ = (id) => root.querySelector('#' + id);
   const consist = $('consist'), gaptxt = $('gaptxt'), statusEl = $('status'), scene = $('scene'),
-        logEl = $('log'), nextEl = $('next'), noteBody = $('notebody'), doneEl = $('done');
+        gapline = $('gapline'), logEl = $('log'), nextEl = $('next'), noteBody = $('notebody'), doneEl = $('done');
   let idx = 0, log = [];
 
   // static signal badge (Clear) — decorative; no looping interval (avoids a leak on re-mount)
@@ -151,7 +152,10 @@ export function mount(root, ctx) {
     consist.setAttribute('transform', 'translate(' + ((500 - feet) * 0.5) + ',0)');
     if (s.status) { gaptxt.setAttribute('opacity', '0'); statusEl.setAttribute('opacity', '1'); statusEl.textContent = s.status; }
     else { statusEl.setAttribute('opacity', '0'); gaptxt.setAttribute('opacity', '1'); gaptxt.textContent = (s.read || ''); }
-    scene.setAttribute('aria-label', s.status || s.read || '');   // the name of the scene is the readout
+    // The page repeats the readout of the scene as text above the call (row U-21), with the words
+    // of the read or status field as they are. The scene takes the same words as its name.
+    gapline.textContent = s.status || s.read || '';
+    scene.setAttribute('aria-label', gapline.textContent);
   }
   // The log adds only its new lines (role="log" announces each added line one time).
   function renderLog() {
