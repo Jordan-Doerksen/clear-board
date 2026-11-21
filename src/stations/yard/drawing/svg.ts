@@ -194,6 +194,8 @@ export function createRenderer(host: HTMLElement): Renderer {
   const gBallast = layer('yd-view-l-ballast'), gTies = layer('yd-view-l-ties'), gCut = layer('yd-view-l-cut');
   const gRails = layer('yd-view-l-rails'), gMarks = layer('yd-view-l-marks'), gRoute = layer('yd-view-l-route');
   const gTrace = layer('yd-view-l-trace'), gCars = layer('yd-view-l-cars'), gEngine = layer('yd-view-l-engine'), gStands = layer('yd-view-l-stands');
+  // The trace is one group: it has the class yd-view-trace only while a trace shows (requirement 36).
+  const gTraceOne = svgEl('g', ''); gTrace.appendChild(gTraceOne);
   const plates = div('yd-view-plates');
   plates.setAttribute('aria-hidden', 'true');
   const probe = div('yd-view-probe');
@@ -211,7 +213,7 @@ export function createRenderer(host: HTMLElement): Renderer {
     marks: pool(gMarks, () => svgEl('line', '')),
     conts: pool(gMarks, line('yd-view-cont')),
     route: pool(gRoute, () => svgEl('polyline', '')),
-    trace: pool(gTrace, () => svgEl('polyline', '')),
+    trace: pool(gTraceOne, () => svgEl('polyline', '')),
     land: pool(gCars, () => svgEl('rect', 'yd-view-land')),
     cars: pool(gCars, () => svgEl('g', 'yd-view-car')),
     couplers: pool(gCars, () => svgEl('line', 'yd-view-coupler')),
@@ -349,16 +351,17 @@ export function createRenderer(host: HTMLElement): Renderer {
     }
 
     // 5. The trace of the last move: a thin line beside the route, with an arrow head.
+    attr(gTraceOne, 'class', sc.trace ? 'yd-view-trace' : '');
     if (sc.trace) {
       const side = 5.5 * s;
-      sc.trace.runs.forEach((pts, k) => { const e = P.trace.get(`run:${k}`); attr(e, 'class', 'yd-view-trace'); attr(e, 'points', ptsAttr(offsetPoly(pts, side))); });
+      sc.trace.runs.forEach((pts, k) => { const e = P.trace.get(`run:${k}`); attr(e, 'class', 'yd-view-trace-run'); attr(e, 'points', ptsAttr(offsetPoly(pts, side))); });
       const runs = sc.trace.runs;
       const end = sc.trace.toLead ? offsetPoly(runs[0], side) : offsetPoly(runs[runs.length - 1], side);
       const tip = sc.trace.toLead ? end[0] : end[end.length - 1];
       const from = sc.trace.toLead ? end[1] : end[end.length - 2];
       const l = Math.hypot(tip[0] - from[0], tip[1] - from[1]) || 1, ux = (tip[0] - from[0]) / l, uy = (tip[1] - from[1]) / l;
       const ah = 6 + 2 * s, aw = 4 + 1 * s;
-      const head = P.trace.get('head'); attr(head, 'class', 'yd-view-trace yd-view-trace-head');
+      const head = P.trace.get('head'); attr(head, 'class', 'yd-view-trace-head');
       attr(head, 'points', ptsAttr([[tip[0] - ux * ah - uy * aw, tip[1] - uy * ah + ux * aw], tip, [tip[0] - ux * ah + uy * aw, tip[1] - uy * ah - ux * aw]]));
     }
 

@@ -2,7 +2,7 @@
    it (../draw.ts). Each selector starts with .yard-wrap .yd-view or with .yard-wrap .yd-legend.
    Each colour is a --yard- name of the Yard block of the bridge (src/styles/clear-board.tokens.css).
    Each size, space, type and radius is a Dusk token or a value of the picture. Each word is at
-   --fs-s (12 px at a root of 16 px) or larger. No rule makes a transition or an animation. */
+   --fs-s (12 px at a root of 16 px) or larger. No rule moves a part over time (requirement 34). */
 
 /* ---- The root, the SVG, the plate layer and the control layer ------------------------------- */
 .yard-wrap .yd-view { position: relative; display: block; width: 100%; max-width: 100%; overflow: hidden; background: var(--yard-floor); }
