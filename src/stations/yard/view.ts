@@ -125,18 +125,18 @@ const YARD_HTML = `
       <div class="yd-rules dusk-grid" id="rules"></div>
     </div>
 
-    <div class="yd-note">
+    <div class="yd-note dusk-panel">
       <strong class="yd-note-head">What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span class="yd-note-more">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span>
     </div>
 
-    <details class="yd-help">
+    <details class="yd-help cb-disclosure">
       <summary>How to play & why these rules</summary>
       <p><strong>You are the conductor, not the engineer.</strong> Click a switch target to line it
       (<span class="yd-key-reverse">yellow</span> = lined into the track / diverging,
       <span class="yd-key-normal">green</span> = normal, straight up the ladder). Then call a move:</p>
       <ul>
-        <li><strong>PULL n from a track</strong> — back in, couple the near (throat) cut, pull <code>n</code> cars onto the lead.</li>
-        <li><strong>SPOT n to a track</strong> — shove <code>n</code> cars in and leave them.</li>
+        <li><strong>PULL n from a track</strong> — back in, couple the near (throat) cut, pull <code class="cb-code">n</code> cars onto the lead.</li>
+        <li><strong>SPOT n to a track</strong> — shove <code class="cb-code">n</code> cars in and leave them.</li>
         <li><strong>KICK n to a track</strong> — shove and cut away; the cars coast in on their own with no coupling. Only where a special instruction allows it (<span class="yd-key-kick">⚡</span>), only onto a secured 2+ car cut, and only car types that can be kicked.</li>
       </ul>
       <p><strong>Score = fewest engine MOVES</strong> — beat or match <em>par</em>. A move is one run of the

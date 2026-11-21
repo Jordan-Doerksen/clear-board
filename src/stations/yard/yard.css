@@ -104,13 +104,21 @@
 .yard-wrap .yd-chip .dusk-tile-lab { white-space: normal; overflow-wrap: anywhere; text-overflow: clip; }
 .yard-wrap .yd-chip .dusk-tile-body { padding-bottom: var(--sp-3); }
 .yard-wrap .yd-chip .dusk-tile-sub { min-height: 0; font-size: .78125rem; }
-.yard-wrap .yd-help { margin-top: 18px; color: var(--ink-2); font-size: var(--fs-data); }
-.yard-wrap .yd-help summary { cursor: pointer; color: var(--ink); font-weight: 600; }
-.yard-wrap .yd-help code { background: var(--head); padding: 1px 5px; border-radius: 4px; font-size: .78125rem; font-family: var(--font-mono); }
-/* The looks that were inline styles in the markup. */
-.yard-wrap .yd-note { margin: 10px 0 4px; padding: 10px 13px; border-left: 3px solid var(--amber-ink); background: var(--rowwash-amber); border-radius: 6px; font-size: var(--fs-data); }
+/* The note "What this trainer builds" is a Dusk panel: the lit edge of the panel takes the place of
+   the amber edge and wash. The head words are amber, the second part is the second ink, the text is
+   13 px, and the text stops at the Dusk measure. */
+.yard-wrap .yd-note { margin: 10px 0 4px; max-width: var(--measure); font-size: var(--fs-data); }
 .yard-wrap .yd-note-head { color: var(--amber-ink); }
 .yard-wrap .yd-note-more { color: var(--ink-2); }
+/* The help is a disclosure of the parts (G15) at the full width of .yard-wrap, in no panel, so that
+   its summary keeps its width. The summary is 44 px high, 13 px, weight 600, in the link colour of
+   the part. The text stops at the Dusk measure. Each paragraph keeps the margin of today here, so
+   that a later sweep can delete the floor rule of the app sheet. The code is 12.5 px. */
+.yard-wrap .yd-help { margin-top: 18px; color: var(--ink-2); font-size: var(--fs-data); }
+.yard-wrap .yd-help > summary { font-weight: var(--fw-medium); }
+.yard-wrap .yd-help > p, .yard-wrap .yd-help > ul { max-width: var(--measure); }
+.yard-wrap .yd-help > p { margin-block: 1em; }
+.yard-wrap .yd-help .cb-code { font-size: .78125rem; }
 /* The colour words of the help text: the word "yellow" takes the amber ink, the word "green" takes
    the green ink. */
 .yard-wrap .yd-key-reverse { color: var(--amber-ink); }
