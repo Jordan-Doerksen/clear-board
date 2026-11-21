@@ -1,8 +1,10 @@
 /* surfaces/drill.css - the rules that only Drill and Signals need. Owner in Wave 2b: job B2. Class prefix: cb-drill-.
    The Signals route is the Drill. Each selector starts with .cb-app .cb-drill-view, the root of each
-   state of the Drill. A rule of a reading mode puts the attribute of the mode on html in front. A
-   text size is in rem, so that the text scale reaches it. A drawing keeps its height in px, as
-   today. This sheet holds no raw colour, no transition, no animation and no movement. */
+   state of the Drill, except the three rules of the words on an answered option: the Radio test
+   shows the same words in the same form (U-06). A rule of a reading mode puts the attribute of the
+   mode on html in front. A text size is in rem, so that the text scale reaches it. A drawing keeps
+   its height in px, as today. This sheet holds no raw colour, no transition, no animation and no
+   movement. */
 
 /* ---- the view: one column of parts, one gap between them ---------------------------------------
    The column is at most --maxw (920 px) wide and sits in the middle of the window, which fills the
@@ -66,15 +68,16 @@
 
 /* ---- the words on an answered option (U-06): a line under the answer text -------------------------
    "Correct answer" on the right option and "Your answer" on a picked wrong option. The words carry
-   the state; the ink of the mark is a second carrier. */
-.cb-app .cb-drill-view .cb-drill-tag {
+   the state; the ink of the mark is a second carrier. The Radio test puts the same words on its
+   options, so these three rules hold for an answer option in each view. */
+.cb-app .cb-opt .cb-drill-tag {
   display: block;
   margin-top: var(--sp-2);
   font-size: var(--fs-base);
   font-weight: var(--fw-medium);
 }
-.cb-app .cb-drill-view .cb-opt--right .cb-drill-tag { color: var(--cb-ok-ink); }
-.cb-app .cb-drill-view .cb-opt--wrong .cb-drill-tag { color: var(--cb-attn-ink); }
+.cb-app .cb-opt--right .cb-drill-tag { color: var(--cb-ok-ink); }
+.cb-app .cb-opt--wrong .cb-drill-tag { color: var(--cb-attn-ink); }
 
 /* ---- the feedback: a Dusk panel. Each part is on its own line, in the order of today ------------ */
 .cb-app .cb-drill-view .cb-drill-feedback {

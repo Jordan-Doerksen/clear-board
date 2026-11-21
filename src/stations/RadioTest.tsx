@@ -163,6 +163,11 @@ export function RadioTest({ active = true }: { active?: boolean }) {
   const answered = picked !== null;
   const ok = picked === step.call;
   const verdict = ok ? 'Right.' : 'Not quite.';
+  // U-06 (A11Y-11), in the form of the Drill: after a miss the feedback names the right call. The
+  // line shows when the other lines of the panel do not hold the call. A screen reader hears the
+  // verdict and the right call (U-19).
+  const namesAnswer = [step.goi, step.rule, step.note].filter(Boolean).join(' ').includes(step.call);
+  const announced = ok ? verdict : spokenText([verdict, `Correct answer: ${step.call}`]);
   const region = verdictRegion(ok, severityOf(item));
   const c = item.citation;
   const readout = step.status || step.read || READOUT_START;
@@ -178,6 +183,7 @@ export function RadioTest({ active = true }: { active?: boolean }) {
     // Read aloud (row U-31) speaks the feedback, with the words of the feedback panel.
     speak(spokenText([
       correct ? 'Right.' : 'Not quite.',
+      !correct && !namesAnswer ? `Correct answer: ${step!.call}` : null,
       correct && step!.ack ? `Engineer · CN 2204 ${step!.ack}` : null,
       step!.goi,
       `${step!.rule} — ${step!.note}`,
@@ -213,8 +219,18 @@ export function RadioTest({ active = true }: { active?: boolean }) {
 
           <div className="cb-opts">
             {opts.map((o, i) => {
-              const cls = answered ? (o === step.call ? 'cb-opt cb-opt--right' : (o === picked ? 'cb-opt cb-opt--wrong' : 'cb-opt')) : 'cb-opt';
-              return <button key={i} className={cls} data-cb="opt" disabled={answered} onClick={() => choose(o)}>{o}</button>;
+              // U-06 (A11Y-11): after an answer the right option and the picked wrong option carry
+              // words, not only a colour, with the words and the look of the Drill (drill.css).
+              const right = answered && o === step.call;
+              const wrong = answered && !right && o === picked;
+              const cls = right ? 'cb-opt cb-opt--right' : wrong ? 'cb-opt cb-opt--wrong' : 'cb-opt';
+              return (
+                <button key={i} className={cls} data-cb="opt" disabled={answered} onClick={() => choose(o)}>
+                  {o}
+                  {right && <>{' '}<span className="cb-drill-tag">Correct answer</span></>}
+                  {wrong && <>{' '}<span className="cb-drill-tag">Your answer</span></>}
+                </button>
+              );
             })}
           </div>
         </div>
@@ -222,12 +238,13 @@ export function RadioTest({ active = true }: { active?: boolean }) {
 
       {/* The verdict for a screen reader (row U-19). Both regions are in the page, empty, before the
           answer; the answer writes the verdict into one of them, so a screen reader announces it. */}
-      <div className="dusk-sr" role="status">{answered && region === 'status' ? verdict : ''}</div>
-      <div className="dusk-sr" role="alert">{answered && region === 'alert' ? verdict : ''}</div>
+      <div className="dusk-sr" role="status">{answered && region === 'status' ? announced : ''}</div>
+      <div className="dusk-sr" role="alert">{answered && region === 'alert' ? announced : ''}</div>
 
       {answered && (
         <div className="dusk-panel cb-radio-feedback" data-cb="feedback">
           <b id="cb-radio-verdict" className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{verdict}</b>
+          {!ok && !namesAnswer && <span>Correct answer: <b>{step.call}</b></span>}
           {/* Only on a correct call: the engineer would not acknowledge a transmission you didn't make. */}
           {ok && step.ack && <span className="cb-tx cb-tx--eng"><span className="cb-who">Engineer · CN 2204</span> {step.ack}</span>}
           {step.goi && <span className="cb-radio-goi">{step.goi}</span>}
