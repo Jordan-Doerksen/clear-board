@@ -304,12 +304,21 @@ export function recomputeMastery(profile: Profile, content: Content): void {
   }
 }
 
-// V1 stage labels — deliberately NO "test-ready" claim (D-0013: deferred past V1).
-export function stageFor(profile: Profile): string {
+// The mean mastery of the live domains, as the whole percent that Home shows.
+export function overallPercent(profile: Profile): number {
   const live = DOMAINS.filter(d => d.live);
   const avg = live.reduce((s, d) => s + (profile.domains[d.id]?.mastery || 0), 0) / Math.max(1, live.length);
-  if (avg >= 0.85) return 'Sharp';
-  if (avg >= 0.50) return 'Coming along';
-  if (avg >= 0.15) return 'Learning the ropes';
+  return Math.round(avg * 100);
+}
+
+// V1 stage labels — deliberately NO "test-ready" claim (D-0013: deferred past V1).
+// The stage reads the whole percent that Home shows, so the name and "N% mastered" agree at each
+// edge. With seven domains at 0.85 the mean is 0.8499999999999999: the stage was "Coming along"
+// beside "85% mastered" (U-15; R6 ENG-20 item 1).
+export function stageFor(profile: Profile): string {
+  const pct = overallPercent(profile);
+  if (pct >= 85) return 'Sharp';
+  if (pct >= 50) return 'Coming along';
+  if (pct >= 15) return 'Learning the ropes';
   return 'First-day trainee';
 }

@@ -1,15 +1,14 @@
 // Home — the qualification path. Mastery bars per domain + the ways to learn. (vanilla renderHome)
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
-import { DOMAINS, drillable, stageFor, STATIONS } from '../core/store';
+import { DOMAINS, drillable, overallPercent, stageFor, STATIONS } from '../core/store';
 
 export function Home() {
   const { content, contentFailed, profile } = useApp();
   const navigate = useNavigate();
   if (!content) return <p className="muted">Loading…</p>;
 
-  const live = DOMAINS.filter(d => d.live);
-  const pct = Math.round(live.reduce((s, d) => s + (profile.domains[d.id]?.mastery || 0), 0) / Math.max(1, live.length) * 100);
+  const pct = overallPercent(profile);
 
   return (
     <div className="cb-home-view">
