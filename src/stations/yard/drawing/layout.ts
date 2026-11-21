@@ -494,7 +494,14 @@ export function tallHolds(fr: Frame, F: YardFacts, M: Measures, land: { track: s
 export function planTall(F: YardFacts, fr: Frame, M: Measures, width: number, land: { track: string; fit: Land[]; over: Land[] } | null): Layout {
   const s = fr.s, xs = TALL_XS, dz = TALL_DZ, diag = dz * Math.SQRT2, xEnd = width - 12, xLine = xs + dz + TALL_CONT + 6;
   const capX = xs + 24, capW = width - capX - 8;
-  const zones = tallZones(F, F.reaches, s, M, width, land);
+  // A row that goes on in the next line in any of the seven routes keeps the lines of its lined
+  // layout (with the room of the "foul point" plate) in every route. So a throw changes no line of
+  // a row, and no switch box moves under the finger (repair 7 of the review, made general).
+  const reachOf = (r: Record<string, Lining>): string | null => TRACK_IDS.find((id) => r[id] === 'reverse') || null;
+  const byRoute = ROUTES7.map((r) => tallZones(F, reachOf(r), s, M, width, land && land.track === reachOf(r) ? land : null));
+  const lined = tallZones(F, null, s, M, width, land).map((_, i) => tallZones(F, TRACK_IDS[i], s, M, width, land && land.track === TRACK_IDS[i] ? land : null)[i]);
+  const now = tallZones(F, F.reaches, s, M, width, land);
+  const zones = now.map((z, i) => (byRoute.some((zs) => !zs[i].oneLine) ? { ...lined[i], lined: z.lined } : z));
   const L: Layout = {
     form: 'tall', s, D: 0, w: width, h: 0, tr: {}, swp: {}, foot: [xs, 0], leadStart: [xs, 0], mainEnd: [xs, -4], lead: [],
     items: [], held: [], engine: null as unknown as Placed, brks: [], conts: [], turns: [], cutline: null,

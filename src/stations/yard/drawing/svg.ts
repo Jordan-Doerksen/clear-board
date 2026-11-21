@@ -300,10 +300,11 @@ export function createRenderer(host: HTMLElement): Renderer {
       L.tr[id].lines.slice(1).forEach((ln, k) => rails(`${id}:line:${k + 1}`, ln, 'yd-view-rail', P.rails));
     });
 
-    // 3. Foul point bars and end stops; the hook and the arrow of a row that goes on.
+    // 3. Foul point bars and end stops; the hook and the arrow of a row that goes on. The foul point
+    // bar carries data-track: one element for each track, at the start of its first line (the test hook).
     for (const id of TRACK_IDS) {
       const tr = L.tr[id];
-      const fb = P.marks.get(`foul:${id}`); attr(fb, 'class', 'yd-view-foulbar');
+      const fb = P.marks.get(`foul:${id}`); attr(fb, 'class', 'yd-view-foulbar'); attr(fb, 'data-track', id);
       attr(fb, 'x1', f1(tr.foul[0])); attr(fb, 'y1', f1(tr.foul[1] - FOUL_HALF * s)); attr(fb, 'x2', f1(tr.foul[0])); attr(fb, 'y2', f1(tr.foul[1] + FOUL_HALF * s));
       const st = P.marks.get(`stop:${id}`); attr(st, 'class', 'yd-view-stop');
       attr(st, 'x1', f1(tr.stop[0])); attr(st, 'y1', f1(tr.stop[1] - 5.5 * s)); attr(st, 'x2', f1(tr.stop[0])); attr(st, 'y2', f1(tr.stop[1] + 5.5 * s));
