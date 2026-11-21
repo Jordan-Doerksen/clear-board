@@ -80,6 +80,9 @@
 .cb-app .cb-reference-view .cb-reference-detail .dusk-btn { font-size: .9rem; }
 /* The rule text: the gap of the body is the only space around it. */
 .cb-app .cb-reference-view .cb-reference-detail .cb-disclosure { margin: 0; }
+/* The quote of the rule text is a box. A box takes the width of the panel body, so that its right
+   edge lines up with the panel (SURFACE-COLUMN). The part stops the quote at the measure. */
+.cb-app .cb-reference-view .cb-reference-detail .cb-quote { max-width: none; }
 
 /* The drawings of a signal entry: a row that wraps, the frames on one bottom line. Each frame has
    its own edge, so the gap between two frames is small. Each drawing is 120 px high, with the
