@@ -61,10 +61,18 @@ export function sharedDrawings(content: Content): SharedDrawing[] {
   return [...drawingOwners(content)].filter(([, ids]) => ids.size > 1).map(([svg, ids]) => ({ svg, itemIds: [...ids] }));
 }
 
-// The aspects of a signal item that the Drill can ask: each one whose drawing no other item holds.
+// Row U-37: each list of aspects in signals.json holds one drawing two times (note S-14 for the
+// SME). This gives each different drawing one time, in the order of the list.
+export function distinctAspects(aspects: SignalAspect[]): SignalAspect[] {
+  const seen = new Set<string>();
+  return aspects.filter(a => { const svg = drawingOf(a); if (seen.has(svg)) return false; seen.add(svg); return true; });
+}
+
+// The aspects of a signal item that the Drill can ask: each different drawing one time (U-37),
+// and only a drawing that no other item holds (U-01).
 export function askableAspects(item: ContentItem, content: Content): SignalAspect[] {
   const owners = drawingOwners(content);
-  return (item.payload?.aspects || []).filter(a => (owners.get(drawingOf(a))?.size ?? 0) <= 1);
+  return distinctAspects(item.payload?.aspects || []).filter(a => (owners.get(drawingOf(a))?.size ?? 0) <= 1);
 }
 
 export type DrillQuestion =
@@ -99,7 +107,7 @@ export function buildQuestion(item: ContentItem, content: Content, ctx: Question
     return { kind: 'rule', heading: 'What does the rule say?', promptText: Q.stem, correct: Q.answer, options: shuffle(Q.choices.slice(), rng), explain: Q.explain };
   }
   if (item.type === 'signal') {
-    const aspects = askableAspects(item, content);   // U-01: no drawing that another item holds
+    const aspects = askableAspects(item, content);   // U-01 and U-37
     const aspect = aspects[Math.floor(rng() * aspects.length)];
     const correct = item.title;
     return { kind: 'signal', heading: 'What signal is this?', aspect, correct, options: shuffle([correct, ...distractors(item, ctx.pool, ctx.byType, o => o.title, rng)], rng) };

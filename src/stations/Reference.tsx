@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import { Signal } from './Signal';
+import { distinctAspects } from '../core/drill';
 import type { ContentItem, Trust } from '../core/types';
 
 const TRUST: Record<Trust, [string, string]> = {
@@ -76,7 +77,7 @@ export function Reference() {
 function Detail({ item, audio, onSpeak, onDrillSignals }:
   { item: ContentItem; audio: boolean; onSpeak: (t: string) => void; onDrillSignals: () => void }) {
   const c = item.citation;
-  const aspects = item.type === 'signal' ? item.payload?.aspects ?? [] : [];
+  const aspects = item.type === 'signal' ? distinctAspects(item.payload?.aspects ?? []) : [];   // U-37: each drawing one time
   return (
     <div className="dusk-panel dusk-panel--framed cb-reference-detail" data-cb="ref-detail" aria-live="polite">
       <div className="dusk-panel-head"><h3 className="dusk-panel-name">{item.title}</h3></div>
@@ -89,7 +90,7 @@ function Detail({ item, audio, onSpeak, onDrillSignals }:
             <p className="cb-sub">Hardware variants — all the same indication.</p>
             {/* Browsing an aspect was a dead end: the graded read-the-aspect drill already exists at
                 /signals, so this is a route into it — not a second answer surface. */}
-            <button className="dusk-btn" onClick={onDrillSignals}>Drill these aspects →</button>
+            <button className="dusk-btn" onClick={onDrillSignals}>Open the Signals drill →</button>
           </>
         )}
         {c.verbatim && (
