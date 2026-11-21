@@ -237,7 +237,7 @@ browser. It runs each step after a failure, and exits non-zero when one step fai
    files (row U-45).
 4. `check:names`: no custom property of the app collides with a Dusk name.
 5. `lint` (oxlint, with a warning limit) and 6. `typecheck` (`tsc -b`).
-7. `test:unit`: 79 unit tests of `sr`, `store`, `severity`, `drill`, `radio` and the signal drawing.
+7. `test:unit`: 88 unit tests of `sr`, `store`, `severity`, `drill`, `radio` and the signal drawing.
 8. `tools/sr-vectors.mjs`: the golden vectors of the schedule.
 9. **Switching jobs:** `tools/solve.mjs` drives the in-app solver (`src/stations/yard/solver.js`).
    For each job the authored line wins in exactly par moves, the solver finds no shorter line,

@@ -144,7 +144,7 @@ src/styles/dusk.lock.json        the source commit and a SHA-256 for each of the
 src/styles/clear-board.tokens.css  the bridge (section 5.2)
 src/styles/clear-board.parts.css   the cb- parts (section 5.2)
 src/styles/surfaces/*.css        six surface sheets: shell, home, settings, reference, drill, radio
-tests/unit/*.test.ts             79 unit tests (node:test). tests/ts-resolve.mjs resolves the imports with no extension.
+tests/unit/*.test.ts             88 unit tests (node:test). tests/ts-resolve.mjs resolves the imports with no extension.
 tests/browser/                   the browser smoke test (smoke.mjs) and the word tape of the guided Radio
 tools/                           the steps of npm run check, the look harness and their helpers (section 7)
 src-tauri/                       the desktop shell. No job of Wave 2 changed it (TAURI).
