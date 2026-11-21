@@ -4,7 +4,8 @@
 // It exports mount(root, ctx) and unmount(), and nothing else. It works with these files in ./yard/:
 //   view.ts            each markup string, each class name and each DOM write of the chrome
 //   yard.css           the style of the chrome
-//   draw.ts            the drawing: the canvas, the hit test of a click and the one draw call
+//   draw.ts            the drawing: the picture, the hit test of a click and the one draw call
+//   access.ts          the access layer: the six switch buttons, the text mirror, the status region
 //   anim.js, sound.js  the tween driver and the sounds
 //   model.js, puzzles.js, geometry.js, solver.js
 //                      the engine. These four modules are frozen: no job edits them. This file

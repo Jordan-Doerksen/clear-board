@@ -1,4 +1,5 @@
-/* yard.css — the style of the Yard chrome. The Yard chunk imports it (../yardSim.js).
+/* yard.css — the style of the Yard chrome. The station wrapper (../Yard.tsx) and the Yard chunk
+   (../yardSim.js) import it; the build puts it in the sheet of the app, after the sheets of main.tsx.
    The chrome stands on Dusk parts and on the cb- parts of the app. This file holds the rules that
    keep the words, the sizes and the boxes of today on those parts.
    Each selector starts with .yard-wrap, so no rule reaches the rest of the app. After it, each
