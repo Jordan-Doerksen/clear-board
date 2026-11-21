@@ -14,6 +14,7 @@ import { useApp } from '../state/AppContext';
 import { LibraryNotice } from '../components/LookUp';
 import { LABEL_GOI, LABEL_NO_CITATION, optionsFor, sourceLine, spokenText, verdictRegion } from '../core/radio';
 import { severityOf } from '../core/severity';
+import { withRecomputedMastery } from '../core/drill';
 import type { ContentItem } from '../core/types';
 
 interface Step {
@@ -35,7 +36,8 @@ export function RadioTest({ active = true }: { active?: boolean }) {
   const [picked, setPicked] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const missedRef = useRef<Set<number>>(new Set());
-  const startRef = useRef(0);
+  const profileRef = useRef(profile);
+  profileRef.current = profile;
 
   // Row U-14: after "Next call →" the keyboard focus stays in the task. The control that had the
   // focus goes away, so the focus goes to the heading of the next call, or to the end heading after
@@ -83,10 +85,15 @@ export function RadioTest({ active = true }: { active?: boolean }) {
     [items, allSteps, runKey],
   );
 
+  // U-15 (UX-39), as in the Drill: the start value of a run is the mastery after the decay. It is
+  // read when the library is in, from a recomputed copy of the profile: after a direct load the
+  // test can mount before the app context recomputes the stored profile. A new library in the
+  // middle of a run (after "Try again") does not change the start value of that run.
+  const startRef = useRef<{ run: number; mastery: number } | null>(null);
   useEffect(() => {
-    startRef.current = profile.domains['radio']?.mastery || 0;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [runKey]);
+    if (!content || startRef.current?.run === runKey) return;
+    startRef.current = { run: runKey, mastery: withRecomputedMastery(profileRef.current, content).domains['radio']?.mastery || 0 };
+  }, [content, runKey]);
 
   const at = order[pos];
   const item: ContentItem | undefined = items[at];
@@ -121,8 +128,11 @@ export function RadioTest({ active = true }: { active?: boolean }) {
   // ── Run finished ──
   if (item === undefined || step === undefined) {
     const gradedCount = order.filter(i => items[i]?.citation.trust === 'verified').length;
-    const end = profile.domains['radio']?.mastery || 0;
-    const delta = Math.round((end - startRef.current) * 100);
+    // The end value is also read after the decay, as the start value is: the app recomputes the
+    // stored mastery at an answer that counts, and a run in which no answer counts would otherwise
+    // compare a value with the decay and a value without it.
+    const end = withRecomputedMastery(profile, content).domains['radio']?.mastery || 0;
+    const delta = Math.round((end - (startRef.current?.mastery ?? end)) * 100);
     return (
       <>
         <div className="dusk-tile dusk-tile--teal cb-radio-done">
