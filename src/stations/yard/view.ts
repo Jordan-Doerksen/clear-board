@@ -90,7 +90,7 @@ const YARD_HTML = `
     <button class="yd-back cb-btn--plain" data-go="">← Home</button>
 
     <div class="yd-bar yd-strip dusk-strip">
-      <select class="cb-select" id="picker" title="Pick a job"></select>
+      <div class="yd-field yd-field--job"><label class="yd-label" for="picker">Pick a job</label><select class="cb-select" id="picker"></select></div>
       <span class="dusk-spacer"></span>
       <div class="dusk-cell"><b class="yd-readout" id="readout">Moves 0 / par 0 · Joints 0</b></div>
     </div>
@@ -102,21 +102,21 @@ const YARD_HTML = `
     <ul class="yd-mirror dusk-sr" id="yard-mirror" role="list"></ul>
 
     <div class="yd-bar yd-builder dusk-panel">
-      <select class="cb-select" id="act" title="Action">
+      <div class="yd-field"><label class="yd-label" for="act">Action</label><select class="cb-select" id="act">
         <option value="pull">PULL</option>
         <option value="spot">SPOT</option>
         <option value="kick">KICK</option>
         <option value="secure">SECURE</option>
-      </select>
+      </select></div>
       <select class="cb-select" id="count" title="How many cars"></select>
-      <span class="yd-unit cb-sub">cars</span>
-      <select class="cb-select" id="track" title="Which track"></select>
+      <label class="yd-unit cb-sub" for="count">cars</label>
+      <div class="yd-field"><label class="yd-label" for="track">Which track</label><select class="cb-select" id="track"></select></div>
       <button class="yd-go dusk-btn" id="work">Work it ▸</button>
       <button class="yd-go dusk-btn" id="optimal" title="Auto-line and play the fewest-moves line in slow motion">▶ Watch optimal</button>
       <button class="yd-go dusk-btn" id="depart" title="Depart the assembled outbound out the lead" style="display:none">Depart ▸</button>
       <span class="dusk-spacer"></span>
       <button class="cb-btn--plain" id="reset">Reset</button>
-      <button class="cb-btn--plain" id="mute" title="Sound">🔊</button>
+      <button class="cb-btn--plain" id="mute"><span aria-hidden="true">🔊</span> Sound on</button>
     </div>
 
     <div class="yd-banner cb-banner" id="msg"></div>
@@ -306,8 +306,9 @@ export function createView(root: HTMLElement): YardView {
       dep.disabled = !enabled;
     },
 
+    // The sound button says its state in words (U-20). The glyph is decoration (U-41).
     setMuted(muted) {
-      at('mute').textContent = muted ? '🔇' : '🔊';
+      at('mute').innerHTML = `<span aria-hidden="true">${muted ? '🔇' : '🔊'}</span> Sound ${muted ? 'off' : 'on'}`;
     },
 
     onGo(fn) {

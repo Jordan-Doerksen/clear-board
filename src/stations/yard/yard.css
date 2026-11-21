@@ -51,12 +51,17 @@
 .yard-wrap #certify { margin: 4px 0 2px; }
 /* The two toolbar rows are children of .yard-wrap. The child selector keeps this rule out of the drawing. */
 .yard-wrap > .yd-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
-/* The strip: a Dusk strip with the job picker, a spacer and one cell with the readout, in the order of
-   the markup. The picker does not take the class of the end of a strip, because that class moves it to
-   the right. It gets the inner room of the end of a strip here, and it is never wider than the strip,
-   so the page does not scroll sideways at 320 px. */
+/* The strip: a Dusk strip with the job picker and its label, a spacer and one cell with the readout, in
+   the order of the markup. The picker does not take the class of the end of a strip, because that class
+   moves it to the right. Its field gets the inner room of the end of a strip here, and it is never wider
+   than the strip, so the page does not scroll sideways at 320 px. */
 .yard-wrap > .yd-strip { gap: 0; align-items: stretch; }
-.yard-wrap .yd-strip #picker { margin: var(--sp-2) var(--sp-4); max-width: calc(100% - 2 * var(--sp-4)); }
+.yard-wrap .yd-strip .yd-field--job { margin: var(--sp-2) var(--sp-4); max-width: calc(100% - 2 * var(--sp-4)); }
+.yard-wrap .yd-strip #picker { max-width: 100%; }
+/* The visible label of a select (U-20, A11Y-18): the words of its old tooltip, above the select, at
+   12 px in the second ink. The count of cars has the word "cars" after it as its label. */
+.yard-wrap .yd-field { display: inline-flex; flex-direction: column; gap: 2px; min-width: 0; }
+.yard-wrap .yd-label { color: var(--ink-2); font-size: var(--fs-s); font-weight: var(--fw-medium); }
 /* The four selects keep the type of today: 14 px, weight 600. */
 .yard-wrap .yd-bar .cb-select { font-size: var(--fs-base); font-weight: var(--fw-medium); }
 /* A disabled select shows its state by the disabled look of the part, with no opacity. The part
@@ -66,7 +71,9 @@
 /* The readout keeps 16 px, mono, bold. The cell gives the mono face. */
 .yard-wrap .yd-readout { font-size: 1rem; font-weight: var(--fw-bold); }
 /* The move builder: one Dusk panel that is the second toolbar row. It holds the controls of today in
-   their order and wraps. The message stays the next element after it, outside the panel.
+   their order and wraps. The message stays the next element after it, outside the panel. The labels
+   stand above their selects, so the controls line up at their foot; the word "cars" stays in the
+   middle of the height of a control.
    Work it, Watch optimal, Depart and Certify are Dusk buttons, with one look: gold is the only light
    of the chrome. A Dusk button has no border: the class yd-go gives it a border with no colour, so
    that it keeps the width of today. A disabled Depart takes the disabled state of the part, with no
@@ -78,7 +85,8 @@
   padding-inline: 12px; border: 1px solid transparent;
   font-size: var(--fs-base); font-weight: var(--fw-medium);
 }
-.yard-wrap .yd-unit { font-size: var(--fs-l); }
+.yard-wrap > .yd-builder { align-items: flex-end; }
+.yard-wrap .yd-unit { display: inline-flex; align-items: center; min-height: var(--cb-target); font-size: var(--fs-l); }
 /* The message: one cb-banner (G9). setBanner writes the tone as cb-banner--ok, --bad or --win beside
    the yd- tone. The text is ink in each tone: red is on the edge and on the mark of a refusal only.
    The message keeps its text of 15 px, weight 600, and its box stops at the Dusk measure. It stays a
