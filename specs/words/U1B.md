@@ -47,3 +47,10 @@ No line here states, corrects or cites a rule. The words were not checked by the
 | U-27 (words) | Home, under the path: the one main control, for a learner with no graded item | none | Start here |
 | U-27 (words) | Home, the same control, for each other learner | none | Continue |
 | U-26 | Home, beside "Continue": the count of Drill items due now, from the stored due dates | none | N due now (for example "3 due now"), or "Nothing due now" |
+| U-33 (words) | Home, each live domain tile: the verb of a press | none (only the hidden name "Drill <name>" said it) | Drill → (the arrow is hidden from a screen reader) |
+| U-33 (words) | Home, each live domain tile: the mastery as a number, beside the bar | none | N% (for example "12%") |
+| U-33 | Home, the spoken name of a domain tile | Drill The words (aria-label) | the visible words of the tile: its name, its line, the number and "Drill" |
+| U-33 (words) | Home, the subtitle of the station The Yard | Work the cuts | Move cars and build a train |
+| U-24, U-33 (words) | Home, the subtitle of the station Radio walkthrough | Back to a joint | Guided, or call it yourself (scored) |
+| U-24 (words) | Home, the Radio domain tile: a second line | none | The calls are scored in Radio walkthrough: Call it yourself. |
+| U-40 | Home and the shell: the name of the way back to Home | the home mark is named "Home" | no change: the home mark keeps the name "Home", as "← Home" of the stations (2c-plan C6); Home has no other way back |

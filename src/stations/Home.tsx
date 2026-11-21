@@ -42,13 +42,25 @@ export function Home() {
         {DOMAINS.map(d => {
           const m = Math.round((profile.domains[d.id]?.mastery || 0) * 100);
           const liveCard = d.live && drillable(content.byDomain[d.id], content).length > 0;
+          // U-33: the visible words of a live tile say what a press does and give the mastery as a
+          // number, so the name of the button is its own words (no aria-label).
           const inner = (
             <>
               <span className="dusk-tile-cap"><h3 className="dusk-tile-lab">{d.name}</h3></span>
               <span className="dusk-tile-body">
                 <p className="dusk-tile-sub">{d.desc}</p>
+                {/* U-24: the radio calls are scored in the Radio station, mode "Call it yourself". */}
+                {liveCard && d.id === 'radio' && <p className="dusk-tile-sub cb-home-pointer">The calls are scored in Radio walkthrough: Call it yourself.</p>}
                 {liveCard
-                  ? <div className="dusk-bar" role="progressbar" aria-label={`${d.name} mastery`} aria-valuenow={m} aria-valuemin={0} aria-valuemax={100}><i className="dusk-fill dusk-fill--teal" style={{ width: `${m}%` }} /></div>
+                  ? (
+                    <span className="cb-home-tile-foot">
+                      <span className="cb-home-tile-figure">
+                        <span className="dusk-bar" role="progressbar" aria-label={`${d.name} mastery`} aria-valuenow={m} aria-valuemin={0} aria-valuemax={100}><i className="dusk-fill dusk-fill--teal" style={{ width: `${m}%` }} /></span>
+                        <b className="dusk-num">{m}%</b>
+                      </span>
+                      <span className="cb-home-tile-act">Drill <span aria-hidden="true">→</span></span>
+                    </span>
+                  )
                   // A domain with no content says "Coming soon" only when each content file loaded.
                   // When a file did not load, the notice of the shell says so (U-07).
                   : contentFailed.length === 0 && <span className="dusk-tile-tag">Coming soon</span>}
@@ -56,7 +68,7 @@ export function Home() {
             </>
           );
           return liveCard
-            ? <button key={d.id} className="dusk-tile dusk-tile--teal" data-cb="domain-card" aria-label={`Drill ${d.name}`} onClick={() => navigate(`/drill/${d.id}`)}>{inner}</button>
+            ? <button key={d.id} className="dusk-tile dusk-tile--teal" data-cb="domain-card" onClick={() => navigate(`/drill/${d.id}`)}>{inner}</button>
             : <div key={d.id} className="dusk-tile dusk-tile--grey" data-cb="domain-card">{inner}</div>;
         })}
       </div>

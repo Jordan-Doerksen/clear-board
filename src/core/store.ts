@@ -18,9 +18,9 @@ export const DOMAINS: DomainDef[] = [
 export const STATIONS = [
   { go: '/reference', icon: '📖', name: 'Reference', sub: 'Look anything up — cited' },
   { go: '/drill', icon: '🎯', name: 'Drill', sub: 'Adaptive practice' },
-  { go: '/yard', icon: '🚂', name: 'The Yard', sub: 'Work the cuts' },
+  { go: '/yard', icon: '🚂', name: 'The Yard', sub: 'Move cars and build a train' },
   { go: '/signals', icon: '🚦', name: 'Signals', sub: 'Read the aspect' },
-  { go: '/radio', icon: '📻', name: 'Radio walkthrough', sub: 'Back to a joint' },
+  { go: '/radio', icon: '📻', name: 'Radio walkthrough', sub: 'Guided, or call it yourself (scored)' },
 ];
 
 export const PROFILE_KEY = 'cb.profile.v1';
