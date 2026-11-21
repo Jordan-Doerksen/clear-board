@@ -20,10 +20,12 @@ The owner runs no command (fence rule 13): section 8 is for the next session, no
 - The GitHub check (`check.yml`: the check, the build and the browser test) passed on each head of
   #4 on 2026-11-21 that the lead read, the last one `52ba708` included. Look at the pull request for
   the result on a later head.
-- **A live preview** of `claude/cb2-wave-2c` at `b92d1e6` is at https://clear-board-2-preview.vercel.app
-  (the Vercel project `clear-board-2-preview` of the owner's Vercel account, made on 2026-11-21 at the
-  owner's request). It is a project of its own: the owner's live site and `main` did not change. A
-  later push to the branch does not update it by itself (not verified): deploy again to see a change.
+- **A live preview** of `claude/cb2-wave-2c` at `a57a780` (after fix round 2) is at
+  https://clear-board-2-preview.vercel.app (the Vercel project `clear-board-2-preview` of the owner's
+  Vercel account, made on 2026-11-21 at the owner's request; deployed again at 20:20 UTC). It serves
+  the same main files as the build that passed the gates (`index-6lCKn_so.js`, `index-BulE0Rjz.css`).
+  It is a project of its own: the owner's live site and `main` did not change. A later push to the
+  branch does not update it by itself (not verified): deploy again to see a change.
 
 ## 2. The "done when" list of the plan (section 9)
 
