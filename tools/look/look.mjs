@@ -456,7 +456,7 @@ function compareFacts(before, now, page, commit) {
     for (const name of lost) {
       if (rows.has(name)) warnings.push(`row ${rows.get(name).join('; ')}: the ${what} ${name} is gone, as the row expects`);
       else if (mayGo(name, standing)) listed.push(name);
-      else fails.push(`a ${what} is gone: ${name}`);
+      else fails.push(`${what === 'element id' ? 'an' : 'a'} ${what} is gone: ${name}`);
     }
     if (listed.length) warnings.push(`${listed.length} ${what}s are gone and are in ${list}: ${listed.join(' ')}`);
     for (const [name, r] of rows) {
