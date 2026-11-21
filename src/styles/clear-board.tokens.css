@@ -5,18 +5,15 @@
    Each new name of the app starts with --cb- or --yard-. */
 
 /* ---- Block 1: the old shell names -----------------------------------------------------------
-   Only src/index.css reads these names. A new rule does not read them: it reads the Dusk token.
+   src/index.css reads these names, and the sheets of Reference, the Drill and the Radio read
+   --maxw (SURFACE-COLUMN). A new rule does not read them: it reads the Dusk token. A name that
+   nothing reads goes (BRIDGE-DEAD): --surface, --clear, --caution, --stop and --r went in Wave 2c.
    --ink and --focus are not here. They are Dusk names with the same meaning. */
 :root {
   --bg: var(--glass);
-  --surface: var(--panel-hi);
   --surface-2: var(--head);
   --line: var(--lit-rule);
   --muted: var(--ink-2);
-  --clear: var(--green-ink);
-  --caution: var(--amber-ink);
-  --stop: var(--red-ink);
-  --r: var(--r-tile);
   --space: var(--lh-base);
   --font: var(--font-ui);
   --maxw: 920px;
