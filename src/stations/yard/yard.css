@@ -61,13 +61,6 @@
 .yard-wrap .yd-bar .cb-select:disabled { opacity: 1; }
 /* The readout keeps 16 px, mono, bold. The cell gives the mono face. */
 .yard-wrap .yd-readout { font-size: 1rem; font-weight: var(--fw-bold); }
-/* The button of the message. The rule names the box of the chrome, so that it does not reach into
-   the drawing. :where() keeps the weight of the rule that it replaces. */
-.yard-wrap :where(.yd-banner) button {
-  font: 600 var(--fs-base) var(--font-ui); color: var(--ink);
-  background: var(--head); border: 1px solid var(--cb-edge); border-radius: 8px;
-  padding: 9px 12px; cursor: pointer;
-}
 /* The move builder: one Dusk panel that is the second toolbar row. It holds the controls of today in
    their order and wraps. The message stays the next element after it, outside the panel.
    Work it, Watch optimal, Depart and Certify are Dusk buttons, with one look: gold is the only light
@@ -81,15 +74,17 @@
   font-size: var(--fs-base); font-weight: var(--fw-medium);
 }
 .yard-wrap .yd-unit { font-size: var(--fs-l); }
-.yard-wrap :where(.yd-banner) button:hover { border-color: var(--lit); }
-.yard-wrap .yd-banner {
-  min-height: 22px; margin: 12px 0; padding: 10px 14px; border-radius: 8px;
-  background: var(--panel-hi); border: 1px solid var(--lit-rule); color: var(--ink-2); font-weight: 600;
+/* The message: one cb-banner (G9). setBanner writes the tone as cb-banner--ok, --bad or --win beside
+   the yd- tone. The text is ink in each tone: red is on the edge and on the mark of a refusal only.
+   The message keeps its text of 15 px, weight 600, and its box stops at the Dusk measure. It stays a
+   block box, so its text and "Look it up →" stay inline, as today. */
+.yard-wrap .yd-banner { margin: 12px 0; max-width: var(--measure); font-size: var(--fs-l); font-weight: var(--fw-medium); }
+/* "Look it up →" is a plain button (G11). It keeps its text of 12 px, weight 600, and the width of
+   today: a side padding of 9 px and a 1 px border with no colour. */
+.yard-wrap .yd-lookup {
+  margin-left: 10px; padding-inline: 9px; border: 1px solid transparent;
+  font-size: var(--fs-s); font-weight: var(--fw-medium);
 }
-.yard-wrap .yd-banner.yd-ok { color: var(--ink); }
-/* A refusal and a win: a wash over the panel, as a one-colour gradient over the panel colour. */
-.yard-wrap .yd-banner.yd-bad { color: var(--red-ink); border-color: transparent; box-shadow: var(--rowneon-red); background-image: linear-gradient(var(--rowwash-red), var(--rowwash-red)); }
-.yard-wrap .yd-banner.yd-win { color: var(--green-ink); border-color: transparent; box-shadow: var(--rowneon-green); background-image: linear-gradient(var(--rowwash-green), var(--rowwash-green)); }
 .yard-wrap .yd-rules-legend { color: var(--ink-2); font-size: .78125rem; margin: 6px 0 2px; }
 .yard-wrap .yd-rules-legend .yd-k { color: var(--blue-ink); font-weight: 700; }
 .yard-wrap .yd-rules-legend .yd-s { color: var(--amber-ink); font-weight: 700; }
@@ -105,11 +100,6 @@
 .yard-wrap .yd-help { margin-top: 18px; color: var(--ink-2); font-size: var(--fs-data); }
 .yard-wrap .yd-help summary { cursor: pointer; color: var(--ink); font-weight: 600; }
 .yard-wrap .yd-help code { background: var(--head); padding: 1px 5px; border-radius: 4px; font-size: .78125rem; font-family: var(--font-mono); }
-.yard-wrap .yd-banner .yd-lookup {
-  margin-left: 10px; padding: 4px 9px; font: 600 var(--fs-s) var(--font-ui);
-  color: var(--cb-link); background: none; border: 1px solid var(--cb-edge); border-radius: 6px; cursor: pointer;
-}
-.yard-wrap .yd-banner .yd-lookup:hover { background: var(--wash-1); }
 /* The looks that were inline styles in the markup. */
 .yard-wrap .yd-note { margin: 10px 0 4px; padding: 10px 13px; border-left: 3px solid var(--amber-ink); background: var(--rowwash-amber); border-radius: 6px; font-size: var(--fs-data); }
 .yard-wrap .yd-note-head { color: var(--amber-ink); }

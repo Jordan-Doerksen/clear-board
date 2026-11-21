@@ -114,7 +114,7 @@ const YARD_HTML = `
       <button class="cb-btn--plain" id="mute" title="Sound">🔊</button>
     </div>
 
-    <div class="yd-banner" id="msg"></div>
+    <div class="yd-banner cb-banner" id="msg"></div>
 
     <div class="yd-rules-legend">
       Rules in play —
@@ -176,16 +176,16 @@ export function createView(root: HTMLElement): YardView {
     setBanner(text, tone) {
       const msg = at('msg');
       msg.textContent = text || '';
-      msg.className = `yd-banner ${tone ? 'yd-' + tone : ''}`;
+      msg.className = `yd-banner cb-banner${tone ? ` yd-${tone} cb-banner--${tone}` : ''}`;
     },
 
     setRefusal(text, onLookup) {
       const msg = at('msg');
-      msg.className = 'yd-banner yd-bad';
+      msg.className = 'yd-banner yd-bad cb-banner cb-banner--bad';
       msg.textContent = text || '';
       if (onLookup) {
         const b = document.createElement('button');
-        b.className = 'yd-lookup'; b.textContent = 'Look it up →';
+        b.className = 'yd-lookup cb-btn--plain'; b.textContent = 'Look it up →';
         b.addEventListener('click', onLookup);
         msg.appendChild(b);
       }
