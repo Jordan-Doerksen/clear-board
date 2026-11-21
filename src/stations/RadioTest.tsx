@@ -92,7 +92,7 @@ export function RadioTest() {
           <div className="dusk-tile-body">
             <p className="dusk-tile-num">{score} / {order.length}</p>
             <p className="dusk-tile-sub">
-              {gradedCount} of those {order.length} calls carry a verified CROR citation and moved your
+              {gradedCount} of those {order.length} calls carry a verified CROR citation and {delta === 0 ? 'did not move' : 'moved'} your
               Radio mastery: {delta >= 0 ? '+' : ''}{delta}% → {Math.round(end * 100)}%. The rest are real
               practice with no rule to cite — they're never scored against you.
             </p>
