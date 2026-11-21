@@ -7,7 +7,7 @@ import { LibraryNotice } from '../components/LookUp';
 import { Signal } from './Signal';
 import { DOMAINS } from '../core/store';
 import { severityOf } from '../core/severity';
-import { buildSession, dueGroups, withRecomputedMastery } from '../core/drill';
+import { answerCounts, buildSession, dueGroups, withRecomputedMastery } from '../core/drill';
 import type { DrillQuestion, Session } from '../core/drill';
 
 // The station heading (U-29, 2c-plan C7): one visible h2 with the station name of Home, in the form
@@ -53,6 +53,7 @@ export function Drill({ domain }: { domain?: string }) {
   const [score, setScore] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const missedRef = useRef<Set<string>>(new Set());                    // items missed in the current session
+  const [counted, setCounted] = useState(false);                        // an answer of the session counted (U26-NOTE)
   // U-14: after "Next" keyboard focus stays in the task. The control that had focus is removed, so
   // focus goes to the heading of the next question, or to the end heading after "Finish".
   const questionHeadRef = useRef<HTMLHeadingElement>(null);
@@ -72,7 +73,7 @@ export function Drill({ domain }: { domain?: string }) {
     missedRef.current = new Set();
     setBuilt(buildSession({ content, profile: profileRef.current, domain }));
     setIsReview(false); setReviewNext(null);
-    setIdx(0); setScore(0); setPicked(null);
+    setIdx(0); setScore(0); setPicked(null); setCounted(false);
   }, [content, domain]);
 
   // Start a new session from the end screen ("Drill again", or the review of the misses).
@@ -80,7 +81,7 @@ export function Drill({ domain }: { domain?: string }) {
     focusTo.current = 'question';
     missedRef.current = new Set();
     setBuilt(session); setIsReview(review); setReviewNext(null);
-    setIdx(0); setScore(0); setPicked(null);
+    setIdx(0); setScore(0); setPicked(null); setCounted(false);
   }
 
   const slot = built && idx < built.slots.length ? built.slots[idx] : null;
@@ -142,7 +143,9 @@ export function Drill({ domain }: { domain?: string }) {
             {/* U-26: progress in words, from the stored profile */}
             <p className="dusk-tile-sub cb-drill-progress">Right answers: {score} of {built.slots.length}.{started > 0 ? ` New items started: ${started}.` : ''}</p>
             {due.length > 0 && <p className="dusk-tile-sub cb-drill-progress">Items due again: {due.join(', ')}.</p>}
-            {built.practiceOnly && <p className="dusk-tile-sub cb-drill-progress">This session was practice only: no item in it was due at the start. {PRACTICE_NOTE}</p>}
+            {/* U26-NOTE: the end note shows only when no answer of the session counted. A miss always
+                counts, and after a miss the mastery can fall: the note would then not be true. */}
+            {built.practiceOnly && !counted && <p className="dusk-tile-sub cb-drill-progress">This session was practice only: no item in it was due at the start. {PRACTICE_NOTE}</p>}
           </div>
         </div>
         <div className="cb-drill-actions">
@@ -180,6 +183,8 @@ export function Drill({ domain }: { domain?: string }) {
     setPicked(value);
     if (correct) setScore(s => s + 1);
     else missedRef.current.add(item!.id);   // remembered for the end-of-session review round (#10)
+    // The guard of the grading, with the profile of this answer (U26-NOTE).
+    if (answerCounts(item!, profileRef.current.items[item!.id], correct)) setCounted(true);
     recordAnswer(item!, correct);   // AppContext gates a correct re-advance by due-ness (anti-marathon, F2)
     // Read aloud the feedback (U-31): the verdict, the right answer after a miss, the explanation
     // and the severity line, as the panel shows them.
