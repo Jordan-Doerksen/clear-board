@@ -24,32 +24,29 @@
    This file sets no width, height, padding or side margin on it, and no rule for an element
    inside it: the drawing job owns each element inside the frame (contract D.6). */
 .yard-wrap .yd-yardframe { margin: 12px 0 14px; overflow: hidden; }
-.yard-wrap .yd-workorder {
-  margin-top: 10px; padding: 12px 16px; border-radius: 10px;
-  background: var(--panel-fill);
-  border: 1px solid var(--lit-rule); border-left: 4px solid var(--teal-ink);
-}
-.yard-wrap .yd-wo-top { font: 700 var(--fs-xs) var(--font-mono); letter-spacing: .6px; color: var(--ink-2); }
-.yard-wrap .yd-wo-tag { color: var(--teal-ink); } .yard-wrap .yd-wo-id { color: var(--ink); }
-.yard-wrap .yd-wo-job { font-size: 1rem; margin-top: 5px; color: var(--ink); }
-.yard-wrap .yd-wo-job b { color: var(--ink); }
-.yard-wrap .yd-wo-from { color: var(--ink-2); font-weight: 600; font-size: var(--fs-data); }
-.yard-wrap .yd-wo-meta { font-size: .78125rem; color: var(--ink-2); margin-top: 5px; }
-.yard-wrap .yd-wo-tip { display: block; margin-top: 3px; color: var(--ink-2); font-style: italic; }
+/* The work order: a framed Dusk panel. Each render function of the view writes a head bar (the tag,
+   the id, the rest of the top line, in the order of today) and a body. The head words are labels:
+   they take the Dusk sizes, 13, 11 and 12 px, none under the 11 px of today. */
+.yard-wrap .yd-workorder { margin-top: 10px; }
+/* The body: the job line (a cb-prose line, 16 px), the meta line and the tip at 12.5 px. Each line
+   of reading text stops at the Dusk measure. The tip is not italic. */
+.yard-wrap .yd-wo-from { color: var(--ink-2); font-weight: var(--fw-medium); font-size: var(--fs-data); }
+.yard-wrap .yd-wo-meta { font-size: .78125rem; margin-top: 5px; max-width: var(--measure); }
+.yard-wrap .yd-wo-tip { display: block; margin-top: 3px; }
+/* A line of a switch list: a Dusk row in the amber tone, lit when the learner flags it. The glyph in
+   the icon square carries the state, as today. One wrapper holds the mark, the arrow and the track. */
 .yard-wrap .yd-ord-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
 .yard-wrap .yd-ord-row {
-  display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer;
-  border: 1px solid var(--cb-edge); border-radius: 8px; background: var(--head);
-  font: 700 var(--fs-base) var(--font-mono); user-select: none; max-width: 360px;
+  max-width: 22.5rem; cursor: pointer; user-select: none;
+  font-family: var(--font-mono); font-size: var(--fs-base); font-weight: var(--fw-bold);
 }
-.yard-wrap .yd-ord-row:hover { border-color: var(--lit); }
-.yard-wrap .yd-ord-row.yd-flagged { border-color: var(--amber-ink); background: var(--rowwash-amber); }
-.yard-wrap .yd-ord-flag { font-size: var(--fs-l); width: 16px; color: var(--ink-2); }
-.yard-wrap .yd-ord-row.yd-flagged .yd-ord-flag { color: var(--amber-ink); }
+.yard-wrap .yd-ord-flag { font-size: var(--fs-l); }
+.yard-wrap .yd-ord-line { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; }
 .yard-wrap .yd-ord-mark { color: var(--ink); } .yard-wrap .yd-ord-arrow { color: var(--ink-2); } .yard-wrap .yd-ord-trk { color: var(--blue-ink); }
 /* The track name of a flagged line takes the main ink. The blue ink on the amber wash can be under 4.5. */
-.yard-wrap .yd-ord-row.yd-flagged .yd-ord-trk { color: var(--ink); }
+.yard-wrap .yd-flagged .yd-ord-trk { color: var(--ink); }
 .yard-wrap .yd-ord-fix { color: var(--amber-ink); font-size: var(--fs-xs); font-style: italic; }
+/* Certify is a Dusk button (the rule of the lit buttons is below). */
 .yard-wrap #certify { margin: 4px 0 2px; }
 /* The two toolbar rows are children of .yard-wrap. The child selector keeps this rule out of the drawing. */
 .yard-wrap > .yd-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
@@ -63,16 +60,18 @@
 .yard-wrap .yd-bar .cb-select { font-size: var(--fs-base); font-weight: var(--fw-medium); }
 /* The readout keeps 16 px, mono, bold. The cell gives the mono face. */
 .yard-wrap .yd-readout { font-size: 1rem; font-weight: var(--fw-bold); }
-/* The selects and the buttons of the move builder, of the work order and of the message. The
+/* The selects and the buttons of the move builder and of the message. The
    rule names the rows and the boxes of the chrome, so that it does not reach into the drawing.
    :where() keeps the weight of the rule that it replaces. */
-.yard-wrap :where(.yd-builder, .yd-workorder, .yd-banner) :is(select, button) {
+.yard-wrap :where(.yd-builder, .yd-banner) :is(select, button) {
   font: 600 var(--fs-base) var(--font-ui); color: var(--ink);
   background: var(--head); border: 1px solid var(--cb-edge); border-radius: 8px;
   padding: 9px 12px; cursor: pointer;
 }
 /* Work it, Certify, Watch optimal and Depart have one look, from the tokens of the Dusk button.
-   The 1 px border stays in the box, so no size changes. */
+   The 1 px border stays in the box, so no size changes. A Dusk button has no border: the class
+   yd-go gives it a border with no colour, so it keeps the box of today. */
+.yard-wrap .yd-go { border: 1px solid transparent; }
 .yard-wrap button.yd-go { background: var(--btn-bg); border-color: transparent; box-shadow: var(--neon-ctl); color: var(--btn-ink); }
 .yard-wrap button.yd-go:hover { background: var(--btn-bg-hover); box-shadow: var(--neon-ctl-on); }
 .yard-wrap button#optimal { background: var(--btn-bg); border-color: transparent; box-shadow: var(--neon-ctl); color: var(--btn-ink); }
@@ -80,7 +79,7 @@
 .yard-wrap button#depart { background: var(--btn-bg); border-color: transparent; box-shadow: var(--neon-ctl); color: var(--btn-ink); }
 .yard-wrap button#depart:hover { background: var(--btn-bg-hover); box-shadow: var(--neon-ctl-on); }
 .yard-wrap button#depart:disabled { opacity: .4; cursor: default; }
-.yard-wrap :where(.yd-builder, .yd-workorder, .yd-banner) button:hover { border-color: var(--lit); }
+.yard-wrap :where(.yd-builder, .yd-banner) button:hover { border-color: var(--lit); }
 .yard-wrap .yd-spacer { flex: 1; }
 .yard-wrap .yd-banner {
   min-height: 22px; margin: 12px 0; padding: 10px 14px; border-radius: 8px;

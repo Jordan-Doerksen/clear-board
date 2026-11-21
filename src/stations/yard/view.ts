@@ -92,7 +92,7 @@ const YARD_HTML = `
       <div class="dusk-cell"><b class="yd-readout" id="readout">Moves 0 / par 0 · Joints 0</b></div>
     </div>
 
-    <div class="yd-workorder" id="workorder"></div>
+    <div class="yd-workorder dusk-panel dusk-panel--framed" id="workorder"></div>
 
     <div class="yd-yardframe dusk-panel dusk-panel--framed" data-cb="yard-drawing"></div>
 
@@ -203,16 +203,18 @@ export function createView(root: HTMLElement): YardView {
 
     renderSwitchList(data, { onFlag, onCertify }) {
       const rows = data.lines.map((e, i) =>
-        `<div class="yd-ord-row${e.flagged ? ' yd-flagged' : ''}" data-i="${i}">`
-        + `<span class="yd-ord-flag">${e.flagged ? '⚑' : '▢'}</span>`
-        + `<span class="yd-ord-mark">${e.mark}</span><span class="yd-ord-arrow">→</span><span class="yd-ord-trk">${e.track}</span>`
+        `<div class="yd-ord-row dusk-row dusk-row--amber${e.flagged ? ' dusk-row--on yd-flagged' : ''}" data-i="${i}">`
+        + `<span class="yd-ord-flag dusk-ico">${e.flagged ? '⚑' : '▢'}</span>`
+        + `<span class="yd-ord-line"><span class="yd-ord-mark">${e.mark}</span><span class="yd-ord-arrow">→</span><span class="yd-ord-trk">${e.track}</span></span>`
         + `</div>`).join('');
       at('workorder').innerHTML =
-        `<div class="yd-wo-top"><span class="yd-wo-tag yd-si">SWITCH LIST</span> <span class="yd-wo-id">${data.id.toUpperCase()}</span> · the list can be wrong</div>`
-        + `<div class="yd-wo-job">Build <b>${data.goalTrack}</b> from these cars. Check each line against the yard — tap any that <b>don't match</b>, then certify.</div>`
+        `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag yd-si dusk-panel-name">SWITCH LIST</span> <span class="yd-wo-id dusk-count">${data.id.toUpperCase()}</span> <span class="yd-wo-sub dusk-panel-sub">· the list can be wrong</span></div>`
+        + `<div class="yd-wo-body dusk-panel-body">`
+        + `<div class="yd-wo-job cb-prose">Build <b class="dusk-num">${data.goalTrack}</b> from these cars. Check each line against the yard — tap any that <b class="dusk-num">don't match</b>, then certify.</div>`
         + `<div class="yd-ord-list">${rows}</div>`
-        + `<button class="yd-go" id="certify">Certify order ▸</button>`
-        + `<div class="yd-wo-meta"><span class="yd-wo-tip">${data.hint}</span></div>`;
+        + `<button class="yd-go dusk-btn" id="certify">Certify order ▸</button>`
+        + `<div class="yd-wo-meta cb-sub"><span class="yd-wo-tip">${data.hint}</span></div>`
+        + `</div>`;
       at('workorder').querySelectorAll<HTMLElement>('.yd-ord-row').forEach((row) => row.addEventListener('click', () => {
         onFlag(+(row.dataset.i as string));
       }));
@@ -221,22 +223,24 @@ export function createView(root: HTMLElement): YardView {
 
     renderVerifiedOrder(data) {
       const lines = data.lines
-        .map((e) => `<b>${e.mark}</b> → ${e.track}${e.corrected ? ' <span class="yd-ord-fix">(list was wrong)</span>' : ''}`)
+        .map((e) => `<b class="dusk-num">${e.mark}</b> → ${e.track}${e.corrected ? ' <span class="yd-ord-fix">(list was wrong)</span>' : ''}`)
         .join(' · ');
       at('workorder').innerHTML =
-        `<div class="yd-wo-top"><span class="yd-wo-tag">WORK ORDER ✓</span> <span class="yd-wo-id">${data.goalTrack}</span> · verified</div>`
-        + `<div class="yd-wo-job">Build <b>${data.goalTrack}</b>: ${lines}.</div>`
-        + `<div class="yd-wo-meta">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.</div>`;
+        `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag dusk-panel-name">WORK ORDER ✓</span> <span class="yd-wo-id dusk-count">${data.goalTrack}</span> <span class="yd-wo-sub dusk-panel-sub">· verified</span></div>`
+        + `<div class="yd-wo-body dusk-panel-body">`
+        + `<div class="yd-wo-job cb-prose">Build <b class="dusk-num">${data.goalTrack}</b>: ${lines}.</div>`
+        + `<div class="yd-wo-meta cb-sub">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.</div>`
+        + `</div>`;
     },
 
     renderWorkOrder(data) {
       const nums = data.cars.map((c) => c.split(' ').pop());
-      const head = `<div class="yd-wo-top"><span class="yd-wo-tag">WORK ORDER</span> <span class="yd-wo-id">${data.id.toUpperCase()}</span> · ${data.title}</div>`;
-      const meta = `<div class="yd-wo-meta">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.<span class="yd-wo-tip">${data.hint}</span></div>`;
+      const head = `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag dusk-panel-name">WORK ORDER</span> <span class="yd-wo-id dusk-count">${data.id.toUpperCase()}</span> <span class="yd-wo-sub dusk-panel-sub">· ${data.title}</span></div>`;
+      const meta = `<div class="yd-wo-meta cb-sub">Target <b>${data.par} move${data.par === 1 ? '' : 's'}</b> (par) — fewest moves wins.<span class="yd-wo-tip">${data.hint}</span></div>`;
       const job = data.depart
-        ? `<div class="yd-wo-job">Build the outbound${data.ordered ? ' in order' : ''} — gather <b>${nums.join(' · ')}</b> onto your train${data.from.length ? ` <span class="yd-wo-from">(set out on ${data.from.join(', ')})</span>` : ''}, then <b>Depart ▸</b>.</div>`
-        : `<div class="yd-wo-job">Build <b>${data.goalTrack}</b> — gather <b>${nums.join(' · ')}</b> onto it${data.from.length ? ` <span class="yd-wo-from">(now on ${data.from.join(', ')})</span>` : ''}.</div>`;
-      at('workorder').innerHTML = head + job + meta;
+        ? `<div class="yd-wo-job cb-prose">Build the outbound${data.ordered ? ' in order' : ''} — gather <b class="dusk-num">${nums.join(' · ')}</b> onto your train${data.from.length ? ` <span class="yd-wo-from">(set out on ${data.from.join(', ')})</span>` : ''}, then <b class="dusk-num">Depart ▸</b>.</div>`
+        : `<div class="yd-wo-job cb-prose">Build <b class="dusk-num">${data.goalTrack}</b> — gather <b class="dusk-num">${nums.join(' · ')}</b> onto it${data.from.length ? ` <span class="yd-wo-from">(now on ${data.from.join(', ')})</span>` : ''}.</div>`;
+      at('workorder').innerHTML = head + `<div class="yd-wo-body dusk-panel-body">` + job + meta + `</div>`;
     },
 
     setCount({ max, value, disabled }) {
