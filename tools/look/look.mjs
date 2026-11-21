@@ -11,7 +11,8 @@
 //   --ref <commit>    baseline only. Build that commit outside the tree, from a `git archive`,
 //                     with the installed node_modules, and take the baseline from that build.
 //                     With no option the baseline comes from `dist/` of the working tree.
-//   --look            compare only. A pixel difference is listed and does not fail.
+//   --look            compare only. A pixel difference is listed and does not fail. A control
+//                     that is smaller and stays 44 by 44 px or more gives a warning only.
 //   --gate            compare only. A shot that scrolls sideways fails, also when the baseline
 //                     scrolls sideways.
 //   --only <text>     Take only the shots whose name holds this text.
@@ -35,10 +36,12 @@
 // `compare` fails on these facts: an element id that is gone (an id of `idsMayGo` gives a
 // warning only); a class name that is gone (a class of `classesMayGo` gives a warning only; an
 // entry can end with `*`); a new script error; more sideways scroll; a smaller smallest text;
-// a word or a number that is gone or new; a control that is gone or smaller. A word and the name
-// of a control are read as the markup writes them: a letter case that a style sets (text-transform)
-// changes the picture only. With no `--look` a pixel difference fails also. The pixels are counted with no package: the SHA-256 of the
-// two files is compared, and where they differ both are decoded in a browser page.
+// a word or a number that is gone or new; a control that is gone or smaller (with `--look`, a
+// control that stays 44 by 44 px or more gives a warning only, with both sizes). A word and the
+// name of a control are read as the markup writes them: a letter case that a style sets
+// (text-transform) changes the picture only. With no `--look` a pixel difference fails also. The
+// pixels are counted with no package: the SHA-256 of the two files is compared, and where they
+// differ both are decoded in a browser page.
 //
 // A baseline is compared only with pictures from the same machine.
 import { execFileSync } from 'node:child_process';
@@ -280,6 +283,10 @@ async function pixelDiff(a, b) {
 }
 
 // ---- Compare the facts of one shot.
+// The floor of a target, in CSS px (fence rule 8). With `--look`, a control that is smaller than
+// in the baseline and stays 44 by 44 px or more gives a warning with both sizes (ruling
+// LOOK-SMALLER). A control under the floor in width or in height fails.
+const TARGET_FLOOR = 44;
 const mayGo = (name, list) => (list ?? []).some((entry) => (entry.endsWith('*') ? name.startsWith(entry.slice(0, -1)) : name === entry));
 function compareFacts(before, now) {
   const fails = [];
@@ -314,7 +321,9 @@ function compareFacts(before, now) {
     if (current.length < list.length) fails.push(`a control is gone: ${key} (${list.length} -> ${current.length})`);
     current.slice(0, list.length).forEach((c, i) => {
       if (c.width < list[i].width - 0.5 || c.height < list[i].height - 0.5) {
-        fails.push(`a control is smaller: ${key}: ${list[i].width} by ${list[i].height} px in the baseline, ${c.width} by ${c.height} px now`);
+        const line = `a control is smaller: ${key}: ${list[i].width} by ${list[i].height} px in the baseline, ${c.width} by ${c.height} px now`;
+        if (flag('--look') && c.width >= TARGET_FLOOR && c.height >= TARGET_FLOOR) warnings.push(`${line}; it stays ${TARGET_FLOOR} by ${TARGET_FLOOR} px or more (--look)`);
+        else fails.push(line);
       }
     });
   }
