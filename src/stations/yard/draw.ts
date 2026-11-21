@@ -63,9 +63,6 @@ export interface YardDrawing {
   destroy(): void;
 }
 
-/** This commit draws no trace yet; the trace of the last move comes in the next commit. */
-const NO_TRACE = true;
-
 interface Snapshot { engine: string[]; tracks: Record<string, string[]>; pos: Record<string, number[]>; lined: string; secured: string }
 
 export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): YardDrawing {
@@ -215,11 +212,14 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
         couplers.push({ p: at.p, dx: at.dx, dy: at.dy });
       }
     }
-    // The trace of the last move (R7-P15): found from the change of the state between two paints with no frame.
+    // The trace of the last move (R7-P15): found from the change of the state between two paints with
+    // no frame. The held cut grew: a pull from the track that lost cars. It shrank: a spot or a kick
+    // into the track that gained cars. A move can also change `secured` (model.js clears or sets it),
+    // so only the lining tells a move of the demo (the next lining comes with no paint between).
     if (anim || cine) trace = null;
     else {
       const now = snap(st);
-      if (rest && now.lined === rest.lined && now.secured === rest.secured && now.engine.length !== rest.engine.length) {
+      if (rest && now.lined === rest.lined && now.engine.length !== rest.engine.length) {
         const prev = rest;
         if (now.engine.length > prev.engine.length) {
           const id = TRACK_IDS.find((t) => now.tracks[t].length < prev.tracks[t].length);
@@ -236,7 +236,7 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
     if (land) landU[land.track] = land.fit.reduce((a, l) => a + (l.x1 - l.x0), 0);
     const sc: Scene = {
       L: lay, F, moving, movingCouplers: couplers, hidden: motion.hidden, engineMoves: motion.engineMoves, departed,
-      trace: trace && !departed && !NO_TRACE ? { runs: tracePx(lay, F, trace.track, trace.contactX), toLead: trace.toLead } : null,
+      trace: trace && !departed ? { runs: tracePx(lay, F, trace.track, trace.contactX), toLead: trace.toLead } : null,
       landU,
     };
     if (sc.trace && !sc.trace.runs.length) sc.trace = null;
