@@ -12,8 +12,7 @@ switching, securement, radio) under **one profile** that tracks mastery and **on
 that ramps gently.
 
 **Who:** not rule-lawyers. The person who'd have made a good railroader but **bounced off a
-dense rulebook** — anxious, never tested well, learns by doing. Jordan is user zero
-(*"i don't want to be scared anymore"*); the mission is everyone like him. This reframes
+dense rulebook** — anxious, never tested well, learns by doing. This reframes
 the product: it is **an on-ramp for people the book failed**, not a comprehensive reference
 that happens to quiz. The design follows from that (see Principles).
 
@@ -201,7 +200,7 @@ others are schema-reserved but empty until their station lands. (N15)
 ---
 
 ## Open questions — status
-**Resolved at the gate (2026-06-23):** verifier = Jordan (D-0008) · honest trust migration (D-0009) ·
+**Resolved at the gate (2026-06-23):** verifier = the SME (D-0008) · honest trust migration (D-0009) ·
 CROR verbatim OK / public document (D-0010) · fresh start + redirect at parity + one portfolio entry
 (D-0011) · test-ready deferred past V1 (D-0013).
 
