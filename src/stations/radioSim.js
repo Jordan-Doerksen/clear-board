@@ -34,7 +34,12 @@ html[data-reduce="1"] .radio-wrap button.rbtn{ transition:none } @media (prefers
 .radio-wrap .note .goi{ color:var(--amber-ink); font-weight:var(--fw-bold); font-size:.75rem; margin-bottom:4px }
 .radio-wrap .done{ background:var(--rowwash-green); box-shadow:var(--rowneon-green); border-radius:var(--r-control); padding:12px; margin-top:10px; font-size:.84375rem; display:none }
 .radio-wrap .done.show{ display:block }
-.radio-wrap .tip{ font-size:.75rem; color:var(--ink-2); margin-top:10px; border-top:1px solid var(--lit-rule); padding-top:9px }`;
+.radio-wrap .tip{ font-size:.75rem; color:var(--ink-2); margin-top:10px; border-top:1px solid var(--lit-rule); padding-top:9px }
+/* Forced colours (ruling FORCED-MARKS, finding F-10). They remove the box shadows: the Key button
+   gets an edge, as each Dusk button beside it. */
+@media (forced-colors: active){
+  .radio-wrap button.key{ border:1px solid }
+}`;
 
 const RADIO_HTML = `
 <div class="radio-wrap">
