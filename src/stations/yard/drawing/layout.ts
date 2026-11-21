@@ -99,7 +99,7 @@ export interface Measures {
   target: number;
 }
 
-/** The move in the builder, when a later job passes it (LANDING). */
+/** The move in the builder, when the controller passes it (LANDING). */
 export interface Builder { act: string; n: number; track: string }
 
 export interface Land { car: CarFact; x0: number; x1: number }

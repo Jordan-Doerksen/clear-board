@@ -17,15 +17,17 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const scripts = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).scripts;
 
-// The limit of lint warnings. It is the count of warnings after Wave 2b. The two warnings are in
-// files of other jobs: `src/stations/imperativeStation.ts` (Y4) and `src/state/AppContext.tsx`
-// (U1). The closing commit of the G1 line lowers this number when a job removes a warning. It
-// never goes up.
-const LINT_WARNING_LIMIT = 2;
+// The limit of lint warnings. It is the count of warnings that remains after Wave 2c-2 (ruling
+// LINT-ONE): one warning, `react(only-export-components)` in `src/state/AppContext.tsx`. The ruling
+// keeps it: a fix moves the hook into a new file, and the rule is about fast refresh in development
+// only. The closing commit of the G1 line lowers this number when a job removes a warning. It never
+// goes up.
+const LINT_WARNING_LIMIT = 1;
 
 // The steps, in the order of the run. `script` is an npm script name. `command` is a command
 // line for a step that has no npm script name. `extra` is text that the runner adds to the
-// command of the script.
+// command of the script. Step 12 is a report (row U-01): it lists the shared signal drawings and
+// fails only when it cannot make the list.
 const STEPS = [
   { n: 1, name: 'check:frozen', script: 'check:frozen' },
   { n: 2, name: 'check:dusk', script: 'check:dusk' },
@@ -38,6 +40,7 @@ const STEPS = [
   { n: 9, name: 'solve', command: 'node tools/solve.mjs' },
   { n: 10, name: 'content-check', command: 'node tools/content-check.mjs' },
   { n: 11, name: 'securement-check', command: 'node tools/securement-check.mjs' },
+  { n: 12, name: 'shared-drawings', command: 'node --import ./tests/ts-resolve.mjs tools/shared-drawings.mjs' },
 ];
 
 const env = {

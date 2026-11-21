@@ -93,6 +93,15 @@
 .yard-wrap .yd-legend .yd-view-stand-mark[data-state="reverse"] { fill: var(--yard-reverse-fill); stroke: var(--yard-reverse); }
 /* The 44 px box of a switch: a still ring that shows where a press lines the switch. */
 .yard-wrap .yd-view .yd-view-swbox { position: absolute; width: var(--cb-target); height: var(--cb-target); border-radius: var(--r-control); box-shadow: var(--yard-plate-ring); }
+/* The switch button of the access layer (../access.ts) lies on the box of its switch, in the control
+   layer. It has no fill and no edge, so the ring of the box shows through; its name holds the words.
+   A hover gives the wash of a row. The focus ring is the ring of the app. */
+.yard-wrap .yd-view .yd-view-sw {
+  position: absolute; left: 0; top: 0; width: var(--cb-target); height: var(--cb-target);
+  margin: 0; padding: 0; border: 0; border-radius: var(--r-control);
+  background: none; color: inherit; font: inherit; cursor: pointer;
+}
+.yard-wrap .yd-view .yd-view-sw:hover { background: var(--wash-1); }
 
 /* ---- Plates: each word of the picture is DOM text on a plate ----------------------------------- */
 .yard-wrap .yd-view .yd-view-plate {

@@ -1,7 +1,7 @@
 // svg.ts — the one inline SVG of the Yard picture, its plate layer and its control layer.
 //
 // The root is div.yd-view. It holds one <svg> (aria-hidden), a plate layer with the words as DOM
-// text (aria-hidden), and an empty control layer for the switch buttons of a later job. The drawing
+// text (aria-hidden), and a control layer that holds the six switch buttons of ../access.ts. The drawing
 // makes each element one time and then updates it: a paint writes an attribute, a style value or a
 // text only when its value changed (requirement 31), and a layout never empties the root.
 // The script writes classes and data attributes. Each colour is in drawing.css, on --yard- names.
@@ -148,7 +148,7 @@ export interface Scene {
   hidden: Set<string>;
   /** The engine and its held cut at rest are not drawn (a chain draws them, or the arrival hides them). */
   engineMoves: boolean;
-  /** After Depart, for a later job: the lead shows no engine and no held car. */
+  /** After Depart (R7-P14): the lead shows no engine and no held car. */
   departed: boolean;
   /** The trace of the last move: px runs from the lead to the place of contact; toLead points the arrow at the lead. */
   trace: { runs: Pt[][]; toLead: boolean } | null;

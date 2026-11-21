@@ -40,6 +40,19 @@
   list-style: none;
 }
 
+/* ---- the groups of the list (U-32): one for each kind of entry --------------------------------------
+   The name of a group is the Dusk group label, as a heading (h3). Its words keep the size of the row
+   title (16 px), so that no text of the page is smaller than today, and start on the line of the row
+   titles. Dusk hides its group label below 760 px (a part of its sidebar there); this list shows it at
+   each width. A group has the space of the view above it; the first has none. */
+.cb-app .cb-reference-view .cb-reference-group-name {
+  display: block;
+  margin: 0 var(--sp-3) var(--sp-2);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
+.cb-app .cb-reference-view .cb-reference-group + .cb-reference-group { margin-top: var(--sp-5); }
+
 /* A result row has no icon square: the row is one column, so that the title does not fall into the
    24 px column of the Dusk row. The title and its plain words have no gap between them, as in a
    Dusk row where they share one cell, so that each row reads as one unit. */
@@ -56,7 +69,26 @@
   line-height: var(--lh-base);
 }
 
+/* The line under the title of a row: the name of the domain (U-32), then the words of the trust mark
+   of the entry (U-02), at the size of the row text. The words carry the state; the ink of the tone is
+   a second carrier (green ink: verified; amber ink: each other mark). */
+.cb-app .cb-reference-view .cb-reference-meta {
+  display: block;
+  color: var(--ink-2);
+  font-size: calc(1rem / 1.2);
+  line-height: var(--lh-base);
+}
+.cb-app .cb-reference-view .cb-reference-trust { font-weight: var(--fw-medium); }
+.cb-app .cb-reference-view .cb-reference-trust--ok { color: var(--cb-ok-ink); }
+.cb-app .cb-reference-view .cb-reference-trust--caution { color: var(--cb-caution-ink); }
+
 /* ---- the entry: a framed Dusk panel. The head holds the title, the body holds the rest. ---------- */
+/* The title of the entry is an h4 under the h3 of its group (U-32). The Dusk base sets no margin of
+   an h4, so this rule does: the look stays that of the h3 of today. */
+.cb-app .cb-reference-view .cb-reference-detail h4 { margin: 0; }
+/* The entry opens inside its row item, directly under the pressed row (U-03), with a space above it
+   and the space of the view below it. */
+.cb-app .cb-reference-view .cb-reference-list > li > .cb-reference-detail { margin: var(--sp-3) 0 var(--sp-5); }
 /* The entry title is reading text and keeps its size of today (18.72 px at a 16 px root). */
 .cb-app .cb-reference-view .cb-reference-detail .dusk-panel-name { font-size: 1.17rem; }
 /* The body is one column with one gap. A chip and a button keep the width of their words; the rule
@@ -78,6 +110,14 @@
 }
 /* The word of a button keeps its size of today (14.4 px). */
 .cb-app .cb-reference-view .cb-reference-detail .dusk-btn { font-size: .9rem; }
+/* A line of app words about the entry (U-11): "This entry has no text in the app." or "The rule text
+   is not in the app." It is reading text at 16 px in the second ink, and stops at the measure. */
+.cb-app .cb-reference-view .cb-reference-note {
+  max-width: var(--measure);
+  color: var(--ink-2);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
 /* The rule text: the gap of the body is the only space around it. */
 .cb-app .cb-reference-view .cb-reference-detail .cb-disclosure { margin: 0; }
 /* The quote of the rule text is a box. A box takes the width of the panel body, so that its right

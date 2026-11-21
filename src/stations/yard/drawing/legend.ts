@@ -22,7 +22,7 @@ export interface LegendFacts {
   kickable: boolean;
   goal: boolean;
   secured: boolean;
-  /** The landing place of the move in the builder is drawn (a later job). */
+  /** The landing place of the move in the builder is drawn (LANDING). */
   landing: boolean;
 }
 

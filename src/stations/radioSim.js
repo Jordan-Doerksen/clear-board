@@ -1,6 +1,9 @@
-// Clear Board — Radio station. Ported VERBATIM from the CN Conductor Trainer "Back to a Joint"
+// Clear Board — Radio station. Ported from the CN Conductor Trainer "Back to a Joint"
 // walkthrough. The call wording is real-world-accurate and tuned by the SME — do NOT reword it.
 // One walkthrough for now (the SME: weakest section, port as-is, grow later).
+// Clear Board 2 changed the style, the markup and the behaviour of the island, and removed one
+// sentence of its end text. It did not change the STEPS wording: tools/frozen-check.mjs compares
+// that region with commit 94a41c5.
 
 const RADIO_CSS = `
 .radio-wrap{ color:var(--ink) }
@@ -21,6 +24,7 @@ html[data-reduce="1"] .radio-wrap button.rbtn{ transition:none } @media (prefers
 .radio-wrap .tx{ background:var(--well); border-left:3px solid var(--blue); border-radius:0 var(--r-control) var(--r-control) 0; padding:var(--sp-3) var(--sp-5); margin-bottom:6px; font-size:.84375rem }
 .radio-wrap .tx.eng{ border-left-color:var(--green) }
 .radio-wrap .tx .who{ display:block; margin-bottom:3px; font-size:var(--fs-xs); font-weight:var(--fw-medium); color:var(--ink-3); text-transform:uppercase; letter-spacing:var(--track-label) }
+.radio-wrap #gapline{ font-size:1.15rem; font-weight:var(--fw-bold); color:var(--ink); margin:4px 0 10px }
 .radio-wrap .next{ font-size:.875rem; margin:8px 0 } .radio-wrap .next .lbl{ font-size:var(--fs-xs); font-weight:var(--fw-medium); color:var(--ink-3); text-transform:uppercase; letter-spacing:var(--track-label); display:block; margin-bottom:4px }
 .radio-wrap .call{ background:var(--well); border:1px dashed var(--blue-ink); border-radius:var(--r-control); padding:var(--sp-4) var(--sp-5); font-size:.90625rem }
 .radio-wrap button.rbtn{ font:inherit; border:none; border-radius:var(--r-control); padding:10px 14px; min-width:var(--cb-target); min-height:var(--cb-target); font-weight:var(--fw-bold); cursor:pointer; font-size:.875rem; margin-top:10px; transition:background-color var(--m-confirm) var(--ease), box-shadow var(--m-confirm) var(--ease) }
@@ -30,18 +34,32 @@ html[data-reduce="1"] .radio-wrap button.rbtn{ transition:none } @media (prefers
 .radio-wrap .note .goi{ color:var(--amber-ink); font-weight:var(--fw-bold); font-size:.75rem; margin-bottom:4px }
 .radio-wrap .done{ background:var(--rowwash-green); box-shadow:var(--rowneon-green); border-radius:var(--r-control); padding:12px; margin-top:10px; font-size:.84375rem; display:none }
 .radio-wrap .done.show{ display:block }
-.radio-wrap .tip{ font-size:.75rem; color:var(--ink-2); margin-top:10px; border-top:1px solid var(--lit-rule); padding-top:9px }`;
+.radio-wrap .tip{ font-size:.75rem; color:var(--ink-2); margin-top:10px; border-top:1px solid var(--lit-rule); padding-top:9px }
+/* Forced colours (ruling FORCED-MARKS, finding F-10). They remove the box shadows: the two panels
+   and the end box get an edge, as each Dusk panel does (the lead, after the review of job F2-B), the
+   Key button gets an edge, as each Dusk button beside it, and the stage gets an edge. The scene takes the
+   system colours, as the Yard drawing does, so each label is CanvasText on Canvas in each palette.
+   Each shape of the scene has a style attribute. A rule of a sheet wins over it only with !important. */
+@media (forced-colors: active){
+  .radio-wrap .radio, .radio-wrap .note, .radio-wrap .done{ border:1px solid }
+  .radio-wrap button.key{ border:1px solid }
+  .radio-wrap .stage{ border:1px solid }
+  .radio-wrap .stage text{ fill:CanvasText !important }
+  .radio-wrap .stage rect{ fill:Canvas !important; stroke:CanvasText !important }
+  .radio-wrap .stage line{ stroke:CanvasText !important }
+  .radio-wrap .stage circle{ fill:CanvasText !important }
+}`;
 
 const RADIO_HTML = `
 <div class="radio-wrap">
   <div class="rhead">
-    <div class="sigmark" id="sigmark" aria-label="Signal aspect"><span></span><span></span><span></span></div>
-    <div><div class="rtitle">Radio &amp; Steps — Back to a Joint</div>
+    <div class="sigmark" id="sigmark" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div><h3 class="rtitle">Radio &amp; Steps — Back to a Joint</h3>
       <div class="rsub">Guided · car counts to feet, couple, verify, protect, cut the air, release</div></div>
   </div>
   <div class="scenario">Engine <b>CN 2204</b> backs its cut up to couple onto a car on AS73. You're on the ground, in the clear, watching the tail car and the joint. Count it down — cars, then feet — verify the coupling, protect, couple the air, release.</div>
   <div class="stage">
-    <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg">
+    <svg id="scene" role="img" viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg">
       <line x1="0" y1="168" x2="760" y2="168" style="stroke:var(--grey)" stroke-width="2"/>
       <line x1="0" y1="176" x2="760" y2="176" style="stroke:var(--grey)" stroke-width="2"/>
       <rect x="566" y="120" width="92" height="46" rx="3" style="fill:var(--tile-grey-lo);stroke:var(--grey-ink)"/>
@@ -68,11 +86,11 @@ const RADIO_HTML = `
     </svg>
   </div>
   <div class="cols">
-    <div class="radio"><h3>Radio</h3><div class="log" id="log"></div><div class="next" id="next"></div></div>
+    <div class="radio"><h3 id="loghead">Radio</h3><div class="log" id="log" role="log" tabindex="0" aria-labelledby="loghead"></div><div id="gapline"></div><div class="next" id="next"></div></div>
     <div class="note" id="notebox">
       <h3>Why this call</h3>
       <div id="notebody" style="color:var(--ink-2)">Make your first call to begin — identify the engine, railway initials and number digit by digit, and wait for the engineer to answer up.</div>
-      <div class="done" id="done"></div>
+      <div role="status"><div class="done" id="done"></div></div>
       <div class="tip"><span style="color:var(--amber-ink)">CN GOI</span> = operational practice, not a CROR rule. Green lines are the engineer; he repeats the car counts and calls the air to the tail.</div>
     </div>
   </div>
@@ -132,12 +150,12 @@ function injectStyle() {
 
 export function mount(root, ctx) {
   injectStyle();
-  root.innerHTML = `<button class="cb-btn--plain" data-go="">← Home</button>` + RADIO_HTML;
-  root.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => ctx.go(b.dataset.go)));
+  // The view (Radio.tsx) shows the one "← Home" of both modes, first (row U-22).
+  root.innerHTML = RADIO_HTML;
 
   const $ = (id) => root.querySelector('#' + id);
-  const consist = $('consist'), gaptxt = $('gaptxt'), statusEl = $('status'),
-        logEl = $('log'), nextEl = $('next'), noteBody = $('notebody'), doneEl = $('done');
+  const consist = $('consist'), gaptxt = $('gaptxt'), statusEl = $('status'), scene = $('scene'),
+        gapline = $('gapline'), logEl = $('log'), nextEl = $('next'), noteBody = $('notebody'), doneEl = $('done');
   let idx = 0, log = [];
 
   // static signal badge (Clear) — decorative; no looping interval (avoids a leak on re-mount)
@@ -149,26 +167,42 @@ export function mount(root, ctx) {
     consist.setAttribute('transform', 'translate(' + ((500 - feet) * 0.5) + ',0)');
     if (s.status) { gaptxt.setAttribute('opacity', '0'); statusEl.setAttribute('opacity', '1'); statusEl.textContent = s.status; }
     else { statusEl.setAttribute('opacity', '0'); gaptxt.setAttribute('opacity', '1'); gaptxt.textContent = (s.read || ''); }
+    // The page repeats the readout of the scene as text above the call (row U-21), with the words
+    // of the read or status field as they are. The scene takes the same words as its name.
+    gapline.textContent = s.status || s.read || '';
+    scene.setAttribute('aria-label', gapline.textContent);
   }
+  // The log adds only its new lines (role="log" announces each added line one time).
   function renderLog() {
-    logEl.innerHTML = log.map(e => e.who === 'Eng'
-      ? '<div class="tx eng"><span class="who">Engineer &middot; CN 2204</span><br>' + e.text + '</div>'
-      : '<div class="tx"><span class="who">You &middot; conductor</span><br>' + e.text + '</div>').join('');
+    for (const e of log.slice(logEl.children.length)) {
+      logEl.insertAdjacentHTML('beforeend', e.who === 'Eng'
+        ? '<div class="tx eng"><span class="who">Engineer &middot; CN 2204</span><br>' + e.text + '</div>'
+        : '<div class="tx"><span class="who">You &middot; conductor</span><br>' + e.text + '</div>');
+    }
     logEl.scrollTop = logEl.scrollHeight;
   }
+  // The sign ▶ of "Key the radio" is decoration: aria-hidden keeps it out of the spoken name, so a
+  // screen reader says "Key the radio" (row U-41, ruling SIGN-NAME). The screen shows the sign as
+  // before. This is the one place that writes the control.
   function renderNext() {
     if (idx < STEPS.length) {
       const s = STEPS[idx];
       const pre = s.pre ? '<div class="tx eng" style="margin-bottom:8px"><span class="who">Engineer &middot; CN 2204 (incoming)</span><br>' + s.pre + '</div>' : '';
-      nextEl.innerHTML = pre + '<span class="lbl">Your ' + (s.pre ? 'reply' : 'next call') + '</span><div class="call">' + s.call + '</div><button class="rbtn key" id="keyBtn">Key the radio &#9654;</button>';
+      nextEl.innerHTML = pre + '<span class="lbl">Your ' + (s.pre ? 'reply' : 'next call') + '</span><div class="call">' + s.call + '</div><button class="rbtn key" id="keyBtn">Key the radio <span aria-hidden="true">&#9654;</span></button>';
       $('keyBtn').addEventListener('click', transmit);
     } else {
       nextEl.innerHTML = '<button class="rbtn again" id="againBtn">Run it again</button>';
       $('againBtn').addEventListener('click', reset);
     }
   }
+  // renderNext writes a new button in place of the one that was pressed. When the pressed button had
+  // the focus, the focus goes to the new button, so that it stays in the task (row U-14).
+  function keepFocus(had) {
+    if (had) { const b = $(idx < STEPS.length ? 'keyBtn' : 'againBtn'); if (b) b.focus(); }
+  }
   function transmit() {
     if (idx >= STEPS.length) return;
+    const had = document.activeElement === $('keyBtn');
     const s = STEPS[idx];
     if (s.pre) log.push({ who: 'Eng', text: s.pre });
     log.push({ who: 'You', text: s.call });
@@ -180,18 +214,21 @@ export function mount(root, ctx) {
     renderLog(); renderNext();
     if (idx >= STEPS.length) {
       doneEl.className = 'done show';
-      doneEl.innerHTML = '<b>Coupled, proven, protected, air to the tail.</b> Counted cars then feet, made the joint, stretched it, set &amp; centered, cut the air in; the engineer called air to the tail, you repeated it and called "going for hand brakes." The move/departure is the next layer.';
+      doneEl.innerHTML = '<b>Coupled, proven, protected, air to the tail.</b> Counted cars then feet, made the joint, stretched it, set &amp; centered, cut the air in; the engineer called air to the tail, you repeated it and called "going for hand brakes."';
       // Guided mode grades NOTHING (REVAMP §5 — the walkthrough is a confidence-builder, not a test).
       // The old profile.radio.done boolean was retired with D-0025: it graded attendance and could
       // never decay. Radio mastery now comes from "Call it yourself" through the one SM-2 model.
     }
+    keepFocus(had);
   }
   function reset() {
+    const had = document.activeElement === $('againBtn');
     idx = 0; log = [];
     applyReadout({ feet: 500, read: '10 cars to the joint' });
     logEl.innerHTML = ''; doneEl.className = 'done';
     noteBody.innerHTML = 'Make your first call to begin.';
     renderNext();
+    keepFocus(had);
   }
 
   applyReadout({ feet: 500, read: '10 cars to the joint' });

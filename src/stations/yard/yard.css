@@ -1,4 +1,5 @@
-/* yard.css — the style of the Yard chrome. The Yard chunk imports it (../yardSim.js).
+/* yard.css — the style of the Yard chrome. The station wrapper (../Yard.tsx) and the Yard chunk
+   (../yardSim.js) import it; the build puts it in the sheet of the app, after the sheets of main.tsx.
    The chrome stands on Dusk parts and on the cb- parts of the app. This file holds the rules that
    keep the words, the sizes and the boxes of today on those parts.
    Each selector starts with .yard-wrap, so no rule reaches the rest of the app. After it, each
@@ -13,6 +14,9 @@
    (the text takes the ink and the face of the body), no side padding, no width and no side margin.
    It keeps the type size of today. */
 .yard-wrap { display: block; padding: 4px 0 20px; font-size: var(--fs-l); }
+/* The top of the station: "← Home" and the heading. Yard.tsx draws them in a .yard-wrap of their own,
+   above the host of the island (2c-plan C7). The island below keeps its own top room. */
+.yard-wrap.yd-top { padding-bottom: 0; }
 /* The back control is a plain button of the parts: the word in the link colour, no fill at rest, a
    wash and an underline on hover, a fill change when pressed. It keeps its text of 14 px, weight 600,
    and the box of today: a side padding of 12 px and a 1 px border with no colour. */
@@ -20,6 +24,13 @@
   margin-bottom: 10px; padding-inline: 12px; border: 1px solid transparent;
   font-size: var(--fs-base); font-weight: var(--fw-medium);
 }
+/* The heading has the form of the Reference title: 20.8 px, the station icon in the Dusk icon square
+   on the line of the word, the glyph at the size of the heading (U-29). In the dyslexia mode it takes
+   the letter spacing and the line height of the mode, as the Reference title does. */
+.yard-wrap .yd-title { font-size: 1.3rem; }
+.yard-wrap .yd-title .dusk-ico { display: inline-grid; vertical-align: middle; width: 1.6em; height: 1.6em; font-size: 1em; }
+.yard-wrap .yd-title:where(html[data-dys="1"] *) { letter-spacing: inherit; }
+.yard-wrap .yd-title .dusk-ico:where(html[data-dys="1"] *) { line-height: var(--lh-base); }
 /* The frame of the drawing is a Dusk panel with no padding: the lit edge, the corner and the fill
    come from the parts. It takes the full width of .yard-wrap and the height of the drawing.
    This file sets no width, height, padding or side margin on it, and no rule for an element
@@ -51,12 +62,17 @@
 .yard-wrap #certify { margin: 4px 0 2px; }
 /* The two toolbar rows are children of .yard-wrap. The child selector keeps this rule out of the drawing. */
 .yard-wrap > .yd-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
-/* The strip: a Dusk strip with the job picker, a spacer and one cell with the readout, in the order of
-   the markup. The picker does not take the class of the end of a strip, because that class moves it to
-   the right. It gets the inner room of the end of a strip here, and it is never wider than the strip,
-   so the page does not scroll sideways at 320 px. */
+/* The strip: a Dusk strip with the job picker and its label, a spacer and one cell with the readout, in
+   the order of the markup. The picker does not take the class of the end of a strip, because that class
+   moves it to the right. Its field gets the inner room of the end of a strip here, and it is never wider
+   than the strip, so the page does not scroll sideways at 320 px. */
 .yard-wrap > .yd-strip { gap: 0; align-items: stretch; }
-.yard-wrap .yd-strip #picker { margin: var(--sp-2) var(--sp-4); max-width: calc(100% - 2 * var(--sp-4)); }
+.yard-wrap .yd-strip .yd-field--job { margin: var(--sp-2) var(--sp-4); max-width: calc(100% - 2 * var(--sp-4)); }
+.yard-wrap .yd-strip #picker { max-width: 100%; }
+/* The visible label of a select (U-20, A11Y-18): the words of its old tooltip, above the select, at
+   12 px in the second ink. The count of cars has the word "cars" after it as its label. */
+.yard-wrap .yd-field { display: inline-flex; flex-direction: column; gap: 2px; min-width: 0; }
+.yard-wrap .yd-label { color: var(--ink-2); font-size: var(--fs-s); font-weight: var(--fw-medium); }
 /* The four selects keep the type of today: 14 px, weight 600. */
 .yard-wrap .yd-bar .cb-select { font-size: var(--fs-base); font-weight: var(--fw-medium); }
 /* A disabled select shows its state by the disabled look of the part, with no opacity. The part
@@ -66,7 +82,9 @@
 /* The readout keeps 16 px, mono, bold. The cell gives the mono face. */
 .yard-wrap .yd-readout { font-size: 1rem; font-weight: var(--fw-bold); }
 /* The move builder: one Dusk panel that is the second toolbar row. It holds the controls of today in
-   their order and wraps. The message stays the next element after it, outside the panel.
+   their order and wraps. The message stays the next element after it, outside the panel. The labels
+   stand above their selects, so the controls line up at their foot; the word "cars" stays in the
+   middle of the height of a control.
    Work it, Watch optimal, Depart and Certify are Dusk buttons, with one look: gold is the only light
    of the chrome. A Dusk button has no border: the class yd-go gives it a border with no colour, so
    that it keeps the width of today. A disabled Depart takes the disabled state of the part, with no
@@ -78,18 +96,28 @@
   padding-inline: 12px; border: 1px solid transparent;
   font-size: var(--fs-base); font-weight: var(--fw-medium);
 }
-.yard-wrap .yd-unit { font-size: var(--fs-l); }
+.yard-wrap > .yd-builder { align-items: flex-end; }
+.yard-wrap .yd-unit { display: inline-flex; align-items: center; min-height: var(--cb-target); font-size: var(--fs-l); }
 /* The message: one cb-banner (G9). setBanner writes the tone as cb-banner--ok, --bad or --win beside
    the yd- tone. The text is ink in each tone: red is on the edge and on the mark of a refusal only.
-   The message keeps its text of 15 px, weight 600, and its box stops at the Dusk measure. It stays a
-   block box, so its text and "Look it up →" stay inline, as today. */
-.yard-wrap .yd-banner { margin: 12px 0; max-width: var(--measure); font-size: var(--fs-l); font-weight: var(--fw-medium); }
+   The message keeps its text of 15 px, weight 600. Its box takes the full width of the Yard, as the
+   panels around it do; its text stops at the Dusk measure: the padding at the end takes the rest of
+   the width (Y-FIX). It stays a block box, so its text and "Look it up →" stay inline, as today. */
+.yard-wrap .yd-banner {
+  margin: 12px 0; font-size: var(--fs-l); font-weight: var(--fw-medium);
+  padding-inline-end: max(var(--sp-5), calc(100% - var(--sp-5) - var(--measure)));
+}
 /* "Look it up →" is a plain button (G11). It keeps its text of 12 px, weight 600, and the width of
    today: a side padding of 9 px and a 1 px border with no colour. */
 .yard-wrap .yd-lookup {
   margin-left: 10px; padding-inline: 9px; border: 1px solid transparent;
   font-size: var(--fs-s); font-weight: var(--fw-medium);
 }
+/* The question before the moves of a job are lost (U-12): a dialog of the parts. The question is
+   reading text; the answers Yes and No stand in one row, each a Dusk button of 44 px or more. */
+.yard-wrap .yd-ask-q { margin: 0 0 var(--sp-6); }
+.yard-wrap .yd-ask-answers { display: flex; flex-wrap: wrap; gap: var(--sp-5); }
+.yard-wrap .yd-ask-answers .dusk-btn { min-width: 5.5rem; border: 1px solid transparent; }
 /* The rules in play: the legend and the rule tiles share one Dusk panel. */
 .yard-wrap .yd-rules-panel { margin: 12px 0; }
 /* The legend is a Dusk named rule: the name, then the line of text beside it, then the lit line of
@@ -111,8 +139,12 @@
 .yard-wrap .yd-chip .dusk-tile-sub { min-height: 0; font-size: .78125rem; }
 /* The note "What this trainer builds" is a Dusk panel: the lit edge of the panel takes the place of
    the amber edge and wash. The head words are amber, the second part is the second ink, the text is
-   13 px, and the text stops at the Dusk measure. */
-.yard-wrap .yd-note { margin: 10px 0 4px; max-width: var(--measure); font-size: var(--fs-data); }
+   13 px. The panel takes the full width of the Yard; its text stops at the Dusk measure: the padding
+   at the end takes the rest of the width (Y-FIX). */
+.yard-wrap .yd-note {
+  margin: 10px 0 4px; font-size: var(--fs-data);
+  padding-inline-end: max(var(--gap), calc(100% - var(--gap) - var(--measure)));
+}
 .yard-wrap .yd-note-head { color: var(--amber-ink); }
 .yard-wrap .yd-note-more { color: var(--ink-2); }
 /* The help is a disclosure of the parts (G15) at the full width of .yard-wrap, in no panel, so that
@@ -129,3 +161,66 @@
 .yard-wrap .yd-key-reverse { color: var(--amber-ink); }
 .yard-wrap .yd-key-normal { color: var(--green-ink); }
 .yard-wrap .yd-key-kick { color: var(--amber-ink); }
+/* An element with the hidden attribute does not show, also when a part gives it a display value
+   (the stepper of the watched line takes the place of the controls of a move). */
+.yard-wrap [hidden] { display: none !important; }
+/* The watched line (R7-P8): a framed Dusk panel under the message. The head bar names the line and
+   says that it is a demonstration; the count chip gives the steps that show. The list has one line
+   for each step: its number, a mark (✓ shown, ▸ the next step) and the call in the mono face. The
+   words carry the state: the count, the banner and the region say the step. */
+.yard-wrap .yd-demo { margin: 12px 0; }
+.yard-wrap .yd-demo-name { font-size: var(--fs-data); }
+.yard-wrap .yd-demo-list { display: flex; flex-direction: column; gap: var(--sp-1); margin: 0; list-style: none; }
+.yard-wrap .yd-demo-step {
+  display: flex; align-items: baseline; gap: var(--sp-3); padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-control); color: var(--ink-2); font-size: var(--fs-base);
+}
+.yard-wrap .yd-demo-step[data-state="done"] { color: var(--ink); }
+.yard-wrap .yd-demo-step[data-state="next"] { color: var(--ink); background: var(--wash-2); }
+.yard-wrap .yd-demo-n { min-width: 1.5em; color: var(--ink-3); text-align: right; }
+.yard-wrap .yd-demo-mark { flex: none; width: 1em; color: var(--cb-link); }
+.yard-wrap .yd-demo-call { font-weight: var(--fw-bold); overflow-wrap: anywhere; }
+/* The control "Show the arrival" of the work order (R7-P5): a Dusk button under the meta line. */
+.yard-wrap .yd-arrival { margin-top: var(--sp-4); }
+/* The words of a past state of the move log in the head bar of the picture (R7-P10), for example
+   "Before move 3": an information state of the parts, with its word. */
+.yard-wrap .yd-yardhead { gap: var(--sp-1) var(--sp-4); }
+.yard-wrap .yd-viewlabel { font-size: var(--fs-data); }
+/* The move log (R7-P10): a framed Dusk panel under the message. One line for each call of the run:
+   its number, the call in the mono face, the result of the model and the cost in words, then the
+   plain buttons "Play again" and, on the last line, "Before and after". In a narrow window the
+   buttons go under the text. */
+.yard-wrap .yd-log { margin: 12px 0; }
+.yard-wrap .yd-log-name { font-size: var(--fs-data); }
+.yard-wrap .yd-log-list { display: flex; flex-direction: column; gap: var(--sp-2); margin: 0; list-style: none; }
+.yard-wrap .yd-log-line { display: grid; grid-template-columns: 1.5em minmax(0, 1fr) auto; align-items: baseline; gap: var(--sp-1) var(--sp-4); }
+.yard-wrap .yd-log-n { color: var(--ink-3); font-size: var(--fs-base); text-align: right; }
+.yard-wrap .yd-log-text { min-width: 0; color: var(--ink-2); font-size: var(--fs-base); }
+.yard-wrap .yd-log-call { color: var(--ink); }
+.yard-wrap .yd-log-ctl { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--sp-2); }
+.yard-wrap .yd-log-btn { padding-inline: 12px; border: 1px solid transparent; font-size: var(--fs-base); font-weight: var(--fw-medium); }
+@media (max-width: 640px) {
+  .yard-wrap .yd-log-line { grid-template-columns: 1.5em minmax(0, 1fr); }
+  .yard-wrap .yd-log-ctl { grid-column: 2; justify-content: flex-start; }
+}
+/* The head bar of the yard panel (YARD-HEAD, ROUTE-WORDS): the route words at the left, the words of a
+   past state of the move log beside them, and BUILD with the goal track and its count at the right,
+   in the gold of the goal of the picture. The route words keep the width of their longest form,
+   "Route: LEAD → MAIN LINE", so that a throw does not move the head bar or the picture under it. */
+.yard-wrap .yd-route { min-width: 15.5em; font-size: var(--fs-data); }
+.yard-wrap .yd-headgoal { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.yard-wrap .yd-headgoal-word { color: var(--yard-goal); font-size: var(--fs-s); font-weight: var(--fw-bold); letter-spacing: var(--track-label); }
+.yard-wrap .yd-headgoal-count { padding: 0 var(--sp-1); font-size: var(--fs-s); }
+/* The first job says how to line a switch and how to call a move (U-16): a line of reading text in the
+   work order, with a lit rule at its start, so that it reads as the first step. It stops at the Dusk
+   measure. */
+.yard-wrap .yd-wo-how {
+  margin: var(--sp-3) 0 var(--sp-2); padding-left: var(--sp-4); max-width: var(--measure);
+  border-left: 2px solid var(--lit-line); color: var(--ink);
+}
+/* The name of the button in that line stays on one line, so that "▸" does not stand alone. */
+.yard-wrap .yd-wo-how-go { white-space: nowrap; }
+/* The key of the marks of the picker (U-39), under the select: 12 px in the second ink. */
+.yard-wrap .yd-pickkey { color: var(--ink-2); font-size: var(--fs-s); }
+/* The message shows no empty box (U-39): with no text it takes no room. */
+.yard-wrap .yd-banner:empty { display: none; }

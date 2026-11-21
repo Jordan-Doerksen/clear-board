@@ -7,7 +7,7 @@ import './styles/dusk/dusk.compose.css'
 import './styles/dusk/dusk.motion.css'
 import './styles/clear-board.tokens.css'    // the bridge
 import './styles/clear-board.parts.css'     // the cb- parts
-import './index.css'                        // the app sheet (the old rules, until the sweep)
+import './index.css'                        // the app sheet: the base rules, and the old rules that still match
 import './styles/surfaces/shell.css'        // B1
 import './styles/surfaces/home.css'         // B1
 import './styles/surfaces/settings.css'     // B1

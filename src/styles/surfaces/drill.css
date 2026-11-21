@@ -1,8 +1,10 @@
 /* surfaces/drill.css - the rules that only Drill and Signals need. Owner in Wave 2b: job B2. Class prefix: cb-drill-.
    The Signals route is the Drill. Each selector starts with .cb-app .cb-drill-view, the root of each
-   state of the Drill. A rule of a reading mode puts the attribute of the mode on html in front. A
-   text size is in rem, so that the text scale reaches it. A drawing keeps its height in px, as
-   today. This sheet holds no raw colour, no transition, no animation and no movement. */
+   state of the Drill, except the three rules of the words on an answered option: the Radio test
+   shows the same words in the same form (U-06). A rule of a reading mode puts the attribute of the
+   mode on html in front. A text size is in rem, so that the text scale reaches it. A drawing keeps
+   its height in px, as today. This sheet holds no raw colour, no transition, no animation and no
+   movement. */
 
 /* ---- the view: one column of parts, one gap between them ---------------------------------------
    The column is at most --maxw (920 px) wide and sits in the middle of the window, which fills the
@@ -18,6 +20,18 @@
 /* "← Home" keeps the width of its word */
 .cb-app .cb-drill-view > .cb-btn--plain { align-self: flex-start; }
 
+/* ---- the station heading (U-29): the form of the Reference title ----------------------------------
+   The heading is reading text at the size of the Reference title (20.8 px at a 16 px root). The
+   station icon sits in the Dusk icon square, before the word, on the line of the word. */
+.cb-app .cb-drill-view .cb-drill-title { font-size: 1.3rem; }
+.cb-app .cb-drill-view .cb-drill-title .dusk-ico {
+  display: inline-grid;
+  vertical-align: middle;
+  width: 1.6em;
+  height: 1.6em;
+  font-size: 1em;
+}
+
 /* ---- the count line, above the question panel, in the reading order of today ------------------- */
 .cb-app .cb-drill-view .cb-drill-top {
   display: flex;
@@ -29,6 +43,14 @@
 /* "Question N of M" and the count chip "N correct" keep their size of today (16 px). */
 .cb-app .cb-drill-view .cb-drill-top .cb-sub,
 .cb-app .cb-drill-view .cb-drill-top .dusk-count { font-size: 1rem; }
+
+/* The note of a practice-only session (U-26) is reading text at 16 px, in the second ink, and stops
+   at the measure. */
+.cb-app .cb-drill-view .cb-drill-note {
+  max-width: var(--measure);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
 
 /* ---- the question panel: the head holds the heading only, the body holds the prompt ------------- */
 /* The question heading is reading text and keeps its size of today (20.8 px). */
@@ -44,6 +66,44 @@
   height: 170px;
 }
 
+/* ---- the learn card (U-28, LEARN-GAP): a framed Dusk panel, in the form of the Reference entry ----
+   The head holds the title of the item at the size of a question heading (20.8 px). The body is one
+   column with one gap: the chip "New item" with the width of its words, the plain words at the size
+   of a prompt, and for a signal each different drawing, 120 px high, in a row that wraps. "Next →"
+   is the one control: it takes the width of the column, and its word has the size of the "Next →"
+   of the feedback (14.4 px). */
+.cb-app .cb-drill-view .cb-drill-learn .dusk-panel-name { font-size: 1.3rem; }
+.cb-app .cb-drill-view .cb-drill-learn > .dusk-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.cb-app .cb-drill-view .cb-drill-learn .cb-chip { align-self: flex-start; }
+.cb-app .cb-drill-view .cb-drill-learn-aspects {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-3);
+}
+.cb-app .cb-drill-view .cb-drill-learn-aspects svg {
+  width: auto;
+  height: 120px;
+}
+.cb-app .cb-drill-view .cb-drill-learn-next { font-size: .9rem; }
+
+/* ---- the words on an answered option (U-06): a line under the answer text -------------------------
+   "Correct answer" on the right option and "Your answer" on a picked wrong option. The words carry
+   the state; the ink of the mark is a second carrier. The Radio test puts the same words on its
+   options, so these three rules hold for an answer option in each view. */
+.cb-app .cb-opt .cb-drill-tag {
+  display: block;
+  margin-top: var(--sp-2);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+}
+.cb-app .cb-opt--right .cb-drill-tag { color: var(--cb-ok-ink); }
+.cb-app .cb-opt--wrong .cb-drill-tag { color: var(--cb-attn-ink); }
+
 /* ---- the feedback: a Dusk panel. Each part is on its own line, in the order of today ------------ */
 .cb-app .cb-drill-view .cb-drill-feedback {
   display: flex;
@@ -56,10 +116,11 @@
 .cb-app .cb-drill-view .cb-drill-feedback .cb-drill-severity { color: var(--ink-2); }
 /* The source line keeps its size of today (12.8 px). */
 .cb-app .cb-drill-view .cb-drill-feedback .cb-sub { font-size: .8rem; }
-/* The word of a button keeps its size of today (14.4 px). "Look it up →" keeps the full width of the
-   panel, and "Next →" or "Finish", the last part, keeps its own width at the start of its line. */
+/* U-38: "Next →" or "Finish" is the main control. It takes the full width of the panel, and its word
+   keeps the size of today (14.4 px). "Look it up →" is a text link: it keeps the width of its words,
+   at the start of its line. */
 .cb-app .cb-drill-view .cb-drill-feedback .dusk-btn { font-size: .9rem; }
-.cb-app .cb-drill-view .cb-drill-feedback > .dusk-btn:last-child { align-self: flex-start; }
+.cb-app .cb-drill-view .cb-drill-feedback .cb-drill-lookup { align-self: flex-start; }
 
 /* ---- the end of a session: a teal Dusk tile ------------------------------------------------------
    The tile is not a control: it does not lift and its edge does not change on hover. */
@@ -86,6 +147,13 @@
   font-size: 1rem;
 }
 
+/* The lines of progress in words (U-26) keep the size and the ink of the mastery line, and each one
+   has the same space above it. Dusk keeps two lines of height for a tile sub line; with the lines of
+   U-26 under it, a line here takes the height of its text, so that the space between two lines is
+   the same when the mastery line has one line of text or two. */
+.cb-app .cb-drill-view .cb-drill-done .dusk-tile-sub { min-height: 0; }
+.cb-app .cb-drill-view .cb-drill-done .cb-drill-progress { margin-top: var(--sp-3); }
+
 /* ---- the end actions: actions, not answers. A row of Dusk buttons that wraps, words at 16 px ---- */
 .cb-app .cb-drill-view .cb-drill-actions {
   display: flex;
@@ -100,4 +168,6 @@
 html[data-dys="1"] .cb-app .cb-drill-view .dusk-btn,
 html[data-dys="1"] .cb-app .cb-drill-view .dusk-tile-num,
 html[data-dys="1"] .cb-app .cb-drill-view .dusk-tile-sub { line-height: var(--lh-base); }
-html[data-dys="1"] .cb-app .cb-drill-view .dusk-tile-num { letter-spacing: inherit; }
+html[data-dys="1"] .cb-app .cb-drill-view .dusk-tile-num,
+html[data-dys="1"] .cb-app .cb-drill-view .cb-drill-title { letter-spacing: inherit; }
+html[data-dys="1"] .cb-app .cb-drill-view .cb-drill-title .dusk-ico { line-height: var(--lh-base); }

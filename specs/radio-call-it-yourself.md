@@ -3,6 +3,11 @@
 Status: **approved by the owner 2026-07-28 — built and verified live**. Shipped as **D-0025**.
 Author: Game Designer hat, 2026-07-28. Source: `REVAMP-DESIGN.md` §3, §4 rec #19, §5, §6.
 
+*This file records the design of 2026-07-28 (D-0025). Its line numbers and its code describe that
+day. Later changes: the button "Drill these aspects →" reads "Open the Signals drill →" (row U-37),
+and "Look it up →" opens the entry in a dialog on top of the Radio test (row U-17). What is true now
+is in `ARCHITECTURE.md`.*
+
 ---
 
 ## 1. Problem
@@ -102,7 +107,8 @@ signals mastery on a real SVG recall.
 
 ## 4. Out of scope
 New radio scenarios beyond "Back to a Joint" · voice/speech-recognition input · reordering the
-STEPS · any change to guided mode's wording, which is SME-tuned and stays byte-for-byte.
+STEPS · any change to the call wording of guided mode (`STEPS`), which is SME-tuned and stays
+unchanged (the frozen-file gate, step 1 of `npm run check`, compares it with commit `94a41c5`).
 
 ## 5. Definition of done
 1. `npm run check` green, with `content-check.mjs` extended over `radio-script.json`:

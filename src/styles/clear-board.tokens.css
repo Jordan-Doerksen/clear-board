@@ -5,18 +5,15 @@
    Each new name of the app starts with --cb- or --yard-. */
 
 /* ---- Block 1: the old shell names -----------------------------------------------------------
-   Only src/index.css reads these names. A new rule does not read them: it reads the Dusk token.
+   src/index.css reads these names, and the sheets of Reference, the Drill and the Radio read
+   --maxw (SURFACE-COLUMN). A new rule does not read them: it reads the Dusk token. A name that
+   nothing reads goes (BRIDGE-DEAD): --surface, --clear, --caution, --stop and --r went in Wave 2c.
    --ink and --focus are not here. They are Dusk names with the same meaning. */
 :root {
   --bg: var(--glass);
-  --surface: var(--panel-hi);
   --surface-2: var(--head);
   --line: var(--lit-rule);
   --muted: var(--ink-2);
-  --clear: var(--green-ink);
-  --caution: var(--amber-ink);
-  --stop: var(--red-ink);
-  --r: var(--r-tile);
   --space: var(--lh-base);
   --font: var(--font-ui);
   --maxw: 920px;
@@ -50,6 +47,27 @@
 }
 
 /* ---- Block 4: the dyslexia type mode -------------------------------------------------------- */
+/* The face that the mode names ships with the app (U-30): Atkinson Hyperlegible, copyright 2020
+   Braille Institute of America, Inc., under the SIL Open Font License 1.1. The licence text is
+   public/fonts/atkinson-hyperlegible-LICENSE.txt. Two files, the Latin subset at 400 and at 700,
+   from the npm package @fontsource/atkinson-hyperlegible 5.3.0. The browser loads a file only when
+   a text of the mode needs it; a character outside the subset takes the next face of the stack. */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 html[data-dys="1"] {
   --font-ui: "Atkinson Hyperlegible", "Comic Sans MS", Verdana, sans-serif;
   --font-mono: var(--font-ui);
@@ -127,6 +145,7 @@ html[data-contrast="1"] {
   /* The two travel times (R7-P4, D-0038). anim.js reads them at the start of each play(). */
   --yard-run-in: calc(var(--m-enter) * 2); /* the leg in: 840 ms. The @property rule below makes it read as a time */
   --yard-run-out: var(--m-enter); /* the leg out: 420 ms */
+  --yard-step-gap: var(--m-enter); /* the pause between two steps of "Play all" of the watched line: 420 ms */
 
   /* Parts of the drawing that the first table of this block does not name. */
   --yard-plate: var(--well); /* the ground of a plate: a car number, a word, a track end, a label */

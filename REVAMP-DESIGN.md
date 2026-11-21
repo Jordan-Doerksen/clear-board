@@ -4,6 +4,10 @@
 
 # Clear Board — Revamp Design (multi-agent synthesis)
 
+*This file records a design pass of 2026-06-25. It is not changed to follow the code, and some of its
+statements are not true today (for example, the tier counts of section 4, #16: D-0026). What is true
+now is in `SPEC.md` and `ARCHITECTURE.md`. A rule number in this file is not confirmed.*
+
 ## 1. Executive summary
 
 The throughline: **Clear Board is already "one brain" for content but only "panels" for practice** — Drill is the only station that writes to the mastery model, while The Yard, Radio, and the Signal Reader teach real skills and throw the result away. The revamp is mostly *wiring what exists together*, not building new systems. Top 3 moves: **(1)** make The Yard, Radio, and Signal Reader write to the one SM-2-lite mastery model (close the "switching = 0% forever" hole); **(2)** ship the missing `tools/solve.mjs` + `tools/content-check.mjs` gates and block the Pages deploy on them (today every par is an unverified claim and the F1 trust firewall is runtime-only); **(3)** make every error — a refused Yard move or a missed Drill — a cause→rule-category→correct-action teaching moment that feeds a severity-weighted remediation queue.
@@ -103,7 +107,7 @@ The throughline: **Clear Board is already "one brain" for content but only "pane
 
 **Two visual channels:** red = unsafe/blocking, amber = inefficient/advisory — meaning carried by **plain words + icon, never colour alone** (accessibility). An S1 "you used 7, par is 5" must never read like a safety failure to an anxious learner.
 
-**Remediation loop:** S3 miss re-shows same session AND jumps ahead of SM-2 due dates until one clean recall (capped to avoid a frustration loop). S2 follows the normal interval reset. S1 is advisory, never re-queued. A repeated *same* wrong answer triggers a targeted confusion-pair drill (e.g. CLEAR vs CLEAR-TO-LIMITED). **Voice:** Jordan's calm, non-shaming register — no "WRONG", no exclamation, cause-then-fix. This is for people the rulebook already failed.
+**Remediation loop:** S3 miss re-shows same session AND jumps ahead of SM-2 due dates until one clean recall (capped to avoid a frustration loop). S2 follows the normal interval reset. S1 is advisory, never re-queued. A repeated *same* wrong answer triggers a targeted confusion-pair drill (e.g. CLEAR vs CLEAR-TO-LIMITED). **Voice:** a calm, non-shaming register — no "WRONG", no exclamation, cause-then-fix. This is for people the rulebook already failed.
 
 **Hard rule:** if a correction would need a rule number/text not in the verified set, show the rule **category + plain action only** with an internal `[verify vs CROR/SME]` flag. Show nothing false.
 
@@ -155,7 +159,7 @@ The throughline: **Clear Board is already "one brain" for content but only "pane
 
 ---
 
-## 9. Open questions for Jordan / the SME
+## 9. Open questions for the SME
 
 1. **Every player-facing CROR number** hardcoded in `model.js` and the rule chips (104 / 112 / 113.4 / 113.5 / 114 / 115) — confirm each against the current CROR before ship. A wrong number taught procedurally is the cardinal sin. *[verify vs CROR/SME]*
 2. **Securement "unattended" trigger** — what exactly un-secures a cut, and should leaving a 2+ cut at DEPART be a hard S3 block? *[verify vs CROR/SME]*
