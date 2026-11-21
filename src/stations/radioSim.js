@@ -132,7 +132,7 @@ function injectStyle() {
 
 export function mount(root, ctx) {
   injectStyle();
-  root.innerHTML = `<button class="back" data-go="">← Home</button>` + RADIO_HTML;
+  root.innerHTML = `<button class="cb-btn--plain" data-go="">← Home</button>` + RADIO_HTML;
   root.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => ctx.go(b.dataset.go)));
 
   const $ = (id) => root.querySelector('#' + id);
