@@ -56,8 +56,35 @@ export function LookUp() {
     if (back && back.isConnected) back.focus();
   }
 
+  // The head of the dialog stays at its top edge (job U1-B), and a long name takes more lines at a
+  // narrow width. The dialog gets the height of its head, so that the scroll keeps a control that has
+  // focus below the head (finding F-6 of the last review of Wave 2c; the rule of .cb-dialog).
+  useEffect(() => {
+    const dialog = ref.current;
+    const head = dialog?.querySelector<HTMLElement>('.dusk-panel-head');
+    if (!dialog || !head || typeof ResizeObserver === 'undefined') return;
+    const fit = () => dialog.style.setProperty('--cb-dialog-head', `${head.offsetHeight}px`);
+    const watch = new ResizeObserver(fit);
+    watch.observe(head);
+    fit();
+    return () => watch.disconnect();
+  }, []);
+
   const lookedUp = lookUpRequest?.itemId ?? null;
   const item = lookedUp && content ? content.byId[lookedUp] : undefined;
+
+  // When the entry comes after a "Try again" in the dialog, the control that had focus goes, and
+  // focus fell to the page body. It now goes to the heading of the dialog (finding F-7 of the last
+  // review of Wave 2c).
+  const itemId = item?.id ?? null;
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog?.open || !itemId) return;
+    const active = document.activeElement;
+    if (active && active !== document.body && dialog.contains(active)) return;
+    const heading = dialog.querySelector('h2');
+    if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus(); }
+  }, [itemId]);
   return (
     <dialog className="cb-dialog cb-shell-lookup" ref={ref} aria-labelledby={headingId} onClose={onClose}>
       <div className="dusk-panel-head">

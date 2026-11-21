@@ -3,9 +3,9 @@
 // (../yardSim.js) sends plain data, and this file builds the words and the elements from it.
 //
 // A view function finds its element at the time of each call, and it does not test for a missing
-// element. When a learner leaves the Yard, the host is emptied. A move that still runs then stops
-// at its next view call with a TypeError, as it did before the split. A test for a missing
-// element would let that move run on. Do not add one.
+// element. When a learner leaves the Yard, the bridge calls unmount() of the controller first
+// (2c-plan C2): it stops each move, pause, question and sound, so no view function runs after the
+// host is emptied.
 
 /** The tone of the banner. The view adds the class `yd-` and the tone. */
 export type BannerTone = '' | 'ok' | 'bad' | 'win';

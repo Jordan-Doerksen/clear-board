@@ -70,9 +70,11 @@ class RenderGuard extends Component<{ children: ReactNode; whole?: boolean }, { 
 function UpdateNotice() {
   const asked = useRef(false);     // the learner pressed "Reload" in this copy of the app
   const takenOver = useRef(false); // the new version controls this copy already: another copy chose it
+  const registered = useRef<ServiceWorkerRegistration | null>(null);
   const { needRefresh: [needRefresh, setNeedRefresh], updateServiceWorker } = useRegisterSW({
     onRegisteredSW(_url, registration) {
       if (!registration) return;
+      registered.current = registration;
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') registration.update().catch(() => { /* offline: ask later */ });
       });
@@ -84,9 +86,11 @@ function UpdateNotice() {
     },
   });
   if (!needRefresh) return null;
+  // With no new worker in waiting (the new version took control already, or no worker controls this
+  // page), only a reload of the page loads the new version (finding F-8 of the last review of Wave 2c).
   function reload() {
     asked.current = true;
-    if (takenOver.current) window.location.reload();
+    if (takenOver.current || !registered.current?.waiting) window.location.reload();
     else void updateServiceWorker(true);
   }
   return (
@@ -124,9 +128,9 @@ function stationName(pathname: string): string {
 }
 
 // Focus goes to the first h2 of the view. The heading gets tabindex="-1", so that a script can
-// focus it. An island draws its heading after its module loads: until the heading is there, focus
-// is on the view, and it moves to the heading when the heading comes, if it is still on the view.
-// The return value stops the wait.
+// focus it. Each station draws its heading with React (Wave 2c). When the view has no h2 yet,
+// focus is on the view, and it moves to the heading when the heading comes, if it is still on the
+// view. The return value stops the wait.
 function focusViewHeading(main: HTMLElement): () => void {
   const toHeading = (heading: HTMLElement) => {
     if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
@@ -150,6 +154,19 @@ function Shell() {
   const mainRef = useRef<HTMLElement>(null);
   const lastPath = useRef<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const { contentFailed } = useApp();
+  const hadFailed = useRef(false);
+
+  // After a "Try again" that loads the library, the notice and its control go, and focus fell to the
+  // page body. It now goes to the heading of the view, as after a change of route (finding F-7 of the
+  // last review of Wave 2c). An open dialog moves focus inside itself (LookUp.tsx).
+  useEffect(() => {
+    const failed = contentFailed.length > 0;
+    const loaded = hadFailed.current && !failed;
+    hadFailed.current = failed;
+    const lost = !document.activeElement || document.activeElement === document.body;
+    if (loaded && lost && mainRef.current) return focusViewHeading(mainRef.current);
+  }, [contentFailed]);
 
   // Each route sets the page title. Focus does not move at the first load, so the first Tab stop is
   // "Skip to content". After a change of route, focus goes to the heading of the new view.

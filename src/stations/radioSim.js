@@ -76,7 +76,7 @@ const RADIO_HTML = `
     <div class="note" id="notebox">
       <h3>Why this call</h3>
       <div id="notebody" style="color:var(--ink-2)">Make your first call to begin — identify the engine, railway initials and number digit by digit, and wait for the engineer to answer up.</div>
-      <div class="done" id="done"></div>
+      <div role="status"><div class="done" id="done"></div></div>
       <div class="tip"><span style="color:var(--amber-ink)">CN GOI</span> = operational practice, not a CROR rule. Green lines are the engineer; he repeats the car counts and calls the air to the tail.</div>
     </div>
   </div>

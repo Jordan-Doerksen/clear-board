@@ -450,6 +450,11 @@
    A floating surface has a lit edge. The head is a Dusk panel head. */
 .cb-dialog {
   width: min(92%, 440px);
+  /* The sticky head must not hide the control that has focus when focus moves up: the scroll keeps
+     the head, the focus ring and 2 px clear (finding F-6 of the last review of Wave 2c). The head of
+     Settings is one line: its control and the padding of the head. The look-up dialog writes the
+     height of its head in --cb-dialog-head, because a long name takes more lines. */
+  scroll-padding-top: calc(var(--cb-dialog-head, var(--cb-target) + 2 * var(--sp-3)) + var(--sp-3));
   padding: 0;
   border: 0;
   border-radius: var(--r-window);
