@@ -195,8 +195,8 @@ SuperMemo-2-style schedule:
 ---
 
 ## Content migration mapping (per source → ContentItem)
-History: this is how the content of the four old apps came into the library in June 2026. The
-library is now frozen. The rebuild is shell + core + **migration**, not a re-author (D-0007).
+History: this is how the content of the four old apps came into the library: four files in June
+2026, and `radio-script.json` on 2026-07-28 (D-0025). The library is now frozen. The rebuild is shell + core + **migration**, not a re-author (D-0007).
 Field-by-field (B6):
 - **training-assistant** defs/reference → `type:"definition"`/`"rule"`; `plain` from its explanations;
   `verbatim` from `DEFS`; `trust` per its existing flag.
@@ -283,8 +283,10 @@ browser. It runs each step after a failure, and exits non-zero when one step fai
 - **Screen-reader:** labelled controls, live regions for drill feedback. The Drill and the Radio
   test put the verdict into a status region, or into an alert for a miss on a safety-critical
   item (row U-19). The Yard has a text mirror (`#yard-mirror`) and a status region (`#yard-live`)
-  (P-03). The emoji of a control is hidden from a screen reader (row U-41). No screen reader was
-  run: what a screen reader says is not verified.
+  (P-03). The emoji of a control is hidden from a screen reader (row U-41). Two signs stay in the
+  name of a control: ▶ in "▶ Watch optimal" (the Yard) and in "Key the radio ▶" (the guided Radio),
+  and ⚠ in the trust mark of the four Reference rows of the items that are not verified. No screen
+  reader was run: what a screen reader says is not verified.
 - **Dyslexia option:** toggle to a dyslexia-friendly face + wider spacing. The face is Atkinson
   Hyperlegible, two font files that ship with the app with their licence text (row U-30).
 - **Read-aloud:** Web Speech API; **degrades gracefully with no offline voice** (N13) — never blocks
