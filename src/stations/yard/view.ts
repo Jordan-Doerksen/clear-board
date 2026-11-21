@@ -437,10 +437,14 @@ export function createView(root: HTMLElement): YardView {
       if (pending || dialog.open) settle(false);
     },
 
+    // A Depart that stops being enabled while it has the focus gives the focus to Reset, so that the
+    // focus does not fall to the page body (after the departure Reset opens the job again, R7-P14).
     setDepart({ shown, enabled }) {
       const dep = at<HTMLButtonElement>('depart');
+      const had = document.activeElement === dep;
       dep.style.display = shown ? '' : 'none';
       dep.disabled = !enabled;
+      if (had && !enabled) at('reset').focus();
     },
 
     // The sound button says its state in words (U-20). The glyph is decoration (U-41).

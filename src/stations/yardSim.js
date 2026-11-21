@@ -94,6 +94,9 @@ export function mount(root, ctx) {
   let effect = null;
   // The watched line (R7-P8), or null: see startDemo().
   let demo = null;
+  // After Depart the train has left (R7-P14, F6): the lead shows empty, and the job is closed until
+  // Reset or another job. model.js holds no such state, so the controller holds the flag.
+  let departed = false;
   let ordered = true;                 // is the switch list verified? (true when there's no list to check)
   const flagged = new Set();          // indices the player has flagged as wrong
   let cine = null, cineCancel = null, cineTimer = null;   // inbound-arrival cinematic state
@@ -117,7 +120,7 @@ export function mount(root, ctx) {
     clearPauses();
     cancelCine();
     puzzle = p; state = freshState(p); anim = null;
-    watched = false; saved = false; demo = null; view.setDemo(null);
+    watched = false; saved = false; demo = null; departed = false; view.setDemo(null);
     ordered = !p.listed; flagged.clear();
     view.setDepart({ shown: !!p.goal.depart, enabled: false });
     renderRules(); renderOrder(); syncBuilder(); paint(); banner('', '');
@@ -127,9 +130,10 @@ export function mount(root, ctx) {
   }
 
   // The mirror and the names of the switch buttons state the model at each paint with no motion frame.
+  // After the departure the picture shows the lead empty (the motion of the departure draws the train).
   function paint() {
-    drawing.paint(state, puzzle, { anim, cine });
-    if (!anim && !cine) { mirror.update(state, puzzle); switches.setLining(state.lined); }
+    drawing.paint(state, puzzle, { anim, cine, departed: departed && !anim });
+    if (!anim && !cine) { mirror.update(state, puzzle, { departed }); switches.setLining(state.lined); }
   }
 
   // Inbound road train (only on `inbound` puzzles): in off the main, STOP, set out a
@@ -160,8 +164,10 @@ export function mount(root, ctx) {
     resume();
     if (id === null) return;
     settle();
-    // During the watched line the switches belong to the demonstration (R7-P8).
+    // During the watched line the switches belong to the demonstration (R7-P8). After the departure
+    // the job is closed (R7-P14).
     if (demo) { demoRefusal(); return; }
+    if (departed) { closedRefusal(); return; }
     lineSwitch(state, id); sfx.points(); paint();
     // R7-P16, F8: a refusal about the lining of the route goes when the throw makes its text false. The
     // model checks the same call again; a refusal of another kind stays.
@@ -300,6 +306,7 @@ export function mount(root, ctx) {
   // the game at the contact, as before, and the end state shows when the motion ends or when a new
   // input ends it. The win sound plays when the end state shows.
   function doMove(kind, id, n) {
+    if (departed) { closedRefusal(); return; }
     if (!ordered) {
       const text = 'Verify the switch list first — flag the bad lines and certify the order.';
       sfx.refuse(); banner(text, 'bad'); live.say(text); return;
@@ -458,6 +465,12 @@ export function mount(root, ctx) {
     demoStep();
   }
 
+  // A call or a switch after the departure: the train has left, and the job is closed until Reset.
+  function closedRefusal() {
+    const text = 'The train has departed. Press Reset to work this job again.';
+    sfx.refuse(); banner(text, 'bad'); live.say(text);
+  }
+
   // A switch during the watched line: the line is a demonstration, not the run of the learner.
   function demoRefusal() {
     const text = 'This is the demonstration. Press Stop watching to play the job yourself.';
@@ -558,13 +571,14 @@ export function mount(root, ctx) {
   // Depart — the deliberate final call once the outbound is assembled (P6). The
   // consist is already coupled to the loco; it leaves out the lead, off-frame.
   function departOut() {
-    if (!puzzle.goal.depart || !checkWin(state, puzzle)) return;
+    if (departed || demo || !puzzle.goal.depart || !checkWin(state, puzzle)) return;
+    departed = true;
     const g = grade(state, puzzle);
     const prev = bestRecord();
     sfx.win();
     const clean = state.joints <= bestJoints() ? ` — ${g.bonus}, clean` : ` · ${g.bonus}`;
-    const departed = `✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev, state)}`;
-    banner(departed, g.beatPar ? 'win' : 'ok'); live.say(departed);   // win registered now
+    const text = `✓ Departed out the lead — ${g.head}${clean}${bestSuffix(prev, state)}`;
+    banner(text, g.beatPar ? 'win' : 'ok'); live.say(text);   // win registered now
     recordWin(state);
     view.setDepart({ shown: true, enabled: false });
     // flavor: pull the whole train out the lead, off-frame left

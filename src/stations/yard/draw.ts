@@ -37,9 +37,9 @@ export type YardPuzzle = Readonly<Record<string, unknown>>;
 export type YardMotion = Readonly<Record<string, unknown>> | null;
 
 /**
- * The values of one paint. `departed` and `builder` are for a later job (R7-P14, LANDING): with
- * `departed` the lead shows no engine and no held car; with `builder` the picture shows where the
- * move in the builder lands. No caller sets them in Wave 2b.
+ * The values of one paint. With `departed` the train has left (R7-P14): the lead shows no engine and
+ * no held car, and its room bar is empty. With `builder` the picture shows where the move in the
+ * builder lands (LANDING).
  */
 export interface PaintOptions {
   anim: YardMotion;
@@ -202,7 +202,9 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
     if (!frame) { selectFrame(null); if (!frame) return; }
     const m = M as Measures;
     const st = last.state, pz = last.puzzle, opts = last.opts;
-    const F = yardFacts(st, pz);
+    const departed = !!opts.departed;
+    // After the departure the facts of the picture have no cut on the engine: the lead is empty.
+    const F = yardFacts(departed ? { ...st, engine: [] } : st, pz);
     const land = landingOf(st, F, opts.builder as Builder | undefined);
     // FORM-KEEP: a state that the kept frame cannot draw turns the job to the tall form one time.
     if (frame.form === 'wide' && !wideHolds(frame, F, m, land)) { frame = tallFrame(width, job.line.concat([F]), m); }
@@ -245,7 +247,6 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
       } else if (rest && (now.lined !== rest.lined || now.secured !== rest.secured)) trace = null;
       rest = now;
     }
-    const departed = !!opts.departed;
     const landU: Record<string, number> = {};
     if (land) landU[land.track] = land.fit.reduce((a, l) => a + (l.x1 - l.x0), 0);
     const sc: Scene = {

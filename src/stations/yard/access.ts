@@ -35,24 +35,32 @@ function trackLine(t: TrackFact, lin: Lining): string {
   return parts.join(' ');
 }
 
+/** What the mirror needs to know besides the state of the model. */
+export interface MirrorOptions {
+  /** The train has departed out the lead (R7-P14): the engine line says so, with its cars. */
+  departed?: boolean;
+}
+
 /** The lines of the mirror for one state: the engine and the cars it holds, then the six tracks from AS71 to AS76. */
-export function mirrorLines(state: ModelState, puzzle: ModelPuzzle): string[] {
+export function mirrorLines(state: ModelState, puzzle: ModelPuzzle, opts: MirrorOptions = {}): string[] {
   const F = yardFacts(state, puzzle);
-  const engine = `ENGINE holding ${carList(F.engine.held, 'from the engine')}`;
+  const engine = opts.departed
+    ? `ENGINE departed out the lead with ${carList(F.engine.held, 'from the engine')}`
+    : `ENGINE holding ${carList(F.engine.held, 'from the engine')}`;
   return [engine, ...F.tracks.map((t) => trackLine(t, F.lined[t.id]))];
 }
 
 /** The text mirror: a list with one item for each line. */
 export interface YardMirror {
   /** Writes the lines of this state. An item is written only when its text changed. */
-  update(state: object, puzzle: object): void;
+  update(state: object, puzzle: object, opts?: MirrorOptions): void;
 }
 
 export function createMirror(list: HTMLElement): YardMirror {
   const items: HTMLLIElement[] = [];
   return {
-    update(state, puzzle) {
-      const lines = mirrorLines(state as ModelState, puzzle as ModelPuzzle);
+    update(state, puzzle, opts) {
+      const lines = mirrorLines(state as ModelState, puzzle as ModelPuzzle, opts);
       lines.forEach((text, k) => {
         let li = items[k];
         if (!li) { li = document.createElement('li'); items[k] = li; list.appendChild(li); }
