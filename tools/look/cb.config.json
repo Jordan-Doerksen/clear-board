@@ -788,6 +788,165 @@
           "source"
         ]
       }
+    },
+    {
+      "row": "U-23, U-40",
+      "baseline": "49d3ba0a356896a7aed1fbe961d23639b0ff9215",
+      "what": "The Yard: the readout says \"Couplings\" in place of \"Joints\" (2c-plan C6; specs/words/Y4b.md, row 11).",
+      "pages": [
+        "yard"
+      ],
+      "wordsGo": {
+        "Joints": 1
+      },
+      "wordsCome": {
+        "Couplings": 1
+      }
+    },
+    {
+      "row": "ROUTE-WORDS, YARD-HEAD",
+      "baseline": "49d3ba0a356896a7aed1fbe961d23639b0ff9215",
+      "what": "The Yard: the head bar of the picture, \"Route: LEAD → MAIN LINE\" at the start of a job, and \"BUILD AS75\" with the count \"0 / 6\" of the first job (specs/words/Y4b.md, row 12). The words of the text mirror are not page words (ruling LOOK-MIRROR).",
+      "pages": [
+        "yard"
+      ],
+      "wordsCome": {
+        "0": 1,
+        "6": 1,
+        "Route:": 1,
+        "LEAD": 1,
+        "→": 1,
+        "MAIN": 1,
+        "LINE": 1,
+        "BUILD": 1,
+        "AS75": 1,
+        "/": 1
+      }
+    },
+    {
+      "row": "U-39",
+      "baseline": "49d3ba0a356896a7aed1fbe961d23639b0ff9215",
+      "what": "The Yard: the key of the marks of the job picker, \"✓ job done · → your next job\" (specs/words/Y4b.md, row 16).",
+      "pages": [
+        "yard"
+      ],
+      "wordsCome": {
+        "✓": 1,
+        "job": 2,
+        "done": 1,
+        "·": 1,
+        "→": 1,
+        "your": 1,
+        "next": 1
+      }
+    },
+    {
+      "row": "U-16",
+      "baseline": "49d3ba0a356896a7aed1fbe961d23639b0ff9215",
+      "what": "The Yard: the work order of the first job says how to line a switch and how to call a move: \"To line a switch, press its box on the picture: the word at the switch changes from NORMAL to REVERSE. To call a move, choose the action, the number of cars and the track under the picture, then press Work it ▸.\" (specs/words/Y4b.md, row 15).",
+      "pages": [
+        "yard"
+      ],
+      "wordsCome": {
+        "To": 2,
+        "line": 1,
+        "a": 2,
+        "switch,": 1,
+        "press": 2,
+        "its": 1,
+        "box": 1,
+        "on": 1,
+        "the": 7,
+        "picture:": 1,
+        "word": 1,
+        "at": 1,
+        "switch": 1,
+        "changes": 1,
+        "from": 1,
+        "NORMAL": 1,
+        "to": 1,
+        "REVERSE.": 1,
+        "call": 1,
+        "move,": 1,
+        "choose": 1,
+        "action,": 1,
+        "number": 1,
+        "of": 1,
+        "cars": 1,
+        "and": 1,
+        "track": 1,
+        "under": 1,
+        "picture,": 1,
+        "then": 1,
+        "Work": 1,
+        "it": 1,
+        "▸.": 1
+      }
+    },
+    {
+      "row": "U-28",
+      "baseline": "49d3ba0a356896a7aed1fbe961d23639b0ff9215",
+      "what": "The page drill-learn: the first screen of a new profile is the learn card of the first new item (ruling LEARN-GAP; with the seed of this config, the signal 425A), and not the first question. The question part goes: the count line, the heading, the four answer options and their classes. The card comes: the title of the item, the chip \"New item\", the plain words of the item as the data holds them, its drawing and the control \"Next →\". The counts are the change of the whole screen, so a word of both screens counts once with the difference of its counts. The chip keeps the size of the chip part, 12 px (ruling CHIP-SIZE). specs/words/U1D.md.",
+      "pages": [
+        "drill-learn"
+      ],
+      "classesGo": [
+        "cb-drill-prompt",
+        "cb-drill-q",
+        "cb-drill-signal",
+        "cb-drill-top",
+        "cb-opt",
+        "cb-opts",
+        "cb-sub",
+        "dusk-count"
+      ],
+      "wordsGo": {
+        "0": 1,
+        "1": 1,
+        "10": 1,
+        "413": 1,
+        "438": 1,
+        "Question": 1,
+        "of": 1,
+        "correct": 1,
+        "What": 1,
+        "is": 1,
+        "this?": 1,
+        "TO": 2,
+        "TAKE": 1,
+        "OR": 2,
+        "LEAVE": 1,
+        "SIDING": 1,
+        "OTHER": 1,
+        "TRACK": 1,
+        "ADVANCE": 2,
+        "CLEAR": 2,
+        "414A": 1
+      },
+      "wordsCome": {
+        "signal": 1,
+        "New": 1,
+        "item": 1,
+        "Proceed,": 1,
+        "speed": 1,
+        "passing": 1,
+        "and": 1,
+        "through": 1,
+        "turnouts,": 1,
+        "approaching": 1,
+        "next": 1,
+        "at": 1,
+        "speed.": 1,
+        "Next": 1,
+        "→": 1
+      },
+      "controlsGo": {
+        "button \"425A MEDIUM TO DIVERGING\"": 1,
+        "button \"438 TAKE OR LEAVE SIDING OR OTHER TRACK\"": 1,
+        "button \"413 ADVANCE CLEAR TO MEDIUM\"": 1,
+        "button \"414A ADVANCE CLEAR TO DIVERGING\"": 1
+      },
+      "smallestText": 12
     }
   ]
 }
