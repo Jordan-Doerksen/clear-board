@@ -26,7 +26,7 @@ export interface LegendFacts {
   landing: boolean;
 }
 
-export const legendKey = (o: LegendFacts): string => JSON.stringify([f1(o.s), f1(o.tagW), o.folds, o.kickable, o.goal, o.secured, o.landing]);
+export const legendKey = (o: LegendFacts): string => JSON.stringify([o.s.toFixed(4), f1(o.tagW), o.folds, o.kickable, o.goal, o.secured, o.landing]);
 
 function svg(w: number, h: number): SVGSVGElement {
   const e = document.createElementNS(NS, 'svg') as SVGSVGElement;

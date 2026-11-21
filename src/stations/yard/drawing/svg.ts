@@ -368,7 +368,7 @@ export function createRenderer(host: HTMLElement): Renderer {
     const drawBody = (it: Placed): void => {
       if (it.kind === 'engine') {
         const g = P.engine.get(it.inbound ? 'inbound' : 'engine') as SVGElement;
-        const shapeKey = f1(s);
+        const shapeKey = s.toFixed(4);   // the exact scale: two scales can round to the same tenth
         if (memo(g).get('#shape') !== shapeKey) { g.replaceChildren(); engineShape(g, s); memo(g).set('#shape', shapeKey); }
         if (it.inbound) attr(g, 'data-inbound', '1');
         attr(g, 'transform', `translate(${f1(it.cx)} ${f1(it.cy)})${it.rot ? ` rotate(${f1(it.rot)})` : ''}`);
@@ -379,7 +379,7 @@ export function createRenderer(host: HTMLElement): Renderer {
       carEls.set(it.key, g);
       const vertical = Math.abs(Math.abs(it.rot) - 90) < 1;
       const tz = (vertical ? tagZoneV : tagZoneH) + (c.type === 'tank' ? 3 : 0);
-      const shapeKey = `${c.type}|${c.loaded}|${f1(it.len)}|${f1(s)}|${f1(tz)}|${c.mark ? 1 : 0}`;
+      const shapeKey = `${c.type}|${c.loaded}|${f1(it.len)}|${s.toFixed(4)}|${f1(tz)}|${c.mark ? 1 : 0}`;
       if (memo(g).get('#shape') !== shapeKey) { g.replaceChildren(); carShape(g, c.type, c.loaded, it.len, s, c.mark ? tz : 0); memo(g).set('#shape', shapeKey); }
       if (c.mark) attr(g, 'data-car', c.mark);
       attr(g, 'data-load', c.loaded ? 'loaded' : 'empty');

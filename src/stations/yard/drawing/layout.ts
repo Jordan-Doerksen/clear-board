@@ -26,7 +26,10 @@
 // the drawn route by its own length in px. So a body does not shrink in a stretch that was left out:
 // the bodies behind the anchor take the px that the stretch does not have. A body that crosses the
 // turn of a row leaves the end of one line and comes out at the start of the next line: a body is
-// drawn on the run that holds its centre. A body beyond the drawn end of the lead is not drawn.
+// drawn on the run that holds its centre. At a bend of the route (the ladder, a switch) two straight
+// bodies in contact overlap at the inner side; there a body moves back along the route until it
+// overlaps the body in front of it by 0.8 px or less, and each body behind it moves back by the same
+// length. On a straight run no body moves back. A body beyond the drawn end of the lead is not drawn.
 //
 // Each constant below with the comment "picture" is a value of the picture, not a number of the game.
 
@@ -35,7 +38,7 @@ import {
   ENGLEN, S_FOOT, THROUGH_ROUTE,
 } from '../geometry.js';
 import { freshState, pull, spot, kick, secure, spotPlan } from '../model.js';
-import type { YardFacts, TrackFact, CarFact, Lining, ModelState, ModelPuzzle, ChainSpec, PathKind } from './bodies.ts';
+import type { YardFacts, TrackFact, CarFact, Lining, ModelState, ModelPuzzle, ChainSpec, PathKind, BodySpec } from './bodies.ts';
 import { yardFacts, switchArc } from './bodies.ts';
 
 // ---- Values of the picture ------------------------------------------------------------------------
@@ -701,16 +704,55 @@ function leadLimits(L: Layout, path: PathKind, pieces: Piece[]): [number, number
   return [-Infinity, Infinity];
 }
 
+/** The four corners of the drawn body of a car or of the engine, centred at a point of a run. */
+function bodyQuad(body: BodySpec, at: { p: Pt; dx: number; dy: number }, s: number): Pt[] {
+  const engine = body.kind === 'engine';
+  const hl = (body.len * s - (engine ? 1.8 : 2.4) * s) / 2;
+  const hw = (engine ? ENG_H : CAR_H * (body.car && body.car.type === 'tank' ? 0.86 : 1)) * s / 2;
+  const { p, dx, dy } = at;
+  return [[-hl, -hw], [hl, -hw], [hl, hw], [-hl, hw]].map(([x, y]) => [p[0] + x * dx - y * dy, p[1] + x * dy + y * dx] as Pt);
+}
+
+/** The depth of the overlap of two convex quadrilaterals in px (separating axes), 0 when they are apart. */
+function quadOverlap(A: Pt[], B: Pt[]): number {
+  let depth = Infinity;
+  for (const Q of [A, B]) {
+    for (let i = 0; i < 4; i++) {
+      const [x1, y1] = Q[i], [x2, y2] = Q[(i + 1) % 4];
+      const nx = y2 - y1, ny = x1 - x2, l = Math.hypot(nx, ny) || 1;
+      const pa = A.map(([x, y]) => (x * nx + y * ny) / l), pb = B.map(([x, y]) => (x * nx + y * ny) / l);
+      const d = Math.min(Math.max(...pa), Math.max(...pb)) - Math.max(Math.min(...pa), Math.min(...pb));
+      if (d <= 0) return 0;
+      depth = Math.min(depth, d);
+    }
+  }
+  return depth;
+}
+
 /** Place the bodies of a chain on the drawn route (requirement 33). */
 export function placeChain(L: Layout, chain: ChainSpec): Placed[] {
   const pieces = pathOf(L, chain.path);
   const dA = distOf(pieces, chain.anchorS);
   const [min, max] = leadLimits(L, chain.path, pieces);
   const out: Placed[] = [];
-  for (const { body, offset } of chain.bodies) {
-    const dc = dA - (offset + body.len / 2) * L.s;
+  // At a bend two straight bodies that touch would overlap at the inner side. A body that overlaps
+  // the body before it moves back along the route until the overlap is 0.8 px or less; each body
+  // behind it moves back by the same length. On a straight run nothing moves back.
+  let back = 0;
+  let prev: Pt[] | null = null;
+  for (let k = 0; k < chain.bodies.length; k++) {
+    const { body, offset } = chain.bodies[k];
+    const touches = k > 0 && Math.abs(chain.bodies[k - 1].offset + chain.bodies[k - 1].body.len - offset) < 1e-6;
+    let dc = dA - offset * L.s - body.len / 2 * L.s - back;
+    let at = atDist(pieces, dc);
+    let quad = bodyQuad(body, at, L.s);
+    if (touches && prev) {
+      let extra = 0;
+      while (extra < 24 && quadOverlap(prev, quad) > 0.8) { extra += 0.5; at = atDist(pieces, dc - extra); quad = bodyQuad(body, at, L.s); }
+      back += extra; dc -= extra;
+    }
+    prev = quad;
     if (dc < min || dc > max) continue;
-    const at = atDist(pieces, dc);
     out.push({ key: body.key, kind: body.kind, car: body.car, inbound: body.inbound, track: null, line: at.run, cx: at.p[0], cy: at.p[1], rot: Math.atan2(at.dy, at.dx) * 180 / Math.PI, len: body.len * L.s });
   }
   return out;
