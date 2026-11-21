@@ -292,9 +292,10 @@ export function mount(root, ctx) {
       cut = st.engine.slice();             // what it carries on the way out
       restEnd = restS(st.engine.reduce((a, c) => a + carLen(st.type[c]), 0));
     };
+    // The legs carry their role (LEG-ROLE): anim.js gives the run in and the run out their times.
     const phases = [
       {
-        dur: 600, fn: (t) => {
+        role: 'in', fn: (t) => {
           const shove = shoveBase
             ? { id: shoveBase.id, from: shoveBase.from, to: shoveBase.to, prog: Math.min(1, Math.max(0, (t - contactF) / (1 - contactF))) }
             : null;
@@ -314,7 +315,7 @@ export function mount(root, ctx) {
       });
     }
     phases.push({
-      dur: 600, fn: (t) => {
+      role: 'out', fn: (t) => {
         commitOnce();
         anim = { route, engS: lerp(engIn, restEnd, t), cut, shove: null };
       },
