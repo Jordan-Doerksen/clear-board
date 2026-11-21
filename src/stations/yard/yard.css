@@ -1,14 +1,17 @@
 /* yard.css — the style of the Yard chrome. The Yard chunk imports it (../yardSim.js).
-   Each selector starts with .yard-wrap, so no rule reaches the rest of the app.
-   Each class has the prefix yd-. This file declares no custom property. Each colour is a token of
-   Dusk or of the bridge file src/styles/clear-board.tokens.css, so the high-contrast mode reaches
-   the Yard. The edge of a control reads --cb-edge. The edge of a container reads --lit-rule.
-   Each type size is a token of the bridge or a rem value, and each face is --font-ui or
-   --font-mono, so the text scale and the dyslexia type reach the Yard. */
-.yard-wrap {
-  color: var(--ink); font-size: var(--fs-l);
-  display: block; padding: 4px 0 20px;
-}
+   The chrome stands on Dusk parts and on the cb- parts of the app. This file holds the rules that
+   keep the words, the sizes and the boxes of today on those parts.
+   Each selector starts with .yard-wrap, so no rule reaches the rest of the app. After it, each
+   selector names a class or an id of the chrome, so no rule reaches into the frame of the drawing:
+   the drawing job owns each element inside the frame. Each class of the Yard has the prefix yd-.
+   This file declares no custom property and sets no transition and no animation. Each colour is a
+   token of Dusk or of the bridge file src/styles/clear-board.tokens.css, so the high-contrast mode
+   reaches the Yard. Each type size is a token of the bridge or a rem value, and each face is the
+   face of the body or of a part, so the text scale and the dyslexia type reach the Yard. */
+/* The wrapper is the scope of the Yard and nothing more: no ground, no ink and no face of its own
+   (the text takes the ink and the face of the body), no side padding, no width and no side margin.
+   It keeps the type size of today. */
+.yard-wrap { display: block; padding: 4px 0 20px; font-size: var(--fs-l); }
 /* The back control is a plain button of the parts: the word in the link colour, no fill at rest, a
    wash and an underline on hover, a fill change when pressed. It keeps its text of 14 px, weight 600,
    and the box of today: a side padding of 12 px and a 1 px border with no colour. */
