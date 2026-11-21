@@ -624,6 +624,91 @@ name, path or project reference.
 **Correction:** the message of one unpushed commit said that no code of the reskin tools is in the
 repository. The lead corrected that message before the first push. The trees did not change.
 
+### D-0040 — Wave 2c: the plan, the jobs and the contracts C1 to C11
+**Chosen (the lead, 2026-11-21):** Wave 2c builds, in three steps, the access layer and the controls
+of the Yard (Y4a, Y4b), the upgrade rows that the owner approved (U1-A to U1-D), the tests and the
+cache budget (G1-2, then the G1 close) and the documents (D1). The plan is `specs/briefs/2c-plan.md`.
+In each step each file has one job (`2C-SPLIT`). The plan gives each job an independent review.
+The notes of the lead after each step are in `specs/briefs/`.
+**The contracts between the jobs:**
+- **C1 `lookUp(itemId)`.** The app context and the bridge object of the islands open the Reference
+  entry of an item in a dialog on top of the route. The station stays mounted. Closing the dialog
+  returns focus to the control that opened it.
+- **C2 `unmount()`.** The bridge hook calls `unmount()` of an island before it empties the host. The
+  Yard exports it.
+- **C3 The words.** Each job writes its new learner-facing words in `specs/words/<job>.md`. The
+  owner approves the words of the rows marked "(words)" in one question at the end of the wave.
+- **C4 Reduce motion.** The setting follows the device flag live. The Yard reads it at each move.
+- **C5 Pictures.** `specs/pictures/2c-<job>/`, at scale 1, at most 6000 px high.
+- **C6 One name for one thing.** "← Home" for the way back to Home, "session" for a scored set of
+  questions or calls, "coupling" for a join of two cars. The owner approves the words.
+- **C7 Titles and headings.** Each route sets a page title. After a change of route, focus goes to
+  the first `h2` of the view; at the first load focus does not move. Each station shows one heading.
+- **C8 The Yard sound key.** The stored sound choice keeps the key `sl_muted`. "Reset my progress"
+  removes it.
+- **C9 A failed load.** The app context gives `contentFailed` and `retryContent()`. The shell shows
+  one notice with a retry control, and Home shows no "Coming soon" for a domain whose file failed.
+- **C10 Read aloud.** A spoken confirmation, "No voice on this device" and a stop on a change of
+  route. The Drill and the Radio test also give the options and the feedback to Read aloud.
+- **C11 The learn card.** The hooks `data-cb="learn"` and `data-cb="learn-next"`.
+**Why:** the jobs of one step run in parallel. A contract gives them one name for each shared
+thing, and each file one owner.
+**State on 2026-11-21:** steps 2c-1 and 2c-2 are merged on `claude/cb2-wave-2c`. Step 2c-3 is the
+G1 close and D1.
+
+### D-0041 — A learn card before the first question about a new item (`LEARN-GAP`, row U-28)
+**Chosen (the lead):** the Drill shows a new item (an item that the learner never answered) one
+time, on a learn card, before the first question about it. The card shows the text that the data
+holds: the title, the plain words and each different drawing of a signal. One other screen or more
+comes between the card and that question. The card grades nothing, and the mastery model does not
+change. A first session can hold up to 10 cards and 10 questions (`SESSION-LENGTH`).
+**Weighed:** the first question right after its card.
+**Why:** row U-28 asks that the Drill shows an item before it tests it, and UX-11 says "no change
+to the mastery model". The signals cap is a safety gate: a right answer right after the card is
+short-term memory, not a read on sight.
+**Open for the SME:** is one other screen between the card and the question enough?
+**Built:** job U1-D (`withLearnCards` in `src/core/drill.ts`, and the hooks of C11).
+
+### D-0042 — A miss in the Radio test is announced by the severity of its own item (`RADIO-SEVERITY`)
+**Chosen (the lead):** after a miss in "Call it yourself", the verdict goes into the alert or into
+the status region by the severity of the radio item itself (`verdictRegion` in `src/core/radio.ts`).
+Each radio item is S2 today, the default of its domain in `src/core/severity.ts`, so a miss goes
+into the status region.
+**Weighed:** the severity of the rule that the call cites.
+**Why:** a link to the severity of the cited rule changes the classification, and the
+classification belongs to the SME.
+**Open for the SME:** which severity a radio call has.
+
+### D-0043 — The stored progress: the sound key, the mastery now, a load and a reset
+**Chosen (the lead):**
+- **`SOUND-KEY`.** The stored sound choice of the Yard keeps the key `sl_muted`: no value or "1" is
+  off, "0" is on. **Why:** a new key needs a move of the stored value, and row U-36 asks only that
+  the choice holds and that a reset clears it.
+- **`MASTERY-NOW`.** The app context computes the mastery again at the first report of a new route,
+  so that Home shows the same current value as the end of a Drill session. This recompute does not
+  write the stored profile. **Why:** the mastery decays with time, and one value must be true at
+  each place.
+- **`LOAD-NEW-PROFILE`.** A load of a progress file gives the profile a new `createdAt`. Another
+  open copy of the app then replaces its profile with the loaded one and does not merge its older
+  answers back. **Why:** the question before a load says that the load replaces the progress.
+- **`RESET-COPY`.** "Reset my progress" also removes the copy of an older profile
+  (`cb.profile.v1.copy`), as it removes the sound choice (C8). **Why:** a reset removes the
+  progress, and the copy holds old progress.
+**Built:** jobs U1-B, U1-D, Y4a and Y4b.
+
+### D-0044 — The Yard: the switch buttons, a done job and the work order (`SW-NAME`, `WIN-HOLD`, `FROM-NOW`)
+**Chosen (the lead):**
+- **`SW-NAME`.** Each switch button keeps `data-sw` and the name that says its lining, and has no
+  `aria-pressed`. **Why:** the name and the pressed state gave the lining two times (the review of
+  Y4a).
+- **`WIN-HOLD`.** A refused call to a job that is done is said in the status region, and "Job done."
+  stays on the screen. **Why:** nothing locks during motion (R7-P11), so a second press of the
+  winning call replaced the win words with a refusal (the review of Y4b).
+- **`FROM-NOW`.** The work order says where the cars of the job stand now, and the list follows the
+  cars. When each car is on the goal track, the words go. A job with Depart keeps "(set out on
+  ...)". **Why:** fence rule 15: the words "(now on ...)" were true only at the start of a job.
+**Built:** job Y4b (`SW-NAME`) and the lead (commit `c3bc4db`).
+
 ### D-0045 — Facts that the documents had wrong, and three changes with no entry (R6 section 11)
 **Recorded (job D1, 2026-11-21):** R6 section 11 lists 46 places where a document and the code
 disagree. Job D1 made its documents say what is true. In this file:
