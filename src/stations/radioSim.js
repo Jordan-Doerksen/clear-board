@@ -142,7 +142,7 @@ export function mount(root, ctx) {
 
   // static signal badge (Clear) — decorative; no looping interval (avoids a leak on re-mount)
   const m = $('sigmark');
-  if (m) { const dot = m.getElementsByTagName('span')[0]; dot.style.background = '#36d07f'; dot.style.boxShadow = '0 0 7px #36d07f'; }
+  if (m) { const dot = m.getElementsByTagName('span')[0]; dot.style.background = 'var(--green)'; dot.style.boxShadow = 'var(--glow-green)'; }
 
   function applyReadout(s) {
     const feet = (s.feet === undefined ? 500 : s.feet);
