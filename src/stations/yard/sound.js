@@ -13,6 +13,10 @@
 const KEY = 'sl_muted';
 let ctx = null;
 let muted = true;
+// The notes of the win melody that wait for their time, and the tones that sound now. stopAll()
+// stops both (ruling SOUND-STOP), so that no note plays after the learner leaves the Yard.
+const timers = new Set();
+const tones = new Set();
 
 /** Reads the stored choice and returns true when the sound is off. With no stored value it is off. */
 export function loadMuted() {
@@ -39,6 +43,16 @@ function blip(freq, dur, type = 'sine', gain = 0.18) {
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   o.connect(g).connect(ctx.destination);
   o.start(t); o.stop(t + dur);
+  tones.add(o);
+  o.onended = () => tones.delete(o);
+}
+
+/** Stops each timed note and each tone that sounds now. The controller calls it from unmount(). */
+export function stopAll() {
+  for (const id of timers) clearTimeout(id);
+  timers.clear();
+  for (const o of tones) { try { o.stop(); } catch { /* the tone has ended */ } }
+  tones.clear();
 }
 
 // One sound, one meaning (R7 11.1, 11.2). points: a switch changes position. couple: cars couple.
@@ -51,5 +65,10 @@ export const sfx = {
   couple() { blip(150, 0.12, 'triangle', 0.25); blip(90, 0.18, 'sine', 0.2); }, // clunk
   roll() { blip(320, 0.25, 'sawtooth', 0.05); },
   refuse() { blip(140, 0.18, 'sawtooth', 0.12); },
-  win() { [523, 659, 784, 1047].forEach((f, k) => setTimeout(() => blip(f, 0.22, 'triangle', 0.18), k * 90)); },
+  win() {
+    [523, 659, 784, 1047].forEach((f, k) => {
+      const id = setTimeout(() => { timers.delete(id); blip(f, 0.22, 'triangle', 0.18); }, k * 90);
+      timers.add(id);
+    });
+  },
 };

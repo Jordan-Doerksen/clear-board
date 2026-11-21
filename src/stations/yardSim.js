@@ -22,7 +22,7 @@
 import { TRACK_IDS, engineRoute, ENGLEN, restS, carLen, LEAD_ROUTE, THROUGH_ROUTE, routeLength } from './yard/geometry.js';
 import { freshState, lineSwitch, routeReady, canPull, canSpot, canKick, canSecure, spotPlan, pull, spot, kick, secure, checkWin, unsecuredGoal, grade } from './yard/model.js';
 import { play, setSpeed } from './yard/anim.js';
-import { sfx, resume, toggleMute, loadMuted } from './yard/sound.js';
+import { sfx, resume, toggleMute, loadMuted, stopAll } from './yard/sound.js';
 import { PUZZLES, RULES, TIERS } from './yard/puzzles.js';
 import './yard/yard.css';
 import { createView } from './yard/view.ts';
@@ -51,10 +51,9 @@ function masteryItemsFor(puzzle) {
 // The teardown of the Yard that is mounted now, or null (UNMOUNT, 2c-plan C2).
 let teardown = null;
 
-// Stops each timer, each animation frame, each loop and each listener of the mounted Yard. The bridge
-// calls it before it empties the host. A second call does nothing. One limit: sound.js holds the
-// timers of the notes of the win melody, so a note that has not played yet still starts after the
-// call, the last one at most 270 ms after the win.
+// Stops each timer, each animation frame, each loop, each listener and each sound of the mounted
+// Yard: also the notes of the win melody that sound.js has timed and not played yet (SOUND-STOP).
+// The bridge calls it before it empties the host. A second call does nothing.
 export function unmount() {
   if (!teardown) return;
   const stop = teardown;
@@ -644,6 +643,7 @@ export function mount(root, ctx) {
     pauses.clear();
     busy = true;                      // no input handler starts a new effect between this call and the end of the host
     view.closeAsk();                  // an open question closes with No; its answer finds a new gen and does nothing
+    stopAll();                        // the timed notes of the win melody and each tone that sounds now
     drawing.destroy();
   };
 }
