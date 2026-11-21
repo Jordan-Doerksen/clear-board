@@ -68,6 +68,16 @@ export interface DemoData { steps: string[]; at: number; playing: boolean }
 /** What the controller does on Back, Next and "Play all" (or Stop) of the watched line. */
 export interface DemoHandlers { back: () => void; next: () => void; play: () => void }
 
+/**
+ * One line of the move log (R7-P10): the call, the result of the model, the cost in words, and true
+ * when the line has "Play again" (a move of the engine; a secure has none). The last line also has
+ * "Before and after".
+ */
+export interface LogLine { call: string; msg: string; cost: string; again: boolean }
+
+/** The two controls of a line of the move log: `k` is the number of the line, from 1. */
+export type LogAction = 'again' | 'before-after';
+
 /** The view object. `createView` makes it. */
 export interface YardView {
   /** The element with this id inside the Yard, or null. It is found again at each call. */
@@ -99,6 +109,15 @@ export interface YardView {
   setDemo(data: DemoData | null): void;
   /** The handlers of Back, Next and "Play all". */
   bindDemo(handlers: DemoHandlers): void;
+  /** Writes the move log. An empty list hides it. A line keeps its element, so focus stays on its control. */
+  renderLog(lines: LogLine[]): void;
+  /** The handler of "Play again" and "Before and after" of the move log. */
+  onLog(handler: (action: LogAction, k: number) => void): void;
+  /**
+   * The words over the picture when it shows a past state of the move log, for example "Before move 3"
+   * (R7-P10). `null` hides them: the picture shows the yard now.
+   */
+  setViewLabel(text: string | null): void;
   /** Shows or hides the control "Show the arrival" of the work order (R7-P5). */
   setArrival(shown: boolean): void;
   /** The handler of the control "Show the arrival". */
@@ -126,7 +145,9 @@ const YARD_HTML = `
 
     <div class="yd-workorder dusk-panel dusk-panel--framed" id="workorder"></div>
 
-    <div class="yd-yardframe dusk-panel dusk-panel--framed" data-cb="yard-drawing"></div>
+    <div class="yd-yardframe dusk-panel dusk-panel--framed" data-cb="yard-drawing">
+      <div class="yd-yardhead dusk-panel-head" id="yard-head" hidden><span class="yd-viewlabel dusk-state dusk-state--info" id="yard-view-label"></span></div>
+    </div>
 
     <ul class="yd-mirror dusk-sr" id="yard-mirror" role="list"></ul>
 
@@ -157,6 +178,11 @@ const YARD_HTML = `
     <div class="yd-demo dusk-panel dusk-panel--framed" id="yard-demo" hidden>
       <div class="dusk-panel-head"><h3 class="dusk-panel-name yd-demo-name">The optimal line</h3><span class="dusk-panel-sub yd-demo-sub">a demonstration, not your run · it gets no done mark</span><span class="dusk-spacer"></span><span class="dusk-count yd-demo-count" id="yard-demo-count"></span></div>
       <ol class="yd-demo-list dusk-panel-body" id="yard-demo-list"></ol>
+    </div>
+
+    <div class="yd-log dusk-panel dusk-panel--framed" id="yard-log" hidden>
+      <div class="dusk-panel-head"><h3 class="dusk-panel-name yd-log-name">Your moves on this job</h3><span class="dusk-spacer"></span><span class="dusk-count yd-log-count" id="yard-log-count"></span></div>
+      <ol class="yd-log-list dusk-panel-body" id="yard-log-list"></ol>
     </div>
 
     <div class="yd-rules-panel dusk-panel">
@@ -237,6 +263,14 @@ export function createView(root: HTMLElement): YardView {
   at('yard-ask-yes').addEventListener('click', () => settle(true));
   at('yard-ask-no').addEventListener('click', () => settle(false));
   dialog.addEventListener('close', () => { if (pending) settle(false); });   // Escape
+
+  // The controls of the move log: one listener of the list calls the handler with the action and the
+  // number of the line.
+  let logHandler: ((action: LogAction, k: number) => void) | null = null;
+  at('yard-log-list').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>('button[data-log]');
+    if (b && logHandler) logHandler(b.dataset.log as LogAction, +(b.dataset.k as string));
+  });
 
   // The control "Show the arrival" is made again with the work order, so one listener of the work
   // order calls the handler.
@@ -429,6 +463,45 @@ export function createView(root: HTMLElement): YardView {
       at('yard-play').innerHTML = data.playing
         ? '<span aria-hidden="true">■</span> Stop'
         : '<span aria-hidden="true">▶</span> Play all';
+    },
+
+    renderLog(lines) {
+      at('yard-log').hidden = lines.length === 0;
+      at('yard-log-count').textContent = String(lines.length);
+      const list = at('yard-log-list');
+      while (list.childElementCount > lines.length) (list.lastElementChild as Element).remove();
+      lines.forEach((ln, i) => {
+        const k = i + 1, last = k === lines.length;
+        let li = list.children[i] as HTMLElement | undefined;
+        if (!li) {
+          li = document.createElement('li');
+          li.className = 'yd-log-line';
+          li.innerHTML = `<span class="yd-log-n dusk-num">${k}</span>`
+            + `<span class="yd-log-text"><b class="yd-log-call dusk-num"></b> <span class="yd-log-msg"></span> <span class="yd-log-cost"></span></span>`
+            + `<span class="yd-log-ctl"></span>`;
+          list.appendChild(li);
+        }
+        const put = (sel: string, text: string): void => { const e = li!.querySelector(sel) as HTMLElement; if (e.textContent !== text) e.textContent = text; };
+        put('.yd-log-call', ln.call); put('.yd-log-msg', ln.msg); put('.yd-log-cost', ln.cost);
+        const ctl = li.querySelector('.yd-log-ctl') as HTMLElement;
+        const want = [ln.again ? 'again' : '', last ? 'before-after' : ''].filter(Boolean);
+        const have = [...ctl.querySelectorAll<HTMLElement>('button')].map((b) => b.dataset.log);
+        if (want.join() !== have.join()) {
+          // A control that goes while it has the focus gives the focus to its line.
+          if (ctl.contains(document.activeElement)) { li.tabIndex = -1; li.focus(); }
+          ctl.innerHTML = want.map((a) => a === 'again'
+            ? `<button type="button" class="cb-btn--plain yd-log-btn" data-log="again" data-k="${k}" aria-label="Play again, move ${k}">Play again</button>`
+            : `<button type="button" class="cb-btn--plain yd-log-btn" data-log="before-after" data-k="${k}" aria-label="Before and after, move ${k}">Before and after</button>`).join('');
+        }
+      });
+    },
+
+    onLog(handler) { logHandler = handler; },
+
+    setViewLabel(text) {
+      at('yard-head').hidden = !text;
+      const label = at('yard-view-label');
+      if (label.textContent !== (text || '')) label.textContent = text || '';
     },
 
     bindDemo({ back, next, play }) {

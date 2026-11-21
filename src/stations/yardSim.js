@@ -97,6 +97,14 @@ export function mount(root, ctx) {
   // After Depart the train has left (R7-P14, F6): the lead shows empty, and the job is closed until
   // Reset or another job. model.js holds no such state, so the controller holds the flag.
   let departed = false;
+  // The state before the last move, a copy: the picture draws the trace of that move from it
+  // (R7-P15). null after an action that ends the trace (a throw, a secure, the arrival, a load).
+  let lastFrom = null;
+  // The move log (R7-P10): one entry for each call of the run. `past` is set while the picture shows a
+  // past state of the run (see showPast); `pastState` is the copy that it shows then.
+  let log = [];
+  let past = null;
+  const pastState = {};
   let ordered = true;                 // is the switch list verified? (true when there's no list to check)
   const flagged = new Set();          // indices the player has flagged as wrong
   let cine = null;                    // a frame of the arrival of the inbound train, or null
@@ -115,6 +123,7 @@ export function mount(root, ctx) {
     cine = null;
     puzzle = p; state = freshState(p); anim = null;
     watched = false; saved = false; demo = null; departed = false; view.setDemo(null);
+    lastFrom = null; log = []; past = null; view.setViewLabel(null); renderLog();
     ordered = !p.listed; flagged.clear();
     view.setDepart({ shown: !!p.goal.depart, enabled: false });
     renderRules(); renderOrder(); syncBuilder(); paint(); banner('', '');
@@ -124,8 +133,11 @@ export function mount(root, ctx) {
 
   // The mirror and the names of the switch buttons state the model at each paint with no motion frame.
   // After the departure the picture shows the lead empty (the motion of the departure draws the train).
+  // The picture shows the yard now, or a past state of the move log (a copy). The job of each paint is
+  // `gen`, so a copy keeps the form of the job; `from` gives the trace of the last move.
   function paint() {
-    drawing.paint(state, puzzle, { anim, cine, departed: departed && !anim });
+    if (past) drawing.paint(pastState, puzzle, { anim, cine: null, job: gen, from: past.from });
+    else drawing.paint(state, puzzle, { anim, cine, job: gen, from: lastFrom, departed: departed && !anim });
     if (!anim && !cine) {
       mirror.update(state, puzzle, { departed }); switches.setLining(state.lined);
       view.setArrival(canArrive());
@@ -142,6 +154,7 @@ export function mount(root, ctx) {
   function showArrival() {
     if (!canArrive()) return;
     settle();
+    lastFrom = null;
     const lenR = routeLength(THROUGH_ROUTE), stopS = lenR - 110;
     cine = { introS: -220, setoutCars: puzzle.inbound.cars, to: puzzle.inbound.to, phase: 'arrive', spotProg: 0 };
     run([
@@ -169,7 +182,7 @@ export function mount(root, ctx) {
     // the job is closed (R7-P14).
     if (demo) { demoRefusal(); return; }
     if (departed) { closedRefusal(); return; }
-    lineSwitch(state, id); sfx.points(); paint();
+    lineSwitch(state, id); sfx.points(); lastFrom = null; paint();
     // R7-P16, F8: a refusal about the lining of the route goes when the throw makes its text false. The
     // model checks the same call again; a refusal of another kind stays.
     if (refusal) {
@@ -227,8 +240,10 @@ export function mount(root, ctx) {
   // state, and "Play all" of the watched line stops. Then the input runs on that state.
   function settle() {
     stopPlay();
-    finishEffect();
+    ending = true; finishEffect(); ending = false;
+    endPast(false);
   }
+  let ending = false;                 // true while settle() ends an effect: a film of the log then says nothing
 
   // One move of the engine on the state `st`. `quiet` is the reduced-motion value that the caller read
   // for this move: each step of the move then runs one time at its end value, in this call. Each step
@@ -319,9 +334,12 @@ export function mount(root, ctx) {
       if (r && !r.ok && r.msg === chk.msg) refusal = { id, msg: chk.msg };
       return;
     }
+    const before = structuredClone(state);
     // SECURE is the conductor on the ground, not an engine leg — no animation, no move cost.
     if (kind === 'secure') {
       secure(state, id); sfx.confirm();
+      lastFrom = null;
+      addLog(kind, id, n, before, state);
       const won = announce(state);
       syncBuilder(); paint();
       if (won) sfx.win();
@@ -329,6 +347,8 @@ export function mount(root, ctx) {
     }
     const after = structuredClone(state);
     MOVES[kind](after, id, n);
+    lastFrom = before;
+    addLog(kind, id, n, before, after);
     const won = announce(after);
     animateMove(state, kind, id, n, still(), () => { syncBuilder(); paint(); if (won) sfx.win(); });
   }
@@ -411,6 +431,7 @@ export function mount(root, ctx) {
     autoLine(trk); sfx.points();
     demo.pre[k] = structuredClone(state);
     demo.at = k;
+    lastFrom = act === 'secure' ? null : demo.pre[k];
     if (act === 'secure') {
       secure(state, trk); sfx.confirm();
       demo.post[k] = structuredClone(state);
@@ -451,6 +472,7 @@ export function mount(root, ctx) {
     const k = demo.at - 1;
     restore(state, demo.post[k]);
     demo.at = k;
+    lastFrom = k > 0 && demo.line[k - 1][0] !== 'secure' ? demo.pre[k] : null;
     sayStep(k); paint();
   }
 
@@ -463,6 +485,58 @@ export function mount(root, ctx) {
     demo.playing = true; showDemo();
     demoStep();
   }
+
+  // ---- The move log (R7-P10, R7 section 9) ------------------------------------------------------------
+  // One line for each call of the run: the call, the result of the model and its cost. The picture can
+  // show a past state of the run, from the copies of the log: "Before and after" on the last line
+  // changes the picture between the yard before the last call and the yard now; "Play again" on the
+  // line of a move plays that move one more time on a copy and then shows the yard now. With reduced
+  // motion "Play again" shows the two still states, one at each press, and a third press shows the
+  // yard now. No past state changes the game state, and each input on the yard shows the yard now
+  // first (settle). The head bar of the picture and the region say which state the picture shows.
+  function addLog(act, trk, n, before, after) {
+    log.push({ act, trk, n, call: callWords(act, trk, n), msg: after.msg, before, after: structuredClone(after) });
+    renderLog();
+  }
+  function renderLog() { view.renderLog(log.map((e) => ({ call: e.call, msg: e.msg, cost: '', again: e.act !== 'secure' }))); }
+
+  function showPast(k, phase) {
+    const e = log[k - 1];
+    restore(pastState, phase === 'before' ? e.before : e.after);
+    past = { k, phase, from: phase === 'after' && e.act !== 'secure' ? e.before : null };
+    view.setViewLabel(`${phase === 'before' ? 'Before' : 'After'} move ${k}`);
+    paint();
+    live.say(`The picture shows the yard ${phase} move ${k}, ${e.call}.`);
+  }
+  function endPast(say) {
+    if (!past) return;
+    past = null; view.setViewLabel(null); paint();
+    if (say) live.say('The picture shows the yard now.');
+  }
+  // "Play again" with motion: the move on a copy of the state before it, then the yard now.
+  function film(k) {
+    const e = log[k - 1];
+    restore(pastState, e.before);
+    past = { k, phase: 'film', from: null };
+    view.setViewLabel(`Move ${k} again`);
+    live.say(`Move ${k} again: ${e.call}.`);
+    animateMove(pastState, e.act, e.trk, e.n, false, () => endPast(!ending));
+  }
+  view.onLog((action, k) => {
+    resume();
+    const was = past;
+    const same = (phase) => !!was && was.k === k && was.phase === phase;
+    settle();
+    if (action === 'before-after') {
+      if (same('before')) live.say('The picture shows the yard now.');
+      else showPast(k, 'before');
+      return;
+    }
+    if (!still()) { film(k); return; }
+    if (same('before')) showPast(k, 'after');
+    else if (same('after')) live.say('The picture shows the yard now.');
+    else showPast(k, 'before');
+  });
 
   // A call or a switch after the departure: the train has left, and the job is closed until Reset.
   function closedRefusal() {
@@ -571,7 +645,7 @@ export function mount(root, ctx) {
   // consist is already coupled to the loco; it leaves out the lead, off-frame.
   function departOut() {
     if (departed || demo || !puzzle.goal.depart || !checkWin(state, puzzle)) return;
-    departed = true;
+    departed = true; lastFrom = null;
     const g = grade(state, puzzle);
     const prev = bestRecord();
     sfx.win();

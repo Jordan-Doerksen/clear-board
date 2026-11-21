@@ -182,3 +182,24 @@
 .yard-wrap .yd-demo-call { font-weight: var(--fw-bold); overflow-wrap: anywhere; }
 /* The control "Show the arrival" of the work order (R7-P5): a Dusk button under the meta line. */
 .yard-wrap .yd-arrival { margin-top: var(--sp-4); }
+/* The head bar of the frame of the picture (R7-P10): a Dusk panel head over the picture. It shows
+   while the picture shows a past state of the move log, with the words of that state. */
+.yard-wrap .yd-yardhead { gap: var(--sp-1) var(--sp-4); }
+.yard-wrap .yd-viewlabel { font-size: var(--fs-data); }
+/* The move log (R7-P10): a framed Dusk panel under the message. One line for each call of the run:
+   its number, the call in the mono face, the result of the model and the cost in words, then the
+   plain buttons "Play again" and, on the last line, "Before and after". In a narrow window the
+   buttons go under the text. */
+.yard-wrap .yd-log { margin: 12px 0; }
+.yard-wrap .yd-log-name { font-size: var(--fs-data); }
+.yard-wrap .yd-log-list { display: flex; flex-direction: column; gap: var(--sp-2); margin: 0; list-style: none; }
+.yard-wrap .yd-log-line { display: grid; grid-template-columns: 1.5em minmax(0, 1fr) auto; align-items: baseline; gap: var(--sp-1) var(--sp-4); }
+.yard-wrap .yd-log-n { color: var(--ink-3); font-size: var(--fs-base); text-align: right; }
+.yard-wrap .yd-log-text { min-width: 0; color: var(--ink-2); font-size: var(--fs-base); }
+.yard-wrap .yd-log-call { color: var(--ink); }
+.yard-wrap .yd-log-ctl { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--sp-2); }
+.yard-wrap .yd-log-btn { padding-inline: 12px; border: 1px solid transparent; font-size: var(--fs-base); font-weight: var(--fw-medium); }
+@media (max-width: 640px) {
+  .yard-wrap .yd-log-line { grid-template-columns: 1.5em minmax(0, 1fr); }
+  .yard-wrap .yd-log-ctl { grid-column: 2; justify-content: flex-start; }
+}
