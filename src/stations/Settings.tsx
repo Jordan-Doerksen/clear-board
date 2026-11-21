@@ -37,15 +37,15 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
         </div>
         {TOGGLES.map(t => (
           <div className="cb-setrow" key={t.key}>
-            <div><label htmlFor={`t-${t.key}`}>{t.label}</label><small>{t.sub}</small></div>
+            <div><label htmlFor={`t-${t.key}`}>{t.label}</label><small id={`t-${t.key}-sub`}>{t.sub}</small></div>
             <span className="cb-toggle">
-              <input type="checkbox" id={`t-${t.key}`} checked={settings[t.key]} onChange={e => toggle(t.key, e.target.checked)} />
+              <input type="checkbox" id={`t-${t.key}`} aria-describedby={`t-${t.key}-sub`} checked={settings[t.key]} onChange={e => toggle(t.key, e.target.checked)} />
               <i />
             </span>
           </div>
         ))}
         <div className="cb-setrow">
-          <div><label>Reset my progress</label><small>Clear mastery, drills &amp; yard wins on this device</small></div>
+          <div><span className="cb-settings-label">Reset my progress</span><small>Clear mastery, drills &amp; yard wins on this device</small></div>
           <button className="cb-btn--attn" onClick={() => {
             if (confirm('Reset all your progress on this device? Mastery, drills and yard wins will be cleared. This cannot be undone.')) {
               resetProgress();

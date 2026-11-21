@@ -30,8 +30,10 @@
 .cb-settings-sample small { color: var(--ink-2); }
 
 /* ---- the rows --------------------------------------------------------------------------------
-   The label and the second line of a row keep their size of today. */
-.cb-app .cb-settings-view .cb-setrow label { font-size: .95rem; }
+   The label and the second line of a row keep their size of today. The words of the reset row are
+   plain text, not a label, because no control belongs to them. They keep the size of a label. */
+.cb-app .cb-settings-view .cb-setrow label,
+.cb-app .cb-settings-view .cb-settings-label { font-size: .95rem; }
 .cb-app .cb-settings-view .cb-setrow small { font-size: .8rem; }
 
 /* A defect of two shared parts, for job U1 to fold into the parts file: the attention button has a
