@@ -154,8 +154,6 @@ export interface Scene {
   trace: { runs: Pt[][]; toLead: boolean } | null;
   /** The landing length on the track of the move in the builder (units), for its room bar. */
   landU: Record<string, number>;
-  /** Show the words of look C2 (NORMAL, REVERSE, ENGINE, BUILD, foul point, the break mark). */
-  words: boolean;
 }
 
 export interface Renderer {
@@ -444,7 +442,7 @@ export function createRenderer(host: HTMLElement): Renderer {
       if (nearV) th = 90;
       const t = th * Math.PI / 180;
       if (it.kind === 'engine') {
-        if (it.inbound || !sc.words) return;
+        if (it.inbound) return;
         const px = nearV ? [it.cx + Hh / 2 + 4, it.cy] : [it.cx - Math.sin(t) * (Hh / 2 + 3), it.cy + Math.cos(t) * (Hh / 2 + 3)];
         if (inside(px[0], px[1])) textOf(plate('eng', 'yd-view-plate yd-view-engword', px[0], px[1], nearV ? 'l' : 'tc'), 'ENGINE');
         return;
@@ -480,11 +478,11 @@ export function createRenderer(host: HTMLElement): Renderer {
     // The stand plates (wide form): the id, and the word of the position.
     for (const st of L.stands) {
       if (!st.plate) continue;
-      htmlOf(plate(`stand:${st.id}`, 'yd-view-plate yd-view-standplate', st.plate.x, st.plate.y, 'r'), `${st.id}${sc.words ? ` ${linHtml(F.lined[st.id])}` : ''}`);
+      htmlOf(plate(`stand:${st.id}`, 'yd-view-plate yd-view-standplate', st.plate.x, st.plate.y, 'r'), `${st.id} ${linHtml(F.lined[st.id])}`);
     }
     // The 44 px box of each switch: a still ring that shows where a press lines the switch.
     for (const st of L.stands) plate(`box:${st.id}`, 'yd-view-swbox', st.bx, st.by, 'c');
-    if (L.foulPlate && sc.words) textOf(plate('foul', 'yd-view-plate yd-view-foulplate', L.foulPlate.x, L.foulPlate.y, L.foulPlate.a), 'foul point');
+    if (L.foulPlate) textOf(plate('foul', 'yd-view-plate yd-view-foulplate', L.foulPlate.x, L.foulPlate.y, L.foulPlate.a), 'foul point');
     // The break marks: track left out here. Each covers the ballast, so the rails stop at it.
     L.brks.forEach((k) => {
       const d = plate(`brk:${k.id ?? 'lead'}`, 'yd-view-plate yd-view-brk', k.x, k.y, 'c');
@@ -493,18 +491,18 @@ export function createRenderer(host: HTMLElement): Renderer {
       const across = `${Math.round(15 * s + 4)}px`;
       if (k.v) { styleOf(d, 'width', across); styleOf(d, 'height', '20px'); styleOf(d, 'line-height', '16px'); }
       else { styleOf(d, 'height', across); styleOf(d, 'line-height', `${Math.round(15 * s + 4) - 2}px`); }
-      textOf(d, sc.words ? '⋯' : '');
+      textOf(d, '⋯');
     });
     // The words of each track: the end plates (wide), the row captions (tall).
     for (const en of L.ends) {
       const d = plate(`end:${en.t.id}`, 'yd-view-plate yd-view-end', en.x, en.y, 'l');
       styleOf(d, 'min-width', `${f1(L.endW)}px`);
-      htmlOf(d, sc.words ? endHtml(en.t, L.compact, sc.landU[en.t.id] || 0) : endHtmlToday(en.t, L.compact));
+      htmlOf(d, endHtml(en.t, L.compact, sc.landU[en.t.id] || 0));
     }
     for (const cp of L.caps) {
       const d = plate(`cap:${cp.t.id}`, 'yd-view-cap', cp.x, cp.y, 'tl');
       styleOf(d, 'width', `${f1(cp.w)}px`);
-      htmlOf(d, sc.words ? capHtml(cp.t, F.lined[cp.t.id], sc.landU[cp.t.id] || 0) : capHtmlToday(cp.t));
+      htmlOf(d, capHtml(cp.t, F.lined[cp.t.id], sc.landU[cp.t.id] || 0));
     }
     // The three labels of today, and the room bar of the lead.
     for (const lb of L.labels) {
@@ -519,14 +517,4 @@ export function createRenderer(host: HTMLElement): Renderer {
   }
 
   return { root, plates, controls, probe, draw, makeMeasures, clearProbe: () => { probe.textContent = ''; } };
-}
-
-/** The plate past the end stop with the words of today only (the shapes step; the words of look C2 come later). */
-function endHtmlToday(t: TrackFact, compact: boolean): string {
-  const l1 = `<span class="yd-view-tid">${t.id}</span>${secHtml(t)}`, l3 = kickHtml(t);
-  const rows = compact ? [l1 + l3] : [l1, l3];
-  return rows.filter(Boolean).map((r) => `<div>${r}</div>`).join('') + `<div class="yd-view-barline">${trackBar(t, 0)}</div>`;
-}
-function capHtmlToday(t: TrackFact): string {
-  return `<span class="yd-view-tid">${t.id}</span>${secHtml(t)}${kickHtml(t)}<span class="yd-view-barline">${trackBar(t, 0)}</span>`;
 }

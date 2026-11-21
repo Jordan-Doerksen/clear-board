@@ -63,8 +63,8 @@ export interface YardDrawing {
   destroy(): void;
 }
 
-/** This commit draws the shapes and the words of today only; the words of look C2, the legend and the trace come next. */
-const SHAPES_ONLY = true;
+/** This commit draws no trace yet; the trace of the last move comes in the next commit. */
+const NO_TRACE = true;
 
 interface Snapshot { engine: string[]; tracks: Record<string, string[]>; pos: Record<string, number[]>; lined: string; secured: string }
 
@@ -236,12 +236,12 @@ export function createDrawing(host: HTMLElement, { onPick }: DrawingOptions): Ya
     if (land) landU[land.track] = land.fit.reduce((a, l) => a + (l.x1 - l.x0), 0);
     const sc: Scene = {
       L: lay, F, moving, movingCouplers: couplers, hidden: motion.hidden, engineMoves: motion.engineMoves, departed,
-      trace: trace && !departed && !SHAPES_ONLY ? { runs: tracePx(lay, F, trace.track, trace.contactX), toLead: trace.toLead } : null,
-      landU, words: false,
+      trace: trace && !departed && !NO_TRACE ? { runs: tracePx(lay, F, trace.track, trace.contactX), toLead: trace.toLead } : null,
+      landU,
     };
     if (sc.trace && !sc.trace.runs.length) sc.trace = null;
     R.draw(sc, m);
-    const h = SHAPES_ONLY ? lay.h : placeLegend(lay, lay.folds > 0, !!land && land.fit.length + land.over.length > 0);
+    const h = placeLegend(lay, lay.folds > 0, !!land && land.fit.length + land.over.length > 0);
     if (h !== lay.h) { R.root.style.height = `${h}px`; }
     R.clearProbe();
     const key = JSON.stringify([lay.w, h, boxesOf(lay)]);
