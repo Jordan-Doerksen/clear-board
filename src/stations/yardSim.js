@@ -281,7 +281,7 @@ export function mount(root, ctx) {
       return;
     }
     // SECURE is the conductor on the ground, not an engine leg — no animation, no move cost.
-    if (kind === 'secure') { secure(state, id); sfx.points(); afterMove(); return; }
+    if (kind === 'secure') { secure(state, id); sfx.confirm(); afterMove(); return; }
     busy = true;
     const g = gen;
     animateMove(kind, id, n, still()).then(() => { if (gen !== g) return; busy = false; afterMove(); });
@@ -490,7 +490,7 @@ export function mount(root, ctx) {
     }, {
       onFlag: (i) => {
         if (flagged.has(i)) flagged.delete(i); else flagged.add(i);
-        sfx.points(); view.setLineFlag(i, flagged.has(i));   // in place: focus stays on the line
+        sfx.confirm(); view.setLineFlag(i, flagged.has(i));   // in place: focus stays on the line
       },
       onCertify: certify,
     });
@@ -501,7 +501,7 @@ export function mount(root, ctx) {
     const errs = new Set(puzzle.listed.map((e, i) => (e.error ? i : -1)).filter((i) => i >= 0));
     const ok = flagged.size === errs.size && [...flagged].every((i) => errs.has(i));
     if (ok) {
-      ordered = true; sfx.couple();
+      ordered = true; sfx.confirm();
       renderOrder(); syncBuilder();
       const text = `✓ Order verified — now work the real cars onto ${puzzle.goal.track}.`;
       banner(text, 'win'); live.say(text);

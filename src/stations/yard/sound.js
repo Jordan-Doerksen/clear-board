@@ -41,8 +41,13 @@ function blip(freq, dur, type = 'sine', gain = 0.18) {
   o.start(t); o.stop(t + dur);
 }
 
+// One sound, one meaning (R7 11.1, 11.2). points: a switch changes position. couple: cars couple.
+// roll: cars roll with no engine. refuse: the call is refused. win: the learner completed the job.
+// confirm (R7-P9): an action of the conductor that moves no equipment: secure, flag a line of the
+// switch list, and a right certify.
 export const sfx = {
   points() { blip(880, 0.05, 'square', 0.08); },        // switch target click
+  confirm() { blip(660, 0.12, 'sine', 0.12); },
   couple() { blip(150, 0.12, 'triangle', 0.25); blip(90, 0.18, 'sine', 0.2); }, // clunk
   roll() { blip(320, 0.25, 'sawtooth', 0.05); },
   refuse() { blip(140, 0.18, 'sawtooth', 0.12); },
