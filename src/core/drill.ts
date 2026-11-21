@@ -94,11 +94,11 @@ export interface Session {
 }
 
 // ---- The grading guards (U-44) ---------------------------------------------------------------------
-// The guards of AppContext.tsx as one pure function. F1 (in gradeItems): an item that is not verified
-// is never graded. F2 (in recordAnswer and gradeItems): a right answer counts only when the item is
-// due; a miss always counts. The Drill draws verified items only, so for each item of the Drill F1
-// gives the same answer as recordAnswer. The Drill reads it for its words (U-26). AppContext.tsx is
-// not a file of job U1-A: it keeps its own copy until the job that owns it calls this function.
+// The guards of the grading as one pure function. F1: an item that is not verified is never graded.
+// F2: a right answer counts only when the item is due; a miss always counts. recordAnswer and
+// gradeItems of AppContext.tsx call it, so the guard that the tests cover is the guard that the app
+// runs. The Drill draws verified items only, so F1 changes no answer of the Drill. The Drill also
+// reads it for its words (U-26).
 export function answerCounts(item: ContentItem, state: SRState | undefined, correct: boolean): boolean {
   if (item.citation?.trust !== 'verified') return false;
   return !correct || isDue(state);

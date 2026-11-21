@@ -3,7 +3,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { freshProfile, keepProfileCopy, loadContent, mergeProfileInto, mergeStoredProfile, PROFILE_KEY, readStoredProfile, recomputeMastery, repairProfile, saveProfile, SETTINGS_KEY, YARD_SOUND_KEY } from '../core/store';
-import { grade, isDue } from '../core/sr';
+import { grade } from '../core/sr';
+import { answerCounts } from '../core/drill';
 import type { Content, ContentItem, Profile, Settings } from '../core/types';
 
 // The device flags of the operating system (U-13; R5 A11Y-07, A11Y-27).
@@ -188,10 +189,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProfile(prev => {
       const p = structuredClone(prev);
       mergeStoredProfile(p);   // U-34: the answers of another open copy stay
+      // The guards are answerCounts of src/core/drill.ts, the function that the tests cover (U-44).
+      // F1: an item that is not verified is never graded; the Drill draws verified items only.
       // Anti-marathon (F2 / validation #7): a CORRECT answer only advances the schedule when the item
       // is actually due — re-drilling before its interval elapses can't farm familiarity. A miss always
       // counts (resetting the interval is safety signal regardless of timing).
-      if (correct && !isDue(p.items[item.id])) return prev;
+      if (!answerCounts(item, p.items[item.id], correct)) return prev;
       p.items[item.id] = grade(p.items[item.id], correct);
       const dom = p.domains[item.domain] || (p.domains[item.domain] = { mastery: 0, lastDrill: null });
       dom.lastDrill = new Date().toISOString();
@@ -214,8 +217,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       let touched = false;
       for (const id of itemIds) {
         const item = content.byId[id];
-        if (!item || item.citation?.trust !== 'verified') continue;   // F1: never grade unverified
-        if (correct && !isDue(p.items[id])) continue;                 // F2: no same-session fam farming
+        // F1 (never grade unverified) and F2 (no same-session fam farming): answerCounts (U-44).
+        if (!item || !answerCounts(item, p.items[id], correct)) continue;
         p.items[id] = grade(p.items[id], correct);
         const dom = p.domains[item.domain] || (p.domains[item.domain] = { mastery: 0, lastDrill: null });
         dom.lastDrill = now;
