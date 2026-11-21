@@ -11,7 +11,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
-import { optionsFor } from '../core/radio';
+import { LABEL_GOI, LABEL_NO_CITATION, optionsFor, sourceLine } from '../core/radio';
 import type { ContentItem } from '../core/types';
 
 interface Step {
@@ -155,9 +155,7 @@ export function RadioTest() {
         <div className="dusk-panel-body">
           {!graded && (
             <p className="cb-chip cb-chip--caution">
-              {c.source === 'GOI'
-                ? '● CN practice (GOI), not a CROR rule — answered and explained, never scored'
-                : '● No CROR citation in the verified source — answered and explained, never scored'}
+              {`● ${c.source === 'GOI' ? LABEL_GOI : LABEL_NO_CITATION} — answered and explained, never scored`}
             </p>
           )}
 
@@ -177,7 +175,7 @@ export function RadioTest() {
           {ok && step.ack && <span className="cb-tx cb-tx--eng"><span className="cb-who">Engineer · CN 2204</span> {step.ack}</span>}
           {step.goi && <span className="cb-radio-goi">{step.goi}</span>}
           <span><b>{step.rule}</b> — {step.note}</span>
-          <span className="cb-sub">{c.source}{c.ref ? ` · ${c.ref}` : ''}{c.relatedRef ? ` · related: ${c.relatedRef}` : ''}</span>
+          <span className="cb-sub">{sourceLine(c)}</span>
           {item.payload?.ruleId && (
             <button className="dusk-btn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(String(item.payload!.ruleId))}`)}>
               Look it up →
