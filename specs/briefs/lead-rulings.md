@@ -228,6 +228,18 @@ check stays open and is in the final report.
 | `R7-P15` | The trace of the last move. | Yes. | Y2 |
 | `R7-P16` | The banner after a switch throw. | A throw clears a refusal that is no longer true. | Y4 |
 
+### 3.1 Closed by the owner at the end of Wave 2c
+
+The owner answered one question on 2026-11-21 with "Approve all (Recommended)". The question listed
+the 153 lines of new or changed learner-facing words of Wave 2c, screen by screen, from the words
+files `specs/words/U1A.md`, `U1B.md`, `U1C.md`, `U1D.md`, `Y4a.md` and `Y4b.md`. It named the 25 lines
+of the seven rows with "(words)" in the upgrade list (U-11, U-24, U-25, U-27, U-33, U-37, U-40), and
+it said that the SME checks named in those files stay open.
+
+| Name | The question | The answer | Jobs that carry it |
+|---|---|---|---|
+| `WORDS-2C` | Do you approve all the new and changed words of Wave 2c? | Yes, all of them, as the words files write them. The SME checks stay open: the words of the Yard mirror and the switch names (`MIRROR-WORDS`), the cost of a move (R7-P12), the labels of the four radio calls with the source "SME" (S-13), and the other notes of the files. | U1-A, U1-B, U1-C, U1-D, Y4a, Y4b |
+
 ## 4. Open: waits for the SME
 
 Each one keeps the behaviour of today, with one exception: Y4 builds the text mirror of the Yard
