@@ -168,14 +168,14 @@ export function Drill({ domain }: { domain?: string }) {
     if (q && (q.kind === 'rule' || q.kind === 'text')) speak(q.promptText);
   }, [q, speak]);
 
-  if (!content || !built) return <p className="muted">Loading…</p>;
+  if (!content || !built) return <div className="cb-drill-view"><p className="dusk-lede">Loading…</p></div>;
 
   if (built.slots.length < (focusIds ? 1 : 4)) {
     return (
-      <>
-        <button className="back" onClick={() => navigate('/')}>← Home</button>
-        <p className="muted">Not enough verified content to drill yet.</p>
-      </>
+      <div className="cb-drill-view">
+        <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+        <p className="dusk-lede">Not enough verified content to drill yet.</p>
+      </div>
     );
   }
 
@@ -188,21 +188,25 @@ export function Drill({ domain }: { domain?: string }) {
       return `${name}: ${delta >= 0 ? '+' : ''}${delta}% → ${Math.round(end * 100)}%`;
     }).join(' · ');
     return (
-      <>
-        <button className="back" onClick={() => navigate('/')}>← Home</button>
-        <h2 className="view-title">{focusIds ? 'Review done' : 'Session done'}</h2>
-        <p className="big-score">{score} / {built.slots.length}</p>
-        <p className="muted">{lines}. Spaced out over the next days so it sticks.</p>
-        <div className="opts">
+      <div className="cb-drill-view">
+        <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+        <div className="dusk-tile dusk-tile--teal cb-drill-done">
+          <div className="dusk-tile-cap"><h2 className="dusk-tile-lab">{focusIds ? 'Review done' : 'Session done'}</h2></div>
+          <div className="dusk-tile-body">
+            <p className="dusk-tile-num">{score} / {built.slots.length}</p>
+            <p className="dusk-tile-sub">{lines}. Spaced out over the next days so it sticks.</p>
+          </div>
+        </div>
+        <div className="cb-drill-actions">
           {missedRef.current.size > 0 && (
-            <button className="opt" onClick={() => { setFocusIds([...missedRef.current]); setSessionKey(k => k + 1); }}>
+            <button className="dusk-btn" onClick={() => { setFocusIds([...missedRef.current]); setSessionKey(k => k + 1); }}>
               Practice the {missedRef.current.size} you missed →
             </button>
           )}
-          <button className="opt" onClick={() => { setFocusIds(null); setSessionKey(k => k + 1); }}>Drill again</button>
-          <button className="opt" onClick={() => navigate('/')}>Back to the path</button>
+          <button className="dusk-btn" onClick={() => { setFocusIds(null); setSessionKey(k => k + 1); }}>Drill again</button>
+          <button className="dusk-btn" onClick={() => navigate('/')}>Back to the path</button>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -220,33 +224,37 @@ export function Drill({ domain }: { domain?: string }) {
   }
 
   return (
-    <>
-      <button className="back" onClick={() => navigate('/')}>← Home</button>
-      <div className="drill-top"><span className="muted">Question {idx + 1} of {built.slots.length}</span><span className="muted">{score} correct</span></div>
-      <h2 className="view-title">{q.heading}</h2>
-      <div className={`prompt ${q.kind === 'signal' ? 'prompt-signal' : ''}`}>
-        {q.kind === 'signal' ? <Signal aspect={q.aspect} /> : q.promptText}
+    <div className="cb-drill-view">
+      <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+      <div className="cb-drill-top"><span className="cb-sub">Question {idx + 1} of {built.slots.length}</span><span className="dusk-count">{score} correct</span></div>
+      <div className="dusk-panel dusk-panel--framed cb-drill-q">
+        <div className="dusk-panel-head"><h2 className="dusk-panel-name">{q.heading}</h2></div>
+        <div className="dusk-panel-body cb-drill-prompt" data-cb="prompt">
+          {q.kind === 'signal'
+            ? <div className="cb-drill-signal" data-cb="prompt-signal"><Signal aspect={q.aspect} /></div>
+            : <div className="cb-prose cb-prose--lead">{q.promptText}</div>}
+        </div>
       </div>
-      <div className="opts">
+      <div className="cb-opts">
         {q.options.map((o, i) => {
-          const cls = answered ? (o === q.correct ? 'opt right' : (o === picked ? 'opt wrong' : 'opt')) : 'opt';
-          return <button key={i} className={cls} disabled={answered} onClick={() => choose(o)}>{o}</button>;
+          const cls = answered ? (o === q.correct ? 'cb-opt cb-opt--right' : (o === picked ? 'cb-opt cb-opt--wrong' : 'cb-opt')) : 'cb-opt';
+          return <button key={i} className={cls} data-cb="opt" disabled={answered} onClick={() => choose(o)}>{o}</button>;
         })}
       </div>
       {answered && (
-        <div className="feedback" aria-live="polite">
-          <b className={ok ? 'fb-ok' : 'fb-no'}>{ok ? 'Right.' : 'Not quite.'}</b>
+        <div className="dusk-panel cb-drill-feedback" data-cb="feedback" aria-live="polite">
+          <b className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{ok ? 'Right.' : 'Not quite.'}</b>
           <span><b>{item.title}</b> — {q.explain || item.plain || c.verbatim}</span>
           {!ok && severityOf(item) !== 'S1' && (
-            <span className="muted">{severityOf(item) === 'S3' ? 'Safety-critical — lock this one in.' : 'Worth nailing.'} Review your misses at the end.</span>
+            <span className="cb-drill-severity">{severityOf(item) === 'S3' ? 'Safety-critical — lock this one in.' : 'Worth nailing.'} Review your misses at the end.</span>
           )}
-          <span className="cite">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
-          <button className="iconbtn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
-          <button className="iconbtn next" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>
+          <span className="cb-sub">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
+          <button className="dusk-btn" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
+          <button className="dusk-btn" autoFocus onClick={() => { setIdx(i => i + 1); setPicked(null); }}>
             {idx + 1 < built.slots.length ? 'Next →' : 'Finish'}
           </button>
         </div>
       )}
-    </>
+    </div>
   );
 }
