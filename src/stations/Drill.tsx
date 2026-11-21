@@ -116,6 +116,13 @@ export function Drill({ domain }: { domain?: string }) {
   // U-06: after a miss the feedback names the right answer. The line of the title and the
   // explanation names it already for a signal and a term; for a rule question it can miss it.
   const namesAnswer = `${item.title} — ${explain ?? ''}`.includes(q.correct);
+  const sev = severityOf(item);
+  const sevLine = `${sev === 'S3' ? 'Safety-critical — lock this one in.' : 'Worth nailing.'} Review your misses at the end.`;
+  // U-19: the verdict goes into a live region that is in the view before the answer. A miss on a
+  // safety-critical item (S3) goes into an alert, so that a screen reader says it at once.
+  const urgent = answered && !ok && sev === 'S3';
+  const verdict = !answered ? '' : ok ? 'Right.'
+    : ['Not quite.', `Correct answer: ${q.correct}.`, sev !== 'S1' ? sevLine : ''].filter(Boolean).join(' ');
 
   function choose(value: string) {
     if (picked !== null) return;
@@ -154,18 +161,18 @@ export function Drill({ domain }: { domain?: string }) {
           );
         })}
       </div>
+      <p className="dusk-sr" role="status">{answered && !urgent ? verdict : ''}</p>
+      <p className="dusk-sr" role="alert">{urgent ? verdict : ''}</p>
       {answered && (
-        <div className="dusk-panel cb-drill-feedback" data-cb="feedback" aria-live="polite">
-          <b className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{ok ? 'Right.' : 'Not quite.'}</b>
+        <div className="dusk-panel cb-drill-feedback" data-cb="feedback">
+          <b id="cb-drill-verdict" className={ok ? 'cb-result cb-result--ok' : 'cb-result cb-result--no'}>{ok ? 'Right.' : 'Not quite.'}</b>
           {!ok && !namesAnswer && <span className="cb-drill-answer">Correct answer: <b>{q.correct}</b></span>}
           <span><b>{item.title}</b> — {explain}</span>
-          {!ok && severityOf(item) !== 'S1' && (
-            <span className="cb-drill-severity">{severityOf(item) === 'S3' ? 'Safety-critical — lock this one in.' : 'Worth nailing.'} Review your misses at the end.</span>
-          )}
+          {!ok && sev !== 'S1' && <span className="cb-drill-severity">{sevLine}</span>}
           <span className="cb-sub">{c.source}{c.ref ? ` · ${c.ref}` : ''}</span>
           {/* U-38: "Next" is the main control; "Look it up" is a text link. */}
           <button className="cb-link cb-drill-lookup" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
-          <button className="dusk-btn cb-drill-next" autoFocus onClick={() => {
+          <button className="dusk-btn cb-drill-next" autoFocus aria-describedby="cb-drill-verdict" onClick={() => {
             focusTo.current = idx + 1 < built.slots.length ? 'question' : 'any';
             setIdx(i => i + 1); setPicked(null);
           }}>
