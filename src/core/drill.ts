@@ -1,7 +1,10 @@
-// Clear Board — the Drill selection as pure functions (row U-44). Moved from Drill.tsx with no
-// change of behaviour. Each function takes the random source as its last parameter; with no
-// argument it is Math.random, as before the move. A test passes a fixed generator and gets the
-// same session each time. Nothing here reads the page, the storage or the clock.
+// Clear Board — the Drill selection as pure functions (row U-44). The selection moved from
+// Drill.tsx with no change of behaviour; rows U-01, U-37, U-15 and U-26 then changed it, each in a
+// commit of its own. A function that draws takes the random source as its last parameter; with no
+// argument it is Math.random, as before the move. A test passes a fixed generator and gets the same
+// session each time. Nothing here reads the page or the storage. The clock (Date.now) is read by
+// the due test (isDue), by the decay of the mastery (withRecomputedMastery) and by dueGroups, which
+// also takes the time as a parameter; a test fixes the clock with a mock.
 import { DOMAINS, drillable, recomputeMastery } from './store';
 import { isDue } from './sr';
 import { severityOf, SEV_RANK } from './severity';
@@ -87,14 +90,15 @@ export interface Session {
   drilledDomains: string[];
   startMastery: Record<string, number>;
   newIds: string[];       // the items of the session that were never answered before it (U-26)
-  practiceOnly: boolean;  // no item of the session was due at its start, so a right answer counts nowhere (U-26)
+  practiceOnly: boolean;  // no item of the session was due at its start (U-26)
 }
 
 // ---- The grading guards (U-44) ---------------------------------------------------------------------
-// The two guards of AppContext.tsx (recordAnswer and gradeItems) as one pure function. F1: an item
-// that is not verified is never graded. F2: a right answer counts only when the item is due; a miss
-// always counts. The Drill reads it for its words (U-26). AppContext.tsx is not a file of job U1-A:
-// it keeps its own copy until the job that owns it calls this function.
+// The guards of AppContext.tsx as one pure function. F1 (in gradeItems): an item that is not verified
+// is never graded. F2 (in recordAnswer and gradeItems): a right answer counts only when the item is
+// due; a miss always counts. The Drill draws verified items only, so for each item of the Drill F1
+// gives the same answer as recordAnswer. The Drill reads it for its words (U-26). AppContext.tsx is
+// not a file of job U1-A: it keeps its own copy until the job that owns it calls this function.
 export function answerCounts(item: ContentItem, state: SRState | undefined, correct: boolean): boolean {
   if (item.citation?.trust !== 'verified') return false;
   return !correct || isDue(state);
