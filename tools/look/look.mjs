@@ -41,8 +41,9 @@
 // that a page names and that is not whole. A word and the name of a control are read as the
 // markup writes them: a letter case that a style sets (text-transform) changes the picture only.
 // Text that is visually hidden (a box of 1 by 1 px or less that clips its content, as the class
-// dusk-sr does) is not page text: its words and its size are not read (ruling LOOK-MIRROR). A
-// select with no aria-label and no title is named by its label. With no `--look` a pixel
+// dusk-sr does) is not page text: its words and its size are not read (ruling LOOK-MIRROR). The
+// text of a content part of the register (`contentParts`) is not page text either: its words are
+// not read. A select with no aria-label and no title is named by its label. With no `--look` a pixel
 // difference fails also. The pixels are counted with no package: the SHA-256 of the two files is
 // compared, and where they differ both are decoded in a browser page.
 //
@@ -65,6 +66,16 @@
 //                             name, and each other word of it is in `gainWords`.
 //   `smallestText`            the size in px of the smallest text of the page now, when the row
 //                             makes it smaller than in the baseline.
+//   `contentParts`            selectors of the parts of the page whose words come from the content
+//                             files: the title and the plain words of an item, the name of an answer
+//                             option, the prompt of a question, a drawing. In the baseline and now,
+//                             the words of these parts are not read, and a control in such a part (or
+//                             that is one) is named `(content)`. So the register holds no word of the
+//                             text of an item (ruling REGISTER-FORM; ruling TAPE-FORM keeps content
+//                             words out of the gates), and each other word of the page keeps its
+//                             exact count. The facts of a shot hold the parts that they were read
+//                             with. When the register names other parts than the baseline was read
+//                             with, the shot fails: take the baseline again.
 // A change of the register gives a warning that names its row. A change that no entry names fails,
 // and a change that an entry names and that the page does not show fails too.
 //
@@ -98,7 +109,7 @@ const config = JSON.parse(readFileSync(resolve(root, option('--config') ?? 'tool
 
 // The register must have the form of LOOK-EXACT. A key that the harness does not know stops the run:
 // a key of an older form would otherwise allow nothing and say nothing.
-const REGISTER_KEYS = ['row', 'baseline', 'what', 'pages', 'idsGo', 'classesGo', 'wordsGo', 'wordsCome', 'controlsGo', 'controlsRenamed', 'smallestText'];
+const REGISTER_KEYS = ['row', 'baseline', 'what', 'pages', 'idsGo', 'classesGo', 'wordsGo', 'wordsCome', 'controlsGo', 'controlsRenamed', 'smallestText', 'contentParts'];
 const count1 = (n) => Number.isInteger(n) && n > 0;
 const pageNames = new Set(config.pages.map((p) => p.name));
 for (const [k, c] of (config.changes ?? []).entries()) {
@@ -109,6 +120,7 @@ for (const [k, c] of (config.changes ?? []).entries()) {
   if (!/^[0-9a-f]{40}$/.test(c.baseline ?? '')) stop(`${at} names no baseline commit in full (40 hex digits)`);
   if (c.pages && (!Array.isArray(c.pages) || c.pages.some((p) => !pageNames.has(p)))) stop(`${at} names a page that the config does not have`);
   for (const key of ['idsGo', 'classesGo']) if (c[key] && (!Array.isArray(c[key]) || !c[key].every((x) => typeof x === 'string' && x))) stop(`${at}: ${key} is not a list of names`);
+  if (c.contentParts && (!Array.isArray(c.contentParts) || !c.contentParts.every((x) => typeof x === 'string' && x))) stop(`${at}: contentParts is not a list of selectors`);
   for (const key of ['wordsGo', 'wordsCome', 'controlsGo']) {
     if (c[key] && (typeof c[key] !== 'object' || Array.isArray(c[key]) || !Object.values(c[key]).every(count1))) stop(`${at}: ${key} is not an object with a count of 1 or more for each key`);
   }
@@ -188,9 +200,18 @@ function seedScript(start) {
 }
 
 // The facts of the page. This function runs in the page. `mirror` is the text mirror that the
-// config of the page names, or null.
-function collectFacts(mirror) {
+// config of the page names, or null. `parts` are the content parts of the register for the shot
+// (ruling REGISTER-FORM): their words are not read, and a control in a part is named `(content)`.
+function collectFacts([mirror, parts]) {
   const shown = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+  const partEls = parts.flatMap((selector) => {
+    try {
+      return [...document.querySelectorAll(selector)];
+    } catch {
+      throw new Error(`the content part "${selector}" of the register is not a selector`);
+    }
+  });
+  const inPart = (el) => partEls.some((part) => part.contains(el));
   const collapse = (text) => (text ?? '').replace(/\s+/g, ' ').trim();
   // Visually hidden: a box of 1 by 1 px or less that clips its content (ruling LOOK-MIRROR). A
   // screen reader reads such text; the screen does not show it.
@@ -220,18 +241,19 @@ function collectFacts(mirror) {
   const asWritten = document.createElement('style');
   asWritten.textContent = '*, *::first-letter, *::first-line { text-transform: none !important; } [data-look-hidden] { display: none !important; }';
   document.head.append(asWritten);
-  for (const el of hidden) el.setAttribute('data-look-hidden', '');
+  for (const el of [...hidden, ...partEls]) el.setAttribute('data-look-hidden', '');
   const words = {};
   for (const word of collapse(document.body.innerText).split(' ')) if (word) words[word] = (words[word] ?? 0) + 1;
-  for (const el of hidden) el.removeAttribute('data-look-hidden');
+  for (const el of [...hidden, ...partEls]) el.removeAttribute('data-look-hidden');
   // The name of a control: its aria-label, its text (not for a select), its placeholder, its title,
-  // the text of its label (a select only: ruling LOOK-MIRROR), or its id.
+  // the text of its label (a select only: ruling LOOK-MIRROR), or its id. A control in a content
+  // part is named `(content)` (ruling REGISTER-FORM).
   const labelOf = (el) => collapse([...(el.labels ?? [])].map((label) => label.innerText).join(' '));
   const named = [];
   for (const el of document.querySelectorAll('button, a[href], select, input, textarea, summary, [role="tab"], [role="button"]')) {
     if (!shown(el)) continue;
     const tag = el.tagName.toLowerCase();
-    const name = collapse(el.getAttribute('aria-label')) || (tag === 'select' ? '' : collapse(el.innerText)) || collapse(el.getAttribute('placeholder')) || collapse(el.getAttribute('title')) || (tag === 'select' ? labelOf(el) : '') || (el.id ? `#${el.id}` : '');
+    const name = inPart(el) ? '(content)' : collapse(el.getAttribute('aria-label')) || (tag === 'select' ? '' : collapse(el.innerText)) || collapse(el.getAttribute('placeholder')) || collapse(el.getAttribute('title')) || (tag === 'select' ? labelOf(el) : '') || (el.id ? `#${el.id}` : '');
     named.push({ el, key: `${tag} "${name}"` });
   }
   asWritten.remove();
@@ -251,7 +273,7 @@ function collectFacts(mirror) {
     };
   }
   const page = document.documentElement;
-  return { ids, classes, smallestText: smallest, words, controls, textMirror, sidewaysScroll: Math.max(0, page.scrollWidth - page.clientWidth), pageWidth: page.scrollWidth, pageHeight: page.scrollHeight };
+  return { ids, classes, smallestText: smallest, words, controls, textMirror, contentParts: parts, sidewaysScroll: Math.max(0, page.scrollWidth - page.clientWidth), pageWidth: page.scrollWidth, pageHeight: page.scrollHeight };
 }
 
 // The check of a text mirror (ruling LOOK-MIRROR): the mirror is in the page, and it has one line for
@@ -304,8 +326,9 @@ async function reach(what, part) {
 }
 
 // Take one picture and its facts, in a new browser process, a new context and a new page. When the
-// shot does not reach its state, the result holds `failure`, a sentence, and no picture.
-async function take(shot) {
+// shot does not reach its state, the result holds `failure`, a sentence, and no picture. `commit` is
+// the commit of the baseline, or null: the content parts of the register for that commit are read.
+async function take(shot, commit) {
   const size = config.sizes[shot.size];
   const browser = await launch();
   const context = await browser.newContext({
@@ -344,7 +367,7 @@ async function take(shot) {
       for (const svg of document.querySelectorAll('svg')) { svg.pauseAnimations(); svg.setCurrentTime(0); }
       await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
     });
-    const facts = await page.evaluate(collectFacts, shot.page.mirror ?? null);
+    const facts = await page.evaluate(collectFacts, [shot.page.mirror ?? null, contentPartsFor(shot.page, commit)]);
     // The picture is taken until two pictures in a row of this page are equal. A page can
     // paint one more time after its content is there, and one pixel of an edge can change.
     const shoot = () => page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide', scale: 'css' });
@@ -415,6 +438,9 @@ const mayGo = (name, list) => (list ?? []).some((entry) => (entry.endsWith('*') 
 // The entries of the register that hold for a page and a baseline: the entries that were measured on
 // the commit of the baseline and that name the page, or name no page (ruling LOOK-EXACT).
 const changesFor = (page, commit) => (config.changes ?? []).filter((c) => commit && c.baseline === commit && (!c.pages || c.pages.includes(page.name)));
+// The content parts of the entries that hold for a page and a baseline, in one sorted list (ruling
+// REGISTER-FORM).
+const contentPartsFor = (page, commit) => [...new Set(changesFor(page, commit).flatMap((c) => c.contentParts ?? []))].sort();
 // The words of the name of a control, from its key `tag "name"`.
 const tagOf = (key) => key.slice(0, key.indexOf(' '));
 const nameWords = (key) => key.slice(key.indexOf('"') + 1, -1).split(' ').filter(Boolean);
@@ -436,6 +462,11 @@ function compareFacts(before, now, page, commit) {
   const fails = [];
   const warnings = [];
   const entries = changesFor(page, commit);
+  // The words of both facts must be read with the content parts that the register names now.
+  const parts = JSON.stringify(contentPartsFor(page, commit));
+  if (JSON.stringify(before.contentParts ?? []) !== parts || JSON.stringify(now.contentParts ?? []) !== parts) {
+    fails.push(`the baseline was read with the content parts ${JSON.stringify(before.contentParts ?? [])}, and the register names ${parts}: take the baseline again`);
+  }
   const byRow = (lines) => {
     const map = new Map();
     for (const { rows, text } of lines) { const key = rows.join('; '); map.set(key, [...(map.get(key) ?? []), text]); }
@@ -603,11 +634,11 @@ try {
     for (const shot of shots) {
       // Two takes must be equal. If they are not, the harness takes the picture again. A shot that
       // does not reach its state fails with its sentence, and the run goes on (LOOK-CRASH).
-      let first = await take(shot);
+      let first = await take(shot, source.commit);
       let takes = 1;
       let stable = false;
       while (!first.failure && takes < 4 && !stable) {
-        const next = await take(shot);
+        const next = await take(shot, source.commit);
         takes++;
         if (next.failure) { first = next; break; }
         stable = next.sha256 === first.sha256;
@@ -655,12 +686,12 @@ try {
         continue;
       }
       const before = { png: readFileSync(basePng), facts: JSON.parse(readFileSync(join(outDir, 'baseline', `${shot.name}.json`), 'utf8')) };
-      let now = await take(shot);
+      let now = await take(shot, manifest.commit ?? null);
       let takes = 1;
       const equal = () => createHash('sha256').update(before.png).digest('hex') === now.sha256;
       // A picture that is not equal is taken again, two times at most. A shot that is equal
       // only on a later take passes, and the report names it.
-      while (!now.failure && !equal() && takes < 3) { now = await take(shot); takes++; }
+      while (!now.failure && !equal() && takes < 3) { now = await take(shot, manifest.commit ?? null); takes++; }
       // A shot that does not reach its state fails with its sentence, and the run goes on (LOOK-CRASH).
       if (now.failure) {
         console.log(`FAIL  ${shot.name}  ${now.failure}`);
