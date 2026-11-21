@@ -10,8 +10,8 @@ phone, no Safari, no screen reader and no Windows build was tried: each measure 
 headless Chromium.
 
 ### The look
-- The app wears Dusk 0.2.0. The six layer files are a locked copy in `src/styles/dusk/` (commit
-  `86cfef2`). App names map to Dusk tokens in one bridge file,
+- The app uses the skin Dusk 0.2.0. The six layer files are a locked copy in `src/styles/dusk/`
+  (commit `86cfef2`). App names map to Dusk tokens in one bridge file,
   `src/styles/clear-board.tokens.css`. The `cb-` parts are in `src/styles/clear-board.parts.css`.
 - The app is one Dusk window that fills the browser. A line of reading text stops at 78
   characters. Reference, the Drill, Signals and the Radio sit in a column of at most 920 px; Home,
@@ -102,8 +102,9 @@ headless Chromium.
   the guided Radio, focus stays on "Key the radio". (U-14)
 - The Drill and the Radio test put the verdict into a live region. A miss on a safety-critical item
   goes into an alert. (U-19) What a screen reader says: not verified.
-- The emoji of a control is hidden from a screen reader. (U-41) What a screen reader says: not
-  verified.
+- The emoji of a control is hidden from a screen reader. The sign ▶ stays in the name of "▶ Watch
+  optimal" and of "Key the radio ▶", and the sign ⚠ stays in the trust mark of four Reference rows.
+  (U-41) What a screen reader says: not verified.
 - The guided Radio: "← Home" first, one heading, mode tabs that move with the arrow keys, Home and
   End, and a log that is a Tab stop with the role "log". The distance or the status shows as page
   text above the next call, with the words of the scene. Bigger text, the dyslexia type and higher
