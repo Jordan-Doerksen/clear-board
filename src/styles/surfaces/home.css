@@ -67,3 +67,36 @@
   margin: auto 0 0;
   font-size: .7rem;
 }
+
+/* ---- the stations ----------------------------------------------------------------------------
+   A Dusk list of rows. Each row is a button with its icon square first: the emoji of today is the
+   glyph of the square. The list keeps the columns and the column gap of today at each width. A
+   Dusk list is one column above 760 px. */
+.cb-app .cb-home-view .cb-home-stations {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  column-gap: var(--sp-5);
+}
+
+/* A station row has no chevron, so it has no third track: the words take that width, and the
+   longest word of a name fits in each reading mode. */
+.cb-app .cb-home-view .cb-home-stations .dusk-row { grid-template-columns: var(--ico-size) minmax(0, 1fr); }
+
+/* The name and the sub-line keep their size of today and the line height of the reading modes. */
+.cb-app .cb-home-view .cb-home-stations .dusk-row b,
+.cb-app .cb-home-view .cb-home-stations .dusk-row small { line-height: var(--lh-base); }
+.cb-app .cb-home-view .cb-home-stations .dusk-row small { font-size: smaller; }
+
+/* ---- the footer ------------------------------------------------------------------------------
+   The tip link is a Dusk button. The link and the text keep their size of today. The text is
+   capped at the measure. */
+.cb-home-view > footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-5);
+  margin-top: var(--sp-6);
+  padding-top: var(--sp-7);
+  border-top: 1px solid var(--lit-rule);
+}
+.cb-app .cb-home-view footer .dusk-btn,
+.cb-app .cb-home-view footer .cb-sub { font-size: .82rem; }

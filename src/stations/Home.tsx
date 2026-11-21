@@ -59,16 +59,16 @@ export function Home() {
       </div>
 
       <h2 className="dusk-rule"><b>Ways to learn</b></h2>
-      <div className="stations">
+      <div className="dusk-rows cb-home-stations">
         {STATIONS.map(s => (
-          <button key={s.go} className="station" onClick={() => navigate(s.go)}><b>{s.icon} {s.name}</b><small>{s.sub}</small></button>
+          <button key={s.go} className="dusk-row" data-cb="station" onClick={() => navigate(s.go)}><span className="dusk-ico">{s.icon}</span><span><b>{s.name}</b><small>{s.sub}</small></span></button>
         ))}
-        <button className="station" disabled><b>📝 Exam</b><small>Coming soon</small></button>
+        <button className="dusk-row" data-cb="station" disabled><span className="dusk-ico">📝</span><span><b>Exam</b><small>Coming soon</small></span></button>
       </div>
 
       <footer>
-        <a className="tip" href="https://ko-fi.com/jordandoerksen" target="_blank" rel="noopener">☕ Tip jar — if it helped you get there</a>
-        <p>An independent study tool. Cites the <b>Canadian Rail Operating Rules</b> (a public document)
+        <a className="dusk-btn" href="https://ko-fi.com/jordandoerksen" target="_blank" rel="noopener">☕ Tip jar — if it helped you get there</a>
+        <p className="cb-sub dusk-measure">An independent study tool. Cites the <b>Canadian Rail Operating Rules</b> (a public document)
           and flags CN operating practice (GOI) as not-a-rule. Not affiliated with CN, Transport Canada,
           or the RAC. Built for the people the book failed.</p>
       </footer>
