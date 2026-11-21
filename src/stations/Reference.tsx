@@ -102,7 +102,7 @@ function Detail({ item, audio, onSpeak, onDrillSignals }:
           Source: {c.source}{c.ref ? ` · ${c.ref}` : ''}{c.relatedRef ? ` · related: ${c.relatedRef}` : ''}
         </div>
         {audio && (
-          <button className="dusk-btn" onClick={() => onSpeak(`${item.title}. ${item.plain || ''}. ${c.verbatim || ''}`)}>🔊 Read aloud</button>
+          <button className="dusk-btn" onClick={() => onSpeak(`${item.title}. ${item.plain || ''}. ${c.verbatim || ''}`)}><span aria-hidden="true">🔊</span> Read aloud</button>
         )}
       </div>
     </div>
