@@ -124,6 +124,13 @@ option of each. A brief that says "open for the lead" for one of these names fol
 | Y3, section 7.5 | Each of the seven points is accepted as the brief writes it. |
 | The contract | Part H of `00-contracts.md` records these rulings and the D-0038 updates of B.3, B.5, C.2, D.4 and E.1. |
 
+### 2.4 Rulings at the start of Wave 2b (2026-11-21)
+
+| Name | The ruling | The reason |
+|---|---|---|
+| `2B-BASE` | Each 2b job starts from the head of the Wave 2a branch, `1590be5`. Its look baseline is built from that commit (`npm run look:baseline -- --ref 1590be5…`). Its compare runs in look mode (`--look --gate`). | Wave 2a is merged, checked and green at that commit. |
+| `PICTURES-CAP` | A committed picture is at device scale factor 1. A picture taller than 6000 px is committed as its first 6000 px; the full picture stays in the uncommitted `.look/` folder. | The full Reference pages are about 20,000 px high and 2.5 MB each. The committed pictures are for the owner's look, and the top of a long page carries the look. |
+
 ## 3. Closed by the owner after Gate A
 
 The owner answered the sheet of these 19 picks on 2026-11-21 with the words "yes to all
