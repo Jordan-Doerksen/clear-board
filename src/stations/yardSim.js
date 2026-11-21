@@ -340,7 +340,7 @@ export function mount(root, ctx) {
       secure(state, id); sfx.confirm();
       lastFrom = null;
       addLog(kind, id, n, before, state);
-      const won = announce(state);
+      const won = announce(state, costWords(kind, before, state));
       syncBuilder(); paint();
       if (won) sfx.win();
       return;
@@ -349,7 +349,7 @@ export function mount(root, ctx) {
     MOVES[kind](after, id, n);
     lastFrom = before;
     addLog(kind, id, n, before, after);
-    const won = announce(after);
+    const won = announce(after, costWords(kind, before, after));
     animateMove(state, kind, id, n, still(), () => { syncBuilder(); paint(); if (won) sfx.win(); });
   }
 
@@ -378,6 +378,20 @@ export function mount(root, ctx) {
   // A call in words, in the form of the help text: PULL 3 from AS73, SPOT 6 to AS75, SECURE AS75.
   function callWords(act, trk, n) {
     return act === 'secure' ? `SECURE ${trk}` : `${act.toUpperCase()} ${n} ${act === 'pull' ? 'from' : 'to'} ${trk}`;
+  }
+  // The cost of a call in words (R7-P12, F7): the change of the two counters, from the states before
+  // and after the call. model.js charges a move of the engine in legs: a pull is back in and pull out
+  // (2), a spot is the shove in (1) and leaves its pull-out to the next time the engine moves, a kick
+  // is one shove (1), a secure moves no engine (0). The next move after a spot pays that pull-out
+  // (+1): the words name it, so that the cost has a visible cause. The SME checks these words.
+  function costWords(act, before, after) {
+    const m = after.moves - before.moves, j = after.joints - before.joints;
+    const counts = (legs) => `+${m} move${m === 1 ? '' : 's'}${legs ? ` (${legs})` : ''}, +${j} coupling${j === 1 ? '' : 's'}.`;
+    if (act === 'secure') return counts('');
+    const late = before.out ? '' : 'the pull-out of your last spot, then ';
+    const legs = act === 'pull' ? (late ? `${late}back in and pull out` : 'back in, pull out') : act === 'spot' ? `${late}shove in` : `${late}one shove`;
+    const tail = act === 'spot' ? ' The pull-out of this spot counts the next time the engine moves.' : '';
+    return counts(legs) + tail;
   }
 
   // ---- The watched line (R7-P8, U-04) -------------------------------------------------------------
@@ -410,7 +424,7 @@ export function mount(root, ctx) {
     if (k === 0) return `Step 0 of ${N}: the yard at the start of the job.`;
     const [act, trk, n] = demo.line[k - 1];
     const end = k === N ? ' The demonstration is over. A watched line gets no done mark.' : '';
-    return `Step ${k} of ${N}: ${callWords(act, trk, n)}. ${demo.post[k].msg}${end}`;
+    return `Step ${k} of ${N}: ${callWords(act, trk, n)}. ${demo.post[k].msg} ${costWords(act, demo.post[k - 1], demo.post[k])}${end}`;
   }
 
   // The banner, the counters and the region say step k.
@@ -495,10 +509,10 @@ export function mount(root, ctx) {
   // yard now. No past state changes the game state, and each input on the yard shows the yard now
   // first (settle). The head bar of the picture and the region say which state the picture shows.
   function addLog(act, trk, n, before, after) {
-    log.push({ act, trk, n, call: callWords(act, trk, n), msg: after.msg, before, after: structuredClone(after) });
+    log.push({ act, trk, n, call: callWords(act, trk, n), msg: after.msg, cost: costWords(act, before, after), before, after: structuredClone(after) });
     renderLog();
   }
-  function renderLog() { view.renderLog(log.map((e) => ({ call: e.call, msg: e.msg, cost: '', again: e.act !== 'secure' }))); }
+  function renderLog() { view.renderLog(log.map((e) => ({ call: e.call, msg: e.msg, cost: e.cost, again: e.act !== 'secure' }))); }
 
   function showPast(k, phase) {
     const e = log[k - 1];
@@ -554,10 +568,10 @@ export function mount(root, ctx) {
   // control and the region. The banner shows the last of its texts. The region says the result of the
   // move, the readout and the text that followed, in one message (R7 F14), so that no part of the
   // result is lost. A win goes into the profile here. Returns true when the call wins the job.
-  function announce(after) {
+  function announce(after, cost) {
     const readout = view.setReadout({ moves: after.moves, par: puzzle.par, joints: after.joints });
-    const said = [after.msg, `${readout}.`];
-    banner(after.msg, 'ok');
+    const said = [after.msg, cost, `${readout}.`];
+    banner(`${after.msg} ${cost}`, 'ok');
     const done = checkWin(after, puzzle);
     let won = false;
     if (done && puzzle.goal.depart) {
