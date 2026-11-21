@@ -2,18 +2,34 @@
 // Mirrors the vanilla `ctx` object (profile/content/settings/save/recompute/speak) as React context.
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { freshProfile, loadContent, loadProfile, recomputeMastery, saveProfile } from '../core/store';
+import { freshProfile, keepProfileCopy, loadContent, readStoredProfile, recomputeMastery, saveProfile, SETTINGS_KEY } from '../core/store';
 import { grade, isDue } from '../core/sr';
 import type { Content, ContentItem, Profile, Settings } from '../core/types';
-
-const SETTINGS_KEY = 'cb.settings.v1';
 
 function defaultSettings(): Settings {
   return { dys: false, contrast: false, reduce: matchMedia('(prefers-reduced-motion: reduce)').matches, audio: false, big: false };
 }
+// A stored setting counts only when it is true or false. Each other value gives the default.
 function loadSettings(): Settings {
-  try { return { ...defaultSettings(), ...(JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null') || {}) }; }
-  catch { return defaultSettings(); }
+  const settings = defaultSettings();
+  try {
+    const stored: unknown = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null');
+    if (stored && typeof stored === 'object') {
+      for (const key of Object.keys(settings) as (keyof Settings)[]) {
+        const value = (stored as Record<string, unknown>)[key];
+        if (typeof value === 'boolean') settings[key] = value;
+      }
+    }
+  } catch { /* storage blocked, or text that is not JSON: the defaults */ }
+  return settings;
+}
+
+// The profile at the start. A stored profile that needed a repair, or that the app cannot read,
+// is kept under the second key before the app writes over it (U-05).
+function startProfile(): Profile {
+  const stored = readStoredProfile(loadSettings());
+  if ((stored.state === 'repaired' || stored.state === 'unreadable') && stored.text !== null) keepProfileCopy(stored.text);
+  return stored.profile;
 }
 
 interface AppValue {
@@ -40,7 +56,7 @@ export function useApp(): AppValue {
 export function AppProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<Content | null>(null);
   const [settings, setSettings] = useState<Settings>(loadSettings);
-  const [profile, setProfile] = useState<Profile>(() => loadProfile(loadSettings()));
+  const [profile, setProfile] = useState<Profile>(startProfile);
 
   // Load the content library once.
   useEffect(() => { loadContent().then(setContent).catch(() => setContent(null)); }, []);

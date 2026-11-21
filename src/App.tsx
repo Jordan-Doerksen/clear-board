@@ -1,7 +1,9 @@
 // Clear Board — app shell: header chrome, hash routing, accessible focus handling, settings dialog.
-import { useEffect, useRef, useState } from 'react';
+import { Component, useEffect, useId, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AppProvider } from './state/AppContext';
+import { clearProfileKeepCopy, saveTextFile, storedDataFile } from './core/store';
 import { Home } from './stations/Home';
 import { Reference } from './stations/Reference';
 import { Drill } from './stations/Drill';
@@ -12,6 +14,51 @@ import { Settings } from './stations/Settings';
 function DrillRoute() {
   const { domain } = useParams();
   return <Drill domain={domain} />;
+}
+
+// ---- The screen for a render error (U-05, U-07) -------------------------------------------------
+// When a part of the app throws while it draws, the guard shows this screen in place of a blank
+// page. It reads the stored data directly, so it works with no app state.
+function RenderFailed() {
+  const headingId = useId();
+  function saveCopy() {
+    const file = storedDataFile();
+    saveTextFile(file.name, file.text);
+  }
+  function startFresh() {
+    if (!confirm('Clear your progress on this device and start fresh? Save a copy first if you want to keep it.')) return;
+    clearProfileKeepCopy();
+    window.location.hash = '#/';
+    window.location.reload();
+  }
+  return (
+    <section className="cb-shell-fail" aria-labelledby={headingId}>
+      <h2 className="dusk-title" id={headingId}>Clear Board could not show this screen</h2>
+      <p className="cb-prose">Save a copy of the stored data to a file first. The file keeps your progress.</p>
+      <p className="cb-prose">Start fresh clears your progress on this device and opens Home again.</p>
+      <div className="cb-shell-fail-actions">
+        <button className="dusk-btn" onClick={saveCopy}>Save a copy of the stored data</button>
+        <button className="cb-btn--attn" onClick={startFresh}>Start fresh</button>
+      </div>
+    </section>
+  );
+}
+
+// `whole`: the guard holds the whole app, so its screen also draws the window.
+class RenderGuard extends Component<{ children: ReactNode; whole?: boolean }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError(): { failed: boolean } { return { failed: true }; }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    if (!this.props.whole) return <RenderFailed />;
+    return (
+      <div className="dusk-stage dusk-stage--app">
+        <section className="dusk-win cb-win cb-shell-win">
+          <main className="dusk-main" id="view"><RenderFailed /></main>
+        </section>
+      </div>
+    );
+  }
 }
 
 function Shell() {
@@ -39,16 +86,19 @@ function Shell() {
           </header>
           <div className="dusk-thread" aria-hidden="true" />
           <main className="dusk-main" id="view" ref={mainRef} tabIndex={-1}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/reference" element={<Reference />} />
-              <Route path="/drill" element={<Drill />} />
-              <Route path="/drill/:domain" element={<DrillRoute />} />
-              <Route path="/signals" element={<Drill domain="signals" />} />
-              <Route path="/yard" element={<Yard />} />
-              <Route path="/radio" element={<Radio />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            {/* A new route gives a new guard, so a screen for a render error goes with its route. */}
+            <RenderGuard key={location.pathname}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/reference" element={<Reference />} />
+                <Route path="/drill" element={<Drill />} />
+                <Route path="/drill/:domain" element={<DrillRoute />} />
+                <Route path="/signals" element={<Drill domain="signals" />} />
+                <Route path="/yard" element={<Yard />} />
+                <Route path="/radio" element={<Radio />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </RenderGuard>
           </main>
         </section>
       </div>
@@ -59,10 +109,12 @@ function Shell() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <HashRouter>
-        <Shell />
-      </HashRouter>
-    </AppProvider>
+    <RenderGuard whole>
+      <AppProvider>
+        <HashRouter>
+          <Shell />
+        </HashRouter>
+      </AppProvider>
+    </RenderGuard>
   );
 }

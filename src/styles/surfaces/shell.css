@@ -25,3 +25,19 @@
 .cb-app .cb-shell-win > .dusk-titlebar h1 { font-size: 1.35rem; }
 .cb-app .cb-shell-win > .dusk-titlebar .dusk-crumb { font-size: .86rem; }
 .cb-app .cb-shell-win > .dusk-titlebar .dusk-btn { font-size: .9rem; }
+
+/* ---- the screen for a render error (U-05, U-07) ----------------------------------------------
+   A heading, two lines of reading text and two controls. The text is capped at the measure. The
+   controls wrap onto a second line on a narrow screen. */
+.cb-shell-fail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  max-width: var(--measure);
+  padding-block: var(--sp-7);
+}
+.cb-shell-fail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+}

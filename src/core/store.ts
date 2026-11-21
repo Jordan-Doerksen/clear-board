@@ -1,7 +1,7 @@
 // Clear Board — profile + content library (SPEC schemas). Local-first; one profile, one library.
 // Ported from the vanilla core/store.js — same logic + safety filters, now typed.
 import { decayedFam } from './sr';
-import type { Content, ContentItem, DomainDef, Profile, Question, Settings } from './types';
+import type { Content, ContentItem, DomainDef, DomainState, Profile, Question, Settings, SRState, YardBest } from './types';
 
 export const DOMAINS: DomainDef[] = [
   { id: 'definitions', name: 'The words', desc: 'CROR definitions — the language of the job.', live: true },
@@ -13,8 +13,15 @@ export const DOMAINS: DomainDef[] = [
   { id: 'operating',   name: 'Operating', desc: 'Speeds, crew duties, time, crossings, bulletins.', live: true },
 ];
 
-const PROFILE_KEY = 'cb.profile.v1';
-const CONTENT_FILES = ['data/definitions.json', 'data/signals.json', 'data/rules.json', 'data/radio-script.json']; // grows as domains migrate
+export const PROFILE_KEY = 'cb.profile.v1';
+// The second key: a copy of a stored profile that the app could not use whole (it was repaired or
+// could not be read), or the profile before "Start fresh". The app reads it only to save it to a
+// file. U-05; R6 ENG-03.
+export const PROFILE_COPY_KEY = 'cb.profile.v1.copy';
+export const SETTINGS_KEY = 'cb.settings.v1';
+// The stored sound choice of the Yard (yard/sound.js). The key keeps its name (2c-plan C8).
+export const YARD_SOUND_KEY = 'sl_muted';
+const CONTENT_FILES =['data/definitions.json', 'data/signals.json', 'data/rules.json', 'data/radio-script.json']; // grows as domains migrate
 const QUESTION_FILES = ['data/rule-questions.json'];                                      // authored MC banks, keyed to a ruleId
 const url = (f: string) => `${import.meta.env.BASE_URL}${f}`;
 
@@ -27,15 +34,154 @@ export function freshProfile(settings: Settings): Profile {
     path: { stage: 'First-day trainee', unlocked: ['reference', 'drill'], testReady: false },
   };
 }
-export function loadProfile(settings: Settings): Profile {
-  try {
-    const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
-    if (p && p.schema === 1) {
-      delete p.radio;   // D-0025: the write-only `radio.done` boolean is retired; nothing gated on it
-      return p as Profile;
+// ---- The repair of a stored profile (U-05; R4 UX-19, R6 ENG-02, ENG-03) ----------------------
+// A stored profile with schema 1 is read field by field. A field of the wrong shape gets the value
+// of a fresh profile. In a map (items, domains, Yard records) each entry of the right shape stays
+// and each other entry goes. So the repaired profile keeps each item that the app can read.
+type Raw = Record<string, unknown>;
+const isObj = (x: unknown): x is Raw => typeof x === 'object' && x !== null && !Array.isArray(x);
+const isNum = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x);
+const isTime = (x: unknown): x is string => typeof x === 'string' && !Number.isNaN(Date.parse(x));
+const isTimeOrNull = (x: unknown): boolean => x === null || isTime(x);
+
+function isItemState(x: unknown): x is SRState {
+  return isObj(x) && isNum(x.fam) && isNum(x.seen) && isNum(x.correct) && isNum(x.ease)
+    && isNum(x.interval) && isTime(x.due) && isTimeOrNull(x.lastSeen);
+}
+function isDomainState(x: unknown): x is DomainState {
+  return isObj(x) && isNum(x.mastery) && isTimeOrNull(x.lastDrill);
+}
+function isYardBest(x: unknown): x is YardBest {
+  return isObj(x) && isNum(x.moves) && isNum(x.joints) && typeof x.beatPar === 'boolean' && typeof x.departed === 'boolean';
+}
+function isPath(x: unknown): boolean {
+  return isObj(x) && typeof x.stage === 'string' && typeof x.testReady === 'boolean'
+    && Array.isArray(x.unlocked) && x.unlocked.every(u => typeof u === 'string');
+}
+const SETTING_KEYS: (keyof Settings)[] = ['dys', 'contrast', 'reduce', 'audio', 'big'];
+function isSettings(x: unknown): x is Settings {
+  return isObj(x) && SETTING_KEYS.every(k => typeof x[k] === 'boolean');
+}
+
+// Keeps each entry of a map that passes the test. `dropped` says that one entry or more went.
+function keepEntries<T>(x: Raw, test: (v: unknown) => v is T): { kept: Record<string, T>; dropped: boolean } {
+  const kept: Record<string, T> = {};
+  let dropped = false;
+  for (const [key, value] of Object.entries(x)) {
+    if (test(value)) kept[key] = value;
+    else dropped = true;
+  }
+  return { kept, dropped };
+}
+
+// Returns null when `raw` is not a profile of schema 1. Else it returns the profile, repaired where
+// a field has the wrong shape, and says whether a repair was made.
+export function repairProfile(raw: unknown, settings: Settings): { profile: Profile; repaired: boolean } | null {
+  if (!isObj(raw) || raw.schema !== 1) return null;
+  const fresh = freshProfile(settings);
+  const p: Raw = { ...raw };
+  let repaired = false;
+  delete p.radio;   // D-0025: the write-only `radio.done` boolean is retired; nothing gated on it
+
+  if (!isTime(p.createdAt)) { p.createdAt = fresh.createdAt; repaired = true; }
+  if (!isTime(p.updatedAt)) { p.updatedAt = fresh.updatedAt; repaired = true; }
+  if (!isSettings(p.settings)) { p.settings = fresh.settings; repaired = true; }
+  if (!isPath(p.path)) { p.path = fresh.path; repaired = true; }
+
+  if (isObj(p.items)) {
+    const r = keepEntries(p.items, isItemState);
+    p.items = r.kept;
+    if (r.dropped) repaired = true;
+  } else { p.items = fresh.items; repaired = true; }
+
+  if (isObj(p.domains)) {
+    const r = keepEntries(p.domains, isDomainState);
+    p.domains = r.kept;
+    if (r.dropped) repaired = true;
+  } else { p.domains = fresh.domains; repaired = true; }
+
+  if (isObj(p.yard)) {
+    const y: Raw = { ...p.yard };
+    const completed = Array.isArray(y.completed) ? y.completed : null;
+    y.completed = (completed ?? []).filter((c): c is string => typeof c === 'string');
+    if (!completed || (y.completed as string[]).length !== completed.length) repaired = true;
+    // A profile from before D-0027 has no `best`. That is not damage: the Yard adds it.
+    if ('best' in y) {
+      if (isObj(y.best)) {
+        const r = keepEntries(y.best, isYardBest);
+        y.best = r.kept;
+        if (r.dropped) repaired = true;
+      } else { y.best = {}; repaired = true; }
     }
-  } catch { /* fall through */ }
-  return freshProfile(settings);
+    p.yard = y;
+  } else { p.yard = fresh.yard; repaired = true; }
+
+  return { profile: p as unknown as Profile, repaired };
+}
+
+// What the app found under the profile key: nothing, a whole profile, a profile that needed a
+// repair, or text that is not a profile of this app. `text` is the stored text.
+export type StoredProfileState = 'none' | 'ok' | 'repaired' | 'unreadable';
+export interface StoredProfile { profile: Profile; state: StoredProfileState; text: string | null }
+
+export function readStoredProfile(settings: Settings): StoredProfile {
+  let text: string | null = null;
+  try { text = localStorage.getItem(PROFILE_KEY); } catch { /* storage blocked: start fresh */ }
+  if (text === null) return { profile: freshProfile(settings), state: 'none', text };
+  let raw: unknown;
+  try { raw = JSON.parse(text); } catch { return { profile: freshProfile(settings), state: 'unreadable', text }; }
+  const r = repairProfile(raw, settings);
+  if (!r) return { profile: freshProfile(settings), state: 'unreadable', text };
+  return { profile: r.profile, state: r.repaired ? 'repaired' : 'ok', text };
+}
+
+export function loadProfile(settings: Settings): Profile {
+  return readStoredProfile(settings).profile;
+}
+
+// Keeps the stored text under the second key before the app writes a repaired or a fresh profile
+// over it.
+export function keepProfileCopy(text: string): void {
+  try { localStorage.setItem(PROFILE_COPY_KEY, text); } catch { /* storage full or blocked */ }
+}
+
+// "Start fresh" on the screen for a render error: the stored profile goes to the second key, and
+// the profile key is cleared. The page then opens again with a fresh profile.
+export function clearProfileKeepCopy(): void {
+  try {
+    const text = localStorage.getItem(PROFILE_KEY);
+    if (text !== null) localStorage.setItem(PROFILE_COPY_KEY, text);
+    localStorage.removeItem(PROFILE_KEY);
+  } catch { /* storage blocked: nothing is stored */ }
+}
+
+// ---- Files on the device (U-05, U-18) ----------------------------------------------------------
+// A file holds JSON. It stays on the device: the app sends nothing anywhere (fence rule 11).
+const FILE_APP = 'clear-board';
+const today = () => new Date().toISOString().slice(0, 10);
+
+// Gives the browser a file to save. The browser asks where to save it, or saves it to the folder
+// of downloads.
+export function saveTextFile(name: string, text: string): void {
+  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// "Save a copy of the stored data": the text of each stored key of the app, as it is, also when it
+// is not a profile that the app can read.
+export function storedDataFile(): { name: string; text: string } {
+  const keys: Record<string, string> = {};
+  for (const key of [PROFILE_KEY, PROFILE_COPY_KEY, SETTINGS_KEY, YARD_SOUND_KEY]) {
+    try { const v = localStorage.getItem(key); if (v !== null) keys[key] = v; } catch { /* storage blocked */ }
+  }
+  const text = JSON.stringify({ app: FILE_APP, kind: 'stored-data', saved: new Date().toISOString(), keys }, null, 2);
+  return { name: `clear-board-stored-data-${today()}.json`, text };
 }
 export function saveProfile(p: Profile): void {
   p.updatedAt = new Date().toISOString();
