@@ -93,6 +93,14 @@
 }
 /* The word of a button keeps its size of today (14.4 px). */
 .cb-app .cb-reference-view .cb-reference-detail .dusk-btn { font-size: .9rem; }
+/* A line of app words about the entry (U-11): "This entry has no text in the app." or "The rule text
+   is not in the app." It is reading text at 16 px in the second ink, and stops at the measure. */
+.cb-app .cb-reference-view .cb-reference-note {
+  max-width: var(--measure);
+  color: var(--ink-2);
+  font-size: 1rem;
+  line-height: var(--lh-base);
+}
 /* The rule text: the gap of the body is the only space around it. */
 .cb-app .cb-reference-view .cb-reference-detail .cb-disclosure { margin: 0; }
 /* The quote of the rule text is a box. A box takes the width of the panel body, so that its right

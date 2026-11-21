@@ -1,4 +1,4 @@
-// Reference — look anything up: plain words first, the rule text one tap deeper, always cited. (vanilla reference.js)
+// Reference — look anything up: plain words first, then the source; the rule text one tap deeper where the app holds it. (vanilla reference.js)
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -75,7 +75,7 @@ export function Reference() {
       <div className="dusk-top cb-reference-head">
         <div>
           <h2 className="dusk-title cb-reference-title"><span className="dusk-ico">📖</span> Reference</h2>
-          <p className="dusk-lede">Look anything up. Plain words first — the rule text is one tap deeper, always cited.</p>
+          <p className="dusk-lede">Look anything up. Plain words first, then the source. Where the app holds the rule text, it is one tap deeper.</p>
         </div>
       </div>
       <input className="cb-input" data-cb="ref-search" type="search" placeholder="Search a term…" aria-label="Search reference"
@@ -109,7 +109,10 @@ function Detail({ item, audio, onSpeak, onDrillSignals, headRef }:
       <div className="dusk-panel-head"><h3 className="dusk-panel-name" ref={headRef} tabIndex={-1}>{item.title}</h3></div>
       <div className="dusk-panel-body">
         <Badge citation={c} />
-        <p className="cb-prose cb-prose--lead">{item.plain}</p>
+        {/* U-11: an entry with no text says so in app words. */}
+        {item.plain
+          ? <p className="cb-prose cb-prose--lead">{item.plain}</p>
+          : <p className="cb-reference-note">This entry has no text in the app.</p>}
         {aspects.length > 0 && (
           <>
             <div className="cb-reference-aspects">{aspects.slice(0, 8).map((a, idx) => <Signal key={idx} aspect={a} />)}</div>
@@ -125,6 +128,9 @@ function Detail({ item, audio, onSpeak, onDrillSignals, headRef }:
             <blockquote className="cb-quote">{c.verbatim}</blockquote>
           </details>
         )}
+        {/* U-11: an entry from the rule book with no rule text says so. An entry of practice has no
+            rule to show; its trust mark says so already. */}
+        {!c.verbatim && item.plain && c.source === 'CROR' && <p className="cb-reference-note">The rule text is not in the app.</p>}
         <div className="cb-sub">
           Source: {c.source}{c.ref ? ` · ${c.ref}` : ''}{c.relatedRef ? ` · related: ${c.relatedRef}` : ''}
         </div>
