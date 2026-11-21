@@ -1,0 +1,82 @@
+[
+ [
+  "FIND",
+  {
+   "summary": "I walked the built app at dc88b14 as a new learner and as a returning learner: 1440 px by keyboard only, 390 px by touch, with motion on and off. Most journeys hold up. All 19 Yard jobs can be won in both modes. Focus stays in the task after each control I tried. I found no sideways scroll at either width (49 states checked at 390 with all reading modes on), no control under 44 px, and no page error. I found five defects. The worst is a new fact on WEAK-REVIEW: the review of the misses can offer the term FIXED SIGNAL as an answer to a signal drawing and mark it wrong, with the safety-critical line, although the app's own entry for that term describes every drawn signal. The other four: (1) 'Continue \u00b7 N due now' mostly asks about new items, so items that are due keep waiting. (2) The open Yard and any open session do not follow a Reset or a Load from Settings. (3) The look-up dialog stays open over the next route after a browser Back, and closing it drops focus to the page body. (4) Reference says 'No match' while the library is still loading. All probes, outputs and screenshots are in /tmp/claude-0/-home-user-clear-board/97369320-fcc4-5a82-bc9f-093035f8cbac/scratchpad/final-review/journeys/. The tree is unchanged, and I stopped my server on port 4520.",
+   "covered": [
+    "Home, new and returning learner, at 1440 by keyboard and 390 by touch: the page title, focus at first load (none), Tab order, 'Start here' and 'Continue', 'N due now', and each of the 7 domain tiles played to the end of its session",
+    "First Drill session by keyboard, reduced motion on and off: learn cards, questions, feedback, 'Look it up' (the dialog opens, the session stays, focus returns), the end screen, the review of the misses, 'Drill again'",
+    "A model of the real selection code over 1500 sessions and 13,691 questions: the right answer was always among the options, no option repeated outside the reviews, no new item asked without its card, and no question came right after its own card",
+    "Signals at 390 by touch: learn cards with drawings, feedback, the look-up dialog at 390, the end screen",
+    "Reference: search, groups, opening and closing an entry under its row (focus moves to the entry), 5 deep links, a row far down the list at 390, browser Back",
+    "Radio in both modes at 1440 by keyboard and at 390 by touch with reduced motion: switching modes keeps the place in each, guided calls to the end, 'Call it yourself' to the end, 'Look it up', focus after 'Practice the N you missed' and 'Run it again'",
+    "Yard: all 19 jobs won at 390 by touch (reduced motion) and at 1440 by keyboard (with motion); a refusal and 'Look it up'; a switch throw that clears the refusal; the watched-line stepper (Back, Next, Play all, Stop) and the question dialog; the move log with 'Before and after' and 'Play again'; Depart and the closed job; Reset; the switch-list job by keyboard; a refused kick; leaving during a move, during Play all, during the arrival and with the question open",
+    "Settings: the 5 reading modes, live and after a reload; the device flag for reduced motion; Save to a file, Reset and Load back, and a bad file; focus after Done, Reset and Escape",
+    "Read aloud, through a stand-in for the browser's speech engine (headless Chromium has no voice): what each screen asks it to say",
+    "A slow load of the library on each route; browser Back with the look-up dialog or Settings open",
+    "Target sizes in 12 states at both widths; no page error or console error in any run"
+   ],
+   "findings": [
+    {
+     "title": "New fact on WEAK-REVIEW: the review of the misses can offer FIXED SIGNAL for a signal drawing, then mark it wrong as safety-critical",
+     "severity": "high",
+     "place": "/drill, the review round ('Practice the N items you missed') after a mixed session ('Start here', 'Continue', /drill); both widths, any motion setting. src/core/drill.ts:175-181: when fewer than three other signals are among the misses, distractors() fills the options from the pool of the misses, which holds other kinds (lines 178-179). The pool is the misses because of focusIds at line 228.",
+     "steps": "To reproduce it exactly, run p26-fixed-signal.mjs with seed 32 at 1440. From page start, Math.random is replaced by s=(s*1664525+1013904223)>>>0 with s=32. Open Home, press 'Start here', pass each learn card, pick the first option on each question, then press 'Practice the 5 items you missed: 5 questions \u2192'. Pick FIXED SIGNAL on review question 1. As a learner: in a mixed session, miss the term FIXED SIGNAL (or ADVANCE, BLOCK, INTERLOCKING or CONTROLLED SIGNAL) and one signal item, with fewer than three other signals missed, then open the review.",
+     "happens": "Review question 1, 'What signal is this?', shows the drawing of 422 MEDIUM TO CLEAR. The options are FIXED SIGNAL, CROSSOVER, 422 MEDIUM TO CLEAR and INTERLOCKING. Picking FIXED SIGNAL gives 'Not quite.', the tag 'Your answer' and 'Safety-critical \u2014 lock this one in.' The app's own entry for FIXED SIGNAL reads 'A signal or sign in a fixed spot that shows a condition affecting how a movement operates.', which is true of every drawn signal. The ruling's premise, 'No right answer is marked wrong', has not been checked for these options. At 390 with seed 129, the drawing of 412 ADVANCE CLEAR TO LIMITED is offered with FIXED SIGNAL, and the same result follows.",
+     "should": "A signal question offers signal names only. When the misses hold fewer than three other signals, the distractors come from the other signal items of the library, as in a normal session, and never from definitions or rules.",
+     "evidence": "Browser output of p26-fixed-signal.mjs: seed 32 at 1440 gave the options [\"FIXED SIGNAL\",\"CROSSOVER\",\"422 MEDIUM TO CLEAR\",\"INTERLOCKING\"], and picking FIXED SIGNAL gave 'Not quite. | 422 MEDIUM TO CLEAR \u2014 \u2026 | Safety-critical \u2014 lock this one in.' Seed 129 at 390 gave the same result for 412. Seed 4242 (p02.out) offered ADVANCE SIGNAL for 412. The model of the real code (a03-review-options.mts) built 3,996 review rounds with 11,808 signal questions: 171 offered one of FIXED, ADVANCE, BLOCK, INTERLOCKING or CONTROLLED SIGNAL, and 42 offered FIXED SIGNAL.",
+     "fixSize": "small",
+     "files": "src/core/drill.ts"
+    },
+    {
+     "title": "'Continue' beside 'N due now' mostly asks about new items, so the items that are due wait",
+     "severity": "medium",
+     "place": "Home main control 'Continue' (goes to /drill); the domain tiles behave the same; returning learner, both widths. src/core/drill.ts:239 (due = items.filter(i => isDue(...))) with src/core/sr.ts:30 (isDue(undefined) is true). The comment at drill.ts:250 says new items should fill the session after the due items.",
+     "steps": "Seed a profile with 70 answered items, 33 of them drillable and due now (returning-profile.json from mkprofile.mts). Open Home: it says 'Continue' and '33 due now'. Press Continue and play the session.",
+     "happens": "The session shows 8 learn cards and 10 questions: 8 about new items and 2 about due items ('New items started: 8'). Home then says '39 due now'. Over 2,000 sessions on this profile, the real selection asked on average 1.9 due items and 8.1 new items, and 206 sessions (10 %) asked no due item at all. The cause: an item with no stored state counts as due, so every new item lands in the first bucket, 'due & in-band'.",
+     "should": "Due items come first and new items fill the rest of the session, as the comment in the same function says. The count beside 'Continue' then names the work that 'Continue' does.",
+     "evidence": "p09.out: 'Home: Continue / 33 due now', 'learn cards 8 questions 10', end 'New items started: 8', 'Home after \u2026 39 due now'. a02-continue.mts: meanDueItems 1.934, meanNewItems 8.066, sessionsWithNoDueItem 206 of 2000; per domain, for example definitions: 10 due, 1.83 due items asked per session. git show 49d3ba0: Home had no 'Continue' and no due count; the selection lines were the same then (Drill.tsx:96, :107).",
+     "fixSize": "small",
+     "files": "src/core/drill.ts (one line). It changes the selection, so the owner rules first."
+    },
+    {
+     "title": "After Reset or Load in Settings, the open Yard still shows the old job marks, and an open session counts the loaded progress as its own gain",
+     "severity": "medium",
+     "place": "/yard with the Settings dialog over it, both widths. yardSim.js builds the picker only at mount and after a win (buildPicker, lines 822-850, and the call in recordWin). Same class in the Drill (startMastery in buildSession) and in the Radio test (startRef in RadioTest.tsx).",
+     "steps": "(a) Open /yard with a profile in which p0-1 and p0-2 are done. Open Settings, press Reset and confirm. (b) As a new learner, open /yard. In Settings press 'Load a file', choose a file with those two wins, confirm and press Done. (c) Answer 2 calls in 'Call it yourself', load a file, then finish the run.",
+     "happens": "(a) The stored profile is gone, but the picker still says '\u2713 Make up the cut \u00b7 par 5 \u00b7 your best 5 moves' and '\u2713 Add to the cut \u00b7 par 5 \u00b7 your best 7 moves' until the learner leaves the Yard or wins a job. (b) The stored profile holds both wins, but the picker still says '\u2192 Make up the cut \u00b7 par 5', with no \u2713 and no record; the next visit shows them. (c) The end of the Radio run says 'moved your Radio mastery: +4% \u2192 4%' after 4 of 14 right; the 4 % came from the file. The Drill shows the same: 'Signals: +2% \u2192 2%', and 'Items due again \u2026 1 in 3 days', a date from the file.",
+     "should": "After a reset or a load, the open station shows the progress that is stored now. The Yard rebuilds its picker. A running Drill or Radio session reads its start values again, or starts over.",
+     "evidence": "p10-yard.out: 'after Reset \u2026 stored profile null \u2026 picker now: \u2713 Make up the cut \u00b7 par 5 \u00b7 your best 5 moves | \u2713 Add to the cut \u2026'. p18-yard-load.mjs: 'after load, same visit: \u2192 Make up the cut \u00b7 par 5 \u2026', stored yard completed [p0-1, p0-2]; 'next visit: \u2713 Make up the cut \u2026'. p24-load-mid.mjs: the Radio and Drill end lines quoted above.",
+     "fixSize": "small",
+     "files": "src/stations/imperativeStation.ts, src/stations/yardSim.js (picker refresh); Drill.tsx and RadioTest.tsx for the end lines"
+    },
+    {
+     "title": "The look-up dialog stays open over the next route after a browser Back, and closing it drops focus to the page body",
+     "severity": "medium",
+     "place": "The look-up dialog (contract C1), opened from the Drill, the Yard refusal or the Radio test, then a browser history Back; 1440 and 390. src/components/LookUp.tsx does not watch the route. The C7 move of focus to the new heading fails while the modal is open.",
+     "steps": "Open the Drill, answer a question and press 'Look it up \u2192'. While the dialog is open, go back in browser history (the browser Back button or Alt+Left). Then press Escape or Close, then Tab.",
+     "happens": "The route is Home ('Home \u2014 Clear Board'), but the dialog still shows the Drill's entry '435 SLOW TO STOP' over Home, and the session is gone. After Escape or Close, focus is on the page body, and the next Tab also leaves the page, so a keyboard user needs a third press to get back in. The Yard path gives the same result. The Settings dialog also stays open, but its focus returns to the Settings button.",
+     "should": "A change of route closes the look-up dialog, and focus goes to the heading of the new view, as C7 asks.",
+     "evidence": "p13.out: 'lookup-drill: after history back: route / dialog open true \u2026 after Escape: focus BODY \u2026 then Tab -> BODY'; the same lines for lookup-yard. Screenshot p21-back-dialog-390.png shows the dialog over Home at 390; 'after Close: focus BODY'.",
+     "fixSize": "small",
+     "files": "src/components/LookUp.tsx"
+    },
+    {
+     "title": "Reference says 'No match. Try another word.' while the library is still loading",
+     "severity": "medium",
+     "place": "/reference on a direct load or a reload, including ?focus= deep links, both widths. src/stations/Reference.tsx:103-105: with content still null, the item list is empty and the 'No match' sentence shows.",
+     "steps": "Open #/reference directly on a slow connection (each data file delayed 1.5 s in the probe) and type 'block' in the search.",
+     "happens": "'No match. Try another word.' shows for 7.3 s; then 13 rows for 'block' appear. With no delay, the same sentence still shows for 110 to 170 ms on each direct load. Home, the Drill, Signals and the Radio test say 'Loading\u2026' in the same state. The five content files load one after the other (store.ts:308-310), so a slow connection pays five round trips.",
+     "should": "While the library loads, Reference says 'Loading\u2026', as the other stations do (fence item 15).",
+     "evidence": "p23-slow-search.mjs: 'at 0.5 s after typing \"block\": \u2026 No match. Try another word.' then 'rows came 7337 ms later: 13 rows'. p15.out: '/reference at 1.2 s: \u2026 No match. Try another word.' p15b-flash.mjs, 3 direct loads: the sentence showed from 119 to 239 ms, 87 to 258 ms and 70 to 197 ms. git show 49d3ba0 shows the same branch existed then; U-07 reworked this branch in Wave 2c and kept the loading case.",
+     "fixSize": "small",
+     "files": "src/stations/Reference.tsx"
+    }
+   ],
+   "forSME": [
+    "In the review of the misses, a signal question can offer a term that names a kind of fixed signal: FIXED SIGNAL, ADVANCE SIGNAL, BLOCK SIGNAL, INTERLOCKING SIGNAL or CONTROLLED SIGNAL. Can such a term count as a right answer to 'What signal is this?'? The app marks it wrong as safety-critical. Seen on screen: 422 MEDIUM TO CLEAR with FIXED SIGNAL; 412 ADVANCE CLEAR TO LIMITED with FIXED SIGNAL, and with ADVANCE SIGNAL. The app's own entry for FIXED SIGNAL reads 'A signal or sign in a fixed spot that shows a condition affecting how a movement operates.'",
+    "For the owner and the SME: should a returning learner's session ask the due items before new items? The selection code says so in its own comment but does otherwise. The order is part of the learning model; no mastery number changes."
+   ]
+  }
+ ]
+]
