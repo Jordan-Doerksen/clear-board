@@ -86,6 +86,17 @@ The job that applied the rulings set a default where a ruling gave no name. The 
 | The items of contract E.5 | Each one stands as written. |
 | A control that is 1 px smaller at the merge check of S1 | The lead rules when S1 reports it. |
 
+### 2.2 Rulings after the review of G1 (2026-11-21)
+
+| Name | The ruling | The reason |
+|---|---|---|
+| `TOOLS` | Changed by the owner (D-0039): the gate tools can follow the owner's reskin tools. | The owner's answer. |
+| `G1-LIB` | Accept `tools/lib/js-scan.mjs` and `tools/lib/css-scan.mjs`. They belong to G1, as each file of `tools/**`. | One scanner for three tools. |
+| `TAPE-CASE` | At G1-close, the word tape of the guided Radio reads the words as the markup writes them (letter case from a style is off while it reads), as the look harness does after commit `b6ee6c4`. G1-close records the tape again from the build of `c2fb637` in that form. | A style that changes the letter case changes no word. B3 can change each style value of `radioSim.js` (`B3-LINE`). |
+| `TARGETS-44` | When G1-close turns the report case "targets" into a gate, its floor is 44 px, not 43.5 px. | Fence rule 8. |
+| `YARD-WRAP` | At G1-close, `yard-wrap` leaves the list `classesMayGo` of `tools/look/cb.config.json`. | The contract keeps `.yard-wrap` (B.2, B.6). A lost `.yard-wrap` must fail. |
+| `LOOK-MODE` | A reskin job proves its look with `look.mjs compare --look --gate`: a pixel difference is listed and does not fail; a lost word, control or id, a smaller text and a sideways scroll fail. | A reskin changes pixels by design. |
+
 ## 3. Closed by the owner after Gate A
 
 The owner answered the sheet of these 19 picks on 2026-11-21 with the words "yes to all

@@ -602,5 +602,19 @@ the wording of the Yard text mirror (Y4 builds it from words the app has today; 
 before the change reaches `main`), where the engine rests after a spot, the picture of a kick, the
 sound of a spot.
 
+### D-0039 — The gate tools may follow the owner's reskin tools (changes the TOOLS ruling of D-0037)
+**Chosen (the owner, 2026-11-21, "Yes, publish it"):** the code of the gate tools of job G1 can be
+published in this public repository as it is. `tools/colour-lint.mjs` follows the structure of the
+owner's reskin tool `token-lint.mjs` closely, with other names. The uses check of
+`tools/dusk-lock-check.mjs` follows `dusk-sync.mjs`, and two helpers of `tools/look/look.mjs` follow
+`visual-regress.mjs`. The reskin tools stay in their own private repository; no file of them is
+copied whole.
+**Why the question came up:** the lead had ruled that G1 copies no code from the private
+repository (TOOLS, option c), because the owner had not said that it could be published. The
+independent review of G1 found the close match. The lead checked the files: they hold no private
+name, path or project reference.
+**Correction:** the message of one unpushed commit said that no code of the reskin tools is in the
+repository. The lead corrected that message before the first push. The trees did not change.
+
 ---
 *V1. Edit as decisions are made or reversed.*
