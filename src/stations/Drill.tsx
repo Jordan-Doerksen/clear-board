@@ -7,7 +7,7 @@ import { Signal } from './Signal';
 import { DOMAINS } from '../core/store';
 import { severityOf } from '../core/severity';
 import { buildSession } from '../core/drill';
-import type { Session } from '../core/drill';
+import type { DrillQuestion, Session } from '../core/drill';
 
 // The station heading (U-29, 2c-plan C7): one visible h2 with the station name of Home, in the form
 // of the Reference title. The route /signals is the station Signals; each other route is the Drill.
@@ -17,6 +17,14 @@ function StationTitle({ signals }: { signals: boolean }) {
       <h2 className="dusk-title cb-drill-title"><span className="dusk-ico">{signals ? '🚦' : '🎯'}</span> {signals ? 'Signals' : 'Drill'}</h2>
     </div>
   );
+}
+
+// U-31: Read aloud speaks the words of the screen, in the order of the screen. Each part ends as a
+// sentence, so that a voice makes a stop between two options.
+const said = (text: string) => { const t = text.trim(); return /[.?!:…]$/.test(t) ? t : `${t}.`; };
+function questionSpeech(q: DrillQuestion): string {
+  const parts = [q.heading, ...(q.kind === 'signal' ? [] : [q.promptText]), ...q.options.map((o, i) => `${i + 1}. ${o}`)];
+  return parts.filter(Boolean).map(said).join(' ');
 }
 
 export function Drill({ domain }: { domain?: string }) {
@@ -60,9 +68,10 @@ export function Drill({ domain }: { domain?: string }) {
   const item = slot?.item ?? null;
   const q = slot?.q ?? null;
 
-  // Read-aloud the prompt (not the signal SVG) when a new question appears.
+  // Read aloud a new question: its heading, its prompt (a signal question has a drawing and no
+  // prompt text) and its options (U-31). speak does nothing when Read aloud is off.
   useEffect(() => {
-    if (q && (q.kind === 'rule' || q.kind === 'text')) speak(q.promptText);
+    if (q) speak(questionSpeech(q));
   }, [q, speak]);
 
   if (!content || !built) return <div className="cb-drill-view">{title}<p className="dusk-lede">Loading…</p></div>;
@@ -131,6 +140,12 @@ export function Drill({ domain }: { domain?: string }) {
     if (correct) setScore(s => s + 1);
     else missedRef.current.add(item!.id);   // remembered for the end-of-session review round (#10)
     recordAnswer(item!, correct);   // AppContext gates a correct re-advance by due-ness (anti-marathon, F2)
+    // Read aloud the feedback (U-31): the verdict, the right answer after a miss, the explanation
+    // and the severity line, as the panel shows them.
+    const words = correct ? ['Right.'] : ['Not quite.', namesAnswer ? '' : `Correct answer: ${q!.correct}`];
+    words.push(`${item!.title}. ${explain ?? ''}`);
+    if (!correct && sev !== 'S1') words.push(sevLine);
+    speak(words.filter(Boolean).map(said).join(' '));
   }
 
   return (
