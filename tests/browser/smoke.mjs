@@ -330,13 +330,17 @@ const waitText = (page, selector, text, when) => page.waitForFunction(([s, t]) =
 
 // One action on a control: a click, a tap or the choice of an option. When the control does not take
 // it in the time of the page (it does not show, it is off, or another element covers it), the case
-// fails with a sentence that names the control and the reason that the browser gives.
+// fails with a sentence that names the control, and the reason when the log of the browser gives one
+// (for example "<div> intercepts pointer events"). The log has colour codes of the terminal: they go.
+const COLOUR_CODE = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g');
+const ROUTINE = /^- (waiting|retrying|attempting|scrolling|done scrolling|locator resolved|element is visible, enabled and stable)/;
 async function onControl(what, action) {
   try {
     await action();
   } catch (err) {
     if (err instanceof CaseFailure) throw err;
-    const reason = String(err.message).split('\n').map((l) => l.trim()).filter((l) => l.startsWith('- ')).at(-1)?.slice(2) ?? '';
+    const reason = String(err.message).replace(COLOUR_CODE, '').split('\n').map((l) => l.trim())
+      .filter((l) => l.startsWith('- ') && !ROUTINE.test(l)).at(-1)?.slice(2) ?? '';
     throw new CaseFailure(`${what} did not reach its control in the time of the page${reason ? `: ${reason}` : ''}`);
   }
 }
