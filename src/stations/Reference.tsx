@@ -4,16 +4,21 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import { Signal } from './Signal';
 import { distinctAspects } from '../core/drill';
-import type { ContentItem, Trust } from '../core/types';
+import type { Citation, ContentItem } from '../core/types';
 
-const TRUST: Record<Trust, [string, string]> = {
-  'verified':           ['✓ verified', 'cb-chip--ok'],
-  'needs-review':       ['⚠ not yet verified — reference only', 'cb-chip--caution'],
-  'operating-practice': ['● CN practice (GOI), not a CROR rule', 'cb-chip--caution'],
-};
+// The trust mark of an entry, as words. An item of operating practice takes its words from its
+// source in the data (U-08): the two labels that the Radio test shows for the same items.
+function trustMark(c: Citation): [string, string] {
+  if (c.trust === 'verified') return ['✓ verified', 'cb-chip--ok'];
+  if (c.trust === 'needs-review') return ['⚠ not yet verified — reference only', 'cb-chip--caution'];
+  if (c.trust === 'operating-practice') {
+    return [c.source === 'GOI' ? '● CN practice (GOI), not a CROR rule' : '● No CROR citation in the verified source', 'cb-chip--caution'];
+  }
+  return ['', ''];
+}
 
-function Badge({ trust }: { trust: Trust }) {
-  const [label, cls] = TRUST[trust] || ['', ''];
+function Badge({ citation }: { citation: Citation }) {
+  const [label, cls] = trustMark(citation);
   return <span className={`cb-chip ${cls}`}>{label}</span>;
 }
 
@@ -82,7 +87,7 @@ function Detail({ item, audio, onSpeak, onDrillSignals }:
     <div className="dusk-panel dusk-panel--framed cb-reference-detail" data-cb="ref-detail" aria-live="polite">
       <div className="dusk-panel-head"><h3 className="dusk-panel-name">{item.title}</h3></div>
       <div className="dusk-panel-body">
-        <Badge trust={c.trust} />
+        <Badge citation={c} />
         <p className="cb-prose cb-prose--lead">{item.plain}</p>
         {aspects.length > 0 && (
           <>
