@@ -104,44 +104,100 @@ export interface Session {
 // be the last screen moves one screen earlier. When the session has no other screen (it asks about
 // one new item only), that item gets no card and no question in this session. A card grades
 // nothing: the mastery model does not change.
+//
+// LEARN-TWIN (finding F-12 of the last review of Wave 2c): items with the same key count as one item
+// for the gap. So no question comes right after the learn card of its own item or of its twin. The
+// key of an item is its citation.ref. An item with no ref, or with a ref of SECTION_REFS, is its own
+// key (its id). The code uses the ref as a key only: it reads no rule text.
+// The rule comes from the data of today (public/data, frozen). Items share 12 refs, and 6 radio calls
+// have no ref. "CROR Definitions" is the ref of the 63 definitions: it names the section of the book
+// that holds them, not one rule, so it is not a key. Each other shared ref names one rule and is a
+// key: 8 refs are shared by a rule item and a signal item (for example "CROR 405": rule.405 and
+// sig.405), and the Drill asks both; 3 refs are shared by a rule item and radio calls, which the
+// Drill never asks.
+// The screens are the screens of LEARN-GAP alone. Their order changes only where a question would
+// come right after the card of its twin:
+// - Before a card goes in, each question that waits and has the key of the card goes out, when the
+//   last screen allows it.
+// - A question waits while the last screen is a card with its key. A question that waits also waits
+//   while the last screen is a question about its twin, so that the feedback of one twin does not
+//   come right before the question of the other. At the end of the session, only a card stops it.
+// - A card that would be the last screen moves before the nearest screen of another key. With the
+//   item as the key, this is the rule of LEARN-GAP above: the card moves one screen earlier.
+// - When no screen of another key comes before that card (each screen has the key of the card), the
+//   gap cannot hold. The session then keeps the order of LEARN-GAP alone, with the item as the key.
 export function withLearnCards(slots: Slot[], isNew: (item: ContentItem) => boolean): Screen[] {
-  const out: Screen[] = [];
-  const carded = new Set<string>();
-  let waiting: Screen[] = [];          // the questions of the item of the last card, which wait
-  let waitingId: string | null = null;
-  // The questions that wait go out when the last screen is not the card of their item.
-  const release = () => {
-    const last = out[out.length - 1];
-    if (!waiting.length || (last?.kind === 'learn' && last.item.id === waitingId)) return;
-    out.push(...waiting);
-    waiting = [];
-    waitingId = null;
+  const SECTION_REFS = new Set(['CROR Definitions']);
+  const itemKey = (item: ContentItem) => `item ${item.id}`;
+  const ruleKey = (item: ContentItem) => {
+    const ref = item.citation?.ref;
+    return ref && !SECTION_REFS.has(ref) ? `ref ${ref}` : itemKey(item);
   };
-  for (const slot of slots) {
-    const { item } = slot;
-    if (isNew(item) && !carded.has(item.id)) {
-      carded.add(item.id);
-      out.push({ kind: 'learn', item });
-      release();
-      waiting = [{ kind: 'ask', slot }];
-      waitingId = item.id;
-    } else if (item.id === waitingId) {
-      waiting.push({ kind: 'ask', slot });
-    } else {
-      release();
-      out.push({ kind: 'ask', slot });
-      release();
+  const itemOf = (s: Screen) => (s.kind === 'learn' ? s.item : s.slot.item);
+  const arrange = (keyOf: (item: ContentItem) => string): Screen[] => {
+    const out: Screen[] = [];
+    const carded = new Set<string>();
+    // The questions that wait, item by item, in the order in which they began to wait.
+    let waiting: { item: ContentItem; asks: Screen[] }[] = [];
+    // The last screen stops a question about `item` when it is a card with the key of the item. It
+    // stops a question that waits (`waits`) also when it is a question about another item with that key.
+    const stops = (item: ContentItem, waits: boolean) => {
+      const last = out[out.length - 1];
+      if (!last || keyOf(itemOf(last)) !== keyOf(item)) return false;
+      return last.kind === 'learn' || (waits && itemOf(last).id !== item.id);
+    };
+    // The questions that wait go out, item by item, when the last screen does not stop them. With
+    // `twins` false (at the end of the session), only a card stops them. With `key`, only the
+    // questions with that key go out.
+    const release = (twins = true, key?: string) => {
+      for (let k = 0; k < waiting.length;) {
+        const { item, asks } = waiting[k];
+        if ((key !== undefined && keyOf(item) !== key) || stops(item, twins)) { k++; continue; }
+        out.push(...asks);
+        waiting.splice(k, 1);
+        k = 0;
+      }
+    };
+    for (const slot of slots) {
+      const { item } = slot;
+      const ask: Screen = { kind: 'ask', slot };
+      const group = waiting.find(g => g.item.id === item.id);
+      if (isNew(item) && !carded.has(item.id)) {
+        carded.add(item.id);
+        release(true, keyOf(item));
+        out.push({ kind: 'learn', item });
+        release();
+        waiting.push({ item, asks: [ask] });
+      } else if (group) {
+        group.asks.push(ask);
+      } else {
+        release();
+        if (stops(item, false)) waiting.push({ item, asks: [ask] });
+        else out.push(ask);
+        release();
+      }
     }
-  }
-  release();
-  if (waiting.length) {
-    // The card of the waiting item is the last screen. The screen before it (a question of another
-    // item) moves after it. With no screen before it, the item is not asked in this session.
-    const card = out.pop()!;
-    const before = out.pop();
-    if (before) out.push(card, before, ...waiting);
-  }
-  return out;
+    release();
+    while (waiting.length) {
+      const last = out[out.length - 1];
+      if (last.kind === 'ask') { release(false); continue; }
+      // The last screen is a card with the key of the questions that wait. It moves before the
+      // nearest screen of another key.
+      const key = keyOf(last.item);
+      let at = out.length - 2;
+      while (at >= 0 && keyOf(itemOf(out[at])) === key) at--;
+      if (at >= 0) { out.splice(at, 0, out.pop()!); release(); continue; }
+      // No screen of another key comes before the card. With the rule as the key, the twin gap
+      // cannot hold: the order of LEARN-GAP alone, with the item as the key, is used. With the item
+      // as the key, the card is the only screen, so the session asks about one new item only: that
+      // item gets no card and no question (LEARN-GAP).
+      if (keyOf === ruleKey) return arrange(itemKey);
+      out.pop();
+      waiting = [];
+    }
+    return out;
+  };
+  return arrange(ruleKey);
 }
 
 // ---- The grading guards (U-44) ---------------------------------------------------------------------

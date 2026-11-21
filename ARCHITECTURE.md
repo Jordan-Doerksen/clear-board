@@ -144,7 +144,7 @@ src/styles/dusk.lock.json        the source commit and a SHA-256 for each of the
 src/styles/clear-board.tokens.css  the bridge (section 5.2)
 src/styles/clear-board.parts.css   the cb- parts (section 5.2)
 src/styles/surfaces/*.css        six surface sheets: shell, home, settings, reference, drill, radio
-tests/unit/*.test.ts             79 unit tests (node:test). tests/ts-resolve.mjs resolves the imports with no extension.
+tests/unit/*.test.ts             88 unit tests (node:test). tests/ts-resolve.mjs resolves the imports with no extension.
 tests/browser/                   the browser smoke test (smoke.mjs) and the word tape of the guided Radio
 tools/                           the steps of npm run check, the look harness and their helpers (section 7)
 src-tauri/                       the desktop shell. No job of Wave 2 changed it (TAURI).
@@ -237,7 +237,7 @@ The trust rule:
 | 4 | `check:names` | `tools/name-check.mjs`, `tools/name-check.allow.json` | Only the bridge declares a Dusk name. Each other custom property of the app has the prefix `--cb-` or `--yard-`. No file declares `--lanes`. |
 | 5 | `lint` | `oxlint`, `.oxlintrc.json` | At most 1 warning (`tools/check.mjs`). One warning remains (`AppContext.tsx`, `react(only-export-components)`; `LINT-ONE`). |
 | 6 | `typecheck` | `tsc -b` | The types. |
-| 7 | `test:unit` | `tests/unit/*.test.ts` | 79 tests of `sr`, `store`, `severity`, `drill`, `radio` and the signal drawing. |
+| 7 | `test:unit` | `tests/unit/*.test.ts` | 88 tests of `sr`, `store`, `severity`, `drill`, `radio` and the signal drawing. |
 | 8 | `sr-vectors` | `tools/sr-vectors.mjs` | 7 checks on `grade` and `newState`. |
 | 9 | `solve` | `tools/solve.mjs` | 19 of 19 jobs: the authored line wins in exactly par moves, the solver finds no shorter line, `optJoints` is true. |
 | 10 | `content-check` | `tools/content-check.mjs` | 9 checks, A to I, on the five content files and on the calls of `radioSim.js`, which it reads as text. |

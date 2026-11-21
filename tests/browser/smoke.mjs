@@ -1240,9 +1240,16 @@ const GATE_CASES = [
     // its card; and each item of a card gets a question later in the session. The item of a question
     // is the item that its feedback names ("<title> — <words>"). The case reads no rule text: the
     // titles and the plain words come from the content files of the build.
+    // Ruling LEARN-TWIN (finding F-12): no question comes right after the learn card of an item with
+    // the same key. The key of an item is its citation ref, or its id when it has no ref or the ref
+    // "CROR Definitions" (src/core/drill.ts, withLearnCards). One more walk, on #/signals at 1440 with
+    // the seed 702 of the finding, must hold the card of an item and a question about its twin: with
+    // LEARN-GAP alone, the card of rule.405 came right before the question about sig.405.
     const items = [];
     for (const file of ['definitions.json', 'signals.json', 'rules.json', 'radio-script.json']) items.push(...JSON.parse(readFileSync(join(distDir, 'data', file), 'utf8')));
     const byTitle = new Map(items.map((i) => [i.title, i]));
+    const byId = new Map(items.map((i) => [i.id, i]));
+    const keyOf = (i) => (i.citation?.ref && i.citation.ref !== 'CROR Definitions' ? `ref ${i.citation.ref}` : `item ${i.id}`);
     const words = (text) => (text ?? '').replace(/\s+/g, ' ').trim();
     // The item that a feedback names: the title that comes first in the feedback with " — " after it
     // (the words of the item come after the title); of two such titles at one place, the longer one.
@@ -1252,9 +1259,9 @@ const GATE_CASES = [
       .sort((a, b) => a.at - b.at || b.i.title.length - a.i.title.length)[0]?.i ?? null;
     const notes = [];
     for (const route of ['/drill', '/signals']) {
-      for (const width of [390, 1440]) {
-        const where = `${route} at ${width}`;
-        const note = await withPage({ width }, async (page) => {
+      for (const [width, seed] of [[390], [1440], ...(route === '/signals' ? [[1440, 702]] : [])]) {
+        const where = `${route} at ${width}${seed ? ` with the seed ${seed}` : ''}`;
+        const note = await withPage({ width, ...(seed ? { seed } : {}) }, async (page) => {
           await open(page, route);
           await firstScreen(page).catch(() => { throw new CaseFailure(`${where}: the first screen shows no learn card and no answer option`); });
           // The card of the first screen: the hooks, the item of the data, the controls.
@@ -1315,6 +1322,7 @@ const GATE_CASES = [
             const item = itemOfFeedback(await feedback.textContent());
             ok(item, `${where}, screen ${k}: the feedback names no item of the data: "${words(await feedback.textContent())}"`);
             ok(!(last?.kind === 'card' && last.item.id === item.id), `${where}, screen ${k}: the question about ${item.id} comes right after its learn card`);
+            ok(!(last?.kind === 'card' && keyOf(last.item) === keyOf(item)), `${where}, screen ${k}: the question about ${item.id} comes right after the learn card of ${last?.item.id}, an item with the same citation ref (ruling LEARN-TWIN)`);
             asked.add(item.id);
             last = { kind: 'question', item };
             await onControl(`${where}, screen ${k}: a click on "Next →" or "Finish"`, () => feedback.getByRole('button', { name: /^(Next →|Finish)$/ }).click());
@@ -1324,7 +1332,10 @@ const GATE_CASES = [
           ok(carded.size > 0, `${where}: the session shows no learn card`);
           const unasked = [...carded].filter((id) => !asked.has(id));
           ok(unasked.length === 0, `${where}: the items ${unasked.join(', ')} get a learn card and no question in the session`);
-          return `${where}: ${screens} screens, ${carded.size} learn cards, ${asked.size} items asked`;
+          // The walk with the seed of the finding holds a twin, so that it tests LEARN-TWIN.
+          const twins = [...carded].flatMap((a) => [...asked].filter((b) => a !== b && keyOf(byId.get(a)) === keyOf(byId.get(b))).map((b) => `${a} and ${b}`));
+          if (seed) ok(twins.length > 0, `${where}: the session holds no learn card of an item and no question about its twin, so the walk does not test ruling LEARN-TWIN`);
+          return `${where}: ${screens} screens, ${carded.size} learn cards, ${asked.size} items asked${seed ? `; the card of one item and a question about the other: ${twins.join(', ')}` : ''}`;
         });
         if (note) notes.push(note);
       }

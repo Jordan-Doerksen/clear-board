@@ -187,7 +187,7 @@ headless Chromium.
   `94a41c5`), the Dusk lock check, the raw-colour lint, the name check, lint, the type check, the
   unit tests, the four scripts of before (the schedule vectors, the solver, the content and trust
   check, the securement check) and a report of the signal drawings that two items share (U-01).
-- 79 unit tests cover the schedule, the store, the severity, the Drill selection and the guard of
+- 88 unit tests cover the schedule, the store, the severity, the Drill selection and the guard of
   the grading, the options of the Radio test and the frozen signal drawing function. The Drill
   selection and the Radio options are pure functions (`src/core/drill.ts`, `src/core/radio.ts`),
   moved with no change of behaviour, and the app runs the guard that the tests cover. (U-44,

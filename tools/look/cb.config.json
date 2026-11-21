@@ -886,9 +886,16 @@
     {
       "row": "U-28",
       "baseline": "49d3ba0a356896a7aed1fbe961d23639b0ff9215",
-      "what": "The page drill-learn: the first screen of a new profile is the learn card of the first new item (ruling LEARN-GAP; with the seed of this config, the signal 425A), and not the first question. The question part goes: the count line, the heading, the four answer options and their classes. The card comes: the title of the item, the chip \"New item\", the plain words of the item as the data holds them, its drawing and the control \"Next →\". The counts are the change of the whole screen, so a word of both screens counts once with the difference of its counts. The chip keeps the size of the chip part, 12 px (ruling CHIP-SIZE). specs/words/U1D.md.",
+      "what": "The page drill-learn: the first screen of a new profile is the learn card of the first new item (ruling LEARN-GAP), and not the first question. The question part goes: the count line, the heading, the four answer options and their classes. The card comes: the chip \"New item\" and the control \"Next →\". The words of the item do not show here (ruling REGISTER-FORM): contentParts names the parts of the two screens whose words come from the content files, and the compare does not read their words. They are the answer options and the prompt of the question, and the title, the plain words and the drawings of the card. A control in such a part has the name (content). Each other word keeps its exact count. The chip keeps the size of the chip part, 12 px (ruling CHIP-SIZE). specs/words/U1D.md.",
       "pages": [
         "drill-learn"
+      ],
+      "contentParts": [
+        "[data-cb=\"opt\"]",
+        "[data-cb=\"prompt\"]",
+        "[data-cb=\"learn\"] h3",
+        "[data-cb=\"learn\"] p",
+        "[data-cb=\"learn\"] svg"
       ],
       "classesGo": [
         "cb-drill-prompt",
@@ -901,50 +908,25 @@
         "dusk-count"
       ],
       "wordsGo": {
-        "0": 1,
-        "1": 1,
-        "10": 1,
-        "413": 1,
-        "438": 1,
         "Question": 1,
+        "1": 1,
         "of": 1,
+        "10": 1,
+        "0": 1,
         "correct": 1,
         "What": 1,
+        "signal": 1,
         "is": 1,
-        "this?": 1,
-        "TO": 2,
-        "TAKE": 1,
-        "OR": 2,
-        "LEAVE": 1,
-        "SIDING": 1,
-        "OTHER": 1,
-        "TRACK": 1,
-        "ADVANCE": 2,
-        "CLEAR": 2,
-        "414A": 1
+        "this?": 1
       },
       "wordsCome": {
-        "signal": 1,
         "New": 1,
         "item": 1,
-        "Proceed,": 1,
-        "speed": 1,
-        "passing": 1,
-        "and": 1,
-        "through": 1,
-        "turnouts,": 1,
-        "approaching": 1,
-        "next": 1,
-        "at": 1,
-        "speed.": 1,
         "Next": 1,
         "→": 1
       },
       "controlsGo": {
-        "button \"425A MEDIUM TO DIVERGING\"": 1,
-        "button \"438 TAKE OR LEAVE SIDING OR OTHER TRACK\"": 1,
-        "button \"413 ADVANCE CLEAR TO MEDIUM\"": 1,
-        "button \"414A ADVANCE CLEAR TO DIVERGING\"": 1
+        "button \"(content)\"": 4
       },
       "smallestText": 12
     }

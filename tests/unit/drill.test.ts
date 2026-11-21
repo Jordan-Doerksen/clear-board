@@ -3,13 +3,12 @@
 // states a rule. The frozen content files of public/data are read and never written. Each made-up
 // item has a made-up id. The clock is a mock. Node prints a warning for the mock clock.
 //
-// Not tested here: the learn card of row U-28 (ruling LEARN-GAP). Job U1-D builds it in the same
-// step. Its test waits for the merge of U1-D.
+// The learn card of row U-28 (rulings LEARN-GAP and LEARN-TWIN) is tested at the end of this file.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, mock, test } from 'node:test';
-import { answerCounts, askableAspects, buildSession, distinctAspects, drawingOf, PER_RULE_CAP, sharedDrawings } from '../../src/core/drill.ts';
-import type { Rng } from '../../src/core/drill.ts';
+import { answerCounts, askableAspects, buildSession, distinctAspects, drawingOf, PER_RULE_CAP, sharedDrawings, shuffle, withLearnCards } from '../../src/core/drill.ts';
+import type { DrillQuestion, Rng, Screen, Slot } from '../../src/core/drill.ts';
 import { drawSignal } from '../../src/core/signal.ts';
 import { freshProfile } from '../../src/core/store.ts';
 import type { Content, ContentItem, Domain, ItemType, Profile, Question, Settings, SignalAspect, SRState, Trust } from '../../src/core/types.ts';
@@ -301,4 +300,189 @@ test('buildSession: practiceOnly is true only when no item of the session is due
   oneDue.items['test.def.0'] = sr({ due: new Date(NOW - DAY).toISOString() });
   assert.equal(buildSession({ content, profile: oneDue, domain: 'definitions' }, seeded(7)).practiceOnly, false);
   assert.equal(buildSession({ content, profile: fresh(), domain: 'definitions' }, seeded(7)).practiceOnly, false);
+});
+
+// ---- withLearnCards: the learn card of row U-28 (ruling LEARN-GAP) and the twin (ruling LEARN-TWIN)
+
+// The key of an item for the gap, as ruling LEARN-TWIN gives it: the citation ref, or the id when
+// the item has no ref or has the ref of the section "CROR Definitions". The test writes the key
+// again, so that it pins it. It uses the ref as a key only: it reads no rule text.
+const keyOf = (i: ContentItem) => (i.citation.ref && i.citation.ref !== 'CROR Definitions' ? `ref ${i.citation.ref}` : `item ${i.id}`);
+const itemOfScreen = (s: Screen) => (s.kind === 'learn' ? s.item : s.slot.item);
+const LIVE_SESSIONS: (string | undefined)[] = ['signals', 'definitions', 'switching', 'securement', 'radio', 'authority', 'operating', undefined];
+
+// Each question that comes right after the learn card of its own item or of an item with its key.
+function gapFaults(screens: Screen[]): string[] {
+  const faults: string[] = [];
+  for (let k = 1; k < screens.length; k++) {
+    const before = screens[k - 1];
+    const now = screens[k];
+    if (before.kind !== 'learn' || now.kind !== 'ask' || keyOf(before.item) !== keyOf(now.slot.item)) continue;
+    faults.push(`screen ${k + 1}: the question about ${now.slot.item.id} comes right after the learn card of ${before.item.id}`);
+  }
+  return faults;
+}
+
+// The order of LEARN-GAP alone: withLearnCards of commit 935b2c9, before ruling LEARN-TWIN, with no
+// change. The test compares the order of today with it (plan of fix round 2, requirement D2).
+function learnGapAlone(slots: Slot[], isNew: (item: ContentItem) => boolean): Screen[] {
+  const out: Screen[] = [];
+  const carded = new Set<string>();
+  let waiting: Screen[] = [];
+  let waitingId: string | null = null;
+  const release = () => {
+    const last = out[out.length - 1];
+    if (!waiting.length || (last?.kind === 'learn' && last.item.id === waitingId)) return;
+    out.push(...waiting);
+    waiting = [];
+    waitingId = null;
+  };
+  for (const slot of slots) {
+    const { item } = slot;
+    if (isNew(item) && !carded.has(item.id)) {
+      carded.add(item.id);
+      out.push({ kind: 'learn', item });
+      release();
+      waiting = [{ kind: 'ask', slot }];
+      waitingId = item.id;
+    } else if (item.id === waitingId) {
+      waiting.push({ kind: 'ask', slot });
+    } else {
+      release();
+      out.push({ kind: 'ask', slot });
+      release();
+    }
+  }
+  release();
+  if (waiting.length) {
+    const card = out.pop()!;
+    const before = out.pop();
+    if (before) out.push(card, before, ...waiting);
+  }
+  return out;
+}
+
+// A screen as a word that the test can sort: the card of an item, or a question (a slot object).
+function screenNames(screens: Screen[], slots: Slot[]): string[] {
+  return screens.map((s) => (s.kind === 'learn' ? `card ${s.item.id}` : `question ${slots.indexOf(s.slot)}`));
+}
+
+test('withLearnCards: in the frozen data items share 12 citation refs and 6 radio calls have none; the 63 definitions share "CROR Definitions"; 8 refs are shared by a rule item and a signal item', () => {
+  // The measure of ruling LEARN-TWIN. A change of the data that shares a ref in a new way fails here.
+  const drillable = (i: ContentItem) => i.citation.trust === 'verified' && i.type !== 'radio-script'
+    && (i.type !== 'rule' || (FROZEN.questionsByRule[i.id] ?? []).length > 0);
+  const byRef = new Map<string, ContentItem[]>();
+  for (const i of FROZEN.items) if (i.citation.ref) byRef.set(i.citation.ref, [...(byRef.get(i.citation.ref) ?? []), i]);
+  const shared = [...byRef].filter(([, list]) => list.length > 1);
+  assert.equal(shared.length, 12, 'refs that two or more items share (and 6 radio calls have no ref)');
+  assert.equal(FROZEN.items.filter((i) => !i.citation.ref).length, 6);
+  assert.ok(FROZEN.items.filter((i) => !i.citation.ref).every((i) => i.type === 'radio-script'));
+  const definitions = byRef.get('CROR Definitions')!;
+  assert.equal(definitions.length, 63);
+  assert.ok(definitions.every((i) => i.type === 'definition'));
+  const twins = shared.filter(([, list]) => list.filter(drillable).length > 1);
+  assert.deepEqual(twins.map(([ref]) => ref).filter((ref) => ref !== 'CROR Definitions').sort(),
+    ['CROR 405', 'CROR 411', 'CROR 415', 'CROR 416', 'CROR 430', 'CROR 436', 'CROR 437', 'CROR 439']);
+  for (const [ref, list] of twins) {
+    if (ref === 'CROR Definitions') continue;
+    assert.deepEqual(list.map((i) => i.type).sort(), ['rule', 'signal'], ref);
+    assert.ok(list.every(drillable), ref);
+  }
+  // Each other shared ref: one rule item in the Drill and radio calls, which the Drill never asks.
+  for (const [ref, list] of shared) {
+    if (ref === 'CROR Definitions' || twins.some(([r]) => r === ref)) continue;
+    assert.ok(list.length <= 4, ref);
+    assert.deepEqual(list.filter(drillable).map((i) => i.type), ['rule'], ref);
+  }
+});
+
+test('buildSession: in 20,000 seeded first sessions of Signals, of each other live domain and of each live domain, no question comes right after the learn card of its own item or of its twin', () => {
+  let twinSessions = 0;
+  for (const domain of LIVE_SESSIONS) {
+    const faults: string[] = [];
+    let cards = 0;
+    for (let seed = 1; seed <= 20000; seed++) {
+      const { screens } = buildSession({ content: FROZEN, profile: fresh(), domain }, seeded(seed));
+      for (const f of gapFaults(screens)) faults.push(`seed ${seed}: ${f}`);
+      const carded = screens.filter((s) => s.kind === 'learn').map((s) => itemOfScreen(s));
+      cards += carded.length;
+      if (carded.some((a) => carded.some((b) => a.id !== b.id && keyOf(a) === keyOf(b)))) twinSessions++;
+    }
+    assert.ok(cards > 0, `${domain ?? 'each live domain'}: no learn card`);
+    assert.deepEqual(faults.slice(0, 5), [], `${domain ?? 'each live domain'}: ${faults.length} questions come right after the learn card of their item or of their twin`);
+  }
+  // The sessions hold twins: the test can fail.
+  assert.ok(twinSessions > 1000, `sessions with the learn cards of two twins: ${twinSessions}`);
+});
+
+test('withLearnCards: the same screens as LEARN-GAP alone, in another order only where a question would come right after the card of its twin', () => {
+  // The questions of seeded sessions of each live domain, in a seeded order. A first session: each
+  // item is new. A later session: some items are new. The test compares each order with LEARN-GAP
+  // alone.
+  let changed = 0;
+  let twinCases = 0;
+  for (const domain of LIVE_SESSIONS) {
+    for (let seed = 1; seed <= 2000; seed++) {
+      const rng = seeded(seed);
+      const slots = shuffle(buildSession({ content: FROZEN, profile: fresh(), domain }, rng).slots, rng);
+      for (const later of [false, true]) {
+        const seen = new Set(later ? slots.filter(() => rng() < 0.5).map((s) => s.item.id) : []);
+        const isNew = (i: ContentItem) => !seen.has(i.id);
+        const before = learnGapAlone(slots, isNew);
+        const now = withLearnCards(slots, isNew);
+        const at = `${domain ?? 'each live domain'}, seed ${seed}${later ? ', a later session' : ''}`;
+        assert.deepEqual(screenNames(now, slots).sort(), screenNames(before, slots).sort(), `${at}: the screens are not the screens of LEARN-GAP alone`);
+        assert.deepEqual(gapFaults(now), [], at);
+        const asked = new Set<string>();
+        for (const s of now) {
+          if (s.kind === 'ask') asked.add(s.slot.item.id);
+          else assert.ok(!asked.has(s.item.id), `${at}: the learn card of ${s.item.id} comes after a question about it`);
+        }
+        if (gapFaults(before).length) twinCases++;
+        else assert.deepEqual(screenNames(now, slots), screenNames(before, slots), `${at}: the order changes, and LEARN-GAP alone has no twin case`);
+        if (screenNames(now, slots).join() !== screenNames(before, slots).join()) changed++;
+      }
+    }
+  }
+  assert.ok(twinCases >= 50, `orders of LEARN-GAP alone with a twin case: ${twinCases}`);
+  assert.equal(changed, twinCases);
+});
+
+// Made-up items for the order: two twins (one made-up ref) and items with their own ref.
+const refItem = (id: string, ref: string | null): ContentItem => ({ ...item(id, 'signals', 'rule'), citation: { source: 'derived', ref, relatedRef: null, verbatim: null, trust: 'verified' } });
+const madeUpQuestion: DrillQuestion = { kind: 'text', heading: 'made-up heading', promptText: 'made-up prompt', correct: 'a', options: ['a', 'b'] };
+const slotOf = (i: ContentItem): Slot => ({ item: i, q: madeUpQuestion });
+const order = (screens: Screen[]) => screens.map((s) => `${s.kind === 'learn' ? 'card' : 'question'} ${itemOfScreen(s).id}`);
+
+test('withLearnCards: the question of a twin goes out before the card of the other twin; the other screens keep their order', () => {
+  const [w, a, b, x] = [refItem('test.w', 'made-up ref w'), refItem('test.a', 'made-up ref ab'), refItem('test.b', 'made-up ref ab'), refItem('test.x', null)];
+  const slots = [w, a, b, x].map(slotOf);
+  assert.deepEqual(order(learnGapAlone(slots, () => true)),
+    ['card test.w', 'card test.a', 'question test.w', 'card test.b', 'question test.a', 'card test.x', 'question test.b', 'question test.x']);
+  assert.deepEqual(order(withLearnCards(slots, () => true)),
+    ['card test.w', 'card test.a', 'question test.w', 'question test.a', 'card test.b', 'card test.x', 'question test.b', 'question test.x']);
+});
+
+test('withLearnCards: a card that would be the last screen moves before the nearest screen of another key', () => {
+  const [w, a, b] = [refItem('test.w', null), refItem('test.a', 'made-up ref ab'), refItem('test.b', 'made-up ref ab')];
+  // test.w and the twin test.a were answered before: only test.b is new. LEARN-GAP alone moves the
+  // screen before the last card after it, and that screen is the question about the twin.
+  const slots = [w, a, b].map(slotOf);
+  const isNew = (i: ContentItem) => i.id === 'test.b';
+  assert.deepEqual(order(learnGapAlone(slots, isNew)), ['question test.w', 'card test.b', 'question test.a', 'question test.b']);
+  assert.deepEqual(order(withLearnCards(slots, isNew)), ['card test.b', 'question test.w', 'question test.a', 'question test.b']);
+});
+
+test('withLearnCards: with no screen of another key, the order of LEARN-GAP alone stays; one new item alone gets no card and no question', () => {
+  const [a, b] = [refItem('test.a', 'made-up ref ab'), refItem('test.b', 'made-up ref ab')];
+  const twinsOnly = [a, b].map(slotOf);
+  assert.deepEqual(order(withLearnCards(twinsOnly, () => true)), order(learnGapAlone(twinsOnly, () => true)));
+  assert.deepEqual(order(withLearnCards(twinsOnly, () => true)), ['card test.a', 'card test.b', 'question test.a', 'question test.b']);
+  assert.deepEqual(withLearnCards([slotOf(a), slotOf(a)], () => true), []);
+});
+
+test('withLearnCards: the items of "CROR Definitions" are not twins; their order is the order of LEARN-GAP alone', () => {
+  const defs = FROZEN.items.filter((i) => i.citation.ref === 'CROR Definitions').slice(0, 6);
+  const slots = defs.map(slotOf);
+  assert.deepEqual(order(withLearnCards(slots, () => true)), order(learnGapAlone(slots, () => true)));
 });
