@@ -13,9 +13,16 @@ function Guided() {
   return <div ref={hostRef} className="radio-host" />;
 }
 
+type Mode = 'guided' | 'test';
+
 export function Radio() {
-  const [mode, setMode] = useState<'guided' | 'test'>('guided');
+  const [mode, setMode] = useState<Mode>('guided');
+  // "Call it yourself" mounts when the learner opens it for the first time. After that both modes
+  // stay mounted and the mode that is not shown is hidden, so a change of mode keeps the run of
+  // each mode (row U-17).
+  const [testOpen, setTestOpen] = useState(false);
   const navigate = useNavigate();
+  const show = (next: Mode) => { setMode(next); if (next === 'test') setTestOpen(true); };
 
   return (
     <div className="cb-radio-view">
@@ -28,16 +35,17 @@ export function Radio() {
 
       <div className="cb-tabs" role="tablist" aria-label="Radio mode">
         <button role="tab" aria-selected={mode === 'guided'} className="cb-tab"
-          onClick={() => setMode('guided')}>
+          onClick={() => show('guided')}>
           Guided<small>Walk it through — nothing scored</small>
         </button>
         <button role="tab" aria-selected={mode === 'test'} className="cb-tab"
-          onClick={() => setMode('test')}>
+          onClick={() => show('test')}>
           Call it yourself<small>Pick the right call — counts toward Radio</small>
         </button>
       </div>
 
-      {mode === 'guided' ? <Guided /> : <RadioTest />}
+      <div hidden={mode !== 'guided'}><Guided /></div>
+      {testOpen && <div hidden={mode !== 'test'}><RadioTest active={mode === 'test'} /></div>}
     </div>
   );
 }

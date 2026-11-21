@@ -22,7 +22,8 @@ interface Step {
 
 const READOUT_START = '10 cars to the joint';
 
-export function RadioTest() {
+// `active` is false while the guided mode is shown: the test stays mounted and hidden (row U-17).
+export function RadioTest({ active = true }: { active?: boolean }) {
   const { content, profile, recordRadioStep, speak } = useApp();
   const navigate = useNavigate();
 
@@ -71,9 +72,10 @@ export function RadioTest() {
   const step: Step | undefined = item && allSteps ? allSteps[item.payload?.step ?? 0] : undefined;
   const graded = item?.citation.trust === 'verified';
 
+  // Read aloud speaks the call of the question only while the test is the mode on the screen.
   useEffect(() => {
-    if (step) speak(step.pre ? step.pre : (step.read || step.status || ''));
-  }, [step, speak]);
+    if (step && active) speak(step.pre ? step.pre : (step.read || step.status || ''));
+  }, [step, speak, active]);
 
   if (!content || !allSteps) return <p className="dusk-lede">Loading…</p>;
   if (!items.length) return <p className="dusk-lede">The radio script hasn't loaded.</p>;
