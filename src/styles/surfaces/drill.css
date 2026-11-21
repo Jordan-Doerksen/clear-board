@@ -18,6 +18,18 @@
 /* "← Home" keeps the width of its word */
 .cb-app .cb-drill-view > .cb-btn--plain { align-self: flex-start; }
 
+/* ---- the station heading (U-29): the form of the Reference title ----------------------------------
+   The heading is reading text at the size of the Reference title (20.8 px at a 16 px root). The
+   station icon sits in the Dusk icon square, before the word, on the line of the word. */
+.cb-app .cb-drill-view .cb-drill-title { font-size: 1.3rem; }
+.cb-app .cb-drill-view .cb-drill-title .dusk-ico {
+  display: inline-grid;
+  vertical-align: middle;
+  width: 1.6em;
+  height: 1.6em;
+  font-size: 1em;
+}
+
 /* ---- the count line, above the question panel, in the reading order of today ------------------- */
 .cb-app .cb-drill-view .cb-drill-top {
   display: flex;
@@ -100,4 +112,6 @@
 html[data-dys="1"] .cb-app .cb-drill-view .dusk-btn,
 html[data-dys="1"] .cb-app .cb-drill-view .dusk-tile-num,
 html[data-dys="1"] .cb-app .cb-drill-view .dusk-tile-sub { line-height: var(--lh-base); }
-html[data-dys="1"] .cb-app .cb-drill-view .dusk-tile-num { letter-spacing: inherit; }
+html[data-dys="1"] .cb-app .cb-drill-view .dusk-tile-num,
+html[data-dys="1"] .cb-app .cb-drill-view .cb-drill-title { letter-spacing: inherit; }
+html[data-dys="1"] .cb-app .cb-drill-view .cb-drill-title .dusk-ico { line-height: var(--lh-base); }

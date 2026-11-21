@@ -1,7 +1,7 @@
 // Drill — adaptive (SM-2-lite) MC across content types; updates mastery → the path. (vanilla drill.js)
 // Definitions → term↔definition MC. Signals → read-the-aspect MC. Rules → authored MC bank. One loop, one profile.
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../state/AppContext';
 import { Signal } from './Signal';
 import { DOMAINS } from '../core/store';
@@ -9,9 +9,21 @@ import { severityOf } from '../core/severity';
 import { buildSession } from '../core/drill';
 import type { Session } from '../core/drill';
 
+// The station heading (U-29, 2c-plan C7): one visible h2 with the station name of Home, in the form
+// of the Reference title. The route /signals is the station Signals; each other route is the Drill.
+function StationTitle({ signals }: { signals: boolean }) {
+  return (
+    <div className="dusk-top cb-drill-head">
+      <h2 className="dusk-title cb-drill-title"><span className="dusk-ico">{signals ? '🚦' : '🎯'}</span> {signals ? 'Signals' : 'Drill'}</h2>
+    </div>
+  );
+}
+
 export function Drill({ domain }: { domain?: string }) {
   const { content, profile, recordAnswer, speak } = useApp();
   const navigate = useNavigate();
+  const onSignals = useLocation().pathname === '/signals';
+  const title = <StationTitle signals={onSignals} />;
   const profileRef = useRef(profile);
   profileRef.current = profile;
 
@@ -42,12 +54,13 @@ export function Drill({ domain }: { domain?: string }) {
     if (q && (q.kind === 'rule' || q.kind === 'text')) speak(q.promptText);
   }, [q, speak]);
 
-  if (!content || !built) return <div className="cb-drill-view"><p className="dusk-lede">Loading…</p></div>;
+  if (!content || !built) return <div className="cb-drill-view">{title}<p className="dusk-lede">Loading…</p></div>;
 
   if (built.slots.length < (focusIds ? 1 : 4)) {
     return (
       <div className="cb-drill-view">
         <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+        {title}
         <p className="dusk-lede">Not enough verified content to drill yet.</p>
       </div>
     );
@@ -64,8 +77,9 @@ export function Drill({ domain }: { domain?: string }) {
     return (
       <div className="cb-drill-view">
         <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+        {title}
         <div className="dusk-tile dusk-tile--teal cb-drill-done">
-          <div className="dusk-tile-cap"><h2 className="dusk-tile-lab">{focusIds ? 'Review done' : 'Session done'}</h2></div>
+          <div className="dusk-tile-cap"><h3 className="dusk-tile-lab">{focusIds ? 'Review done' : 'Session done'}</h3></div>
           <div className="dusk-tile-body">
             <p className="dusk-tile-num">{score} / {built.slots.length}</p>
             <p className="dusk-tile-sub">{lines}. Spaced out over the next days so it sticks.</p>
@@ -100,9 +114,10 @@ export function Drill({ domain }: { domain?: string }) {
   return (
     <div className="cb-drill-view">
       <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
+      {title}
       <div className="cb-drill-top"><span className="cb-sub">Question {idx + 1} of {built.slots.length}</span><span className="dusk-count">{score} correct</span></div>
       <div className="dusk-panel dusk-panel--framed cb-drill-q">
-        <div className="dusk-panel-head"><h2 className="dusk-panel-name">{q.heading}</h2></div>
+        <div className="dusk-panel-head"><h3 className="dusk-panel-name">{q.heading}</h3></div>
         <div className="dusk-panel-body cb-drill-prompt" data-cb="prompt">
           {q.kind === 'signal'
             ? <div className="cb-drill-signal" data-cb="prompt-signal"><Signal aspect={q.aspect} /></div>

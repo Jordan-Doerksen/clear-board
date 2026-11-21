@@ -9,3 +9,5 @@ app counts.
 | Row | Place | The words of today | The proposed words |
 |---|---|---|---|
 | U-37 (words) | Reference, the entry of a signal, the button under the drawings | "Drill these aspects →" | "Open the Signals drill →" |
+| U-29 | the Drill, the top of each state, under "← Home": a new station heading (`h2`) | none | "🎯 Drill" |
+| U-29 | Signals (the route `/signals`), the top of each state, under "← Home": a new station heading (`h2`) | none | "🚦 Signals" |
