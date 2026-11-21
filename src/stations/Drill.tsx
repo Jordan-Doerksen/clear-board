@@ -6,7 +6,7 @@ import { useApp } from '../state/AppContext';
 import { Signal } from './Signal';
 import { DOMAINS } from '../core/store';
 import { severityOf } from '../core/severity';
-import { buildSession, dueGroups } from '../core/drill';
+import { buildSession, dueGroups, withRecomputedMastery } from '../core/drill';
 import type { DrillQuestion, Session } from '../core/drill';
 
 // The station heading (U-29, 2c-plan C7): one visible h2 with the station name of Home, in the form
@@ -110,9 +110,13 @@ export function Drill({ domain }: { domain?: string }) {
     const started = built.newIds.filter(id => (profile.items[id]?.seen ?? 0) > 0).length;
     const due = dueGroups(built.slots.map(s => s.item.id), profile)
       .map(g => (g.days === 0 ? `${g.count} now` : `${g.count} in ${count(g.days, 'day')}`));
+    // U-15: the end value is also read after the decay, as the start value is (buildSession). The app
+    // recomputes the stored mastery only at the load and at an answer that counts, so after the app
+    // has been open for days a session in which no answer counts would show the decay as a gain.
+    const after = withRecomputedMastery(profile, content);
     const lines = built.drilledDomains.map(d => {
       const name = (DOMAINS.find(x => x.id === d) || {}).name || d;
-      const end = profile.domains[d]?.mastery || 0;
+      const end = after.domains[d]?.mastery || 0;
       const delta = Math.round((end - (built.startMastery[d] || 0)) * 100);
       return `${name}: ${delta >= 0 ? '+' : ''}${delta}% → ${Math.round(end * 100)}%`;
     }).join(' · ');
