@@ -86,17 +86,17 @@ const YARD_HTML = `
   <div class="yard-wrap">
     <button class="yd-back" data-go="">← Home</button>
 
-    <div class="yd-bar">
-      <select id="picker" title="Pick a job"></select>
-      <span class="yd-spacer"></span>
-      <div class="yd-readout" id="readout">Moves 0 / par 0 · Joints 0</div>
+    <div class="yd-bar yd-strip dusk-strip">
+      <select class="cb-select" id="picker" title="Pick a job"></select>
+      <span class="dusk-spacer"></span>
+      <div class="dusk-cell"><b class="yd-readout" id="readout">Moves 0 / par 0 · Joints 0</b></div>
     </div>
 
     <div class="yd-workorder" id="workorder"></div>
 
     <div class="yd-yardframe dusk-panel dusk-panel--framed" data-cb="yard-drawing"></div>
 
-    <div class="yd-bar">
+    <div class="yd-bar yd-builder">
       <select id="act" title="Action">
         <option value="pull">PULL</option>
         <option value="spot">SPOT</option>

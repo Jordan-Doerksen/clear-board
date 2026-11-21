@@ -51,19 +51,22 @@
 .yard-wrap .yd-ord-row.yd-flagged .yd-ord-trk { color: var(--ink); }
 .yard-wrap .yd-ord-fix { color: var(--amber-ink); font-size: var(--fs-xs); font-style: italic; }
 .yard-wrap #certify { margin: 4px 0 2px; }
-/* The two toolbar rows are children of .yard-wrap. The child selector keeps this rule out of the drawing.
-   The app sheet has a rule for the class "bar". It no longer matches these rows. The declarations that
-   cancelled it stay here for now: height, overflow, background, border and border-radius. */
-.yard-wrap > .yd-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; height: auto; overflow: visible; background: none; border: 0; border-radius: 0; margin: 12px 0; }
-.yard-wrap .yd-readout {
-  font: 700 1rem/1 var(--font-mono);
-  background: var(--head); border: 1px solid var(--lit-rule); border-radius: 8px;
-  padding: 10px 14px; color: var(--ink);
-}
-/* The selects and the buttons of the two toolbar rows, of the work order and of the message. The
+/* The two toolbar rows are children of .yard-wrap. The child selector keeps this rule out of the drawing. */
+.yard-wrap > .yd-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
+/* The strip: a Dusk strip with the job picker, a spacer and one cell with the readout, in the order of
+   the markup. The picker does not take the class of the end of a strip, because that class moves it to
+   the right. It gets the inner room of the end of a strip here, and it is never wider than the strip,
+   so the page does not scroll sideways at 320 px. */
+.yard-wrap > .yd-strip { gap: 0; align-items: stretch; }
+.yard-wrap .yd-strip #picker { margin: var(--sp-2) var(--sp-4); max-width: calc(100% - 2 * var(--sp-4)); }
+/* The four selects keep the type of today: 14 px, weight 600. */
+.yard-wrap .yd-bar .cb-select { font-size: var(--fs-base); font-weight: var(--fw-medium); }
+/* The readout keeps 16 px, mono, bold. The cell gives the mono face. */
+.yard-wrap .yd-readout { font-size: 1rem; font-weight: var(--fw-bold); }
+/* The selects and the buttons of the move builder, of the work order and of the message. The
    rule names the rows and the boxes of the chrome, so that it does not reach into the drawing.
    :where() keeps the weight of the rule that it replaces. */
-.yard-wrap :where(.yd-bar, .yd-workorder, .yd-banner) :is(select, button) {
+.yard-wrap :where(.yd-builder, .yd-workorder, .yd-banner) :is(select, button) {
   font: 600 var(--fs-base) var(--font-ui); color: var(--ink);
   background: var(--head); border: 1px solid var(--cb-edge); border-radius: 8px;
   padding: 9px 12px; cursor: pointer;
@@ -77,7 +80,7 @@
 .yard-wrap button#depart { background: var(--btn-bg); border-color: transparent; box-shadow: var(--neon-ctl); color: var(--btn-ink); }
 .yard-wrap button#depart:hover { background: var(--btn-bg-hover); box-shadow: var(--neon-ctl-on); }
 .yard-wrap button#depart:disabled { opacity: .4; cursor: default; }
-.yard-wrap :where(.yd-bar, .yd-workorder, .yd-banner) button:hover { border-color: var(--lit); }
+.yard-wrap :where(.yd-builder, .yd-workorder, .yd-banner) button:hover { border-color: var(--lit); }
 .yard-wrap .yd-spacer { flex: 1; }
 .yard-wrap .yd-banner {
   min-height: 22px; margin: 12px 0; padding: 10px 14px; border-radius: 8px;
