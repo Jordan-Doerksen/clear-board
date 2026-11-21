@@ -2,7 +2,7 @@
 // change of behaviour. Each function takes the random source as its last parameter; with no
 // argument it is Math.random, as before the move. A test passes a fixed generator and gets the
 // same session each time. Nothing here reads the page, the storage or the clock.
-import { DOMAINS, drillable } from './store';
+import { DOMAINS, drillable, recomputeMastery } from './store';
 import { isDue } from './sr';
 import { severityOf, SEV_RANK } from './severity';
 import { drawSignal } from './signal';
@@ -119,6 +119,16 @@ export function buildQuestion(item: ContentItem, content: Content, ctx: Question
   return { kind: 'text', heading: dir === 'term' ? 'What does this mean?' : 'Which term is this?', promptText, correct, options: shuffle([correct, ...distractors(item, ctx.pool, ctx.byType, field, rng)], rng) };
 }
 
+// Row U-15 (UX-39): a session reads the mastery of the profile after the decay. After a direct load
+// of a drill route the Drill builds its session before AppContext recomputes the stored profile, so
+// the start values and the tier limit read stale numbers. This recomputes a copy; the profile of the
+// caller does not change.
+export function withRecomputedMastery(profile: Profile, content: Content): Profile {
+  const p = structuredClone(profile);
+  recomputeMastery(p, content);
+  return p;
+}
+
 export interface SessionInput {
   content: Content;
   profile: Profile;            // the profile before the session
@@ -127,7 +137,8 @@ export interface SessionInput {
 }
 
 // Build one session: at most 10 questions.
-export function buildSession({ content, profile, domain, focusIds }: SessionInput, rng: Rng = Math.random): Session {
+export function buildSession({ content, profile: stored, domain, focusIds }: SessionInput, rng: Rng = Math.random): Session {
+  const profile = withRecomputedMastery(stored, content);   // U-15
   let items: ContentItem[] = [];
   if (focusIds) items = focusIds.map(id => content.byId[id]).filter((i): i is ContentItem => !!i);   // misses-review round
   else if (domain) items = drillable(content.byDomain[domain], content);

@@ -19,6 +19,9 @@ function StationTitle({ signals }: { signals: boolean }) {
   );
 }
 
+// "1 item", "3 items": a count with its noun.
+const count = (n: number, noun: string) => `${n} ${noun}${n === 1 ? '' : 's'}`;
+
 // U-31: Read aloud speaks the words of the screen, in the order of the screen. Each part ends as a
 // sentence, so that a voice makes a stop between two options.
 const said = (text: string) => { const t = text.trim(); return /[.?!:…]$/.test(t) ? t : `${t}.`; };
@@ -35,13 +38,13 @@ export function Drill({ domain }: { domain?: string }) {
   const profileRef = useRef(profile);
   profileRef.current = profile;
 
-  const [sessionKey, setSessionKey] = useState(0);
   const [built, setBuilt] = useState<Session | null>(null);
+  const [isReview, setIsReview] = useState(false);                     // the session is a "practice your misses" round
+  const [reviewNext, setReviewNext] = useState<Session | null>(null); // that round, built at "Finish" (U-15)
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
-  const [focusIds, setFocusIds] = useState<string[] | null>(null);   // set ⇒ a "practice your misses" round
-  const missedRef = useRef<Set<string>>(new Set());                  // items missed in the current session
+  const missedRef = useRef<Set<string>>(new Set());                    // items missed in the current session
   // U-14: after "Next" keyboard focus stays in the task. The control that had focus is removed, so
   // focus goes to the heading of the next question, or to the end heading after "Finish".
   const questionHeadRef = useRef<HTMLHeadingElement>(null);
@@ -54,15 +57,23 @@ export function Drill({ domain }: { domain?: string }) {
     if (el) { focusTo.current = null; el.focus(); }
   });
 
-  // Build the session once per (content, domain, sessionKey). profileRef → pre-session snapshot.
+  // Build the first session once per (content, domain). profileRef → pre-session snapshot.
   // The selection is the pure function buildSession of src/core/drill.ts (row U-44).
   useEffect(() => {
     if (!content) return;
-    const session = buildSession({ content, profile: profileRef.current, domain, focusIds });
     missedRef.current = new Set();
-    setBuilt(session);
+    setBuilt(buildSession({ content, profile: profileRef.current, domain }));
+    setIsReview(false); setReviewNext(null);
     setIdx(0); setScore(0); setPicked(null);
-  }, [content, domain, sessionKey, focusIds]);
+  }, [content, domain]);
+
+  // Start a new session from the end screen ("Drill again", or the review of the misses).
+  function start(session: Session, review: boolean) {
+    focusTo.current = 'question';
+    missedRef.current = new Set();
+    setBuilt(session); setIsReview(review); setReviewNext(null);
+    setIdx(0); setScore(0); setPicked(null);
+  }
 
   const slot = built && idx < built.slots.length ? built.slots[idx] : null;
   const item = slot?.item ?? null;
@@ -76,7 +87,7 @@ export function Drill({ domain }: { domain?: string }) {
 
   if (!content || !built) return <div className="cb-drill-view">{title}<p className="dusk-lede">Loading…</p></div>;
 
-  if (built.slots.length < (focusIds ? 1 : 4)) {
+  if (built.slots.length < (isReview ? 1 : 4)) {
     return (
       <div className="cb-drill-view">
         <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
@@ -88,6 +99,9 @@ export function Drill({ domain }: { domain?: string }) {
 
   // Finished — show the session summary with mastery deltas.
   if (!slot || !item || !q) {
+    // U-15 (UX-27): the button of the review says the count of items and the count of questions of
+    // the round that it starts.
+    const reviewItems = new Set(reviewNext?.slots.map(s => s.item.id)).size;
     const lines = built.drilledDomains.map(d => {
       const name = (DOMAINS.find(x => x.id === d) || {}).name || d;
       const end = profile.domains[d]?.mastery || 0;
@@ -99,19 +113,19 @@ export function Drill({ domain }: { domain?: string }) {
         <button className="cb-btn--plain" onClick={() => navigate('/')}>← Home</button>
         {title}
         <div className="dusk-tile dusk-tile--teal cb-drill-done">
-          <div className="dusk-tile-cap"><h3 className="dusk-tile-lab" ref={doneHeadRef} tabIndex={-1}>{focusIds ? 'Review done' : 'Session done'}</h3></div>
+          <div className="dusk-tile-cap"><h3 className="dusk-tile-lab" ref={doneHeadRef} tabIndex={-1}>{isReview ? 'Review done' : 'Session done'}</h3></div>
           <div className="dusk-tile-body">
             <p className="dusk-tile-num">{score} / {built.slots.length}</p>
             <p className="dusk-tile-sub">{lines}. Spaced out over the next days so it sticks.</p>
           </div>
         </div>
         <div className="cb-drill-actions">
-          {missedRef.current.size > 0 && (
-            <button className="dusk-btn" onClick={() => { focusTo.current = 'question'; setFocusIds([...missedRef.current]); setSessionKey(k => k + 1); }}>
-              Practice the {missedRef.current.size} you missed →
+          {reviewNext && reviewNext.slots.length > 0 && (
+            <button className="dusk-btn" onClick={() => start(reviewNext, true)}>
+              Practice the {count(reviewItems, 'item')} you missed: {count(reviewNext.slots.length, 'question')} →
             </button>
           )}
-          <button className="dusk-btn" onClick={() => { focusTo.current = 'question'; setFocusIds(null); setSessionKey(k => k + 1); }}>Drill again</button>
+          <button className="dusk-btn" onClick={() => start(buildSession({ content, profile: profileRef.current, domain }), false)}>Drill again</button>
           <button className="dusk-btn" onClick={() => navigate('/')}>Back to the path</button>
         </div>
       </div>
@@ -188,7 +202,10 @@ export function Drill({ domain }: { domain?: string }) {
           {/* U-38: "Next" is the main control; "Look it up" is a text link. */}
           <button className="cb-link cb-drill-lookup" onClick={() => navigate(`/reference?focus=${encodeURIComponent(item!.id)}`)}>Look it up →</button>
           <button className="dusk-btn cb-drill-next" autoFocus aria-describedby="cb-drill-verdict" onClick={() => {
-            focusTo.current = idx + 1 < built.slots.length ? 'question' : 'any';
+            const last = idx + 1 >= built.slots.length;
+            focusTo.current = last ? 'any' : 'question';
+            // At "Finish", build the review of the misses now, so that its button can count it (U-15).
+            if (last && missedRef.current.size > 0) setReviewNext(buildSession({ content, profile: profileRef.current, domain, focusIds: [...missedRef.current] }));
             setIdx(i => i + 1); setPicked(null);
           }}>
             {idx + 1 < built.slots.length ? 'Next →' : 'Finish'}
