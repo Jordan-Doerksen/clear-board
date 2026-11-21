@@ -451,7 +451,7 @@ export function mount(root, ctx) {
     }, {
       onFlag: (i) => {
         if (flagged.has(i)) flagged.delete(i); else flagged.add(i);
-        sfx.points(); renderOrder();
+        sfx.points(); view.setLineFlag(i, flagged.has(i));   // in place: focus stays on the line
       },
       onCertify: certify,
     });

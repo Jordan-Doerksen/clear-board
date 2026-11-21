@@ -70,6 +70,8 @@ export interface YardView {
   setRefusal(text: string | null | undefined, onLookup: (() => void) | null): void;
   renderRules(list: RuleChip[]): void;
   renderSwitchList(data: SwitchListData, handlers: SwitchListHandlers): void;
+  /** Flags or unflags line `index` of the switch list in place, so that focus stays on it. */
+  setLineFlag(index: number, flagged: boolean): void;
   renderVerifiedOrder(data: VerifiedOrderData): void;
   renderWorkOrder(data: WorkOrderData): void;
   setCount(data: CountData): void;
@@ -213,12 +215,14 @@ export function createView(root: HTMLElement): YardView {
       }
     },
 
+    // Each line is a native button (U-09, A11Y-02): Tab reaches it, Enter or Space flags it, and
+    // aria-pressed gives its state. The glyph shows the state and is hidden from a screen reader.
     renderSwitchList(data, { onFlag, onCertify }) {
       const rows = data.lines.map((e, i) =>
-        `<div class="yd-ord-row dusk-row dusk-row--amber${e.flagged ? ' dusk-row--on yd-flagged' : ''}" data-i="${i}">`
-        + `<span class="yd-ord-flag dusk-ico">${e.flagged ? '⚑' : '▢'}</span>`
+        `<button type="button" class="yd-ord-row dusk-row dusk-row--amber${e.flagged ? ' dusk-row--on yd-flagged' : ''}" data-i="${i}" aria-pressed="${e.flagged}">`
+        + `<span class="yd-ord-flag dusk-ico" aria-hidden="true">${e.flagged ? '⚑' : '▢'}</span>`
         + `<span class="yd-ord-line"><span class="yd-ord-mark">${e.mark}</span><span class="yd-ord-arrow">→</span><span class="yd-ord-trk">${e.track}</span></span>`
-        + `</div>`).join('');
+        + `</button>`).join('');
       at('workorder').innerHTML =
         `<div class="yd-wo-top dusk-panel-head"><span class="yd-wo-tag yd-si dusk-panel-name">SWITCH LIST</span> <span class="yd-wo-id dusk-count">${data.id.toUpperCase()}</span> <span class="yd-wo-sub dusk-panel-sub">· the list can be wrong</span></div>`
         + `<div class="yd-wo-body dusk-panel-body">`
@@ -231,6 +235,14 @@ export function createView(root: HTMLElement): YardView {
         onFlag(+(row.dataset.i as string));
       }));
       at('certify').addEventListener('click', onCertify);
+    },
+
+    setLineFlag(index, flagged) {
+      const row = at('workorder').querySelector(`.yd-ord-row[data-i="${index}"]`) as HTMLElement;
+      row.classList.toggle('dusk-row--on', flagged);
+      row.classList.toggle('yd-flagged', flagged);
+      row.setAttribute('aria-pressed', String(flagged));
+      (row.querySelector('.yd-ord-flag') as HTMLElement).textContent = flagged ? '⚑' : '▢';
     },
 
     renderVerifiedOrder(data) {
