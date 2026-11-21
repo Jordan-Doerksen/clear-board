@@ -37,13 +37,13 @@ html[data-reduce="1"] .radio-wrap button.rbtn{ transition:none } @media (prefers
 const RADIO_HTML = `
 <div class="radio-wrap">
   <div class="rhead">
-    <div class="sigmark" id="sigmark" aria-label="Signal aspect"><span></span><span></span><span></span></div>
-    <div><div class="rtitle">Radio &amp; Steps — Back to a Joint</div>
+    <div class="sigmark" id="sigmark" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div><h3 class="rtitle">Radio &amp; Steps — Back to a Joint</h3>
       <div class="rsub">Guided · car counts to feet, couple, verify, protect, cut the air, release</div></div>
   </div>
   <div class="scenario">Engine <b>CN 2204</b> backs its cut up to couple onto a car on AS73. You're on the ground, in the clear, watching the tail car and the joint. Count it down — cars, then feet — verify the coupling, protect, couple the air, release.</div>
   <div class="stage">
-    <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg">
+    <svg id="scene" role="img" viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg">
       <line x1="0" y1="168" x2="760" y2="168" style="stroke:var(--grey)" stroke-width="2"/>
       <line x1="0" y1="176" x2="760" y2="176" style="stroke:var(--grey)" stroke-width="2"/>
       <rect x="566" y="120" width="92" height="46" rx="3" style="fill:var(--tile-grey-lo);stroke:var(--grey-ink)"/>
@@ -70,7 +70,7 @@ const RADIO_HTML = `
     </svg>
   </div>
   <div class="cols">
-    <div class="radio"><h3>Radio</h3><div class="log" id="log"></div><div class="next" id="next"></div></div>
+    <div class="radio"><h3 id="loghead">Radio</h3><div class="log" id="log" role="log" tabindex="0" aria-labelledby="loghead"></div><div class="next" id="next"></div></div>
     <div class="note" id="notebox">
       <h3>Why this call</h3>
       <div id="notebody" style="color:var(--ink-2)">Make your first call to begin — identify the engine, railway initials and number digit by digit, and wait for the engineer to answer up.</div>
@@ -134,11 +134,11 @@ function injectStyle() {
 
 export function mount(root, ctx) {
   injectStyle();
-  root.innerHTML = `<button class="cb-btn--plain" data-go="">← Home</button>` + RADIO_HTML;
-  root.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => ctx.go(b.dataset.go)));
+  // The view (Radio.tsx) shows the one "← Home" of both modes, first (row U-22).
+  root.innerHTML = RADIO_HTML;
 
   const $ = (id) => root.querySelector('#' + id);
-  const consist = $('consist'), gaptxt = $('gaptxt'), statusEl = $('status'),
+  const consist = $('consist'), gaptxt = $('gaptxt'), statusEl = $('status'), scene = $('scene'),
         logEl = $('log'), nextEl = $('next'), noteBody = $('notebody'), doneEl = $('done');
   let idx = 0, log = [];
 
@@ -151,11 +151,15 @@ export function mount(root, ctx) {
     consist.setAttribute('transform', 'translate(' + ((500 - feet) * 0.5) + ',0)');
     if (s.status) { gaptxt.setAttribute('opacity', '0'); statusEl.setAttribute('opacity', '1'); statusEl.textContent = s.status; }
     else { statusEl.setAttribute('opacity', '0'); gaptxt.setAttribute('opacity', '1'); gaptxt.textContent = (s.read || ''); }
+    scene.setAttribute('aria-label', s.status || s.read || '');   // the name of the scene is the readout
   }
+  // The log adds only its new lines (role="log" announces each added line one time).
   function renderLog() {
-    logEl.innerHTML = log.map(e => e.who === 'Eng'
-      ? '<div class="tx eng"><span class="who">Engineer &middot; CN 2204</span><br>' + e.text + '</div>'
-      : '<div class="tx"><span class="who">You &middot; conductor</span><br>' + e.text + '</div>').join('');
+    for (const e of log.slice(logEl.children.length)) {
+      logEl.insertAdjacentHTML('beforeend', e.who === 'Eng'
+        ? '<div class="tx eng"><span class="who">Engineer &middot; CN 2204</span><br>' + e.text + '</div>'
+        : '<div class="tx"><span class="who">You &middot; conductor</span><br>' + e.text + '</div>');
+    }
     logEl.scrollTop = logEl.scrollHeight;
   }
   function renderNext() {
