@@ -127,7 +127,7 @@ const YARD_HTML = `
       <strong class="yd-note-head">What this trainer builds</strong> — the instinct to <strong>think several moves ahead</strong> and learn the <strong>switching routine</strong>: read the yard, line the road, call clean moves, win in the fewest. <span class="yd-note-more">The next level — out on the ground — is minimizing the actual distance you run and using the lead as working room. That's real-yard efficiency that comes with seat time, beyond what this tool scores.</span>
     </div>
 
-    <details>
+    <details class="yd-help">
       <summary>How to play & why these rules</summary>
       <p><strong>You are the conductor, not the engineer.</strong> Click a switch target to line it
       (<span class="yd-key-reverse">yellow</span> = lined into the track / diverging,

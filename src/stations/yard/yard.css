@@ -11,7 +11,6 @@
   color: var(--ink); font-size: var(--fs-l);
   display: block; padding: 4px 0 20px;
 }
-.yard-wrap * { box-sizing: border-box; }
 .yard-wrap button.yd-back {
   font: 600 var(--fs-base) var(--font-ui); color: var(--ink);
   background: var(--head); border: 1px solid var(--cb-edge); border-radius: 8px;
@@ -61,7 +60,10 @@
   background: var(--head); border: 1px solid var(--lit-rule); border-radius: 8px;
   padding: 10px 14px; color: var(--ink);
 }
-.yard-wrap select, .yard-wrap button {
+/* The selects and the buttons of the two toolbar rows, of the work order and of the message. The
+   rule names the rows and the boxes of the chrome, so that it does not reach into the drawing.
+   :where() keeps the weight of the rule that it replaces. */
+.yard-wrap :where(.yd-bar, .yd-workorder, .yd-banner) :is(select, button) {
   font: 600 var(--fs-base) var(--font-ui); color: var(--ink);
   background: var(--head); border: 1px solid var(--cb-edge); border-radius: 8px;
   padding: 9px 12px; cursor: pointer;
@@ -75,7 +77,7 @@
 .yard-wrap button#depart { background: var(--btn-bg); border-color: transparent; box-shadow: var(--neon-ctl); color: var(--btn-ink); }
 .yard-wrap button#depart:hover { background: var(--btn-bg-hover); box-shadow: var(--neon-ctl-on); }
 .yard-wrap button#depart:disabled { opacity: .4; cursor: default; }
-.yard-wrap button:hover { border-color: var(--lit); }
+.yard-wrap :where(.yd-bar, .yd-workorder, .yd-banner) button:hover { border-color: var(--lit); }
 .yard-wrap .yd-spacer { flex: 1; }
 .yard-wrap .yd-banner {
   min-height: 22px; margin: 12px 0; padding: 10px 14px; border-radius: 8px;
@@ -97,9 +99,9 @@
 .yard-wrap .yd-chip span { font-size: .78125rem; color: var(--ink-2); }
 .yard-wrap .yd-chip.yd-cror { border-left: 3px solid var(--blue-ink); } .yard-wrap .yd-chip.yd-cror b { color: var(--blue-ink); }
 .yard-wrap .yd-chip.yd-si { border-left: 3px solid var(--amber-ink); background: var(--rowwash-amber); } .yard-wrap .yd-chip.yd-si b { color: var(--amber-ink); }
-.yard-wrap details { margin-top: 18px; color: var(--ink-2); font-size: var(--fs-data); }
-.yard-wrap details summary { cursor: pointer; color: var(--ink); font-weight: 600; }
-.yard-wrap code { background: var(--head); padding: 1px 5px; border-radius: 4px; font-size: .78125rem; font-family: var(--font-mono); }
+.yard-wrap .yd-help { margin-top: 18px; color: var(--ink-2); font-size: var(--fs-data); }
+.yard-wrap .yd-help summary { cursor: pointer; color: var(--ink); font-weight: 600; }
+.yard-wrap .yd-help code { background: var(--head); padding: 1px 5px; border-radius: 4px; font-size: .78125rem; font-family: var(--font-mono); }
 .yard-wrap .yd-banner .yd-lookup {
   margin-left: 10px; padding: 4px 9px; font: 600 var(--fs-s) var(--font-ui);
   color: var(--cb-link); background: none; border: 1px solid var(--cb-edge); border-radius: 6px; cursor: pointer;
