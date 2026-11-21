@@ -32,7 +32,7 @@ The owner runs no command (fence rule 13): section 8 is for the next session, no
 | 2. `npm run check` and `npm run build` green on the last branch, with the output | Done: section 3. |
 | 3. The hash gate proves that no frozen file changed since `94a41c5` | Done: section 3. |
 | 4. `DECISIONS.md`, `ARCHITECTURE.md`, `SPEC.md`, `README.md`, `CHANGELOG.md` say what is true | Done at `dc88b14` (job D1, then the lead). D-0040 to D-0047 are the decisions of Wave 2c. |
-| 5. One final report | This file. The last review of the whole wave did not finish (section 5.1). |
+| 5. One final report | This file. The last review of the whole wave finished (section 5.1). |
 
 ## 3. The gates on `claude/cb2-wave-2c` at `dc88b14`, run by the lead on 2026-11-21
 
@@ -91,6 +91,16 @@ STEPS region at 94a41c5: dc38610359f800ba7e336c981e038d629e0c541d60f11da7722f2ad
 STEPS region now:        dc38610359f800ba7e336c981e038d629e0c541d60f11da7722f2add919ca3c5
 ```
 
+### 3.1 The gates at `b0c70f3`, the last fix commit of the lead (2026-11-21)
+
+```
+check: 12 of 12 steps passed in 8.52 s        (81 unit tests; lint 1 warning, limit 1)
+npm run build                                 (exit 0; the offline cache: 17 files)
+smoke: 22 of 22 gate cases passed in 51.02 s.
+sha256sum -c specs/handoff/frozen-files-94a41c5.sha256   -> each frozen file equal
+STEPS region at 94a41c5 and now: dc38610359f800ba... (equal)
+```
+
 ## 4. What landed
 
 - **Wave 1.** The research R1 to R7, the upgrade list (51 rows), Gate A: look C2 for the Yard, full
@@ -113,7 +123,7 @@ STEPS region now:        dc38610359f800ba7e336c981e038d629e0c541d60f11da7722f2ad
 
 ## 5. What is open
 
-After the handoff the lead fixed F-1, F-3, F-4, F-5 and K-2 on the same branch (section 5.1 marks each one). The gates stayed green: check 12 of 12 with 81 unit tests, build, smoke 22 of 22, frozen files equal.
+After the handoff the lead fixed F-1, F-3, F-4, F-5, F-6, F-8, F-9, F-13 and K-2, and the focus part of F-7, on the same branch (section 5.1 marks each one). The gates stayed green: check 12 of 12 with 81 unit tests, build, smoke 22 of 22, frozen files and the `STEPS` region equal (section 3.1).
 
 ### 5.1 The last review of the whole wave (finished)
 
@@ -133,14 +143,14 @@ The confirmed findings, with the same defect found twice shown once:
 | F-3 | medium | After Reset or Load in Settings, an open station shows the old progress. | **Fixed in `5a7f3fc`.** |
 | F-4 | medium | The look-up dialog stays open after a browser Back, and its close drops focus to the page body. | **Fixed in `62cedd7`.** |
 | F-5 | medium | Reference says "No match" while the library loads. | **Fixed in `62cedd7`.** |
-| F-6 | medium | Settings: the sticky head of the dialog hides the control that has focus when focus moves up (`clear-board.parts.css`, the rule of `.cb-dialog > .dusk-panel-head`). Fix: `scroll-padding-top` on `.cb-dialog`. | See the top of this section. |
-| F-7 | medium | After a "Try again" that works, focus falls to the page body and no result is said (`src/App.tsx`, `src/components/LookUp.tsx`). | See the top of this section. |
-| F-8 | medium | "Reload" of the notice "A new version is ready" does nothing on a page that no service worker controls (`src/App.tsx` lines 87 to 90). Fix: reload the page when no worker waits. | See the top of this section. |
-| F-9 | medium | The guided Radio: the end summary is not announced (`src/stations/radioSim.js` line 79, outside `STEPS`). Fix: put the done box in a `role="status"` region. | See the top of this section. |
+| F-6 | medium | Settings: the sticky head of the dialog hides the control that has focus when focus moves up (`clear-board.parts.css`, the rule of `.cb-dialog > .dusk-panel-head`). Fix: `scroll-padding-top` on `.cb-dialog`. | **Fixed in `b0c70f3`.** The look-up dialog had the same defect with a long name (its head is up to 162 px high at 390 px); it writes the height of its head for the rule. Probe: each control of both dialogs keeps its whole focus ring below the head. |
+| F-7 | medium | After a "Try again" that works, focus falls to the page body and no result is said (`src/App.tsx`, `src/components/LookUp.tsx`). | **Focus fixed in `b0c70f3`:** it goes to the heading of the view, or of the look-up dialog. Open: one message that says the result of a try (loaded, or still not loaded). It needs new words, so the owner approves them first. |
+| F-8 | medium | "Reload" of the notice "A new version is ready" does nothing on a page that no service worker controls (`src/App.tsx` lines 87 to 90). Fix: reload the page when no worker waits. | **Fixed in `b0c70f3`.** Probe with two builds: on a first visit and on a second visit, "Reload" opens build 2. |
+| F-9 | medium | The guided Radio: the end summary is not announced (`src/stations/radioSim.js` line 79, outside `STEPS`). Fix: put the done box in a `role="status"` region. | **Fixed in `b0c70f3`.** The `STEPS` region stays equal; the gaps round the box stay 10 px. |
 | F-10 | low | Forced colours: the selected Radio mode, the stepper controls that cannot act and the Key button lose their marks. | Open. |
 | F-11 | low | The Yard stepper with Reduce motion: "Play all" announces only the last step (`src/stations/yardSim.js` near line 495). | Open. |
 | F-12 | low | LEARN-GAP: the learn card of a twin item (the rule item and the signal item of one CROR rule) can come right before a question about the other, and holds its answer (`src/core/drill.ts` lines 107 to 131). A question for the SME too. | Open. |
-| F-13 | low | Comments and one document line that Wave 2c made untrue: `ARCHITECTURE.md` near line 397 (the report case of C7 is now gate case 21), `src/stations/yard/view.ts` lines 5 to 8, `src/App.tsx` lines 127 and 128. | See the top of this section. |
+| F-13 | low | Comments and one document line that Wave 2c made untrue: `ARCHITECTURE.md` near line 397 (the report case of C7 is now gate case 21), `src/stations/yard/view.ts` lines 5 to 8, `src/App.tsx` lines 127 and 128. | **Fixed in `b0c70f3`.** |
 | F-14 | low | The headings of the Drill and Reference carry their icon in the accessible name; the Yard and the Radio do not. | Open: one verifier refuted it (brief B2 asked for "📖 Reference" as the heading). |
 
 ### 5.2 Small known items for the same final fix job
@@ -220,9 +230,10 @@ and any test with a learner. Each measurement is from headless Chromium on Linux
 3. Read the fence (plan, section 4) and keep it. The frozen files and the `STEPS` region must stay
    equal to `94a41c5`: `specs/handoff/lead-merge-check.sh` checks them with
    `specs/handoff/frozen-files-94a41c5.sha256`.
-4. Do the final fix job: K-1, K-3 and K-4 (F-1, F-3, F-4, F-5 and K-2 are fixed; F-2 waits for the owner's ruling). Give the fixes of the lead (`3076815`, `62cedd7`, `5a7f3fc`) an independent review: they had probes and the gates, but no second reader. Check the top of section 5.1 first: the lead may have fixed more before the account ended.
+4. Do the final fix job: F-10, F-11, F-12 (with its note for the SME), a decision on F-14, K-1, K-3 and K-4. The message part of F-7 needs new words: ask the owner first. F-2 waits for the owner's ruling. Each other item of section 5.1 and 5.2 is fixed. Give the fixes of the lead (`3076815`, `62cedd7`, `5a7f3fc`, `b0c70f3`) an independent review: they had probes and the gates, but no second reader. Check section 5.1 first: the lead may have fixed more before the account ended.
    Work on a new branch from `claude/cb2-wave-2c`, give the job an independent review, merge it into
    `claude/cb2-wave-2c`, run the gates, and push. The draft pull request #4 then shows the change.
-5. Run the three reviews that did not finish (accessibility, the fence and safety, code
-   correctness), verify each finding, and fix what is small.
+5. After the fix job, run the last review again on the whole wave (the four lenses of section
+   5.1: learner journeys, accessibility, the fence and safety, code correctness), verify each
+   finding, and fix what is small.
 6. Do not merge into `main`. The owner says when.
